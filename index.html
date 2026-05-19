@@ -175,21 +175,21 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 
 <!-- 로그인 -->
 <div id="loginPage">
-  <div class="login-logo">\ud83c\udfe0</div>
+  <div class="login-logo">🏠</div>
   <div class="login-title">AI 도어센서</div>
   <div class="login-sub">스마트홈 제어 시스템<br>IT융합통신학과 졸업작품</div>
   <div class="login-label">사용자를 선택하세요</div>
   <div class="user-cards">
     <div class="user-card admin-card" onclick="login(0)">
-      <div class="uc-av" style="background:rgba(201,168,76,.2);border:1px solid #C9A84C">\ud83d\udc51</div>
+      <div class="uc-av" style="background:rgba(201,168,76,.2);border:1px solid #C9A84C">👑</div>
       <div><div class="uc-name">김민종</div><div class="uc-id">2101042</div><span class="uc-bdg" style="background:var(--gd);color:var(--gold);border:1px solid var(--gold)">전체 관리자</span></div>
     </div>
     <div class="user-card" onclick="login(1)">
-      <div class="uc-av" style="background:rgba(78,127,212,.2);border:1px solid #4E7FD4">\ud83d\ude0a</div>
+      <div class="uc-av" style="background:rgba(78,127,212,.2);border:1px solid #4E7FD4">😊</div>
       <div><div class="uc-name">문성일</div><div class="uc-id">2001184</div><span class="uc-bdg" style="background:var(--bld);color:var(--bl);border:1px solid var(--bl)">멤버</span></div>
     </div>
     <div class="user-card" onclick="login(2)">
-      <div class="uc-av" style="background:rgba(76,175,130,.2);border:1px solid #4CAF82">\ud83d\ude4b</div>
+      <div class="uc-av" style="background:rgba(76,175,130,.2);border:1px solid #4CAF82">🙋</div>
       <div><div class="uc-name">손의윤</div><div class="uc-id">2101056</div><span class="uc-bdg" style="background:var(--bld);color:var(--bl);border:1px solid var(--bl)">멤버</span></div>
     </div>
   </div>
@@ -203,7 +203,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
       <div class="mbtn" onclick="openDrw()"><div class="mline"></div><div class="mline"></div><div class="mline"></div></div>
       <div><div class="htit">스마트홈 제어</div><div class="hsub">AI 도어센서 시스템</div></div>
     </div>
-    <div class="gbtn" onclick="go('p-share')"><span style="font-size:13px">\ud83d\udc65</span><span class="gbtn-t">공유 대상</span></div>
+    <div class="gbtn" onclick="go('p-share')"><span style="font-size:13px">👥</span><span class="gbtn-t">공유 대상</span></div>
   </div>
   <div class="gbar"></div>
   <div class="cub" id="cubBar"></div>
@@ -225,7 +225,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
     <div class="stit">집안 전체</div>
     <div class="acard" id="ac">
       <div class="al">
-        <div class="aicn" id="ai">\ud83c\udfe0</div>
+        <div class="aicn" id="ai">🏠</div>
         <div><div class="aname">집안 전체</div><div class="adesc">거실 · 안방 · 화장실 동시 제어</div></div>
       </div>
       <button class="abtn" id="ab" onclick="togAll(event)">전체 켜기</button>
@@ -234,15 +234,15 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
     <!-- 방별 제어 -->
     <div class="stit">방별 제어</div>
     <div class="rcard" id="rc-living" onclick="togRoom('living')">
-      <div class="rl"><div class="ricn" id="ri-living">\ud83d\udecb️</div><div><div class="rname">거실</div><div class="rst" id="rs-living">● OFF</div></div></div>
+      <div class="rl"><div class="ricn" id="ri-living">🛋️</div><div><div class="rname">거실</div><div class="rst" id="rs-living">● OFF</div></div></div>
       <div class="tgl" id="tg-living"><div class="tknob"></div></div>
     </div>
     <div class="rcard" id="rc-bedroom" onclick="togRoom('bedroom')">
-      <div class="rl"><div class="ricn" id="ri-bedroom">\ud83d\udecf️</div><div><div class="rname">안방</div><div class="rst" id="rs-bedroom">● OFF</div></div></div>
+      <div class="rl"><div class="ricn" id="ri-bedroom">🛏️</div><div><div class="rname">안방</div><div class="rst" id="rs-bedroom">● OFF</div></div></div>
       <div class="tgl" id="tg-bedroom"><div class="tknob"></div></div>
     </div>
     <div class="rcard" id="rc-bathroom" onclick="togRoom('bathroom')">
-      <div class="rl"><div class="ricn" id="ri-bathroom">\ud83d\udebf</div><div><div class="rname">화장실</div><div class="rst" id="rs-bathroom">● OFF</div></div></div>
+      <div class="rl"><div class="ricn" id="ri-bathroom">🚿</div><div><div class="rname">화장실</div><div class="rst" id="rs-bathroom">● OFF</div></div></div>
       <div class="tgl" id="tg-bathroom"><div class="tknob"></div></div>
     </div>
   </div>
@@ -289,10 +289,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <div class="dovl" id="dovl" onclick="closeDrw()"></div>
 <div class="drw" id="drw">
   <div class="dhdr"><div class="dtit">AI 도어센서</div><div class="dsub" id="drwSub">IT융합통신학과 졸업작품</div></div>
-  <div class="ditm act"  onclick="go('p-home');  closeDrw()"><span class="dic">\ud83c\udfe0</span>홈 대시보드</div>
-  <div class="ditm"      onclick="go('p-hist');  closeDrw()"><span class="dic">\ud83d\udcca</span>사용 기록</div>
-  <div class="ditm"      onclick="go('p-notif');closeDrw()"><span class="dic">\ud83d\udd14</span>알림 설정</div>
-  <div class="ditm"      onclick="go('p-share');closeDrw()"><span class="dic">\ud83d\udc65</span>공유 대상</div>
+  <div class="ditm act"  onclick="go('p-home');  closeDrw()"><span class="dic">🏠</span>홈 대시보드</div>
+  <div class="ditm"      onclick="go('p-hist');  closeDrw()"><span class="dic">📊</span>사용 기록</div>
+  <div class="ditm"      onclick="go('p-notif');closeDrw()"><span class="dic">🔔</span>알림 설정</div>
+  <div class="ditm"      onclick="go('p-share');closeDrw()"><span class="dic">👥</span>공유 대상</div>
   <div class="ditm"      onclick="closeDrw()">   <span class="dic">⚙️</span>기기 설정</div>
 </div>
 </div>
@@ -313,9 +313,9 @@ const db = firebase.database();
 
 // ── 사용자 ──
 const USERS=[
-  {id:0,name:'김민종',studentId:'2101042',emoji:'\ud83d\udc51',color:'#C9A84C',bg:'rgba(201,168,76,.15)',isAdmin:true},
-  {id:1,name:'문성일',studentId:'2001184',emoji:'\ud83d\ude0a',color:'#4E7FD4',bg:'rgba(78,127,212,.15)',isAdmin:false},
-  {id:2,name:'손의윤',studentId:'2101056',emoji:'\ud83d\ude4b',color:'#4CAF82',bg:'rgba(76,175,130,.15)',isAdmin:false},
+  {id:0,name:'김민종',studentId:'2101042',emoji:'👑',color:'#C9A84C',bg:'rgba(201,168,76,.15)',isAdmin:true},
+  {id:1,name:'문성일',studentId:'2001184',emoji:'😊',color:'#4E7FD4',bg:'rgba(78,127,212,.15)',isAdmin:false},
+  {id:2,name:'손의윤',studentId:'2101056',emoji:'🙋',color:'#4CAF82',bg:'rgba(76,175,130,.15)',isAdmin:false},
 ];
 let curUser=null;
 
@@ -346,7 +346,7 @@ function login(idx){
     <div class="cub-av" style="background:${curUser.bg};border:1px solid ${curUser.color}">${curUser.emoji}</div>
     <span class="cub-nm">${curUser.name} (${curUser.studentId})</span>
     <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:${curUser.isAdmin?'var(--gd)':'var(--bld)'};color:${curUser.isAdmin?'var(--gold)':'var(--bl)'};border:1px solid ${curUser.isAdmin?'var(--gold)':'var(--bl)'}">
-      ${curUser.isAdmin?'\ud83d\udc51 전체 관리자':'\ud83d\udc64 멤버'}
+      ${curUser.isAdmin?'👑 전체 관리자':'👤 멤버'}
     </span>
     <span class="cub-out" onclick="logout()">로그아웃</span>`;
   document.getElementById('drwSub').textContent=curUser.name+' · '+(curUser.isAdmin?'전체 관리자':'멤버');
@@ -408,9 +408,9 @@ function initFB(){
     // 기본 멤버 없으면 자동 추가
     if(members.length===0 && curUser && curUser.isAdmin){
       const defaults=[
-        {name:'문성일',studentId:'2001184',emoji:'\ud83d\ude0a',...getMC(0)},
-        {name:'손의윤',studentId:'2101056',emoji:'\ud83d\ude4b',...getMC(1)},
-        {name:'강규창',studentId:'0000001',emoji:'\ud83d\udc68‍\ud83c\udfeb',...getMC(2)},
+        {name:'문성일',studentId:'2001184',emoji:'😊',...getMC(0)},
+        {name:'손의윤',studentId:'2101056',emoji:'🙋',...getMC(1)},
+        {name:'강규창',studentId:'0000001',emoji:'👨‍🏫',...getMC(2)},
       ];
       defaults.forEach(m=>db.ref('/members').push(m));
     }
@@ -432,7 +432,7 @@ function togRoom(r){
     room:RNAME[r], act:newState?'켬':'끔',
     time:nowStr(), timestamp:Date.now()
   });
-  toast(RNAME[r]+' '+(newState?'켜졌어요 \ud83d\udca1':'꺼졌어요 \ud83c\udf19'));
+  toast(RNAME[r]+' '+(newState?'켜졌어요 💡':'꺼졌어요 🌙'));
 }
 
 // ── 전체 토글 ──
@@ -451,7 +451,7 @@ function togAll(e){
     room:'집안 전체', act:ns?'켬':'끔',
     time:nowStr(), timestamp:Date.now()
   });
-  toast(ns?'집안 전체 켜졌어요 \ud83d\udca1':'집안 전체 꺼졌어요 \ud83c\udf19');
+  toast(ns?'집안 전체 켜졌어요 💡':'집안 전체 꺼졌어요 🌙');
 }
 
 // ── UI 업데이트 ──
@@ -468,15 +468,15 @@ function updateSummary(){
   const ao=onCnt===tot, af=onCnt===0;
   document.getElementById('sc').textContent=onCnt+'/'+tot;
   const ic=document.getElementById('si');
-  if(ao){ic.textContent='\ud83d\udca1';ic.style.background='rgba(76,175,130,.15)';ic.style.borderColor='#4CAF82';}
-  else if(af){ic.textContent='\ud83c\udf19';ic.style.background='rgba(201,80,76,.15)';ic.style.borderColor='#C9504C';}
+  if(ao){ic.textContent='💡';ic.style.background='rgba(76,175,130,.15)';ic.style.borderColor='#4CAF82';}
+  else if(af){ic.textContent='🌙';ic.style.background='rgba(201,80,76,.15)';ic.style.borderColor='#C9504C';}
   else{ic.textContent='⚡';ic.style.background='rgba(201,168,76,.12)';ic.style.borderColor='#C9A84C';}
   document.getElementById('sl').textContent=ao?'전체 켜짐':af?'전체 꺼짐':'일부 켜짐';
   document.getElementById('sd').textContent=ao?'모든 방 작동 중':af?'모든 방 꺼짐':onCnt+'개 방 작동 중';
   const ac=document.getElementById('ac');
   ac.classList.toggle('aon',ao);
   document.getElementById('ab').textContent=ao?'전체 끄기':'전체 켜기';
-  document.getElementById('ai').textContent=ao?'\ud83d\udca1':'\ud83c\udfe0';
+  document.getElementById('ai').textContent=ao?'💡':'🏠';
 }
 
 // ── 사용 기록 ──
@@ -488,7 +488,7 @@ function renderLogs(){
       <div class="lavt" style="background:${l.bg};border:1px solid ${l.color};color:${l.color}">${l.emoji}</div>
       <div class="lbody">
         <div class="lact"><strong>${l.user}</strong> 님이 <strong>${l.room}</strong> 불을 ${l.act==='켬'?'켜셨습니다':'끄셨습니다'}<span class="lbdg ${l.act==='켬'?'lon':'loff'}">${l.act==='켬'?'ON':'OFF'}</span></div>
-        <div class="ltime">\ud83d\udd50 ${l.time}</div>
+        <div class="ltime">🕐 ${l.time}</div>
       </div>
     </div>`).join('');
 }
@@ -501,8 +501,8 @@ function renderNotifs(){
     <div class="nitem ${n.unrd?'unrd':''}">
       <div class="nicn">${n.emoji}</div>
       <div class="nbody">
-        <div class="nmsg"><strong>${n.user}</strong> 님이 <strong>${n.room}</strong> 불을 ${n.act==='켬'?'켜셨습니다 \ud83d\udca1':'끄셨습니다 \ud83c\udf19'}</div>
-        <div class="ntime">\ud83d\udd50 ${n.time}</div>
+        <div class="nmsg"><strong>${n.user}</strong> 님이 <strong>${n.room}</strong> 불을 ${n.act==='켬'?'켜셨습니다 💡':'끄셨습니다 🌙'}</div>
+        <div class="ntime">🕐 ${n.time}</div>
       </div>
       ${n.unrd?'<div class="udot"></div>':''}
     </div>`).join('');
@@ -514,13 +514,13 @@ function renderShare(){
   const isAdmin=curUser&&curUser.isAdmin;
   let html='<div style="padding-top:4px">';
   if(isAdmin&&pending.length>0){
-    html+=`<div class="admin-banner"><span style="font-size:18px;flex-shrink:0">\ud83d\udd14</span>
+    html+=`<div class="admin-banner"><span style="font-size:18px;flex-shrink:0">🔔</span>
       <div><div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:2px">승인 대기 중 ${pending.length}명</div>
       <div style="font-size:12px;color:var(--tx2)">새로운 멤버 추가 요청이 있어요.</div></div></div>`;
   }
   const adm=USERS[0];
   html+=`<div class="sec-box">
-    <div class="sec-hdr"><span class="sec-hdr-tit">전체 관리자</span><span class="sec-hdr-bdg bdg-gold">\ud83d\udc51 1명</span></div>
+    <div class="sec-hdr"><span class="sec-hdr-tit">전체 관리자</span><span class="sec-hdr-bdg bdg-gold">👑 1명</span></div>
     <div class="mcard">
       <div class="mavt" style="background:${adm.bg};border:1px solid ${adm.color};color:${adm.color}">${adm.emoji}</div>
       <div style="flex:1"><div class="mname">${adm.name}</div><div class="mrole" style="color:var(--gold)">모든 권한 · ${adm.studentId}</div></div>
@@ -565,10 +565,10 @@ function renderShare(){
           </div>
         </div></div>`;
     }else{
-      html+='<div class="addcard" style="opacity:.4;cursor:not-allowed">\ud83d\udd12 나머지 대상이 꽉 찼어요</div>';
+      html+='<div class="addcard" style="opacity:.4;cursor:not-allowed">🔒 나머지 대상이 꽉 찼어요</div>';
     }
   }else{
-    html+=`<div class="addcard" onclick="document.getElementById('reqForm').style.display='block'">\ud83d\udce9 멤버 추가 요청하기</div>
+    html+=`<div class="addcard" onclick="document.getElementById('reqForm').style.display='block'">📩 멤버 추가 요청하기</div>
       <div id="reqForm" style="display:none"><div class="req-box">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">멤버 추가 요청</div>
         <div style="font-size:12px;color:var(--tx2);margin-bottom:12px">관리자(김민종)에게 승인 요청이 전송돼요.</div>
@@ -602,22 +602,22 @@ function rmMember(id){
 function doAdd(){
   const name=document.getElementById('mnm').value.trim();
   const stu=document.getElementById('mstu').value.trim()||'-';
-  const emoji=document.getElementById('memj').value.trim()||'\ud83d\udc64';
+  const emoji=document.getElementById('memj').value.trim()||'👤';
   if(!name){toast('이름을 입력해주세요');return;}
   if(members.length>=4){toast('나머지 대상이 꽉 찼어요');return;}
   const mc=getMC(members.length);
   db.ref('/members').push({name,studentId:stu,emoji,color:mc.color,bg:mc.bg});
   document.getElementById('addForm').style.display='none';
-  toast(name+' 님을 추가했어요 \ud83c\udf89');
+  toast(name+' 님을 추가했어요 🎉');
 }
 function sendReq(){
   const name=document.getElementById('rqnm').value.trim();
-  const emoji=document.getElementById('rqemj').value.trim()||'\ud83d\ude4b';
+  const emoji=document.getElementById('rqemj').value.trim()||'🙋';
   if(!name){toast('이름을 입력해주세요');return;}
   pending.push({id:pnid++,name,emoji,studentId:'',time:'방금'});
   document.getElementById('reqForm').style.display='none';
   renderShare();
-  toast('관리자(김민종)에게 요청을 보냈어요 \ud83d\udce9');
+  toast('관리자(김민종)에게 요청을 보냈어요 📩');
 }
 
 function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('show'));document.getElementById(id).classList.add('show');if(id==='p-hist')renderLogs();if(id==='p-notif')renderNotifs();if(id==='p-share')renderShare();}
@@ -757,7 +757,7 @@ echo "\완\성: $(wc -c < /mnt/user-data/outputs/index.html) bytes""}"
     "stop_timestamp": "2026-05-11T05:23:42.394104Z",
     "flags": null,
     "type": "text",
-    "text": "파일 이름이 이미 `index.html` 이에요! \ud83d\ude0a\n\n---\n\n## 지금 바로 GitHub에 올리면 돼요\n\n**① 위 파일 다운로드**\n\n**② `github.com/minjong0910/minjong0910.github.io` 접속**\n\n**③ `index.html` 클릭 → ✏️ 클릭 → 전체 선택 `Ctrl+A` → 삭제 → 새 내용 붙여넣기 `Ctrl+V` → Commit changes**\n\n---\n\n## 이 파일에 포함된 멤버\n\n| 이름 | 학번 | 이모지 | 역할 |\n|---|---|---|---|\n| 김민종 | 2101042 | \ud83d\udc51 | 전체 관리자 |\n| 문성일 | 2001184 | \ud83d\ude0a | 멤버 |\n| 손의윤 | 2101056 | \ud83d\ude4b | 멤버 |\n| 강규창 | 0000001 | \ud83d\udc68‍\ud83c\udfeb | 멤버 |\n\n멤버 추가/삭제는 앱 껐다 켜도 **Firebase에 영구 저장**돼요 \ud83d\ude0a",
+    "text": "파일 이름이 이미 `index.html` 이에요! 😊\n\n---\n\n## 지금 바로 GitHub에 올리면 돼요\n\n**① 위 파일 다운로드**\n\n**② `github.com/minjong0910/minjong0910.github.io` 접속**\n\n**③ `index.html` 클릭 → ✏️ 클릭 → 전체 선택 `Ctrl+A` → 삭제 → 새 내용 붙여넣기 `Ctrl+V` → Commit changes**\n\n---\n\n## 이 파일에 포함된 멤버\n\n| 이름 | 학번 | 이모지 | 역할 |\n|---|---|---|---|\n| 김민종 | 2101042 | 👑 | 전체 관리자 |\n| 문성일 | 2001184 | 😊 | 멤버 |\n| 손의윤 | 2101056 | 🙋 | 멤버 |\n| 강규창 | 0000001 | 👨‍🏫 | 멤버 |\n\n멤버 추가/삭제는 앱 껐다 켜도 **Firebase에 영구 저장**돼요 😊",
     "citations": []
   }
 ]
@@ -787,7 +787,7 @@ Content:
     "stop_timestamp": "2026-05-11T05:26:07.894798Z",
     "flags": null,
     "type": "text",
-    "text": " 지금 만든 파일을 GitHub에 올리는 방법이에요!\n\n---\n\n## 순서\n\n**① `github.com/minjong0910/minjong0910.github.io` 접속**\n\n**② `index.html` 파일 클릭**\n\n**③ 오른쪽 상단 연필 ✏️ 클릭**\n\n**④ 기존 내용 전체 선택 `Ctrl+A` → 삭제**\n\n**⑤ 방금 받은 `index.html` 파일을 메모장으로 열기**\n\n```\n파일 우클릭 → 연결 프로그램 → 메모장\n```\n\n**⑥ 메모장에서 전체 선택 `Ctrl+A` → 복사 `Ctrl+C`**\n\n**⑦ GitHub 편집창에 붙여넣기 `Ctrl+V`**\n\n**⑧ 오른쪽 상단 `Commit changes` 클릭 → 초록 버튼 클릭**\n\n---\n\n## 완료 후 접속 주소\n\n1~2분 후 아이폰 사파리에서 접속하면 돼요!\n\n```\nhttps://minjong0910.github.io\n```\n\n이 주소를 카카오톡으로 팀원들한테 공유하면 세 명 모두 쓸 수 있어요 \ud83d\ude0a",
+    "text": " 지금 만든 파일을 GitHub에 올리는 방법이에요!\n\n---\n\n## 순서\n\n**① `github.com/minjong0910/minjong0910.github.io` 접속**\n\n**② `index.html` 파일 클릭**\n\n**③ 오른쪽 상단 연필 ✏️ 클릭**\n\n**④ 기존 내용 전체 선택 `Ctrl+A` → 삭제**\n\n**⑤ 방금 받은 `index.html` 파일을 메모장으로 열기**\n\n```\n파일 우클릭 → 연결 프로그램 → 메모장\n```\n\n**⑥ 메모장에서 전체 선택 `Ctrl+A` → 복사 `Ctrl+C`**\n\n**⑦ GitHub 편집창에 붙여넣기 `Ctrl+V`**\n\n**⑧ 오른쪽 상단 `Commit changes` 클릭 → 초록 버튼 클릭**\n\n---\n\n## 완료 후 접속 주소\n\n1~2분 후 아이폰 사파리에서 접속하면 돼요!\n\n```\nhttps://minjong0910.github.io\n```\n\n이 주소를 카카오톡으로 팀원들한테 공유하면 세 명 모두 쓸 수 있어요 😊",
     "citations": []
   }
 ]
@@ -817,7 +817,7 @@ Content:
     "stop_timestamp": "2026-05-11T05:26:56.311399Z",
     "flags": null,
     "type": "text",
-    "text": " 사진 찍어서 보내주실 수 있어요? 현재 GitHub 저장소 화면이랑 Settings → Pages 화면 보면 바로 원인 찾을 수 있어요 \ud83d\udcf8\n\n그 전에 체크리스트 확인해주세요!\n\n---\n\n## 체크리스트\n\n**① 저장소 이름 확인**\n\n```\ngithub.com/minjong0910 접속\n→ 저장소 이름이 minjong0910.github.io 인지 확인\n```\n\n**② 파일 이름 확인**\n\n저장소 안에 파일 이름이 정확히\n\n```\nindex.html\n```\n\n인지 확인 (대소문자 구분, 한글 안됨)\n\n**③ Pages 설정 확인**\n\n```\n저장소 → Settings → Pages\n→ Source: Deploy from a branch\n→ Branch: main / (root)\n→ Save 눌렀는지 확인\n```\n\n**④ 1~2분 기다리기**\n\nCommit 후 바로 접속하면 404 떠요. 1~2분 기다렸다가 접속해보세요!\n\n---\n\n## 저장소 이름이 다르면\n\n지금 저장소 이름이 `minjong0910.github.io` 가 아니면 주소가 달라져요.\n\n저장소 이름이 뭔지 알려주시면 정확한 주소 알려드릴게요 \ud83d\ude0a",
+    "text": " 사진 찍어서 보내주실 수 있어요? 현재 GitHub 저장소 화면이랑 Settings → Pages 화면 보면 바로 원인 찾을 수 있어요 📸\n\n그 전에 체크리스트 확인해주세요!\n\n---\n\n## 체크리스트\n\n**① 저장소 이름 확인**\n\n```\ngithub.com/minjong0910 접속\n→ 저장소 이름이 minjong0910.github.io 인지 확인\n```\n\n**② 파일 이름 확인**\n\n저장소 안에 파일 이름이 정확히\n\n```\nindex.html\n```\n\n인지 확인 (대소문자 구분, 한글 안됨)\n\n**③ Pages 설정 확인**\n\n```\n저장소 → Settings → Pages\n→ Source: Deploy from a branch\n→ Branch: main / (root)\n→ Save 눌렀는지 확인\n```\n\n**④ 1~2분 기다리기**\n\nCommit 후 바로 접속하면 404 떠요. 1~2분 기다렸다가 접속해보세요!\n\n---\n\n## 저장소 이름이 다르면\n\n지금 저장소 이름이 `minjong0910.github.io` 가 아니면 주소가 달라져요.\n\n저장소 이름이 뭔지 알려주시면 정확한 주소 알려드릴게요 😊",
     "citations": []
   }
 ]
@@ -849,7 +849,7 @@ Content:
     "stop_timestamp": "2026-05-11T05:28:06.489849Z",
     "flags": null,
     "type": "text",
-    "text": " **Pages 설정이 안 된 거예요!** 노트북에서 바로 해결할게요.\n\n---\n\n## 지금 바로 해주세요\n\n**① 노트북 크롬에서 접속**\n```\ngithub.com/minjong0910/minjong0910.github.io\n```\n\n**② 상단 메뉴 Settings 클릭**\n\n**③ 왼쪽 메뉴 스크롤 내리면 Pages 클릭**\n\n**④ 이렇게 설정**\n```\nSource: Deploy from a branch\nBranch: main 선택\n/(root) 그대로\nSave 클릭!\n```\n\n**⑤ 1~2분 기다린 후 페이지 새로고침**\n\n상단에 이렇게 뜨면 성공이에요!\n```\n✅ Your site is live at\nhttps://minjong0910.github.io\n```\n\n**⑥ 핸드폰에서 접속**\n```\nhttps://minjong0910.github.io\n```\n\n---\n\nSettings → Pages 화면 사진 찍어서 보내주시면 정확히 어디 클릭해야 하는지 알려드릴게요 \ud83d\udcf8 \ud83d\ude0a",
+    "text": " **Pages 설정이 안 된 거예요!** 노트북에서 바로 해결할게요.\n\n---\n\n## 지금 바로 해주세요\n\n**① 노트북 크롬에서 접속**\n```\ngithub.com/minjong0910/minjong0910.github.io\n```\n\n**② 상단 메뉴 Settings 클릭**\n\n**③ 왼쪽 메뉴 스크롤 내리면 Pages 클릭**\n\n**④ 이렇게 설정**\n```\nSource: Deploy from a branch\nBranch: main 선택\n/(root) 그대로\nSave 클릭!\n```\n\n**⑤ 1~2분 기다린 후 페이지 새로고침**\n\n상단에 이렇게 뜨면 성공이에요!\n```\n✅ Your site is live at\nhttps://minjong0910.github.io\n```\n\n**⑥ 핸드폰에서 접속**\n```\nhttps://minjong0910.github.io\n```\n\n---\n\nSettings → Pages 화면 사진 찍어서 보내주시면 정확히 어디 클릭해야 하는지 알려드릴게요 📸 😊",
     "citations": []
   }
 ]
@@ -879,7 +879,7 @@ Content:
     "stop_timestamp": "2026-05-11T05:29:01.404428Z",
     "flags": null,
     "type": "text",
-    "text": " 그럼 원래 주소로 접속하면 돼요!\n\n```\nhttps://dmldbs5923.github.io\n```\n\n이 주소가 이미 작동하고 있었잖아요. 거기에 새 파일 올리면 돼요!\n\n---\n\n## 지금 바로 할 것\n\n**① 노트북 크롬에서 접속**\n```\ngithub.com/dmldbs5923-create/dmldbs5923.github.io\n```\n\n**② `index.html` 파일 클릭**\n\n**③ 오른쪽 상단 연필 ✏️ 클릭**\n\n**④ 전체 선택 `Ctrl+A` → 삭제**\n\n**⑤ 방금 받은 `index.html` 파일을 메모장으로 열기**\n```\n파일 우클릭 → 연결 프로그램 → 메모장\n```\n\n**⑥ 메모장에서 전체 선택 `Ctrl+A` → 복사 `Ctrl+C`**\n\n**⑦ GitHub 편집창에 붙여넣기 `Ctrl+V`**\n\n**⑧ Commit changes 클릭 → 초록 버튼 클릭**\n\n---\n\n## 완료 후 접속 주소\n\n```\nhttps://dmldbs5923.github.io\n```\n\n이 주소 그대로 쓰면 돼요! 1~2분 후 접속해보세요 \ud83d\ude0a",
+    "text": " 그럼 원래 주소로 접속하면 돼요!\n\n```\nhttps://dmldbs5923.github.io\n```\n\n이 주소가 이미 작동하고 있었잖아요. 거기에 새 파일 올리면 돼요!\n\n---\n\n## 지금 바로 할 것\n\n**① 노트북 크롬에서 접속**\n```\ngithub.com/dmldbs5923-create/dmldbs5923.github.io\n```\n\n**② `index.html` 파일 클릭**\n\n**③ 오른쪽 상단 연필 ✏️ 클릭**\n\n**④ 전체 선택 `Ctrl+A` → 삭제**\n\n**⑤ 방금 받은 `index.html` 파일을 메모장으로 열기**\n```\n파일 우클릭 → 연결 프로그램 → 메모장\n```\n\n**⑥ 메모장에서 전체 선택 `Ctrl+A` → 복사 `Ctrl+C`**\n\n**⑦ GitHub 편집창에 붙여넣기 `Ctrl+V`**\n\n**⑧ Commit changes 클릭 → 초록 버튼 클릭**\n\n---\n\n## 완료 후 접속 주소\n\n```\nhttps://dmldbs5923.github.io\n```\n\n이 주소 그대로 쓰면 돼요! 1~2분 후 접속해보세요 😊",
     "citations": []
   }
 ]
@@ -911,7 +911,7 @@ Content:
     "stop_timestamp": "2026-05-14T02:25:31.081716Z",
     "flags": null,
     "type": "text",
-    "text": " PDF 잘 읽었어요! 지금 하고 있는 프로젝트 내용과 연결해서 추천해드릴게요 \ud83d\ude0a\n\n---\n\n## 지금 프로젝트 핵심 요소\n\n```\n현관문 센서 → 아두이노 → NodeMCU \n→ Firebase → 웹앱 → 전기기기 제어\n```\n\nIoT + 실시간 데이터 + 자동화 시스템이에요.\n\n---\n\n## 추천 주제 TOP 3\n\n---\n\n### \ud83e\udd47 1순위 — IoT 게이트웨이 프로토콜 변환기 구현 (통신SW 2번)\n\n**가장 강력 추천이에요!**\n\n지금 하고 있는 것과 거의 똑같아요.\n\n| 지금 프로젝트 | 과목 연계 |\n|---|---|\n| MQTT (Firebase) | MQTT 프로토콜 분석 |\n| NodeMCU → Firebase | 프로토콜 변환 구현 |\n| 웹앱 HTTP 통신 | HTTP 프로토콜 연동 |\n| 릴레이 제어 | IoT 기기 통합 관리 |\n\n추가로 할 것이 거의 없어요. 지금 만든 걸 정리하고 MQTT/HTTP 데이터 흐름을 분석하면 바로 보고서가 완성돼요!\n\n---\n\n### \ud83e\udd48 2순위 — LoRaWAN 기반 스마트 농업 통신 인프라 설계 (통신SW 5번)\n\n지금 프로젝트가 **저전력 IoT 센서 + 원격 제어** 구조잖아요. 이걸 농업 환경으로 확장하는 시나리오예요.\n\n현관문 센서 → 농경지 센서로 바꾸면 스토리가 자연스럽게 연결돼요.\n\n---\n\n### \ud83e\udd49 3순위 — 전력 수요 예측 및 피크 관리 분석 (데이터분석 5번)\n\n지금 앱에 **사용 기록** 기능이 있잖아요. Firebase에 쌓인 데이터를 활용해서 언제 전기를 많이 켜고 끄는지 패턴 분석하는 주제예요.\n\n이미 데이터가 쌓이고 있으니까 추가 개발 없이 분석만 하면 돼요!\n\n---\n\n## 최종 추천\n\n**IoT 게이트웨이 프로토콜 변환기 구현**을 강력 추천해요.\n\n지금 만든 프로젝트가 **이미 이 주제의 80%** 를 구현한 상태예요. 보고서 작성이랑 프로토콜 분석 자료만 추가하면 바로 제출 가능해요 \ud83d\ude0a\n\n어떤 주제로 할지 정하셨으면 보고서 구성도 도와드릴게요!",
+    "text": " PDF 잘 읽었어요! 지금 하고 있는 프로젝트 내용과 연결해서 추천해드릴게요 😊\n\n---\n\n## 지금 프로젝트 핵심 요소\n\n```\n현관문 센서 → 아두이노 → NodeMCU \n→ Firebase → 웹앱 → 전기기기 제어\n```\n\nIoT + 실시간 데이터 + 자동화 시스템이에요.\n\n---\n\n## 추천 주제 TOP 3\n\n---\n\n### 🥇 1순위 — IoT 게이트웨이 프로토콜 변환기 구현 (통신SW 2번)\n\n**가장 강력 추천이에요!**\n\n지금 하고 있는 것과 거의 똑같아요.\n\n| 지금 프로젝트 | 과목 연계 |\n|---|---|\n| MQTT (Firebase) | MQTT 프로토콜 분석 |\n| NodeMCU → Firebase | 프로토콜 변환 구현 |\n| 웹앱 HTTP 통신 | HTTP 프로토콜 연동 |\n| 릴레이 제어 | IoT 기기 통합 관리 |\n\n추가로 할 것이 거의 없어요. 지금 만든 걸 정리하고 MQTT/HTTP 데이터 흐름을 분석하면 바로 보고서가 완성돼요!\n\n---\n\n### 🥈 2순위 — LoRaWAN 기반 스마트 농업 통신 인프라 설계 (통신SW 5번)\n\n지금 프로젝트가 **저전력 IoT 센서 + 원격 제어** 구조잖아요. 이걸 농업 환경으로 확장하는 시나리오예요.\n\n현관문 센서 → 농경지 센서로 바꾸면 스토리가 자연스럽게 연결돼요.\n\n---\n\n### 🥉 3순위 — 전력 수요 예측 및 피크 관리 분석 (데이터분석 5번)\n\n지금 앱에 **사용 기록** 기능이 있잖아요. Firebase에 쌓인 데이터를 활용해서 언제 전기를 많이 켜고 끄는지 패턴 분석하는 주제예요.\n\n이미 데이터가 쌓이고 있으니까 추가 개발 없이 분석만 하면 돼요!\n\n---\n\n## 최종 추천\n\n**IoT 게이트웨이 프로토콜 변환기 구현**을 강력 추천해요.\n\n지금 만든 프로젝트가 **이미 이 주제의 80%** 를 구현한 상태예요. 보고서 작성이랑 프로토콜 분석 자료만 추가하면 바로 제출 가능해요 😊\n\n어떤 주제로 할지 정하셨으면 보고서 구성도 도와드릴게요!",
     "citations": []
   }
 ]
@@ -1736,7 +1736,7 @@ Content:
     "stop_timestamp": "2026-05-14T02:34:36.683491Z",
     "flags": null,
     "type": "text",
-    "text": "완성이에요! \ud83d\ude0a\n\n---\n\n## 보고서 구성 요약 (6장 구조)\n\n| 장 | 제목 | 핵심 내용 |\n|---|---|---|\n| 1장 | 서론 | 분석 주제, 선정 이유, 핵심 질문 3개 |\n| 2장 | 데이터 소개 | Firebase 로그 구조, 변수 8개 표로 정리 |\n| 3장 | 데이터 전처리 | 결측치/이상치 처리, 파생변수(hour·weekday·duration·protocol) |\n| 4장 | 탐색적 데이터 분석 | 프로토콜별 제어 횟수, 시간대별 패턴, 방별 빈도, 응답 지연 |\n| 5장 | 결과 및 시각화 | 막대/선/박스플롯 그래프 4종 |\n| 6장 | 결론 및 한계 | 결론 3가지, 한계 4가지, 향후 방향 |\n\n---\n\n## 지금 당장 해야 할 것\n\n보고서 구성도는 완성됐고, 실제 데이터는 **Firebase에서 직접 수집**해야 해요. 캡스톤 진행하면서 Firebase `/logs` 에 쌓이는 데이터를 Python으로 내려받으면 분석 시작할 수 있어요 \ud83d\ude0a",
+    "text": "완성이에요! 😊\n\n---\n\n## 보고서 구성 요약 (6장 구조)\n\n| 장 | 제목 | 핵심 내용 |\n|---|---|---|\n| 1장 | 서론 | 분석 주제, 선정 이유, 핵심 질문 3개 |\n| 2장 | 데이터 소개 | Firebase 로그 구조, 변수 8개 표로 정리 |\n| 3장 | 데이터 전처리 | 결측치/이상치 처리, 파생변수(hour·weekday·duration·protocol) |\n| 4장 | 탐색적 데이터 분석 | 프로토콜별 제어 횟수, 시간대별 패턴, 방별 빈도, 응답 지연 |\n| 5장 | 결과 및 시각화 | 막대/선/박스플롯 그래프 4종 |\n| 6장 | 결론 및 한계 | 결론 3가지, 한계 4가지, 향후 방향 |\n\n---\n\n## 지금 당장 해야 할 것\n\n보고서 구성도는 완성됐고, 실제 데이터는 **Firebase에서 직접 수집**해야 해요. 캡스톤 진행하면서 Firebase `/logs` 에 쌓이는 데이터를 Python으로 내려받으면 분석 시작할 수 있어요 😊",
     "citations": []
   }
 ]

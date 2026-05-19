@@ -935,13 +935,20 @@ function getMC(idx){ return MC[idx%MC.length]; }
 
 // ── 로그인 ──
 function login(idx){
-  curUser=USERS[idx];
-  document.getElementById('loginPage').style.display='none';
-  document.getElementById('app').style.cssText='display:flex;flex-direction:column;height:100vh;';
-  // 드로어 사용자 정보 업데이트
-  document.getElementById('drwSub').textContent=curUser.name+' · '+(curUser.isAdmin?'전체 관리자':'멤버');
-  initFB();
-  go('p-home');
+  try {
+    curUser = USERS[idx];
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').style.cssText = 'display:flex;flex-direction:column;height:100vh;overflow:hidden;';
+    try { document.getElementById('drwSub').textContent = curUser.name + ' · ' + (curUser.isAdmin ? '전체 관리자' : '멤버'); } catch(e){}
+    try { initFB(); } catch(e){ console.error('initFB 오류:', e); }
+    go('p-home');
+  } catch(e) {
+    console.error('login 오류:', e);
+    // 오류 나도 강제로 앱 열기
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').style.cssText = 'display:flex;flex-direction:column;height:100vh;';
+    go('p-home');
+  }
 }
 function logout(){
   try{
@@ -960,80 +967,85 @@ function logout(){
 
 // ── Firebase 연결 ──
 function initFB(){
-  // 연결 상태
-  db.ref('.info/connected').on('value',s=>{
-    const ok=s.val();
-    // Firebase 연결 상태 (UI 요소 없음)
-  });
-
-  // 각 방 상태 실시간 감지
-  ROOMS.forEach(r=>{
-    db.ref('/rooms/'+r+'/state').on('value',s=>{
-      const val=s.val();
-      if(val===null){
-        // 처음이면 false로 초기화
-        db.ref('/rooms/'+r+'/state').set(false);
-        return;
-      }
-      roomState[r]=val;
-      updateRoomUI(r);
-      updateSummary();
+  try {
+    // 각 방 상태 실시간 감지
+    ROOMS.forEach(r=>{
+      db.ref('/rooms/'+r+'/state').on('value',s=>{
+        try {
+          const val=s.val();
+          if(val===null){ db.ref('/rooms/'+r+'/state').set(false); return; }
+          roomState[r]=val;
+          updateRoomUI(r);
+          updateSummary();
+        } catch(e){}
+      });
     });
-  });
+  } catch(e){ console.error('방 감지 오류:', e); }
 
-  // 사용 기록
-  db.ref('/logs').limitToLast(30).on('value',s=>{
-    logs=[]; notifs=[];
-    s.forEach(c=>{
-      const d=c.val();
-      logs.unshift(d);
-      notifs.unshift({...d,unrd:true});
+  try {
+    // 사용 기록
+    db.ref('/logs').limitToLast(30).on('value',s=>{
+      try {
+        logs=[]; notifs=[];
+        s.forEach(c=>{ const d=c.val(); logs.unshift(d); notifs.unshift({...d,unrd:true}); });
+        if(document.getElementById('p-hist').classList.contains('show')) renderLogs();
+        if(document.getElementById('p-notif').classList.contains('show')) renderNotifs();
+      } catch(e){}
     });
-    if(document.getElementById('p-hist').classList.contains('show')) renderLogs();
-    if(document.getElementById('p-notif').classList.contains('show')) renderNotifs();
-  });
+  } catch(e){ console.error('로그 감지 오류:', e); }
 
-  // ── 멤버 목록 실시간 Firebase 연동 ──
-  db.ref('/members').on('value',s=>{
-    members=[];
-    s.forEach(c=>{
-      members.push({id:c.key, ...c.val()});
+  try {
+    // 멤버 목록
+    db.ref('/members').on('value',s=>{
+      try {
+        members=[];
+        s.forEach(c=>{ members.push({id:c.key, ...c.val()}); });
+        if(members.length===0 && curUser && curUser.isAdmin){
+          const defaults=[
+            {name:'문성일',studentId:'2001184',emoji:'😊',...getMC(0)},
+            {name:'손의윤',studentId:'2101056',emoji:'🙋',...getMC(1)},
+            {name:'강규창',studentId:'0000001',emoji:'👨‍🏫',...getMC(2)},
+          ];
+          defaults.forEach(m=>db.ref('/members').push(m));
+        }
+        if(document.getElementById('p-share').classList.contains('show')) renderShare();
+      } catch(e){}
     });
-    // 기본 멤버 없으면 자동 추가
-    if(members.length===0 && curUser && curUser.isAdmin){
-      const defaults=[
-        {name:'문성일',studentId:'2001184',emoji:'😊',...getMC(0)},
-        {name:'손의윤',studentId:'2101056',emoji:'🙋',...getMC(1)},
-        {name:'강규창',studentId:'0000001',emoji:'👨‍🏫',...getMC(2)},
-      ];
-      defaults.forEach(m=>db.ref('/members').push(m));
-    }
-    if(document.getElementById('p-share').classList.contains('show')) renderShare();
-  });
+  } catch(e){ console.error('멤버 감지 오류:', e); }
 
-  // ── 전력 리스너 초기화 ──
-  initPowerListener();
+  try { initPowerListener(); } catch(e){ console.error('전력 리스너 오류:', e); }
 
-  // ── 비상 알림 Firebase 리스너 ──
-  db.ref('/emergency').on('value', snap => {
-    const e = snap.val();
-    if (e && e.active) {
-      emgShow(e.watt || 0, e.reason || '전력 이상 감지!');
-    }
-  });
+  try {
+    // 비상 알림
+    db.ref('/emergency').on('value', snap => {
+      try { const e=snap.val(); if(e && e.active) emgShow(e.watt||0, e.reason||'전력 이상 감지!'); } catch(e){}
+    });
+  } catch(e){ console.error('비상 리스너 오류:', e); }
 
-  // 전력 데이터 실시간 감지
-  db.ref('/power/current_watt').on('value', snap => {
-    const w = snap.val() || 0;
-    // powerBadge 는 제거됨 (헤더 배지로 대체)
-  });
+  try {
+    // 예약 목록
+    db.ref('/schedules').on('value', snap => {
+      try {
+        schedListArr=[];
+        snap.forEach(c=>schedListArr.push({id:c.key,...c.val()}));
+        if(document.getElementById('p-timer')?.classList.contains('show')) renderSched();
+      } catch(e){}
+    });
+  } catch(e){ console.error('예약 리스너 오류:', e); }
 
-  // 예약 목록 실시간 로드
-  db.ref('/schedules').on('value', snap => {
-    schedListArr = [];
-    snap.forEach(c => schedListArr.push({ id: c.key, ...c.val() }));
-    if(document.getElementById('p-timer')?.classList.contains('show')) renderSched();
-  });
+  try {
+    // 전력 배지
+    db.ref('/power/current_watt').on('value', snap => {
+      try {
+        const w = snap.val() || 0;
+        const b = document.getElementById('powerBadgeHdr');
+        if(b) b.textContent = Math.round(w) + ' W';
+      } catch(e){}
+    });
+  } catch(e){}
+
+  // 타이머/예약 체커 시작
+  try { setTimeout(()=>{ restoreTimer(); startSchedChecker(); }, 2500); } catch(e){}
 }
 
 // ── 방 개별 토글 ──

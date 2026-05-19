@@ -723,15 +723,18 @@ let nid=100, pnid=200;
 // ── 로그인 ──
 function login(idx) {
   curUser = USERS[idx];
+  // 1. 로그인 화면 숨기기
   document.getElementById('loginPage').style.display = 'none';
+  // 2. 앱 보이기
   var app = document.getElementById('app');
-  app.style.display = 'flex';
-  app.style.flexDirection = 'column';
-  app.style.height = '100vh';
-  app.style.overflow = 'hidden';
-  document.getElementById('drwSub').textContent = curUser.name + ' · ' + (curUser.isAdmin ? '전체 관리자' : '멤버');
-  initFB();
+  app.style.cssText = 'display:flex!important;flex-direction:column;height:100vh;overflow:hidden;';
+  // 3. 홈 화면 먼저 표시
   showPage('p-home', 't-home');
+  // 4. 드로어 사용자명 업데이트
+  var ds = document.getElementById('drwSub');
+  if(ds) ds.textContent = curUser.name + ' · ' + (curUser.isAdmin ? '전체 관리자' : '멤버');
+  // 5. Firebase 연동 (비동기 - 나중에)
+  setTimeout(function(){ initFB(); }, 100);
 }
 
 // ── 페이지 전환 ──

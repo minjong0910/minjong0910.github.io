@@ -1005,18 +1005,19 @@ let schedListArr   = [];
 let schedChecker   = null;
 
 // ── 타이머 완료 알림 배너 ──
-let _tnVibInterval = null;  // 반복 진동 인터벌
-let _tnAutoHide    = null;  // 자동 숨김 (사용 안 함 — 직접 꺼야 함)
+let _tnVibInterval = null;  // 쉬지 않는 진동 인터벌
+let _tnAutoHide    = null;  // 30초 자동 숨김
+let _tnBarTimer    = null;  // 진행바 타이머
 
-// 진동 반복 시작
+// 진동 쉬지 않고 계속 울리기
 function _startVib() {
   _stopVib();
   try {
     if (!navigator.vibrate) return;
-    navigator.vibrate([400, 300, 400, 300, 400]);
-    _tnVibInterval = setInterval(function() {
-      try { navigator.vibrate([400, 300, 400, 300, 400]); } catch(e) {}
-    }, 2000); // 2초마다 반복
+    // 500ms 진동, 100ms 쉬고 반복 → 거의 쉬지 않는 진동
+    var pat = [];
+    for (var i = 0; i < 60; i++) pat.push(500, 100);
+    navigator.vibrate(pat);
   } catch(e) {}
 }
 
@@ -1026,7 +1027,7 @@ function _stopVib() {
   if (_tnVibInterval) { clearInterval(_tnVibInterval); _tnVibInterval = null; }
 }
 
-// 배너 표시 + 진동 시작
+// 배너 표시 + 진동 + 30초 카운트다운
 function tnShow(icon, title, msg) {
   const box = document.getElementById('tnBox');
   const bar = document.getElementById('tnBar');
@@ -1037,10 +1038,14 @@ function tnShow(icon, title, msg) {
   document.getElementById('tnTitle').textContent = title;
   document.getElementById('tnMsg').textContent   = msg;
 
-  // 진행바 초기화 (끄기 전까지 꽉 찬 상태 유지)
+  // 진행바 — 30초 카운트다운
   if (bar) {
     bar.style.transition = 'none';
     bar.style.width = '100%';
+    setTimeout(function() {
+      bar.style.transition = 'width 30s linear';
+      bar.style.width = '0%';
+    }, 100);
   }
 
   // 배너 표시
@@ -1051,11 +1056,17 @@ function tnShow(icon, title, msg) {
     });
   });
 
-  // 진동 반복 시작
+  // 진동 시작 (쉬지 않고)
   _startVib();
+
+  // 30초 후 자동 숨김
+  clearTimeout(_tnAutoHide);
+  _tnAutoHide = setTimeout(function() {
+    tnHide();
+  }, 30000);
 }
 
-// 배너 닫기 + 진동 중단 (X 버튼 누를 때)
+// 배너 닫기 + 진동 중단 ([끄기] 버튼 or 30초 후)
 function tnHide() {
   const box = document.getElementById('tnBox');
   if (box) box.classList.remove('show');
@@ -1066,7 +1077,7 @@ function tnHide() {
 // 기존 코드 호환
 function showTimerNotif(icon, title, msg) { tnShow(icon, title, msg); }
 function closeTimerNotif() { tnHide(); }
-function testNotif() { tnShow('⏰', '타이머 작동 중!', '이 배너를 직접 닫아야 진동이 멈춰요'); }
+function testNotif() { tnShow('⏰', '타이머 완료!', '[끄기] 전까지 진동이 울려요 — 30초 후 자동 종료'); }
 
 // ── 실시간 미리보기 ──
 function livePreview() {

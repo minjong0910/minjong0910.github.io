@@ -416,37 +416,41 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
       <div class="timer-target" id="timerTarget"></div>
     </div>
 
-    <!-- 발표용 초 단위 빠른 선택 -->
-    <div class="stit">⚡ 발표용 (초 단위)</div>
-    <div class="timer-btns">
-      <div class="tbtn" onclick="quickSec(5)" id="qs-5">
-        <div class="tbtn-time">5초</div>
-        <div class="tbtn-label">시연용</div>
+    <!-- 직접 설정 (실시간 미리보기) -->
+    <div class="stit">직접 설정</div>
+    <div class="custom-time">
+      <div style="font-size:11px;color:var(--tx2);margin-bottom:10px;">눌러서 시간을 직접 입력 — 위 시계에 실시간 반영돼요</div>
+
+      <!-- 시/분/초 큰 입력 버튼 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div style="text-align:center;">
+          <div style="font-size:10px;color:var(--tx2);margin-bottom:4px;letter-spacing:1px;">시간 (H)</div>
+          <input class="custom-inp" id="custH" type="number" min="0" max="23" placeholder="00" value="0"
+            oninput="livePreview()"
+            style="width:100%;font-size:28px;padding:14px 4px;border-radius:12px;border:1.5px solid var(--bdr);">
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:10px;color:var(--tx2);margin-bottom:4px;letter-spacing:1px;">분 (M)</div>
+          <input class="custom-inp" id="custM" type="number" min="0" max="59" placeholder="00" value="0"
+            oninput="livePreview()"
+            style="width:100%;font-size:28px;padding:14px 4px;border-radius:12px;border:1.5px solid var(--bdr);">
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:10px;color:var(--tx2);margin-bottom:4px;letter-spacing:1px;">초 (S)</div>
+          <input class="custom-inp" id="custS" type="number" min="0" max="59" placeholder="00" value="0"
+            oninput="livePreview()"
+            style="width:100%;font-size:28px;padding:14px 4px;border-radius:12px;border:1.5px solid var(--bdr);">
+        </div>
       </div>
-      <div class="tbtn" onclick="quickSec(10)" id="qs-10">
-        <div class="tbtn-time">10초</div>
-        <div class="tbtn-label">데모</div>
-      </div>
-      <div class="tbtn" onclick="quickSec(30)" id="qs-30">
-        <div class="tbtn-time">30초</div>
-        <div class="tbtn-label">발표</div>
-      </div>
-      <div class="tbtn" onclick="quickSec(60)" id="qs-60">
-        <div class="tbtn-time">60초</div>
-        <div class="tbtn-label">1분</div>
-      </div>
-      <div class="tbtn" onclick="quickSec(90)" id="qs-90">
-        <div class="tbtn-time">90초</div>
-        <div class="tbtn-label">1분 30초</div>
-      </div>
-      <div class="tbtn" onclick="quickSec(120)" id="qs-120">
-        <div class="tbtn-time">2분</div>
-        <div class="tbtn-label">시연</div>
+
+      <!-- 실시간 합산 표시 -->
+      <div id="liveTotal" style="background:var(--surf);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--tx2);text-align:center;border:1px solid var(--bdr);">
+        총 0초 설정됨
       </div>
     </div>
 
-    <!-- 빠른 선택 버튼 -->
-    <div class="stit">🌙 수면 타이머</div>
+    <!-- 수면 타이머 빠른 선택 -->
+    <div class="stit">🌙 수면 빠른 선택</div>
     <div class="timer-btns">
       <div class="tbtn" onclick="quickTimer(30)" id="qt-30">
         <div class="tbtn-time">30분</div>
@@ -474,20 +478,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
       </div>
     </div>
 
-    <!-- 직접 설정 -->
-    <div class="stit">직접 설정</div>
-    <div class="custom-time">
-      <div style="font-size:11px;color:var(--tx2);margin-bottom:4px;">시간 · 분 · 초를 직접 입력하세요</div>
-      <div class="custom-row">
-        <input class="custom-inp" id="custH" type="number" min="0" max="23" placeholder="0" value="0" oninput="clearQuick()">
-        <span style="color:var(--tx2);font-size:14px;font-weight:700;">시</span>
-        <input class="custom-inp" id="custM" type="number" min="0" max="59" placeholder="0" value="0" oninput="clearQuick()">
-        <span style="color:var(--tx2);font-size:14px;font-weight:700;">분</span>
-        <input class="custom-inp" id="custS" type="number" min="0" max="59" placeholder="0" value="0" oninput="clearQuick()">
-        <span style="color:var(--tx2);font-size:14px;font-weight:700;">초</span>
-      </div>
-    </div>
-
     <!-- 타이머 종료 동작 -->
     <div class="stit">타이머 종료 시</div>
     <div class="timer-action">
@@ -506,20 +496,45 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
     <button class="timer-stop" id="timerStopBtn" onclick="stopTimer()">■ 타이머 취소</button>
 
     <!-- 예약 제어 -->
-    <div class="stit" style="margin-top:16px;">예약 제어</div>
+    <div class="stit" style="margin-top:16px;">📅 예약 제어</div>
     <div class="sched-box">
-      <div style="font-size:12px;color:var(--tx2);">특정 시간에 자동으로 켜거나 끌 수 있어요</div>
-      <div class="sched-row">
-        <input class="sched-time-inp" type="time" id="schedTime" value="07:00">
-        <div class="tact" id="sact-off" onclick="setSchedAction('off')" style="padding:8px 12px;flex:1;">
-          <div class="tact-label">🌙 끄기</div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:12px;">특정 시간에 자동으로 켜거나 끌 수 있어요</div>
+
+      <!-- 시간 선택 크게 -->
+      <div style="background:var(--surf);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--bdr);">
+        <div style="font-size:10px;color:var(--tx2);margin-bottom:8px;letter-spacing:1px;text-align:center;">예약 시간 선택</div>
+        <input type="time" id="schedTime" value="07:00"
+          style="width:100%;background:var(--card);border:1.5px solid var(--gold);border-radius:10px;
+                 color:var(--gold);font-size:32px;font-weight:800;font-family:'DM Mono',monospace;
+                 text-align:center;padding:12px 8px;letter-spacing:4px;">
+        <div style="display:flex;justify-content:space-between;padding:4px 8px 0;font-size:10px;color:var(--tx2);">
+          <span>시  :  분</span>
+          <span id="schedAmPm" style="color:var(--gold);font-weight:600;"></span>
         </div>
-        <div class="tact sel" id="sact-on" onclick="setSchedAction('on')" style="padding:8px 12px;flex:1;">
-          <div class="tact-label">💡 켜기</div>
-        </div>
-        <button onclick="addSched()" style="background:var(--gold);border:none;border-radius:8px;color:#0A0E1A;font-size:12px;font-weight:700;padding:8px 12px;cursor:pointer;">추가</button>
       </div>
-      <div class="sched-list" id="schedList"></div>
+
+      <!-- 동작 선택 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div class="tact" id="sact-off" onclick="setSchedAction('off')"
+          style="padding:14px 12px;">
+          <div class="tact-icon">🌙</div>
+          <div class="tact-label" style="font-size:12px;">끄기</div>
+        </div>
+        <div class="tact sel" id="sact-on" onclick="setSchedAction('on')"
+          style="padding:14px 12px;">
+          <div class="tact-icon">💡</div>
+          <div class="tact-label" style="font-size:12px;">켜기</div>
+        </div>
+      </div>
+
+      <!-- 추가 버튼 -->
+      <button onclick="addSched()"
+        style="width:100%;background:var(--gold);border:none;border-radius:10px;
+               color:#0A0E1A;font-size:14px;font-weight:800;padding:12px;cursor:pointer;">
+        + 예약 추가
+      </button>
+
+      <div class="sched-list" id="schedList" style="margin-top:10px;"></div>
     </div>
 
   </div>
@@ -949,27 +964,66 @@ let selectedMin   = 0;     // 선택된 분
 
 // 빠른 선택 — 분 단위
 function quickTimer(min) {
-  selectedMin = min * 60; // 초로 저장
+  selectedMin = min * 60;
   document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('sel'));
   document.getElementById('qt-' + min)?.classList.add('sel');
   document.getElementById('custH').value = Math.floor(min / 60);
   document.getElementById('custM').value = min % 60;
   document.getElementById('custS').value = 0;
+  livePreview();
 }
 
 // 빠른 선택 — 초 단위 (발표용)
 function quickSec(sec) {
-  selectedMin = sec; // 초로 저장
+  selectedMin = sec;
   document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('sel'));
   document.getElementById('qs-' + sec)?.classList.add('sel');
   document.getElementById('custH').value = 0;
   document.getElementById('custM').value = Math.floor(sec / 60);
   document.getElementById('custS').value = sec % 60;
+  livePreview();
 }
 
 function clearQuick() {
   document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('sel'));
   selectedMin = 0;
+  livePreview();
+}
+
+// 실시간 미리보기 — 입력할 때마다 위 시계에 반영
+function livePreview() {
+  if (timerInterval) return; // 타이머 작동 중엔 무시
+  const h = parseInt(document.getElementById('custH').value) || 0;
+  const m = parseInt(document.getElementById('custM').value) || 0;
+  const s = parseInt(document.getElementById('custS').value) || 0;
+  const total = h * 3600 + m * 60 + s;
+
+  // 위 시계에 미리보기 표시
+  const clock = document.getElementById('timerClock');
+  if (clock) {
+    clock.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    clock.style.opacity = total > 0 ? '1' : '0.4';
+  }
+
+  // 합산 표시
+  const el = document.getElementById('liveTotal');
+  if (el) {
+    if (total <= 0) {
+      el.textContent = '총 0초 설정됨';
+      el.style.color = 'var(--tx2)';
+    } else {
+      let txt = '총 ';
+      if (h > 0) txt += h + '시간 ';
+      if (m > 0) txt += m + '분 ';
+      if (s > 0) txt += s + '초 ';
+      txt += '= ' + total + '초';
+      el.textContent = txt;
+      el.style.color = 'var(--gold)';
+    }
+  }
+
+  // 빠른 선택 버튼 하이라이트 해제
+  document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('sel'));
 }
 
 // 타이머 종료 동작 선택
@@ -1076,6 +1130,18 @@ function stopTimer() {
   document.getElementById('custM').value = 0;
   toast('타이머가 취소됐어요');
 }
+
+// 예약 시간 AM/PM 표시
+document.addEventListener('DOMContentLoaded', () => {
+  const si = document.getElementById('schedTime');
+  if (si) {
+    si.addEventListener('change', () => {
+      const [h] = si.value.split(':').map(Number);
+      const el = document.getElementById('schedAmPm');
+      if (el) el.textContent = h < 12 ? '오전 (AM)' : '오후 (PM)';
+    });
+  }
+});
 
 // 예약 추가
 function addSched() {

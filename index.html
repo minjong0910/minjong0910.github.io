@@ -360,6 +360,15 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
       <div class="tgl" id="tg-bathroom"><div class="tknob"></div></div>
     </div>
   </div>
+
+  <!-- 하단 탭바 -->
+  <div class="tab-bar">
+    <div class="tab active" id="tab-home" onclick="goTab('p-home','tab-home')"><div class="tab-icon">🏠</div><div class="tab-label">홈</div></div>
+    <div class="tab" id="tab-power" onclick="goTab('p-power','tab-power')"><div class="tab-icon">⚡</div><div class="tab-label">전력</div></div>
+    <div class="tab" id="tab-timer" onclick="goTab('p-timer','tab-timer')"><div class="tab-icon">⏰</div><div class="tab-label">타이머</div></div>
+    <div class="tab" id="tab-ai" onclick="goTab('p-ai','tab-ai')"><div class="tab-icon">🤖</div><div class="tab-label">AI분석</div></div>
+    <div class="tab" id="tab-hist" onclick="goTab('p-hist','tab-hist')"><div class="tab-icon">📋</div><div class="tab-label">기록</div></div>
+  </div>
 </div>
 
 <!-- 사용 기록 -->
@@ -411,16 +420,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
   <div class="ditm"      onclick="go('p-notif');closeDrw()"><span class="dic">🔔</span>알림 설정</div>
   <div class="ditm"      onclick="go('p-share');closeDrw()"><span class="dic">👥</span>공유 대상</div>
   <div class="ditm"      onclick="closeDrw()">   <span class="dic">⚙️</span>기기 설정</div>
-  <!-- 하단 탭바 -->
-  <div class="tab-bar">
-    <div class="tab active" id="tab-home" onclick="goTab('p-home','tab-home')"><div class="tab-icon">🏠</div><div class="tab-label">홈</div></div>
-    <div class="tab" id="tab-power" onclick="goTab('p-power','tab-power')"><div class="tab-icon">⚡</div><div class="tab-label">전력</div></div>
-    <div class="tab" id="tab-timer" onclick="goTab('p-timer','tab-timer')"><div class="tab-icon">⏰</div><div class="tab-label">타이머</div></div>
-    <div class="tab" id="tab-ai" onclick="goTab('p-ai','tab-ai')"><div class="tab-icon">🤖</div><div class="tab-label">AI분석</div></div>
-    <div class="tab" id="tab-hist" onclick="goTab('p-hist','tab-hist')"><div class="tab-icon">📋</div><div class="tab-label">기록</div></div>
   </div>
-</div>
-</div>
 <!-- 타이머 -->
 <div class="page" id="p-timer">
   <div class="hdr"><div class="hl"><div class="bbtn" onclick="goTab('p-home','tab-home')">←</div><div><div class="htit">타이머 & 예약</div><div class="hsub">수면 타이머 · 예약 제어</div></div></div></div>

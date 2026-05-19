@@ -978,23 +978,25 @@ function renderSched() {
 }
 var schedCheckIv=null;
 var _schedVibInt=null, _schedAutoHide=null;
-var _lastSchedFired = '';  // 같은 분에 중복 실행 방지
+var _firedTimes = {};  // {시간: true} 형태로 이미 실행된 예약 기록
 function startSchedCheck(){
   if(schedCheckIv)return;
-  // 10초마다 체크 — 시간을 놓치지 않음
   schedCheckIv=setInterval(function(){
-    var d=new Date(),cur=pad(d.getHours())+':'+pad(d.getMinutes());
-    if(cur===_lastSchedFired) return;  // 이미 이 분에 실행됨
+    var d = new Date();
+    var cur = pad(d.getHours())+':'+pad(d.getMinutes());
+    // 매 정각 분이 바뀌면 이전 기록 초기화
+    if(Object.keys(_firedTimes).length > 10) _firedTimes = {};
     schedArr.forEach(function(s){
-      if(s.time===cur){
-        _lastSchedFired=cur;  // 이 분은 실행됨으로 표시
-        var ns=s.action==='on';
-        ROOMS.forEach(function(r){db.ref('/rooms/'+r+'/state').set(ns);});
+      // 정확히 시간 일치 + 아직 이 시간에 실행 안 한 경우만
+      if(s.time === cur && !_firedTimes[s.id+'_'+cur]){
+        _firedTimes[s.id+'_'+cur] = true;
+        var ns = s.action==='on';
+        ROOMS.forEach(function(r){ db.ref('/rooms/'+r+'/state').set(ns); });
         db.ref('/logs').push({user:'예약',emoji:'📅',color:'#4E7FD4',bg:'rgba(78,127,212,.15)',room:'집안 전체',act:ns?'켬':'끔',time:nowStr(),timestamp:Date.now()});
         schedShow(s.time, ns);
       }
     });
-  },10000);  // 10초마다 — 시간 절대 안 놓침
+  }, 5000);  // 5초마다 체크 — 더 정밀하게
 }
 function schedShow(time, isOn){
   var box = document.getElementById('schedBox');

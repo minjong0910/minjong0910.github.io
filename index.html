@@ -260,14 +260,14 @@ button,input{font-family:inherit;}
 .ai-card-c{font-size:13px;color:var(--tx);line-height:1.7;}
 
 /* 타이머 배너 */
-#tnBox{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-200px);z-index:99999;background:#1C2A45;border:2px solid #C9A84C;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;width:330px;max-width:93vw;box-shadow:0 8px 32px rgba(0,0,0,.7);transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
-#tnBox.show{transform:translateX(-50%) translateY(0);}
+#tnBox{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-200px);visibility:hidden;z-index:99999;background:#1C2A45;border:2px solid #C9A84C;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;width:330px;max-width:93vw;box-shadow:0 8px 32px rgba(0,0,0,.7);transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
+#tnBox.show{transform:translateX(-50%) translateY(0);visibility:visible;}
 #tnClose{background:#C9A84C;border:none;color:#0A0E1A;font-size:11px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;}
 #tnBar{position:absolute;bottom:0;left:0;height:4px;background:#C9A84C;border-radius:0 0 16px 16px;width:100%;}
 
 /* 비상 배너 */
-#emgBox{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-200px);z-index:999999;background:#2A0A0A;border:2.5px solid var(--off);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;width:340px;max-width:93vw;box-shadow:0 8px 40px rgba(201,80,76,.5);transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
-#emgBox.show{transform:translateX(-50%) translateY(0);}
+#emgBox{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-200px);visibility:hidden;z-index:999999;background:#2A0A0A;border:2.5px solid var(--off);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;width:340px;max-width:93vw;box-shadow:0 8px 40px rgba(201,80,76,.5);transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
+#emgBox.show{transform:translateX(-50%) translateY(0);visibility:visible;}
 .emg-t{display:flex;align-items:center;gap:10px;}
 .emg-i{font-size:28px;animation:emgblink .5s ease-in-out infinite alternate;}
 @keyframes emgblink{0%{opacity:1;}100%{opacity:.4;}}

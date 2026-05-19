@@ -318,7 +318,7 @@ button,input{font-family:inherit;}
 
 /* ── 게스트 코드 ── */
 .guest-box{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;}
-.guest-code{font-size:40px;font-weight:800;color:var(--gold);font-family:'DM Mono',monospace;letter-spacing:8px;text-align:center;padding:16px 0;}
+.guest-code{font-size:36px;font-weight:800;color:var(--gold);font-family:'DM Mono',monospace;letter-spacing:5px;text-align:center;padding:16px 0;}
 .guest-code-wrap{background:var(--surf);border-radius:12px;border:1.5px dashed var(--gold);margin:8px 0;}
 .guest-expire{font-size:11px;color:var(--tx2);text-align:center;margin-bottom:8px;}
 .guest-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),#E8C87A);border:none;border-radius:10px;color:#0A0E1A;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:8px;}
@@ -568,7 +568,7 @@ button,input{font-family:inherit;}
         <div class="guest-box">
           <div style="font-size:12px;color:var(--tx2);margin-bottom:10px;">게스트에게 코드를 알려주세요. 24시간 후 자동 만료돼요.</div>
           <div class="guest-code-wrap">
-            <div class="guest-code" id="guestCodeDisplay">------</div>
+            <div class="guest-code" id="guestCodeDisplay">-------</div>
             <div class="guest-expire" id="guestExpire">코드 없음</div>
           </div>
           <button class="guest-btn" onclick="genGuestCode()">🎲 새 코드 발급</button>
@@ -1361,7 +1361,7 @@ function renderGuest() {
       }
     } else {
       if (isAdmin) {
-        document.getElementById('guestCodeDisplay').textContent = '------';
+        document.getElementById('guestCodeDisplay').textContent = '-------';
         document.getElementById('guestExpire').textContent = '코드 없음';
       }
     }
@@ -1386,7 +1386,7 @@ function genGuestCode() {
 
 function revokeGuestCode() {
   db.ref('/guestCode').remove();
-  document.getElementById('guestCodeDisplay').textContent = '------';
+  document.getElementById('guestCodeDisplay').textContent = '-------';
   document.getElementById('guestExpire').textContent = '코드 없음';
   toast('코드가 취소됐어요');
 }

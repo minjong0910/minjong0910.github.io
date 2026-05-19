@@ -215,6 +215,43 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
   animation:tnpulse 1s ease-in-out infinite alternate;}
 @keyframes tnpulse{0%{opacity:1;}100%{opacity:0.4;}}
 
+/* ── 비상 알림 시스템 ── */
+#emgBox{
+  position:fixed;top:14px;left:50%;
+  transform:translateX(-50%) translateY(-200px);
+  z-index:999999;
+  background:linear-gradient(135deg,#2A0A0A,#1A0505);
+  border:2.5px solid #C9504C;
+  border-radius:16px;padding:16px 18px;
+  display:flex;flex-direction:column;gap:10px;
+  width:340px;max-width:93vw;
+  box-shadow:0 8px 40px rgba(201,80,76,.5), 0 0 0 1px rgba(201,80,76,.2);
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s;
+  opacity:0;pointer-events:none;
+}
+#emgBox.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto;}
+.emg-top{display:flex;align-items:center;gap:10px;}
+.emg-icon{font-size:28px;animation:emgblink .5s ease-in-out infinite alternate;}
+@keyframes emgblink{0%{opacity:1;}100%{opacity:.4;}}
+.emg-body{flex:1;}
+.emg-title{font-size:14px;font-weight:800;color:#FF6B6B;margin-bottom:3px;}
+.emg-msg{font-size:11px;color:#E8A8A8;line-height:1.5;}
+.emg-watt{font-size:22px;font-weight:800;color:#FF6B6B;
+  font-family:'DM Mono',monospace;text-align:center;
+  background:rgba(201,80,76,.15);border-radius:10px;padding:8px;
+  border:1px solid rgba(201,80,76,.3);}
+.emg-watt span{font-size:12px;color:#E8A8A8;font-weight:400;}
+.emg-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.emg-cut{background:#C9504C;border:none;border-radius:10px;
+  color:white;font-size:13px;font-weight:800;padding:12px;
+  cursor:pointer;letter-spacing:.3px;}
+.emg-close{background:rgba(255,255,255,.08);border:1px solid rgba(201,80,76,.4);
+  border-radius:10px;color:#E8A8A8;font-size:12px;font-weight:700;
+  padding:12px;cursor:pointer;}
+#emgBar{height:3px;background:#C9504C;border-radius:3px;
+  animation:emgbarW 30s linear forwards;}
+@keyframes emgbarW{0%{width:100%;}100%{width:0%;}}
+
 /* ── 타이머 페이지 ── */
 .timer-hero{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:20px 16px;margin-bottom:12px;text-align:center;}
 .timer-clock{font-size:52px;font-weight:800;color:var(--gold);font-family:'DM Mono',monospace;letter-spacing:2px;line-height:1.1;}
@@ -312,6 +349,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
       <div><div class="htit">스마트홈 제어</div><div class="hsub">원 스위치 도어센서</div></div>
     </div>
     <div class="gbtn" onclick="go('p-timer')"><span style="font-size:13px">⏰</span><span class="gbtn-t">타이머</span></div>
+    <div class="gbtn" onclick="testEmergency()" style="border-color:rgba(201,80,76,.4)"><span style="font-size:13px">🚨</span><span class="gbtn-t" style="color:#C9504C">비상테스트</span></div>
     <div class="gbtn" onclick="go('p-share')"><span style="font-size:13px">👥</span><span class="gbtn-t">공유 대상</span></div>
   </div>
   <div class="gbar"></div>
@@ -721,6 +759,21 @@ function initFB(){
       defaults.forEach(m=>db.ref('/members').push(m));
     }
     if(document.getElementById('p-share').classList.contains('show')) renderShare();
+  });
+
+  // ── 비상 알림 Firebase 리스너 ──
+  db.ref('/emergency').on('value', snap => {
+    const e = snap.val();
+    if (e && e.active) {
+      emgShow(e.watt || 0, e.reason || '전력 이상 감지!');
+    }
+  });
+
+  // 전력 데이터 실시간 감지
+  db.ref('/power/current_watt').on('value', snap => {
+    const w = snap.val() || 0;
+    const el = document.getElementById('powerBadge');
+    if (el) el.textContent = Math.round(w) + 'W';
   });
 
   // 예약 목록 실시간 로드
@@ -1368,6 +1421,97 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+
+// ══════════════════════════════════════
+// 비상 알림 시스템
+// ══════════════════════════════════════
+let _emgVibInterval = null;
+let _emgAutoHide    = null;
+let _emgBarAnim     = null;
+
+// 비상 배너 표시 + 진동
+function emgShow(watt, reason) {
+  const box = document.getElementById('emgBox');
+  const bar = document.getElementById('emgBar');
+  if (!box) return;
+
+  document.getElementById('emgWatt').textContent = Math.round(watt);
+  document.getElementById('emgMsg').textContent  =
+    reason || ('전력 사용량 ' + Math.round(watt) + 'W — 임계값 초과!');
+
+  // 배너 표시
+  box.classList.remove('show');
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      box.classList.add('show');
+    });
+  });
+
+  // 진행바 리셋
+  if (bar) {
+    bar.style.animation = 'none';
+    void bar.offsetWidth;
+    bar.style.animation = 'emgbarW 30s linear forwards';
+  }
+
+  // 진동 — 비상이라 더 강하게 쉬지 않고
+  _emgStopVib();
+  try {
+    if (navigator.vibrate) {
+      var pat = [];
+      for (var i = 0; i < 30; i++) pat.push(800, 200);
+      navigator.vibrate(pat);
+    }
+  } catch(e) {}
+
+  // 30초 자동 숨김
+  clearTimeout(_emgAutoHide);
+  _emgAutoHide = setTimeout(emgHide, 30000);
+
+  toast('🚨 비상 알림 발동!');
+}
+
+// 비상 배너 숨김
+function emgHide() {
+  const box = document.getElementById('emgBox');
+  if (box) box.classList.remove('show');
+  _emgStopVib();
+  clearTimeout(_emgAutoHide);
+}
+
+// 진동 중단
+function _emgStopVib() {
+  try { if (navigator.vibrate) navigator.vibrate(0); } catch(e) {}
+  if (_emgVibInterval) { clearInterval(_emgVibInterval); _emgVibInterval = null; }
+}
+
+// 🔌 전체 전기 차단
+function emergencyCut() {
+  // 모든 방 끄기
+  ROOMS.forEach(r => {
+    roomState[r] = false;
+    updateRoomUI(r);
+    try { db.ref('/rooms/' + r + '/state').set(false); } catch(e) {}
+  });
+  // Firebase 차단 명령 (NodeMCU 수신)
+  try {
+    db.ref('/relay/state').set(false);
+    db.ref('/relay/source').set('emergency');
+    db.ref('/command/state').set(false);
+    db.ref('/emergency/cut_power').set(true);
+    db.ref('/emergency/active').set(false);
+    addLog(curUser ? curUser.name : '비상', '끔', '비상 차단 — 전체');
+  } catch(e) {}
+
+  emgHide();
+  toast('🔌 전체 전기 차단 완료!');
+}
+
+// 비상 테스트 버튼 (발표용)
+function testEmergency() {
+  emgShow(2450, '전력 사용량 2450W — 임계값(2000W) 초과!');
+}
+
 // ── PWA 서비스워커 등록 ──
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
@@ -1377,6 +1521,23 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+
+<!-- ══ 비상 알림 배너 ══ -->
+<div id="emgBox">
+  <div class="emg-top">
+    <div class="emg-icon">🚨</div>
+    <div class="emg-body">
+      <div class="emg-title">⚡ 전력 이상 감지!</div>
+      <div class="emg-msg" id="emgMsg">전력 사용량이 임계값을 초과했어요</div>
+    </div>
+  </div>
+  <div class="emg-watt"><span id="emgWatt">0</span> W <span>현재 전력</span></div>
+  <div class="emg-btns">
+    <button class="emg-cut" onclick="emergencyCut()">🔌 전체 전기 차단</button>
+    <button class="emg-close" onclick="emgHide()">무시하기</button>
+  </div>
+  <div id="emgBar"></div>
+</div>
 
 <!-- ══ 타이머 완료 알림 배너 ══ -->
 <div id="tnBox">

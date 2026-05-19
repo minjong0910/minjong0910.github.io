@@ -277,6 +277,31 @@ button,input{font-family:inherit;}
 .emg-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .emg-cut{background:var(--off);border:none;border-radius:10px;color:white;font-size:13px;font-weight:800;padding:12px;cursor:pointer;}
 .emg-skip{background:rgba(255,255,255,.08);border:1px solid rgba(201,80,76,.4);border-radius:10px;color:#E8A8A8;font-size:12px;font-weight:700;padding:12px;cursor:pointer;}
+
+/* ── 전구 시뮬레이션 ── */
+.sim-box{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:9px;}
+.sim-title{font-size:11px;font-weight:600;color:var(--tx2);letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.sim-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:var(--gd);color:var(--gold);border:1px solid var(--gold);}
+.sim-rooms{display:flex;justify-content:space-around;align-items:flex-end;padding:8px 0;}
+.sim-room{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;}
+.sim-room:active{opacity:.7;}
+.sim-bulb{font-size:44px;line-height:1;transition:all .3s;filter:grayscale(1) brightness(.5);}
+.sim-room.son .sim-bulb{filter:none;animation:gblink .4s ease;}
+@keyframes gblink{0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}}
+.sim-room-name{font-size:11px;font-weight:600;color:var(--tx2);}
+.sim-room.son .sim-room-name{color:var(--gold);}
+.sim-room-state{font-size:10px;color:var(--tx3);}
+.sim-room.son .sim-room-state{color:var(--on);}
+.sim-relay{margin-top:10px;background:var(--surf);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;border:1px solid var(--bdr);}
+.sim-led{width:14px;height:14px;border-radius:50%;background:#333;border:1px solid #555;flex-shrink:0;transition:all .3s;}
+.sim-led.on{background:#4CAF82;box-shadow:0 0 8px #4CAF82;border-color:#4CAF82;}
+.sim-relay-txt{font-size:11px;color:var(--tx2);}
+.sim-relay-txt span{color:var(--tx);font-weight:600;}
+
+/* ── 예약 알림 배너 ── */
+#schedBox{display:none;position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-200px);z-index:99998;background:#0F1A35;border:2px solid var(--bl);border-radius:16px;padding:14px 16px;align-items:center;gap:12px;width:330px;max-width:93vw;box-shadow:0 8px 32px rgba(0,0,0,.7);transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
+#schedBox.show{transform:translateX(-50%) translateY(0);}
+#schedClose{background:var(--bl);border:none;color:#fff;font-size:11px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -362,6 +387,35 @@ button,input{font-family:inherit;}
       <div class="rcard" id="rc-bathroom" onclick="togRoom('bathroom')">
         <div class="rl"><div class="ricn">🚿</div><div><div class="rname">화장실</div><div class="rst" id="rs-bathroom">● OFF</div></div></div>
         <div class="tgl" id="tg-bathroom"><div class="tknob"></div></div>
+      </div>
+
+      <div class="stit">가상 시뮬레이션</div>
+      <div class="sim-box">
+        <div class="sim-title">
+          <span>💡 전구 시뮬레이터</span>
+          <span class="sim-badge" id="simBadge">전체 꺼짐</span>
+        </div>
+        <div class="sim-rooms">
+          <div class="sim-room" id="sim-living" onclick="togRoom('living')">
+            <div class="sim-bulb">💡</div>
+            <div class="sim-room-name">거실</div>
+            <div class="sim-room-state" id="sst-living">OFF</div>
+          </div>
+          <div class="sim-room" id="sim-bedroom" onclick="togRoom('bedroom')">
+            <div class="sim-bulb">💡</div>
+            <div class="sim-room-name">안방</div>
+            <div class="sim-room-state" id="sst-bedroom">OFF</div>
+          </div>
+          <div class="sim-room" id="sim-bathroom" onclick="togRoom('bathroom')">
+            <div class="sim-bulb">💡</div>
+            <div class="sim-room-name">화장실</div>
+            <div class="sim-room-state" id="sst-bathroom">OFF</div>
+          </div>
+        </div>
+        <div class="sim-relay">
+          <div class="sim-led" id="simLed"></div>
+          <div class="sim-relay-txt">릴레이: <span id="simRelayTxt">꺼짐</span> | D4: <span id="simD4Txt">LOW</span></div>
+        </div>
       </div>
     </div>
     <div class="tabbar">
@@ -531,6 +585,16 @@ button,input{font-family:inherit;}
   <div class="ditm" onclick="showPg('pg-notif');closeDrw()"><span class="dic">🔔</span>알림 설정</div>
   <div class="ditm" onclick="showPg('pg-share');closeDrw()"><span class="dic">👥</span>공유 대상</div>
   <div class="ditm" onclick="doLogout()"><span class="dic">🚪</span>로그아웃</div>
+</div>
+
+<!-- 예약 알림 배너 -->
+<div id="schedBox" style="display:none">
+  <div style="font-size:26px;flex-shrink:0;" id="schedIcon">📅</div>
+  <div style="flex:1;">
+    <div style="font-size:13px;font-weight:800;color:#4E7FD4;margin-bottom:3px;" id="schedBannerTitle">예약 실행됨</div>
+    <div style="font-size:11px;color:#8A9BB8;line-height:1.5;" id="schedBannerMsg">예약된 시간이 됐어요</div>
+  </div>
+  <button id="schedClose" onclick="schedHide()">끄기</button>
 </div>
 
 <!-- 타이머 배너 -->
@@ -704,6 +768,24 @@ function updateRoom(r) {
   document.getElementById('rc-'+r).classList.toggle('ron',on);
   document.getElementById('tg-'+r).classList.toggle('ton',on);
   document.getElementById('rs-'+r).textContent = on?'● ON':'● OFF';
+  // 시뮬레이션 업데이트
+  var sr = document.getElementById('sim-'+r);
+  var st = document.getElementById('sst-'+r);
+  if(sr) sr.classList.toggle('son', on);
+  if(st) st.textContent = on?'ON':'OFF';
+  updateSimRelay();
+}
+function updateSimRelay() {
+  var any = ROOMS.some(function(r){ return roomState[r]; });
+  var cnt = ROOMS.filter(function(r){ return roomState[r]; }).length;
+  var led = document.getElementById('simLed');
+  var rt  = document.getElementById('simRelayTxt');
+  var d4  = document.getElementById('simD4Txt');
+  var sb  = document.getElementById('simBadge');
+  if(led) { led.className = 'sim-led' + (any?' on':''); }
+  if(rt)  rt.textContent  = any?'켜짐':'꺼짐';
+  if(d4)  d4.textContent  = any?'HIGH':'LOW';
+  if(sb)  { sb.textContent = cnt===3?'전체 켜짐':cnt===0?'전체 꺼짐':cnt+'개 켜짐'; }
 }
 function updateSummary() {
   var cnt = ROOMS.filter(function(r){ return roomState[r]; }).length;
@@ -892,6 +974,7 @@ function renderSched() {
   }).join('');
 }
 var schedCheckIv=null;
+var _schedVibInt=null, _schedAutoHide=null;
 function startSchedCheck(){
   if(schedCheckIv)return;
   schedCheckIv=setInterval(function(){
@@ -900,10 +983,31 @@ function startSchedCheck(){
       if(s.time===cur){
         var ns=s.action==='on';
         ROOMS.forEach(function(r){db.ref('/rooms/'+r+'/state').set(ns);});
-        toast('📅 예약 실행! '+s.time+' '+(ns?'켜짐 💡':'꺼짐 🌙'));
+        db.ref('/logs').push({user:'예약',emoji:'📅',color:'#4E7FD4',bg:'rgba(78,127,212,.15)',room:'집안 전체',act:ns?'켬':'끔',time:nowStr(),timestamp:Date.now()});
+        schedShow(s.time, ns);
       }
     });
   },60000);
+}
+function schedShow(time, isOn){
+  var box = document.getElementById('schedBox');
+  if(!box) return;
+  document.getElementById('schedIcon').textContent = isOn?'💡':'🌙';
+  document.getElementById('schedBannerTitle').textContent = '예약 실행! '+time;
+  document.getElementById('schedBannerMsg').textContent = isOn?'전체 전등을 켰어요':'전체 전등을 껐어요';
+  box.style.display='flex';
+  box.classList.remove('show');
+  requestAnimationFrame(function(){requestAnimationFrame(function(){box.classList.add('show');});});
+  clearTimeout(_schedAutoHide);
+  _schedAutoHide=setTimeout(schedHide, 30000);
+  // 진동 - 쉬지않고
+  try{if(navigator.vibrate){var p=[];for(var i=0;i<60;i++)p.push(500,100);navigator.vibrate(p);}}catch(e){}
+}
+function schedHide(){
+  var box=document.getElementById('schedBox');
+  if(box){box.classList.remove('show');setTimeout(function(){box.style.display='none';},400);}
+  clearTimeout(_schedAutoHide);
+  try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
 }
 
 // ── 타이머 배너 ──

@@ -299,9 +299,10 @@ button,input{font-family:inherit;}
 .sim-relay-txt span{color:var(--tx);font-weight:600;}
 
 /* ── 예약 알림 배너 ── */
-#schedBox{display:none;position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-200px);z-index:99998;background:#0F1A35;border:2px solid var(--bl);border-radius:16px;padding:14px 16px;align-items:center;gap:12px;width:330px;max-width:93vw;box-shadow:0 8px 32px rgba(0,0,0,.7);transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
+#schedBox{display:none;position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-200px);z-index:99998;background:#0F1A35;border:2px solid #4E7FD4;border-radius:16px;padding:14px 16px;align-items:center;gap:12px;width:330px;max-width:93vw;box-shadow:0 8px 32px rgba(0,0,0,.7);transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
 #schedBox.show{transform:translateX(-50%) translateY(0);}
-#schedClose{background:var(--bl);border:none;color:#fff;font-size:11px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;}
+#schedBar{position:absolute;bottom:0;left:0;height:4px;background:#4E7FD4;border-radius:0 0 16px 16px;width:100%;}
+#schedClose{background:#4E7FD4;border:none;color:#fff;font-size:11px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -375,19 +376,6 @@ button,input{font-family:inherit;}
         </div>
         <button class="abtn" id="ab">전체 켜기</button>
       </div>
-      <div class="stit">방별 제어</div>
-      <div class="rcard" id="rc-living" onclick="togRoom('living')">
-        <div class="rl"><div class="ricn">🛋️</div><div><div class="rname">거실</div><div class="rst" id="rs-living">● OFF</div></div></div>
-        <div class="tgl" id="tg-living"><div class="tknob"></div></div>
-      </div>
-      <div class="rcard" id="rc-bedroom" onclick="togRoom('bedroom')">
-        <div class="rl"><div class="ricn">🛏️</div><div><div class="rname">안방</div><div class="rst" id="rs-bedroom">● OFF</div></div></div>
-        <div class="tgl" id="tg-bedroom"><div class="tknob"></div></div>
-      </div>
-      <div class="rcard" id="rc-bathroom" onclick="togRoom('bathroom')">
-        <div class="rl"><div class="ricn">🚿</div><div><div class="rname">화장실</div><div class="rst" id="rs-bathroom">● OFF</div></div></div>
-        <div class="tgl" id="tg-bathroom"><div class="tknob"></div></div>
-      </div>
 
       <div class="stit">가상 시뮬레이션</div>
       <div class="sim-box">
@@ -417,6 +405,20 @@ button,input{font-family:inherit;}
           <div class="sim-relay-txt">릴레이: <span id="simRelayTxt">꺼짐</span> | D4: <span id="simD4Txt">LOW</span></div>
         </div>
       </div>
+      <div class="stit">방별 제어</div>
+      <div class="rcard" id="rc-living" onclick="togRoom('living')">
+        <div class="rl"><div class="ricn">🛋️</div><div><div class="rname">거실</div><div class="rst" id="rs-living">● OFF</div></div></div>
+        <div class="tgl" id="tg-living"><div class="tknob"></div></div>
+      </div>
+      <div class="rcard" id="rc-bedroom" onclick="togRoom('bedroom')">
+        <div class="rl"><div class="ricn">🛏️</div><div><div class="rname">안방</div><div class="rst" id="rs-bedroom">● OFF</div></div></div>
+        <div class="tgl" id="tg-bedroom"><div class="tknob"></div></div>
+      </div>
+      <div class="rcard" id="rc-bathroom" onclick="togRoom('bathroom')">
+        <div class="rl"><div class="ricn">🚿</div><div><div class="rname">화장실</div><div class="rst" id="rs-bathroom">● OFF</div></div></div>
+        <div class="tgl" id="tg-bathroom"><div class="tknob"></div></div>
+      </div>
+
     </div>
     <div class="tabbar">
       <div class="tab on" id="tab-home" onclick="showPg('pg-home')"><div class="tab-icon">🏠</div><div class="tab-lbl">홈</div></div>
@@ -595,6 +597,7 @@ button,input{font-family:inherit;}
     <div style="font-size:11px;color:#8A9BB8;line-height:1.5;" id="schedBannerMsg">예약된 시간이 됐어요</div>
   </div>
   <button id="schedClose" onclick="schedHide()">끄기</button>
+  <div id="schedBar"></div>
 </div>
 
 <!-- 타이머 배너 -->
@@ -991,23 +994,40 @@ function startSchedCheck(){
 }
 function schedShow(time, isOn){
   var box = document.getElementById('schedBox');
+  var bar = document.getElementById('schedBar');
   if(!box) return;
   document.getElementById('schedIcon').textContent = isOn?'💡':'🌙';
   document.getElementById('schedBannerTitle').textContent = '예약 실행! '+time;
   document.getElementById('schedBannerMsg').textContent = isOn?'전체 전등을 켰어요':'전체 전등을 껐어요';
+  // 진행바 리셋 (30초 카운트다운)
+  if(bar){
+    bar.style.transition='none';
+    bar.style.width='100%';
+    setTimeout(function(){
+      bar.style.transition='width 30s linear';
+      bar.style.width='0%';
+    },50);
+  }
   box.style.display='flex';
   box.classList.remove('show');
   requestAnimationFrame(function(){requestAnimationFrame(function(){box.classList.add('show');});});
+  // 30초 후 자동 숨김
   clearTimeout(_schedAutoHide);
   _schedAutoHide=setTimeout(schedHide, 30000);
-  // 진동 - 쉬지않고
-  try{if(navigator.vibrate){var p=[];for(var i=0;i<60;i++)p.push(500,100);navigator.vibrate(p);}}catch(e){}
+  // 진동 - 쉬지않고 30초 (500ms 진동, 100ms 쉬고 반복)
+  try{
+    if(navigator.vibrate){
+      var p=[];
+      for(var i=0;i<60;i++) p.push(500,100);
+      navigator.vibrate(p);
+    }
+  }catch(e){}
 }
 function schedHide(){
   var box=document.getElementById('schedBox');
-  if(box){box.classList.remove('show');setTimeout(function(){box.style.display='none';},400);}
+  if(box){ box.classList.remove('show'); setTimeout(function(){box.style.display='none';},400); }
   clearTimeout(_schedAutoHide);
-  try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
+  try{if(navigator.vibrate) navigator.vibrate(0);}catch(e){}
 }
 
 // ── 타이머 배너 ──

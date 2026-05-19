@@ -431,6 +431,7 @@ button,input{font-family:inherit;}
         <div class="hbtn" id="pwBadge">-- W</div>
         <div class="hbtn-icon" onclick="showPg('pg-notif')">🔔</div>
         <div class="hbtn-red" onclick="testEmg()">🚨</div>
+        <div class="hbtn-icon" onclick="testDoor()" style="background:rgba(76,175,130,.1);border:1px solid rgba(76,175,130,.5);">🚪</div>
       </div>
     </div>
     <div class="gbar"></div>
@@ -1479,9 +1480,12 @@ function doorShow(time) {
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.classList.add('show'); }); });
   clearTimeout(_doorAutoHide);
   _doorAutoHide = setTimeout(doorHide, 10000);
-  try { if(navigator.vibrate) navigator.vibrate([300,100,300,100,300]); } catch(e) {}
+  try { if(navigator.vibrate) navigator.vibrate([300,100,300,100,300,100,300,100,300]); } catch(e) {}
 }
 
+function testDoor(){
+  doorShow(nowStr());
+}
 function doorHide() {
   var box = document.getElementById('doorBox');
   if (box) { box.classList.remove('show'); setTimeout(function(){ box.style.display='none'; }, 400); }

@@ -701,6 +701,26 @@ button,input{font-family:inherit;}
         🔴 자동 제어 꺼짐 — 클릭해서 켜기
       </button>
 
+      <div class="stit" style="margin-top:16px;">📶 와이파이 기반 자동 제어</div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;">
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:12px;">집 와이파이에 연결되면 귀가 모드, 끊기면 외출 모드가 자동 실행돼요</div>
+        <div id="wifiStatusBox" style="background:var(--surf);border-radius:10px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+          <div id="wifiDot" style="width:10px;height:10px;border-radius:50%;background:var(--tx3);flex-shrink:0;"></div>
+          <div style="font-size:12px;" id="wifiStatusTxt">와이파이 상태 확인 중...</div>
+        </div>
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:6px;">집 와이파이 이름 (SSID)</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input id="homeSSIDInp" class="loc-range-inp" placeholder="예: KT_GiGA_1234" style="flex:1;font-size:13px;padding:10px;">
+          <button onclick="saveHomeSSID()" style="padding:10px 14px;background:var(--gold);border:none;border-radius:8px;color:#0A0E1A;font-size:12px;font-weight:800;cursor:pointer;">저장</button>
+        </div>
+        <button class="loc-toggle-btn" id="wifiAutoBtn" onclick="toggleWifiAuto()" style="margin-bottom:8px;">
+          🔴 와이파이 자동 제어 꺼짐
+        </button>
+        <button onclick="testWifiCheck()" style="width:100%;padding:10px;background:var(--surf);border:1.5px dashed var(--bl);border-radius:10px;color:var(--bl);font-size:12px;font-weight:700;cursor:pointer;">
+          📶 지금 와이파이 상태 확인
+        </button>
+      </div>
+
       <!-- 활동 로그 -->
       <div class="stit">📋 위치 감지 로그</div>
       <div class="loc-log" id="locLog">로그 없음</div>
@@ -1034,7 +1054,7 @@ function initFB() {
     if (b) b.textContent = Math.round(w)+' W';
     if (document.getElementById('pg-power').classList.contains('show')) updatePwHero(w);
   });
-  setTimeout(function(){ restoreTimer(); startSchedCheck(); startModeCheck(); initLocAuto(); initDoorSensor(); loadHouses(); initWifiListener(); }, 1500);
+  setTimeout(function(){ restoreTimer(); startSchedCheck(); startModeCheck(); initLocAuto(); initDoorSensor(); loadHouses(); initWifiListener(); loadWifiSettings(); }, 1500);
 }
 
 // ── 방 제어 ──
@@ -1439,6 +1459,143 @@ async function runAI(){
 
 
 
+
+
+// ══════════════════════════════════════
+// 와이파이 기반 자동 제어 (Network API)
+// ══════════════════════════════════════
+var _wifiAutoOn = false;
+var _homeSSID = '';
+var _wifiCheckIv = null;
+var _wifiLastSent = '';
+
+function loadWifiSettings() {
+  try {
+    var ssid = localStorage.getItem('homeSSID') || '';
+    var autoOn = localStorage.getItem('wifiAutoOn') === 'true';
+    if (ssid) {
+      _homeSSID = ssid;
+      var inp = document.getElementById('homeSSIDInp');
+      if (inp) inp.value = ssid;
+    }
+    if (autoOn) {
+      _wifiAutoOn = true;
+      updateWifiAutoBtn();
+      startWifiCheck();
+    }
+  } catch(e) {}
+}
+
+function saveHomeSSID() {
+  var inp = document.getElementById('homeSSIDInp');
+  if (!inp || !inp.value.trim()) { toast('와이파이 이름을 입력해주세요'); return; }
+  _homeSSID = inp.value.trim();
+  try { localStorage.setItem('homeSSID', _homeSSID); } catch(e) {}
+  toast('✅ 집 와이파이 이름 저장됨: ' + _homeSSID);
+  testWifiCheck();
+}
+
+function getNetworkInfo() {
+  // Network Information API - 연결 타입 확인
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (!conn) return {type: 'unknown', effectiveType: 'unknown'};
+  return {
+    type: conn.type || 'unknown',           // wifi, cellular, none 등
+    effectiveType: conn.effectiveType || 'unknown',  // 4g, 3g, 2g
+    downlink: conn.downlink || 0
+  };
+}
+
+function testWifiCheck() {
+  var net = getNetworkInfo();
+  var dot = document.getElementById('wifiDot');
+  var txt = document.getElementById('wifiStatusTxt');
+
+  if (net.type === 'wifi') {
+    if (dot) dot.style.background = '#4CAF82';
+    if (txt) txt.textContent = '📶 와이파이 연결됨 (type: wifi)';
+    if (_wifiAutoOn && _wifiLastSent !== 'home') {
+      _wifiLastSent = 'home';
+      sendWifiStatus('home');
+    }
+  } else if (net.type === 'cellular' || net.type === 'none' || net.type === 'unknown') {
+    if (dot) dot.style.background = '#C9504C';
+    if (txt) txt.textContent = '📵 와이파이 끊김 (type: ' + net.type + ')';
+    if (_wifiAutoOn && _wifiLastSent !== 'away') {
+      _wifiLastSent = 'away';
+      sendWifiStatus('away');
+    }
+  } else {
+    if (dot) dot.style.background = '#C9A84C';
+    if (txt) txt.textContent = '❓ 연결 타입: ' + net.type;
+  }
+}
+
+function sendWifiStatus(status) {
+  db.ref('/wifi').set({
+    status: status,
+    who: curUser ? curUser.name : '스마트폰',
+    time: nowStr(),
+    timestamp: Date.now()
+  });
+  db.ref('/logs').push({
+    user: curUser ? curUser.name : '와이파이',
+    emoji: '📶',
+    color: status==='home' ? '#4CAF82' : '#C9504C',
+    bg: status==='home' ? 'rgba(76,175,130,.15)' : 'rgba(201,80,76,.15)',
+    room: '집 전체',
+    act: status==='home' ? '켬' : '끔',
+    time: nowStr(),
+    timestamp: Date.now()
+  });
+  toast(status==='home' ? '🏠 와이파이 귀가 모드 전송!' : '🚶 와이파이 외출 모드 전송!');
+}
+
+function toggleWifiAuto() {
+  if (!_homeSSID) { toast('먼저 집 와이파이 이름을 저장해주세요'); return; }
+  _wifiAutoOn = !_wifiAutoOn;
+  try { localStorage.setItem('wifiAutoOn', _wifiAutoOn); } catch(e) {}
+  updateWifiAutoBtn();
+  if (_wifiAutoOn) {
+    startWifiCheck();
+    toast('✅ 와이파이 자동 제어 켜짐!');
+  } else {
+    stopWifiCheck();
+    toast('⏹ 와이파이 자동 제어 꺼짐');
+  }
+}
+
+function updateWifiAutoBtn() {
+  var btn = document.getElementById('wifiAutoBtn');
+  if (!btn) return;
+  if (_wifiAutoOn) {
+    btn.textContent = '🟢 와이파이 자동 제어 켜짐 — 끄려면 클릭';
+    btn.className = 'loc-toggle-btn active';
+  } else {
+    btn.textContent = '🔴 와이파이 자동 제어 꺼짐 — 켜려면 클릭';
+    btn.className = 'loc-toggle-btn';
+  }
+}
+
+function startWifiCheck() {
+  if (_wifiCheckIv) return;
+  // Network 변화 이벤트 감지
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn) {
+    conn.addEventListener('change', testWifiCheck);
+  }
+  // 30초마다 주기적으로도 체크
+  _wifiCheckIv = setInterval(testWifiCheck, 30000);
+  testWifiCheck(); // 즉시 한번 체크
+}
+
+function stopWifiCheck() {
+  if (_wifiCheckIv) { clearInterval(_wifiCheckIv); _wifiCheckIv = null; }
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn) {
+    try { conn.removeEventListener('change', testWifiCheck); } catch(e) {}
+  }
+}
 
 // ══════════════════════════════════════
 // 와이파이 기반 자동 제어 (MIT App Inventor 연동)

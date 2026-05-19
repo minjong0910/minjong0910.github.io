@@ -565,6 +565,20 @@ button,input{font-family:inherit;}
           <div class="sim-relay-txt">릴레이: <span id="simRelayTxt">꺼짐</span> | D4: <span id="simD4Txt">LOW</span></div>
         </div>
       </div>
+      <div class="stit">외출 / 귀가</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px;">
+        <div onclick="runMode('away')" style="background:rgba(201,80,76,.1);border:1.5px solid var(--off);border-radius:14px;padding:14px 12px;text-align:center;cursor:pointer;transition:all .2s;" ontouchstart="this.style.opacity='.7'" ontouchend="this.style.opacity='1'">
+          <div style="font-size:28px;margin-bottom:6px;">🚶</div>
+          <div style="font-size:13px;font-weight:800;color:var(--off);">외출 모드</div>
+          <div style="font-size:10px;color:var(--tx2);margin-top:3px;">전체 꺼짐</div>
+        </div>
+        <div onclick="runMode('home')" style="background:rgba(76,175,130,.1);border:1.5px solid var(--on);border-radius:14px;padding:14px 12px;text-align:center;cursor:pointer;transition:all .2s;" ontouchstart="this.style.opacity='.7'" ontouchend="this.style.opacity='1'">
+          <div style="font-size:28px;margin-bottom:6px;">🏠</div>
+          <div style="font-size:13px;font-weight:800;color:var(--on);">귀가 모드</div>
+          <div style="font-size:10px;color:var(--tx2);margin-top:3px;">설정한 방 켜짐</div>
+        </div>
+      </div>
+
       <div class="stit">방별 제어</div>
       <div class="rcard" id="rc-living" onclick="togRoom('living')">
         <div class="rl"><div class="ricn">🛋️</div><div><div class="rname">거실</div><div class="rst" id="rs-living">● OFF</div></div></div>
@@ -1200,7 +1214,9 @@ function initFB() {
     s.forEach(function(c){ schedArr.push(Object.assign({id:c.key},c.val())); });
     if (document.getElementById('pg-timer').classList.contains('show')) renderSched();
   });
+  var _emgFirstLoad = true;
   db.ref('/emergency').on('value', function(s) {
+    if (_emgFirstLoad) { _emgFirstLoad = false; return; }  // 첫 로드 무시
     var e = s.val();
     if (e && e.active) emgShow(e.watt||0, e.reason||'전력 이상 감지!');
   });
@@ -1797,7 +1813,9 @@ function stopWifiCheck() {
 var _wifiLastStatus = null;
 
 function initWifiListener() {
+  var _wifiFirstLoad = true;  // 앱 켤 때 첫 값 무시
   db.ref('/wifi').on('value', function(s) {
+    if (_wifiFirstLoad) { _wifiFirstLoad = false; return; }  // 첫 로드 무시
     var d = s.val();
     if (!d || !d.status) return;
     var status = d.status;   // "home" or "away"
@@ -1834,7 +1852,15 @@ var _doorAutoHide = null;
 var _lastDoorState = null;
 
 function initDoorSensor() {
+  var _doorFirstLoad = true;  // 앱 켤 때 첫 값 무시
   db.ref('/door').on('value', function(s) {
+    if (_doorFirstLoad) {
+      // 첫 로드 시 현재 상태만 저장하고 알림 안 띄움
+      var d0 = s.val();
+      _lastDoorState = d0 ? d0.open : false;
+      _doorFirstLoad = false;
+      return;
+    }
     var d = s.val();
     if (!d) return;
     // 문이 열렸을 때만 알림 (이전 상태와 비교)
@@ -2401,6 +2427,11 @@ function updateModeBanner() {
 
 function startModeCheck() {
   if (_modeCheckIv) return;
+  // 앱 시작 직후 현재 분은 이미 지난 것으로 처리 (시작 시 오발동 방지)
+  var initMin = pad(new Date().getHours())+':'+pad(new Date().getMinutes());
+  _modeFired['away_'+initMin] = true;
+  _modeFired['home_'+initMin] = true;
+
   _modeCheckIv = setInterval(function() {
     var d = new Date(), cur = pad(d.getHours())+':'+pad(d.getMinutes());
     db.ref('/modeSchedule').once('value', function(s) {
@@ -2409,14 +2440,13 @@ function startModeCheck() {
       if (ms.awayTime && ms.awayTime === cur && !_modeFired['away_'+cur]) {
         _modeFired['away_'+cur] = true;
         runMode('away');
-        schedShow(cur, false); // 예약 배너 재활용
+        schedShow(cur, false);
       }
       if (ms.homeTime && ms.homeTime === cur && !_modeFired['home_'+cur]) {
         _modeFired['home_'+cur] = true;
         runMode('home');
         schedShow(cur, true);
       }
-      // fired 캐시 정리
       if (Object.keys(_modeFired).length > 20) _modeFired = {};
     });
   }, 5000);

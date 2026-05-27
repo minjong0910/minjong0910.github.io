@@ -580,6 +580,18 @@ button,input{font-family:inherit;}
           <div class="sim-relay-txt">릴레이: <span id="simRelayTxt">꺼짐</span> | D4: <span id="simD4Txt">LOW</span></div>
         </div>
       </div>
+      <div class="stit">자동 제어 모드</div>
+      <div id="autoModeCard" style="background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--radius);padding:15px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;transition:all .2s;" onclick="toggleAutoMode()">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:12px;background:var(--card2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:19px;" id="autoModeIcon">🤖</div>
+          <div>
+            <div style="font-size:14px;font-weight:800;" id="autoModeTitle">자동 모드 꺼짐</div>
+            <div style="font-size:11px;color:var(--tx2);margin-top:3px;" id="autoModeSub">사람 감지 시 자동 전등 제어</div>
+          </div>
+        </div>
+        <div class="tgl" id="autoModeTgl"><div class="tknob"></div></div>
+      </div>
+
       <div class="stit">방별 제어</div>
       <div class="rcard" id="rc-living" onclick="togRoom('living')">
         <div class="rl"><div class="ricn">🛋️</div><div><div class="rname">거실</div><div class="rst" id="rs-living">● OFF</div></div></div>
@@ -1250,6 +1262,12 @@ function initFB() {
     var e = s.val();
     if (e && e.active) emgShow(e.watt||0, e.reason||'전력 이상 감지!');
   });
+  // 자동모드 상태 동기화
+  db.ref('/autoMode/enabled').on('value', function(s) {
+    var v = s.val();
+    if (v !== null) { _autoMode = v; updateAutoModeUI(); }
+  });
+
   db.ref('/power/current_watt').on('value', function(s) {
     var w = s.val()||0;
     var b = document.getElementById('pwBadge');
@@ -2596,6 +2614,45 @@ function checkSkip() {
 function hideChecklist() {
   var box = document.getElementById('checklistBox');
   if (box) box.classList.remove('show');
+}
+
+
+// ── 자동모드 ──
+var _autoMode = false;
+function toggleAutoMode() {
+  _autoMode = !_autoMode;
+  db.ref('/autoMode/enabled').set(_autoMode);
+  updateAutoModeUI();
+  db.ref('/logs').push({
+    user: curUser?curUser.name:'시스템',
+    emoji:'🤖', color:'#4E7FD4', bg:'rgba(78,127,212,.15)',
+    room:'자동모드', act:_autoMode?'켬':'끔',
+    time:nowStr(), timestamp:Date.now()
+  });
+  toast(_autoMode ? '🤖 자동모드 켜짐! 사람 감지시 자동 제어' : '🤖 자동모드 꺼짐');
+}
+function updateAutoModeUI() {
+  var card  = document.getElementById('autoModeCard');
+  var icon  = document.getElementById('autoModeIcon');
+  var title = document.getElementById('autoModeTitle');
+  var sub   = document.getElementById('autoModeSub');
+  var tgl   = document.getElementById('autoModeTgl');
+  if (!card) return;
+  if (_autoMode) {
+    card.style.borderColor = 'var(--on)';
+    card.style.background  = 'linear-gradient(135deg,#1A2D25,var(--card))';
+    if (icon)  icon.textContent  = '🤖';
+    if (title) title.textContent = '자동 모드 켜짐';
+    if (sub)   sub.textContent   = '사람 감지시 전등 자동 ON/OFF';
+    if (tgl)   tgl.classList.add('ton');
+  } else {
+    card.style.borderColor = 'var(--bdr)';
+    card.style.background  = 'var(--card)';
+    if (icon)  icon.textContent  = '🤖';
+    if (title) title.textContent = '자동 모드 꺼짐';
+    if (sub)   sub.textContent   = '사람 감지시 자동 전등 제어';
+    if (tgl)   tgl.classList.remove('ton');
+  }
 }
 
 // ── 토스트 ──

@@ -1901,9 +1901,11 @@ var _tapoToken    = '';
 var _tapoDeviceId = '';
 var _tapoCheckIv  = null;
 
-var TAPO_EMAIL = 'minjong020910@gmail.com';
-var TAPO_PASS  = 'jra0102030';
-var TAPO_API   = 'https://wap.tplinkcloud.com';
+var TAPO_EMAIL     = 'minjong020910@gmail.com';
+var TAPO_PASS      = 'jra0102030';
+var TAPO_API       = 'https://wap.tplinkcloud.com';
+var _tapoAppServer = 'https://aps1-wap.tplinkcloud.com';
+var _tapoDeviceId  = '8022AB073D1FBD3582E060D2F0D26C6325643303';
 
 // ── Tapo 로그인 ──
 async function tapoLogin() {
@@ -1924,11 +1926,10 @@ async function tapoLogin() {
     var data = await res.json();
     if (data.error_code === 0) {
       _tapoToken = data.result.token;
-      Serial.println('[Tapo] 로그인 성공!');
-      await tapoGetDevices();
+      console.log('[Tapo] 로그인 성공!');
       return true;
     } else {
-      console.log('[Tapo] 로그인 실패:', data);
+      console.log('[Tapo] 로그인 실패:', data.error_code);
       return false;
     }
   } catch(e) {
@@ -1937,7 +1938,7 @@ async function tapoLogin() {
   }
 }
 
-// ── 기기 목록 조회 ──
+// ── 기기 목록 조회 (서버URL 업데이트용) ──
 async function tapoGetDevices() {
   try {
     var res = await fetch(TAPO_API + '?token=' + _tapoToken, {
@@ -1948,18 +1949,13 @@ async function tapoGetDevices() {
     var data = await res.json();
     if (data.error_code === 0) {
       var devices = data.result.deviceList;
-      // P110M 찾기
       for (var i = 0; i < devices.length; i++) {
         if (devices[i].deviceModel && devices[i].deviceModel.indexOf('P110') >= 0) {
-          _tapoDeviceId = devices[i].deviceId;
-          console.log('[Tapo] P110M 찾음:', devices[i].alias);
+          _tapoDeviceId  = devices[i].deviceId;
+          _tapoAppServer = devices[i].appServerUrl || _tapoAppServer;
+          console.log('[Tapo] P110M 찾음! 서버:', _tapoAppServer);
           break;
         }
-      }
-      // 못 찾으면 첫번째 기기
-      if (!_tapoDeviceId && devices.length > 0) {
-        _tapoDeviceId = devices[0].deviceId;
-        console.log('[Tapo] 기기 사용:', devices[0].alias);
       }
     }
   } catch(e) {
@@ -1971,7 +1967,7 @@ async function tapoGetDevices() {
 async function tapoGetEnergy() {
   if (!_tapoToken) { await tapoLogin(); return; }
   try {
-    var res = await fetch(TAPO_API + '?token=' + _tapoToken, {
+    var res = await fetch(_tapoAppServer + '?token=' + _tapoToken, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -2036,7 +2032,7 @@ function calcElecCost(kwh) {
 async function tapoSetPower(on) {
   if (!_tapoToken) { await tapoLogin(); return; }
   try {
-    var res = await fetch(TAPO_API + '?token=' + _tapoToken, {
+    var res = await fetch(_tapoAppServer + '?token=' + _tapoToken, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -2065,6 +2061,7 @@ async function initTapo() {
   console.log('[Tapo] 초기화 시작...');
   var ok = await tapoLogin();
   if (ok) {
+    await tapoGetDevices();
     toast('Tapo P110M 연결 완료!');
     // 30초마다 전력 데이터 갱신
     _tapoCheckIv = setInterval(tapoGetEnergy, 30000);

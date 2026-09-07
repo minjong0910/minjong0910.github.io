@@ -2311,21 +2311,10 @@ function admRefreshLockUI(){
 function openAdminGate(from){
   pwGateFrom = from || 'sset';
   /* v49 : 웹(https)으로 열었으면 서버 계정 로그인, 파일로 연 개발 환경이면 숫자 비밀번호 */
+  /* v50 : 웹에서도 숫자 7자리를 친다. 속으로는 그 7자리를 서버 계정 비밀번호로 써서 로그인한다. */
   if(typeof SUGDB !== 'undefined' && SUGDB.online()){
     if(SUGDB.user()){ go('sph'); return; }          // 이미 로그인돼 있으면 바로
-    go('spwgate');
-    fbGateShow(true);
-    SUGDB.ensure().then(function(){
-      if(SUGDB.user()){ go('sph'); return; }
-      fbGateState('on', '서버 연결됨');
-      var em = document.getElementById('fbEmail'); if(em) em.focus();
-    })['catch'](function(){
-      /* 서버 SDK를 못 불러오면 숫자 비밀번호로 대체 — 발표장에서 막히지 않게 */
-      fbGateShow(false);
-      var err = document.getElementById('pwErr');
-      if(err) err.textContent = '서버에 연결하지 못해 로컬 비밀번호로 전환했습니다.';
-    });
-    return;
+    SUGDB.ensure().then(function(){ if(SUGDB.user() && document.getElementById('spwgate').classList.contains('on')) go('sph'); })['catch'](function(){});
   }
   fbGateShow(false);
   go('spwgate');
@@ -2344,11 +2333,59 @@ function pwInputSanitize(el){
   if(err && Date.now() >= admGetLockUntil()) err.textContent = '';
   if(el.value.length === 7) checkAdminPw();
 }
+var admChecking = false;
+function admFail(inp, err){
+  var fails = admGetFail()+1;
+  if(fails >= ADMIN_MAX_FAIL){
+    admSetFail(0);
+    admSetLockUntil(Date.now()+ADMIN_LOCK_MS);
+    admRefreshLockUI();
+  }else{
+    admSetFail(fails);
+    var left = ADMIN_MAX_FAIL - fails;
+    if(err) err.textContent = (LANG==='ko')
+      ? ('비밀번호가 올바르지 않습니다. (남은 시도 '+left+'회)')
+      : ('Incorrect password. ('+left+' attempts left)');
+  }
+  inp.value = '';
+  inp.focus();
+}
 function checkAdminPw(){
   var inp = document.getElementById('pwInput');
   var err = document.getElementById('pwErr');
-  if(!inp) return;
+  if(!inp || admChecking) return;
   if(Date.now() < admGetLockUntil()){ admRefreshLockUI(); inp.value=''; return; }
+  if(inp.value.length < 7) return;
+
+  /* v50 : 웹으로 열었으면 7자리를 서버 계정 비밀번호로 보내 로그인한다 */
+  if(typeof SUGDB !== 'undefined' && SUGDB.online()){
+    var pin = inp.value;
+    admChecking = true;
+    if(err){ err.style.color = '#7C8AA0'; err.textContent = (LANG==='ko') ? '확인하는 중…' : 'Checking…'; }
+    SUGDB.loginPin(pin).then(function(){
+      admChecking = false;
+      inp.value = '';
+      if(err){ err.textContent = ''; err.style.color = ''; }
+      admSetFail(0); admSetLockUntil(0);
+      go('sph');
+    })['catch'](function(ex){
+      admChecking = false;
+      if(err) err.style.color = '';
+      var code = (ex && ex.code) || String(ex || '');
+      if(/network|load:|timeout:|failed|offline/.test(code)){
+        if(err) err.textContent = (LANG==='ko') ? '서버에 연결하지 못했어요. 인터넷을 확인하고 다시 시도해 주세요.' : 'Could not reach the server. Check your connection.';
+        inp.value = ''; inp.focus();
+      }else if(/too-many/.test(code)){
+        if(err) err.textContent = (LANG==='ko') ? '시도가 너무 많습니다. 잠시 뒤 다시 해주세요.' : 'Too many attempts. Try again later.';
+        inp.value = '';
+      }else{
+        admFail(inp, err);
+      }
+    });
+    return;
+  }
+
+  /* 파일로 직접 연 개발 모드 : 로컬 비밀번호 */
   if(inp.value === ADMIN_PW){
     inp.value = '';
     if(err) err.textContent = '';
@@ -17158,6 +17195,11 @@ var SUGDB = (function(){
   }
 
   /* ── 로그인 ── */
+  /* 관리자 계정 이메일 — 비밀이 아니라 '계정 이름'이다. 비밀번호는 사용자가 치는 7자리.
+     Firebase 콘솔 Authentication → Users 에 이 이메일로 사용자를 만들고, 비밀번호를 7자리 숫자로 두면 된다. */
+  var ADMIN_EMAIL = 'admin@b3nav.app';
+  function loginPin(pin){ return login(ADMIN_EMAIL, String(pin)); }
+
   function login(email, pw){
     return ensure().then(function(){ return auth.signInWithEmailAndPassword(email, pw); })
       .then(function(c){ curUser = c.user; uiAuth(); return c.user; });
@@ -17188,7 +17230,8 @@ var SUGDB = (function(){
   return { ensure:ensure, online:online, pushOne:pushOne, retryUnsynced:retryUnsynced, prepSubmit:prepSubmit,
            watchAdmin:watchAdmin, unwatchAdmin:unwatchAdmin, setStatus:setStatus,
            publishPhoto:publishPhoto, loadPhotos:loadPhotos,
-           login:login, logout:logout, user:user, fit:fit, CFG:CFG };
+           login:login, loginPin:loginPin, logout:logout, user:user, fit:fit, CFG:CFG,
+           get ADMIN_EMAIL(){ return ADMIN_EMAIL; } };
 })();
 
 /* ── 로그인 화면 동작 ── */
@@ -17199,7 +17242,9 @@ function fbGateShow(useFb){
   if(fb) fb.classList.toggle('on', !!useFb);
   var err = document.getElementById('fbErr'); if(err) err.textContent = '';
   var tip = document.querySelector('#spwgate .pwGateTip');
-  if(tip && !useFb) tip.textContent = (LANG==='ko') ? '관리자 비밀번호 7자리를 입력해 주세요. (개발 모드)' : 'Enter the 7-digit admin password. (dev mode)';
+  if(tip && !useFb) tip.textContent = (typeof SUGDB!=='undefined' && SUGDB.online())
+    ? ((LANG==='ko') ? '관리자 비밀번호 7자리를 입력해 주세요.' : 'Enter the 7-digit admin password.')
+    : ((LANG==='ko') ? '관리자 비밀번호 7자리를 입력해 주세요. (개발 모드)' : 'Enter the 7-digit admin password. (dev mode)');
   if(useFb) fbGateState('load', '서버 연결 중…');
 }
 function fbGateState(state, txt){

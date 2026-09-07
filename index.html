@@ -707,6 +707,48 @@
     border-radius:999px;padding:5px 10px;font-size:11px;font-family:inherit;cursor:pointer;font-weight:700;}
   #sadmin .sugAi .cands button:hover{border-color:#00E5FF;color:#E7F6FF;}
   #sadmin .sugAi .qr{color:#39FF88;}
+  #sadmin .sugAi .where{margin:6px 0 4px;padding:8px 10px;border-radius:7px;background:#131A24;
+    border-left:3px solid #00E5FF;font-size:12px;line-height:1.55;color:#E7F6FF;}
+  #sadmin .sugAi .where b{color:#00E5FF;}
+  #sadmin .sugAi .where .sub{display:block;color:#7C8AA0;font-size:11px;margin-top:2px;}
+  #sadmin .sugAi .where.low{border-left-color:#FFC93C;}
+  #sadmin .sugAi .where.low b{color:#FFC93C;}
+
+
+  /* ══════════════ AI 자동 학습·분류 (v45 신규) ══════════════ */
+  #phsort .aiBar{display:flex;gap:8px;margin-bottom:10px;flex:0 0 auto;}
+  #phsort .aiBar button{flex:1;background:linear-gradient(90deg,#00E5FF,#7B5CFF);color:#05060A;
+    border:none;border-radius:6px;padding:12px 8px;font-size:13px;font-weight:800;
+    font-family:inherit;cursor:pointer;}
+  #phsort .aiBar button:disabled{background:#1A2230;color:#5D6B80;cursor:default;}
+  #phsort .aiBar button.ghost{background:transparent;color:#00E5FF;border:1px solid #2A3644;font-weight:700;}
+  #phsort .aiProg{font-size:11.5px;color:#7C8AA0;text-align:center;margin-bottom:8px;min-height:16px;}
+
+  #phsort .pit .aiRec{display:block;margin-top:4px;font-size:10.5px;color:#39FF88;font-weight:700;}
+  #phsort .pit .aiRec.warn{color:#FFC93C;}
+  #phsort .pit .aiRec.newp{color:#FF2E88;}
+
+  /* 새 장소 묶음 */
+  #phsort .newGroups{margin-bottom:10px;}
+  #phsort .ngCard{background:#0E141C;border:1px solid #2A3644;border-radius:10px;
+    padding:10px;margin-bottom:8px;}
+  #phsort .ngCard .ngHd{font-size:12.5px;font-weight:800;color:#FF2E88;margin-bottom:6px;}
+  #phsort .ngCard .ngThumbs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+  #phsort .ngCard .ngThumbs img{width:46px;height:46px;object-fit:cover;border-radius:6px;
+    border:1px solid #232D3A;}
+  #phsort .ngCard .ngRow{display:flex;gap:6px;}
+  #phsort .ngCard input{flex:1;background:#131A24;border:1px solid #2A3644;color:#E7F6FF;
+    border-radius:6px;padding:10px;font-size:12.5px;font-family:inherit;}
+  #phsort .ngCard button{background:rgba(57,255,136,.14);color:#39FF88;border:1px solid rgba(57,255,136,.5);
+    border-radius:6px;padding:10px 14px;font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;}
+  #phsort .ngCard .ngTip{font-size:10.5px;color:#5D6B80;margin-top:6px;line-height:1.5;}
+
+  /* 학습 현황 (사진 등록 화면) */
+  #sph .aiLearn{margin-top:10px;font-size:11.5px;color:#5D6B80;text-align:center;line-height:1.6;}
+  #sph .aiLearn b{color:#39FF88;}
+
+  /* 메모 힌트 표시 */
+  #sadmin .sugAi .hint{color:#00E5FF;}
 
   /* 출발지 배지 — 목적지 화면(s4)에 현재 출발 문을 표시 */
   .entryChip{display:inline-flex;align-items:center;gap:5px;background:rgba(57,255,136,.09);
@@ -821,6 +863,7 @@
     </div>
     <div class="card">
       <h4 data-ko="사진 제보하기" data-en="Report a photo">사진 제보하기</h4>
+      <p style="margin:-4px 0 10px;font-size:12px;color:#7C8AA0;line-height:1.6;" data-ko="받는 범위 : <b style=&quot;color:#94B8E0;&quot;>지하 1층(크리에이티브 존) ~ 5층, 건물 출입문</b><br>옥상 등 범위 밖 장소는 접수되지 않아요." data-en="Accepted: <b style=&quot;color:#94B8E0;&quot;>B1 (Creative Zone) to 5F, building gates</b><br>Places outside this range (e.g. rooftop) are not accepted.">받는 범위 : <b style="color:#94B8E0;">지하 1층(크리에이티브 존) ~ 5층, 건물 출입문</b><br>옥상 등 범위 밖 장소는 접수되지 않아요.</p>
       <label class="shot" id="sugShot" for="sugFile">
         <span class="ic">📷</span>
         <span data-ko="탭해서 지금 보이는 모습을 촬영하거나 사진을 선택하세요" data-en="Tap to take a photo of what you see, or choose one">탭해서 지금 보이는 모습을 촬영하거나 사진을 선택하세요</span>
@@ -1053,6 +1096,7 @@
     <div class="stat" id="phStat">아직 등록된 사진이 없습니다.
       <div class="bar2"><i id="phBar"></i></div>
     </div>
+    <div class="aiLearn" id="phAiLearn"></div>
     <div class="list" id="phList"></div>
     <div class="row">
       <button class="big" onclick="phExport()">사진 담아서 저장</button>
@@ -1071,6 +1115,12 @@
       <h3>넣을 위치 확인</h3>
     </div>
     <div class="sum" id="phSortSum"></div>
+    <div class="aiBar">
+      <button id="phAiBtn" onclick="phAiSort()">🤖 AI로 위치 찾기</button>
+      <button class="ghost" id="phAiClearBtn" onclick="phAiClear()">추천 지우기</button>
+    </div>
+    <div class="aiProg" id="phAiProg"></div>
+    <div class="newGroups" id="phNewGroups"></div>
     <div class="tools">
       <button id="phOnlyNone" onclick="phSortToggleFilter()">미지정만 보기</button>
       <button onclick="phSortSelectAll()">보이는 것 모두 선택</button>
@@ -1765,7 +1815,8 @@ function go(id){
     else animateBRunning=false;
   }
   if(id==='ssug' && typeof SUGAI!=='undefined') SUGAI.warmup();
-  if(id==='sph'){ phRender(); if(typeof sugBadgeSync==='function') sugBadgeSync(); }
+  if(id==='sph'){ phRender(); if(typeof sugBadgeSync==='function') sugBadgeSync();
+                  if(typeof phAiLearnRender==='function') phAiLearnRender(); }
   if(id==='sadmin' && typeof sugAdminRender==='function') sugAdminRender();
   if(id==='sphmgr' && typeof sphMgrRender==='function') sphMgrRender();
   if(id==='phsort' && typeof phSortRender==='function') phSortRender();
@@ -2000,7 +2051,7 @@ function sugSubmit(){
        품질 불합격·건물과 무관한 사진은 여기서 걸러 관리자에게 넘기지 않는다. */
     if(stat){ stat.style.color = '#7C8AA0'; stat.textContent = (LANG==='ko') ? 'AI가 사진을 확인하는 중…' : 'AI is checking the photo…'; }
     SUGAI.judge(url, function(ai){
-      if(ai.verdict === 'reject_quality' || ai.verdict === 'irrelevant'){
+      if(ai.verdict === 'reject_quality' || ai.verdict === 'irrelevant' || ai.verdict === 'out_of_scope'){
         SUGAI.showCard(ai);
         if(stat){ stat.style.color = '#FF6B6B'; stat.textContent = SUGAI.rejectMsg(ai); stat.classList.add('on'); }
         return;                                   // 접수하지 않음
@@ -2104,6 +2155,8 @@ function sugApprove(id){
   }
   phNormalize();
   phRender();
+  /* v45 : 관리자가 승인한 사진도 AI 정답표에 더한다 */
+  if(typeof SUGAI !== 'undefined') SUGAI.learn(code, s.u, '건의함_'+id);
   s.status = 'approved'; s.code = code + (sub ? ('-'+sub) : ''); s.handledTs = Date.now();
   sugSaveQueue();
   sugAdminRender();
@@ -14677,6 +14730,153 @@ function phFloorOf(code){
   return (d>=1 && d<=5) ? d : null;
 }
 
+
+/* ══════════════════════════════════════════════════════════════════
+   사진 일괄 등록 AI 도우미 (v45)
+
+   파일 이름에 호실번호가 없어도, 사진을 보고 위치를 찾아준다.
+   · 이미 등록된 장소와 충분히 닮으면        → 위치 자동 배정
+   · 조금 닮았으면                          → 추천만 표시 (사람이 확인)
+   · 어디와도 안 닮았으면                    → 처음 보는 장소로 판단하고
+                                             같은 장소끼리 묶어서 제안
+   ══════════════════════════════════════════════════════════════════ */
+var PH_NEW_GROUPS = [];        // [{idxs:[PH_STAGE 인덱스], code:''}]
+
+function phAiSay(msg){
+  var el = document.getElementById('phAiProg');
+  if(el) el.textContent = msg || '';
+}
+
+function phAiSort(){
+  if(typeof SUGAI === 'undefined'){ phAiSay('AI를 쓸 수 없습니다.'); return; }
+  var targets = [];
+  PH_STAGE.forEach(function(x, i){ if(!x.code) targets.push(i); });
+  if(!targets.length){ phAiSay('위치가 비어 있는 사진이 없습니다.'); return; }
+
+  var btn = document.getElementById('phAiBtn');
+  if(btn){ btn.disabled = true; }
+  phAiSay('AI를 준비하는 중…');
+
+  SUGAI.ensure().then(function(){
+    var vecs = {}, k = 0, autoN = 0, recN = 0, newIdx = [];
+
+    (function step(){
+      if(k >= targets.length){ finish(); return; }
+      var i = targets[k++];
+      phAiSay('사진을 보는 중…  ' + k + ' / ' + targets.length);
+      SUGAI.classify(PH_STAGE[i].u).then(function(r){
+        vecs[i] = r.vec;
+        var it = PH_STAGE[i];
+        if(r.sim >= SUGAI.TH.MATCH && r.margin >= SUGAI.TH.MARGIN){
+          it.code = r.code; it.auto = true;
+          it.ai = {kind:'auto', code:r.code, sim:r.sim};
+          autoN++;
+        }else if(r.sim >= SUGAI.TH.RELEVANT){
+          it.ai = {kind:'weak', code:r.code, sim:r.sim};
+          recN++;
+        }else{
+          it.ai = {kind:'new', code:null, sim:r.sim, group:null};
+          newIdx.push(i);
+        }
+        setTimeout(step, 0);
+      })['catch'](function(){ setTimeout(step, 0); });
+    })();
+
+    function finish(){
+      /* 처음 보는 장소들끼리 묶기 */
+      PH_NEW_GROUPS = [];
+      if(newIdx.length){
+        var groups = SUGAI.cluster(newIdx.map(function(i){ return vecs[i]; }));
+        groups.forEach(function(g, gi){
+          var idxs = g.map(function(p){ return newIdx[p]; });
+          idxs.forEach(function(i){ PH_STAGE[i].ai.group = gi; });
+          PH_NEW_GROUPS.push({idxs:idxs, code:''});
+        });
+      }
+      if(btn) btn.disabled = false;
+      phAiSay('자동 배정 ' + autoN + '장 · 추천 ' + recN + '장 · 처음 보는 장소 '
+              + newIdx.length + '장' + (PH_NEW_GROUPS.length ? ' (' + PH_NEW_GROUPS.length + '묶음)' : ''));
+      phSortRender();
+    }
+  })['catch'](function(){
+    if(btn) btn.disabled = false;
+    phAiSay('AI 모델을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.');
+  });
+}
+
+function phAiClear(){
+  PH_STAGE.forEach(function(x){
+    if(x.ai && x.ai.kind === 'auto' && x.auto) x.code = '';
+    delete x.ai;
+  });
+  PH_NEW_GROUPS = [];
+  phAiSay('');
+  phSortRender();
+}
+
+/* 처음 보는 장소 묶음을 화면에 그린다 */
+function phNewGroupsRender(){
+  var box = document.getElementById('phNewGroups');
+  if(!box) return;
+  if(!PH_NEW_GROUPS.length){ box.innerHTML = ''; return; }
+  var h = '';
+  PH_NEW_GROUPS.forEach(function(g, gi){
+    var alive = g.idxs.filter(function(i){ return PH_STAGE[i] && !PH_STAGE[i].code; });
+    if(!alive.length) return;
+    h += '<div class="ngCard">' +
+         '<div class="ngHd">🆕 처음 보는 장소 ' + (gi+1) + ' — 사진 ' + alive.length + '장</div>' +
+         '<div class="ngThumbs">';
+    alive.slice(0,8).forEach(function(i){ h += '<img src="'+PH_STAGE[i].u+'" alt="">'; });
+    h += '</div><div class="ngRow">' +
+         '<input type="text" id="ngCode_'+gi+'" placeholder="이 장소 이름 (예: 옥상, RF, 13210)">' +
+         '<button onclick="phNewGroupApply('+gi+')">이 묶음에 적용</button>' +
+         '</div>' +
+         '<div class="ngTip">AI가 이 사진들을 같은 장소로 봤지만, 앱에 등록된 어떤 곳과도 다릅니다.<br>' +
+         '이름을 한 번만 정해주면 다음부터 AI가 이 장소를 알아봅니다.<br>' +
+         '<b>한글 이름도 됩니다</b> — 「옥상」처럼 적어두면 제보 메모에 "옥상"이라고 쓴 것도 AI가 알아봅니다.</div>' +
+         '</div>';
+  });
+  box.innerHTML = h;
+}
+
+function phNewGroupApply(gi){
+  var g = PH_NEW_GROUPS[gi];
+  if(!g) return;
+  var el = document.getElementById('ngCode_'+gi);
+  var code = el ? el.value.trim().toUpperCase() : '';
+  if(!code){ alert('이 장소 이름을 입력해 주세요. (예: 13210, HALL3L)'); return; }
+  if(typeof SUGAI!=='undefined' && SUGAI.SCOPE && !SUGAI.SCOPE.allow(code)){
+    if(!confirm('「'+code+'」은 건의함 접수 범위(지하 1층~5층·출입문) 밖입니다.\n앱에 사진은 넣을 수 있지만, 이 장소 제보는 AI가 받지 않습니다.\n그래도 넣을까요?')) return;
+  }
+  g.idxs.forEach(function(i){
+    if(PH_STAGE[i] && !PH_STAGE[i].code){
+      PH_STAGE[i].code = code;
+      PH_STAGE[i].auto = false;
+      if(PH_STAGE[i].ai) PH_STAGE[i].ai = {kind:'auto', code:code, sim:1};
+    }
+  });
+  g.code = code;
+  phAiSay('처음 보는 장소 ' + (gi+1) + ' → ' + code + ' 로 지정했습니다. 「넣기」를 누르면 AI가 배웁니다.');
+  phSortRender();
+}
+
+/* 학습 현황 표시 (사진 등록 화면) */
+function phAiLearnRender(){
+  var el = document.getElementById('phAiLearn');
+  if(!el || typeof SUGAI === 'undefined') return;
+  var st = SUGAI.learnStats();
+  if(!st.n){ el.innerHTML = ''; return; }
+  var codes = Object.keys(st.codes).sort();
+  el.innerHTML = '🤖 AI가 추가로 배운 사진 <b>' + st.n + '장</b> · 위치 ' + codes.length + '곳 (' +
+                 codes.slice(0,8).join(', ') + (codes.length>8 ? ' 외' : '') + ')' +
+                 '<br><span style="cursor:pointer;text-decoration:underline" onclick="phAiForget()">배운 것 지우기</span>';
+}
+function phAiForget(){
+  if(!confirm('AI가 추가로 배운 내용을 모두 지울까요?\n(앱에 원래 들어있던 사진 학습은 그대로 남습니다)')) return;
+  SUGAI.forgetAll();
+  phAiLearnRender();
+}
+
 /* ══════════ 넣을 위치 확인 / 직접 배치 ══════════
    PH_STAGE : 아직 ROOM_PHOTOS에 반영되지 않은 대기 사진들
               [{n:파일명, u:데이터URL, code:'13524'|'', auto:자동분류여부, sel:선택여부}] */
@@ -14750,6 +14950,7 @@ function phSortRender(){
   var cb = document.getElementById('phCommitBtn');
   if(cb) cb.textContent = (st.tot-st.none) ? ((st.tot-st.none)+'장 넣기') : '넣기';
 
+  if(typeof phNewGroupsRender === 'function') phNewGroupsRender();
   box.innerHTML = '';
   if(!st.tot){
     var e = document.createElement('div'); e.className='mini';
@@ -14770,6 +14971,18 @@ function phSortRender(){
                  + (it.code && it.auto ? '<span class="auto">자동</span>' : '');
     bt.onclick = function(ev){ ev.stopPropagation(); phPickOpen(idx); };
     meta.appendChild(fn); meta.appendChild(bt);
+    /* v45 : AI가 본 결과를 카드에 함께 보여준다 */
+    if(it.ai){
+      var rec = document.createElement('span');
+      rec.className = 'aiRec' + (it.ai.kind==='new' ? ' newp' : (it.ai.kind==='weak' ? ' warn' : ''));
+      if(it.ai.kind === 'new'){
+        rec.textContent = '🤖 새로운 장소 ' + (it.ai.group!=null ? '묶음 '+(it.ai.group+1) : '');
+      }else{
+        rec.textContent = '🤖 ' + (it.ai.kind==='auto' ? '자동 배정 ' : '추천 ')
+                        + it.ai.code + ' ' + Math.round(it.ai.sim*100) + '%';
+      }
+      meta.appendChild(rec);
+    }
     var rm = document.createElement('button'); rm.className='drop1'; rm.textContent='✕';
     rm.title = '이 사진 빼기';
     rm.onclick = function(ev){ ev.stopPropagation(); PH_STAGE.splice(idx,1); phSortRender(); };
@@ -14900,6 +15113,8 @@ function phSortCommit(){
     var already = ROOM_PHOTOS[x.code].some(function(p){ return p.n === x.n; });
     if(already){ dup++; return; }
     ROOM_PHOTOS[x.code].push({n:x.n, u:x.u});
+    /* v45 : 넣는 순간 AI에게도 가르친다 — 이 사진이 이 위치라는 것 */
+    if(typeof SUGAI !== 'undefined') SUGAI.learn(x.code, x.u, x.n);
     ok++;
   });
   PH_STAGE = left;
@@ -14978,6 +15193,18 @@ function phExport(){
   var tag  = '<scr' + 'ipt id="EMBEDDED_PHOTOS" type="application/json">' + json + '</scr' + 'ipt>';
   var rx   = new RegExp('<scr' + 'ipt id="EMBEDDED_PHOTOS"[\\s\\S]*?<\\/scr' + 'ipt>', 'i');
   var html = PRISTINE_HTML.replace(rx, '');
+  /* v45 : AI가 배운 내용도 함께 담는다.
+     이렇게 해야 내보낸 파일을 다른 사람이 열어도 AI가 새 위치를 그대로 안다. */
+  try{
+    var lj = localStorage.getItem('aiLearned');
+    if(lj && lj !== '[]'){
+      var ltag = '<scr' + 'ipt id="EMBEDDED_AILEARN" type="application/json">' +
+                 lj.replace(/</g, '\\u003c') + '</scr' + 'ipt>';
+      var lrx = new RegExp('<scr' + 'ipt id="EMBEDDED_AILEARN"[\\s\\S]*?<\\/scr' + 'ipt>', 'i');
+      html = html.replace(lrx, '');
+      tag = tag + '\n' + ltag;
+    }
+  }catch(e){}
   html = html.replace(/<body[^>]*>/i, function(m){ return m + '\n' + tag; });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([html], {type:'text/html;charset=utf-8'}));
@@ -15924,7 +16151,7 @@ var SUGAI = (function(){
     DARK:      40,      // 평균 밝기 하한
     BRIGHT:   218,      // 평균 밝기 상한
     MINPX:    480,      // 원본 긴 변 최소 픽셀
-    RELEVANT: 0.60,     // 미만 → 건물과 무관한 사진, 자동 반려
+    RELEVANT: 0.65,     // 미만 → 범위 밖 사진, 자동 반려 (실측: 실제 사진 최저 0.679, 무관 최고 0.420)
     MATCH:    0.75,     // 이상 + MARGIN 이상 → 위치 자동 확정
     MARGIN:   0.04,     // 1등과 2등의 차이
     SAME:     0.98      // 이상 → 앱에 있는 사진과 사실상 동일
@@ -15933,6 +16160,25 @@ var SUGAI = (function(){
   /* 라이브러리는 두 곳에서 찾는다.
      ① 앱과 같은 서버의 lib/ 폴더 — 저장소에 올려두면 외부 인터넷이 막혀도 동작한다
      ② 공개 CDN — lib/ 폴더가 없을 때의 대비책                                */
+  /* ── 건의함 접수 범위 ─────────────────────────────────────────
+     지하 1층(크리에이티브 존) ~ 5층, 그리고 건물 출입문(정문·후문·동문·서문).
+     옥상처럼 범위 밖인 장소는 사진이 아무리 선명해도 접수하지 않는다.
+     · allow  : 이 위치 코드가 범위 안인가
+     · outRx  : 제보 메모에 이런 말이 있으면 범위 밖으로 본다              */
+  var SCOPE = {
+    label: { ko:'지하 1층(크리에이티브 존) ~ 5층 · 건물 출입문', en:'B1 (Creative Zone) to 5F · building gates' },
+    allow: function(code){
+      if(!code) return false;
+      code = String(code).toUpperCase();
+      if(code === 'B1' || code === 'BLD' || code === 'KTC') return true;
+      if(/^(EV|WC|ES)[1-5]$/.test(code)) return true;
+      if(/^HALL[1-5][LR]$/.test(code)) return true;
+      if(/^13[1-5]\d{2}(-[AB])?$/.test(code)) return true;
+      return false;
+    },
+    outRx: /옥상|옥탑|루프탑|rooftop|\bRF\b|[6-9]\s*층|1[0-9]\s*층/i
+  };
+
   var TFJS = ['lib/tf.min.js',       'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js'];
   var MNET = ['lib/mobilenet.min.js','https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js'];
 
@@ -16111,7 +16357,7 @@ var SUGAI = (function(){
   }
 
   /* ── 판정 ── */
-  function judge(dataUrl, cb){
+  function judge(dataUrl, cb, note){
     var img = new Image();
     img.onload = function(){
       var q = quality(img);
@@ -16122,7 +16368,9 @@ var SUGAI = (function(){
       if(q.bright > TH.BRIGHT){ res.verdict='reject_quality'; res.why='bright'; cb(res); return; }
       if(Math.max(q.w,q.h) < TH.MINPX){ res.verdict='reject_quality'; res.why='small'; cb(res); return; }
 
-      if(!loadVectors()){ res.verdict='skipped'; res.why='novec'; cb(res); return; }
+      if(note && SCOPE.outRx.test(String(note))){ res.verdict='out_of_scope'; res.why='note'; cb(res); return; }
+      loadLearned();
+      if(!REF){ res.verdict='skipped'; res.why='novec'; cb(res); return; }
 
       ensure().then(function(){
         var t = net.infer(prep(img), true);
@@ -16144,10 +16392,13 @@ var SUGAI = (function(){
           var gate = (typeof QRNAV!=='undefined' && QRNAV.gate) ? QRNAV.gate() : null;
           if(gate){ res.qrGate = gate; res.qrAgree = (res.code === 'BLD'); }
 
+          if(note && SCOPE.outRx.test(String(note))){ res.verdict = 'out_of_scope'; res.why = 'note'; cb(res); return; }
+          if(!SCOPE.allow(res.code)){ res.verdict = 'out_of_scope'; res.why = 'code'; cb(res); return; }
           if(res.sim < TH.RELEVANT)      res.verdict = 'irrelevant';
           else if(res.sim >= TH.SAME)    res.verdict = 'same';
           else if(res.sim >= TH.MATCH && res.margin >= TH.MARGIN) res.verdict = 'match';
           else                           res.verdict = 'uncertain';
+          applyHint(res, note);                    // 제보 메모를 힌트로 반영
           cb(res);
         });
       })['catch'](function(){
@@ -16173,10 +16424,19 @@ var SUGAI = (function(){
              : ai.why==='dark'   ? (ko()?'사진이 너무 어두워요. 불을 켜거나 밝은 곳에서 찍어주세요.':'Too dark. Try a brighter spot.')
              : ai.why==='bright' ? (ko()?'사진이 너무 밝아 하얗게 날아갔어요.':'Too bright / washed out.')
              :                     (ko()?'사진이 너무 작아요. 더 큰 사진으로 올려주세요.':'The photo is too small.');
+    } else if(ai.verdict === 'out_of_scope'){
+      t.icon='🚫'; t.cls='aiBad'; t.tag=ko()?'접수 안 됨':'Not accepted';
+      t.title=ko()?'건의함이 받는 범위 밖이에요':'Outside the accepted area';
+      t.body=(ai.why==='note')
+        ? (ko()?'메모에 적힌 곳은 건의함 대상이 아니에요.<br>받는 범위 : '+SCOPE.label.ko
+               :'The place in your note is not covered.<br>Accepted: '+SCOPE.label.en)
+        : (ko()?'받는 범위 : '+SCOPE.label.ko+'<br>이 범위 안의 장소 사진을 올려주세요.'
+               :'Accepted: '+SCOPE.label.en);
     } else if(ai.verdict === 'irrelevant'){
       t.icon='🚫'; t.cls='aiBad'; t.tag=ko()?'접수 안 됨':'Not accepted';
       t.title=ko()?'건물과 관련 없는 사진 같아요':'This does not look like the building';
-      t.body=ko()?'공대 3호관의 건물·복도·강의실 사진을 올려주세요.':'Please upload a photo of Engineering Building 3.';
+      t.body=ko()?'받는 범위 : '+SCOPE.label.ko+'<br>이 범위 안의 복도·강의실·출입문 사진을 올려주세요.'
+                 :'Accepted: '+SCOPE.label.en;
     } else if(ai.verdict === 'same'){
       t.icon='ℹ️'; t.cls='aiInfo'; t.tag=ko()?'접수됨':'Accepted';
       t.title=ko()?'지금 앱에 있는 사진과 거의 같아요':'Almost identical to the current photo';
@@ -16210,12 +16470,14 @@ var SUGAI = (function(){
     title.textContent = t.title;
     tag.textContent = t.tag;
     tag.className = 'tag ' + t.cls;
-    body.textContent = t.body;
+    body.innerHTML = t.body;
     why.textContent = t.why;
     card.classList.add('on');
   }
 
   function rejectMsg(ai){
+    if(ai.verdict === 'out_of_scope')
+      return ko()?'건의함이 받는 범위(지하 1층~5층·출입문) 밖이라 접수하지 않았어요.':'Outside the accepted area — not submitted.';
     if(ai.verdict === 'irrelevant')
       return ko()?'건물과 관련 없는 사진 같아요. 다시 확인해 주세요.':'This does not look like the building.';
     return ko()?'사진 상태 때문에 접수하지 못했어요. 위 안내를 확인해 주세요.':'Not submitted — please check the notice above.';
@@ -16230,6 +16492,62 @@ var SUGAI = (function(){
     if(!s.ai) return '';
     return (s.ai.verdict === 'match' || s.ai.verdict === 'same') ? (s.ai.code || '') : '';
   }
+  /* 위치 코드 → 층 이름 */
+  function floorOf(code){
+    code = String(code||'').toUpperCase();
+    if(code === 'B1')  return '지하 1층';
+    if(code === 'BLD') return '건물 외부';
+    if(code === 'KTC') return '4층';
+    var m = code.match(/^(?:EV|HALL|WC|ES)([1-5])/); if(m) return m[1]+'층';
+    m = code.match(/^13([1-5])\d{2}/);              if(m) return m[1]+'층';
+    return null;
+  }
+  /* 상위 후보들의 유사도를 층별로 합쳐, 정확한 자리는 몰라도 '몇 층쯤'인지 추정한다 */
+  function floorGuess(top){
+    if(!top || !top.length) return null;
+    var sum = {}, tot = 0, i;
+    for(i=0;i<top.length;i++){
+      var f = floorOf(top[i].code); if(!f) continue;
+      sum[f] = (sum[f]||0) + top[i].sim; tot += top[i].sim;
+    }
+    var best = null, bv = 0;
+    for(var k in sum) if(sum[k] > bv){ bv = sum[k]; best = k; }
+    if(!best || !tot) return null;
+    var share = bv/tot;
+    var others = Object.keys(sum).filter(function(k){ return k!==best; });
+    return { floor:best, share:share, sure: share >= 0.6, others:others };
+  }
+  /* "여기가 어디쯤인지" 한 줄 — 관리자가 코드 몰라도 읽히게 */
+  function whereText(ai){
+    if(!ai || !ai.top || !ai.top.length) return '';
+    var t = ai.top[0], pct = Math.round(t.sim*100);
+    var sure = (ai.verdict==='match'||ai.verdict==='same');
+    var conf = sure ? '높음' : (t.sim >= 0.70 ? '보통' : '낮음');
+    var low = (conf === '낮음');
+    var name = codeLabel(t.code);
+    /* '으로/로' 조사 : 마지막 글자에 받침이 있으면 '으로'(ㄹ 받침은 '로') */
+    var lc = name.charCodeAt(name.length-1), jong = (lc>=0xAC00 && lc<=0xD7A3) ? (lc-0xAC00)%28 : 0;
+    var ro = (jong===0 || jong===8) ? '로' : '으로';
+    var h = '<div class="where'+(low?' low':'')+'">📍 사진만 보면 <b>'+name+'</b>'
+          + (ai.verdict==='same' ? ' — 지금 앱에 있는 사진과 같음' : ro+' 추정')
+          + ' <span class="num">(유사도 '+pct+'% · 신뢰도 '+conf+')</span>';
+    if(sure){
+      var f1 = floorOf(t.code);
+      if(f1) h += '<span class="sub">층 : <b>'+f1+'</b></span>';
+    }else{
+      var fg = floorGuess(ai.top);
+      if(fg){
+        h += '<span class="sub">층 추정 : <b>'+fg.floor+'</b>'
+           + (fg.sure ? ' (후보가 같은 층에 몰려 있음)' : ' 또는 '+fg.others.join('·')+' — 층도 불확실') + '</span>';
+      }
+    }
+    if(ai.top[1] && low){
+      h += '<span class="sub">다음 후보 : '+codeLabel(ai.top[1].code)+' '+Math.round(ai.top[1].sim*100)+'%'
+         + (ai.top[2] ? ' · '+codeLabel(ai.top[2].code)+' '+Math.round(ai.top[2].sim*100)+'%' : '')+'</span>';
+    }
+    return h + '</div>';
+  }
+
   function adminBadge(s){
     var ai = s.ai;
     if(!ai) return '';
@@ -16244,12 +16562,18 @@ var SUGAI = (function(){
     if(ai.sim !== undefined) h += '<span class="num">유사도 '+(ai.sim*100).toFixed(0)+'% · 격차 '+(ai.margin*100).toFixed(0)+'%p</span>';
     if(ai.quality) h += '<span class="num">선명도 '+Math.round(ai.quality.sharp)+'</span>';
     if(s.qr) h += '<span class="num qr">⛶ '+s.qr+' QR 스캔 후 제보</span>';
+    if(ai.noteCode){
+      h += '<span class="num hint">📝 메모 : '+ai.noteCode +
+           (ai.noteAgree ? ' (사진과 일치)' : ' (사진과 다름)')+'</span>';
+    }
     h += '</div>';
+    h += whereText(ai);
     if(ai.top && ai.top.length){
       h += '<div class="cands">';
       for(var i=0;i<ai.top.length;i++){
         var c = ai.top[i];
-        h += '<button onclick="SUGAI.pick(\''+s.id+'\',\''+c.code+'\')">'+c.code+' <span class="num">'+(c.sim*100).toFixed(0)+'%</span></button>';
+        h += '<button onclick="SUGAI.pick(\''+s.id+'\',\''+c.code+'\')" title="'+codeLabel(c.code)+'">'
+           + codeLabel(c.code)+' <span class="num">'+c.code+' · '+(c.sim*100).toFixed(0)+'%</span></button>';
       }
       h += '</div>';
     }
@@ -16282,6 +16606,217 @@ var SUGAI = (function(){
     });
   }
 
+
+  /* ══════════════════════════════════════════════════════════════
+     v45 확장 : 학습 · 자동분류 · 새 장소 묶기 · 메모 힌트
+     ══════════════════════════════════════════════════════════════ */
+
+  var LEARN_KEY = 'aiLearned';
+  var LEARN_MAX = 400;              // localStorage 용량을 고려한 상한
+  var LEARNED = [];                 // [{code, q:'base64 int8', n, ts}]
+  var loadedLearn = false;
+
+  function i8ToB64(f32){
+    var s = '', i;
+    for(i=0;i<f32.length;i++){
+      var q = Math.round(Math.max(-1, Math.min(1, f32[i])) * 127);
+      s += String.fromCharCode(q & 0xFF);
+    }
+    return btoa(s);
+  }
+  function b64ToVec(b64){
+    var bin = atob(b64), v = new Float32Array(bin.length), s = 0, i;
+    for(i=0;i<bin.length;i++){
+      var b = bin.charCodeAt(i);
+      v[i] = (b>127 ? b-256 : b)/127;
+      s += v[i]*v[i];
+    }
+    s = Math.sqrt(s) || 1;
+    for(i=0;i<v.length;i++) v[i] /= s;
+    return v;
+  }
+
+  function loadLearned(){
+    if(loadedLearn) return;
+    loadedLearn = true;
+    /* ① 파일에 담겨 배포된 학습분 ② 이 브라우저에서 배운 것 — 둘 다 읽어 합친다 */
+    var fromFile = [];
+    try{
+      var fe = document.getElementById('EMBEDDED_AILEARN');
+      if(fe && fe.textContent.trim()) fromFile = JSON.parse(fe.textContent) || [];
+    }catch(e){ fromFile = []; }
+    var mine = [];
+    try{
+      var raw = localStorage.getItem(LEARN_KEY);
+      if(raw) mine = JSON.parse(raw) || [];
+    }catch(e){ mine = []; }
+    var seen = {};
+    LEARNED = [];
+    fromFile.concat(mine).forEach(function(r){
+      if(!r || !r.code || !r.q) return;
+      var k = r.code + '|' + r.q.slice(0, 24);
+      if(seen[k]) return;
+      seen[k] = 1; LEARNED.push(r);
+    });
+    /* 내장 벡터 뒤에 학습분을 이어 붙인다 */
+    if(loadVectors()){
+      for(var i=0;i<LEARNED.length;i++){
+        try{ REF.push(b64ToVec(LEARNED[i].q)); CODES.push(LEARNED[i].code); }catch(e){}
+      }
+    }
+  }
+  function saveLearned(){
+    try{ localStorage.setItem(LEARN_KEY, JSON.stringify(LEARNED)); return true; }
+    catch(e){
+      /* 용량이 꽉 차면 오래된 것부터 버린다 */
+      while(LEARNED.length > 40){
+        LEARNED.splice(0, 20);
+        try{ localStorage.setItem(LEARN_KEY, JSON.stringify(LEARNED)); return true; }catch(e2){}
+      }
+      return false;
+    }
+  }
+
+  /* 사진 한 장의 특징벡터 뽑기 (모델 준비 포함) */
+  function vecOf(dataUrl){
+    return ensure().then(function(){
+      return new Promise(function(res, rej){
+        var im = new Image();
+        im.onload = function(){
+          try{
+            var t = net.infer(prep(im), true);
+            t.data().then(function(v){
+              t.dispose();
+              var n = 0, i;
+              for(i=0;i<v.length;i++) n += v[i]*v[i];
+              n = Math.sqrt(n) || 1;
+              var o = new Float32Array(v.length);
+              for(i=0;i<v.length;i++) o[i] = v[i]/n;
+              res(o);
+            })['catch'](rej);
+          }catch(e){ rej(e); }
+        };
+        im.onerror = function(){ rej('image'); };
+        im.src = dataUrl;
+      });
+    });
+  }
+
+  /* ── 학습 : 이 사진이 이 위치라는 것을 AI에게 가르친다 ──
+     앱에 사진을 넣거나 제보를 승인할 때 자동으로 불린다.
+     결과는 브라우저에 저장되어 다음에 앱을 열어도 유지된다. */
+  function learn(code, dataUrl, name){
+    if(!code || !dataUrl) return Promise.resolve(false);
+    loadLearned();
+    return vecOf(dataUrl).then(function(v){
+      if(LEARNED.length >= LEARN_MAX){ LEARNED.shift(); REF.shift(); CODES.shift(); }
+      var rec = {code:code, q:i8ToB64(v), n:name||'', ts:Date.now()};
+      LEARNED.push(rec);
+      REF.push(v); CODES.push(code);
+      saveLearned();
+      if(typeof phAiLearnRender === 'function') phAiLearnRender();
+      return true;
+    })['catch'](function(){ return false; });
+  }
+
+  function learnStats(){
+    loadLearned();
+    var codes = {};
+    for(var i=0;i<LEARNED.length;i++) codes[LEARNED[i].code] = (codes[LEARNED[i].code]||0)+1;
+    return { n: LEARNED.length, codes: codes, builtin: (CODES ? CODES.length - LEARNED.length : 0) };
+  }
+  function forgetAll(){
+    LEARNED = [];
+    try{ localStorage.removeItem(LEARN_KEY); }catch(e){}
+    REF = null; CODES = null; loadedLearn = false; loadVectors(); loadLearned();
+    if(typeof phAiLearnRender === 'function') phAiLearnRender();
+  }
+
+  /* ── 분류 : 등록용 (판정 문구 없이 순위만) ── */
+  function classify(dataUrl){
+    loadLearned();
+    return vecOf(dataUrl).then(function(v){
+      var rk = rank(v);
+      return { vec:v, top:rk.slice(0,3), sim:rk[0].sim, code:rk[0].code,
+               margin: rk[0].sim - (rk[1] ? rk[1].sim : 0) };
+    });
+  }
+
+  /* ── 새 장소 묶기 ──────────────────────────────────────────────
+     기존 위치와 안 닮은(=처음 보는) 사진들끼리 서로 비교해서,
+     서로 닮은 것들을 한 묶음으로 만든다. 옥상 사진 5장을 넣으면
+     "이 5장은 같은 곳"까지는 AI가 알아낸다. 그 장소의 '이름'만
+     사람이 한 번 정해주면 그때부터 AI가 그 이름으로 인식한다. */
+  var GROUP_TH = 0.72;
+  function cluster(vecs){
+    var n = vecs.length, parent = [], i, j;
+    for(i=0;i<n;i++) parent.push(i);
+    function find(x){ while(parent[x]!==x){ parent[x]=parent[parent[x]]; x=parent[x]; } return x; }
+    function join(a,b){ a=find(a); b=find(b); if(a!==b) parent[b]=a; }
+    for(i=0;i<n;i++) for(j=i+1;j<n;j++){
+      var d = 0, a = vecs[i], b = vecs[j];
+      for(var k=0;k<a.length;k++) d += a[k]*b[k];
+      if(d >= GROUP_TH) join(i,j);
+    }
+    var map = {}, out = [];
+    for(i=0;i<n;i++){
+      var r = find(i);
+      if(!(r in map)){ map[r] = out.length; out.push([]); }
+      out[map[r]].push(i);
+    }
+    return out;
+  }
+
+  /* ── 메모에서 위치 읽기 ────────────────────────────────────────
+     "옥상", "3층 왼쪽 복도", "13210호", "정문" 처럼 사람이 쓴 말에서
+     위치 코드를 찾아낸다. 사진 판정과 메모가 같은 곳을 가리키면
+     확신도를 올리고, 다르면 관리자에게 둘 다 보여준다. */
+  function noteCode(note){
+    if(!note) return null;
+    var t = String(note).replace(/\s+/g, ' ').trim();
+    var m;
+    m = t.match(/\b(13[1-5]\d{2})\b/);                       if(m) return m[1];
+    m = t.match(/([1-5])\s*층\s*(왼쪽|좌측|왼)\s*복도/);       if(m) return 'HALL'+m[1]+'L';
+    m = t.match(/([1-5])\s*층\s*(오른쪽|우측|오른)\s*복도/);    if(m) return 'HALL'+m[1]+'R';
+    m = t.match(/([1-5])\s*층\s*(엘리베이터|엘베|EV)/i);        if(m) return 'EV'+m[1];
+    if(/지하|B1/i.test(t)) return 'B1';
+    if(/정문|후문|동문|서문|출입문|건물\s*외부|외관/.test(t)) return 'BLD';
+    if(/KTC/i.test(t)) return 'KTC';
+    /* 학습된 위치 이름과 직접 대조 (옥상처럼 새로 등록한 곳) */
+    loadLearned();
+    if(CODES){
+      var up = t.toUpperCase();
+      for(var i=0;i<CODES.length;i++){
+        var c = String(CODES[i]).toUpperCase();
+        if(c.length >= 2 && up.indexOf(c) !== -1) return CODES[i];
+      }
+    }
+    return null;
+  }
+
+  /* 힌트를 판정에 반영 : 후보 안에 있으면 1순위로 올린다 */
+  function applyHint(res, note){
+    var hint = noteCode(note);
+    if(!hint) return res;
+    res.noteCode = hint;
+    if(!res.top) return res;
+    var idx = -1;
+    for(var i=0;i<res.top.length;i++) if(res.top[i].code === hint) idx = i;
+    if(idx === 0){
+      res.noteAgree = true;                       // 사진과 메모가 일치 → 확신
+      if(res.verdict === 'uncertain' && res.sim >= TH.RELEVANT) res.verdict = 'match';
+    }else if(idx > 0){
+      res.noteAgree = true;                       // 후보 안에 있음 → 그걸로 승격
+      var pick = res.top.splice(idx,1)[0];
+      res.top.unshift(pick);
+      res.code = pick.code; res.sim = pick.sim;
+      if(res.verdict === 'uncertain') res.verdict = 'match';
+    }else{
+      res.noteAgree = false;                      // 사진과 메모가 다름 → 관리자 판단
+    }
+    return res;
+  }
+
   /* ── 콘솔 진단 : SUGAI.tune() 후 사진을 고르면 수치가 표로 출력된다 ── */
   function tune(){
     var i = document.createElement('input'); i.type='file'; i.accept='image/*';
@@ -16301,7 +16836,10 @@ var SUGAI = (function(){
 
   return { judge:judge, warmup:warmup, showCard:showCard, rejectMsg:rejectMsg,
            adminBadge:adminBadge, autoCode:autoCode, pick:pick, tune:tune,
-           codeLabel:codeLabel, TH:TH,
+           codeLabel:codeLabel, whereText:whereText, floorGuess:floorGuess, TH:TH, SCOPE:SCOPE,
+           learn:learn, learnStats:learnStats, forgetAll:forgetAll,
+           classify:classify, cluster:cluster, noteCode:noteCode, vecOf:vecOf,
+           ensure:ensure,
            get ready(){ return !!net; } };
 })();
 </script>

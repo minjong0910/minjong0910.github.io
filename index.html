@@ -103,6 +103,18 @@
   #sadmin .mini{color:#7C8AA0;font-size:12.5px;line-height:1.65;background:#131A24;
     border:1px solid #232D3A;border-radius:10px;padding:12px 14px;margin-bottom:12px;}
   #sadmin .sugEmpty{color:#5A6472;font-size:13px;text-align:center;padding:34px 10px;}
+  /* v48 : 제보가 여러 건이면 화면 전체가 스크롤되게 — .screen 기본값이 overflow:hidden이라
+     둘째 건부터 잘려 보이던 문제. 목록만 스크롤하면 작은 폰에선 안내문이 자리를 다 차지하므로
+     안내문까지 같이 위로 밀리도록 화면 자체를 스크롤 컨테이너로 만든다. */
+  #sadmin{overflow-y:auto;-webkit-overflow-scrolling:touch;display:block;}
+  #sadmin .bar{position:sticky;top:0;background:#0B0E13;z-index:3;padding-bottom:8px;margin:0 0 6px;
+    /* 화면 위쪽 여백(padding-top)까지 제목줄 배경으로 덮어 카드가 비쳐 보이지 않게 */
+    padding-top:calc(16px + env(safe-area-inset-top, 0px));
+    margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;}
+  /* 화면 자체의 위 여백을 없애고 제목줄이 그 여백을 대신 갖게 → 스크롤된 내용이 위로 비칠 자리가 없다 */
+  #sadmin{padding-top:0 !important;}
+  #sadmin #sugAdminList{padding-bottom:6px;}
+  #ssug{overflow-y:auto;-webkit-overflow-scrolling:touch;}
   #sadmin .sugCard{display:flex;gap:10px;background:#131A24;border:1px solid #232D3A;border-radius:12px;
     padding:10px;margin-bottom:10px;}
   #sadmin .sugThumb{width:84px;height:84px;object-fit:cover;border-radius:8px;flex:0 0 auto;background:#0D0F18;}

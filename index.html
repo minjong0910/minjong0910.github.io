@@ -17106,9 +17106,21 @@ var SUGAI = (function(){
     if(txt) txt.textContent = ko()?'AI 준비하는 중…':'Preparing AI…';
     ensure().then(function(){
       box.className='aiPrep on';
-      if(txt) txt.textContent = ko()?'AI 준비 완료 — 사진을 올리면 자동으로 확인해요':'AI ready — photos are checked automatically';
-      /* v53 : 모델 다음에 번호판 읽기 라이브러리도 미리 받아 둔다 (제보할 때 기다리지 않게) */
-      setTimeout(function(){ ocrEnsure()['catch'](function(){}); }, 500);
+      var base = ko()?'AI 준비 완료':'AI ready';
+      if(txt) txt.textContent = base + (ko()?' · 번호판 읽기 준비 중…':' · loading plate reader…');
+      /* v53 : 모델 다음에 번호판 읽기 라이브러리도 미리 받아 둔다 (제보할 때 기다리지 않게).
+         준비됐는지를 이 줄에 그대로 보여준다 — 서버에 lib/tess/ 폴더가 있는지 사용자가 눈으로 확인할 수 있게. */
+      setTimeout(function(){
+        ocrEnsure().then(function(){
+          if(txt) txt.textContent = base + (ko()
+            ? (' · 🔢 번호판 읽기 준비 완료 (' + (ocrSrc==='local' ? '앱 서버' : '인터넷') + ')')
+            : (' · plate reader ready (' + (ocrSrc==='local' ? 'server' : 'internet') + ')'));
+        })['catch'](function(){
+          if(txt) txt.textContent = base + (ko()
+            ? ' · 🔢 번호판 읽기는 못 써요 (사진 판별만 사용)'
+            : ' · plate reader unavailable (photo matching only)');
+        });
+      }, 500);
     })['catch'](function(){
       box.className='aiPrep off';
       if(txt) txt.textContent = ko()?'AI를 불러오지 못했어요 — 사람이 직접 확인해요':'AI unavailable — manual review';

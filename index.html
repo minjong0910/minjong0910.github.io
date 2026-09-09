@@ -141,7 +141,7 @@
   #ssug{overflow-y:auto;-webkit-overflow-scrolling:touch;}
   /* v53 : 층 선택 버튼 + 촬영 안내 */
   .sugFloorRow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:#7C8AA0;}
-  .sugFloorRow button{background:#131A24;color:#94B8E0;border:1px solid #2A3644;border-radius:8px;padding:6px 10px;font-size:13px;min-width:40px;}
+  .sugFloorRow button{background:#131A24;color:#94B8E0;border:1px solid #2A3644;border-radius:8px;padding:6px 11px;font-size:13px;white-space:nowrap;}
   .sugFloorRow button.on{background:#1B3A2E;color:#39FF88;border-color:#39FF88;}
   .sugTip{margin-top:8px;font-size:12px;line-height:1.5;color:#7C8AA0;background:#0F141B;border:1px dashed #2A3644;border-radius:8px;padding:8px 10px;}
   .sugTip b{color:#94B8E0;font-weight:600;}
@@ -950,12 +950,12 @@
       <textarea id="sugNote" rows="2" data-ko-placeholder="어디 사진인가요? (예 : 정문/정문내부/후문/후문내부/동문/동문내부/서문/서문내부)" data-en-placeholder="Which photo is this? (e.g. Front/Front interior/Back/Back interior/East/East interior/West/West interior gate)" placeholder="어디 사진인가요? (예 : 정문/정문내부/후문/후문내부/동문/동문내부/서문/서문내부)"></textarea>
       <div class="sugFloorRow" id="sugFloorRow">
         <span data-ko="몇 층에서 찍으셨나요? (선택)" data-en="Which floor? (optional)">몇 층에서 찍으셨나요? (선택)</span>
-        <button type="button" data-f="지하 1층" onclick="sugFloorSel(this)">B1</button>
-        <button type="button" data-f="1층" onclick="sugFloorSel(this)">1</button>
-        <button type="button" data-f="2층" onclick="sugFloorSel(this)">2</button>
-        <button type="button" data-f="3층" onclick="sugFloorSel(this)">3</button>
-        <button type="button" data-f="4층" onclick="sugFloorSel(this)">4</button>
-        <button type="button" data-f="5층" onclick="sugFloorSel(this)">5</button>
+        <button type="button" data-f="지하 1층" data-ko="지하 1층" data-en="B1" onclick="sugFloorSel(this)">지하 1층</button>
+        <button type="button" data-f="1층" data-ko="1층" data-en="1F" onclick="sugFloorSel(this)">1층</button>
+        <button type="button" data-f="2층" data-ko="2층" data-en="2F" onclick="sugFloorSel(this)">2층</button>
+        <button type="button" data-f="3층" data-ko="3층" data-en="3F" onclick="sugFloorSel(this)">3층</button>
+        <button type="button" data-f="4층" data-ko="4층" data-en="4F" onclick="sugFloorSel(this)">4층</button>
+        <button type="button" data-f="5층" data-ko="5층" data-en="5F" onclick="sugFloorSel(this)">5층</button>
       </div>
       <div class="sugTip" data-ko="💡 복도·엘리베이터 앞처럼 어느 층이나 비슷한 곳은, <b>가까운 호실 번호판</b>이 함께 나오게 찍어 주세요. AI가 번호를 읽어 층을 알아냅니다." data-en="💡 For hallways and elevator lobbies that look alike on every floor, include a <b>nearby room-number plate</b> in the shot — the AI reads the number to tell the floor.">💡 복도·엘리베이터 앞처럼 어느 층이나 비슷한 곳은, <b>가까운 호실 번호판</b>이 함께 나오게 찍어 주세요. AI가 번호를 읽어 층을 알아냅니다.</div>
       <button class="big" style="margin-top:10px;" onclick="sugSubmit()" data-ko="건의함에 올리기" data-en="Submit to Suggestion Box">건의함에 올리기</button>

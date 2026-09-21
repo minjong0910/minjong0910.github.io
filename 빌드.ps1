@@ -136,8 +136,8 @@ if(-not $up){
                   adminFloor='관리자 화면 층 묶음'; adminPick='관리자가 고를 수 있는 목록';
                   place3D='3D 위치(place3D)'; floor3D='3D 층이 앱 층과 일치'; outside3D='3D 건물 윤곽 안';
                   graph='길찾기 그래프'; reach='정문에서 계단 없이 갈 수 있는 곳'; turnTruth='확정된 좌우와 맞는 안내';
-                  guideGraph='안내와 그래프가 맞는 곳'; b3d='실사 3D 띄우기' }
-      foreach($k in 'scope','label','floor','adminFloor','adminPick','place3D','floor3D','outside3D','graph','reach','turnTruth','guideGraph','b3d'){
+                  guideGraph='안내와 그래프가 맞는 곳'; b3d='실사 3D 띄우기'; miniMap='관리자 후보 평면도' }
+      foreach($k in 'scope','label','floor','adminFloor','adminPick','place3D','floor3D','outside3D','graph','reach','turnTruth','guideGraph','b3d','miniMap'){
         $list = @($res.bad.$k)
         if($list.Count -and $k -eq 'b3d'){ Bad ("{0} 실패 : {1}" -f $names[$k], ($list -join ', ')) }
         elseif($list.Count){ Bad ("{0}에 빠진 장소 {1}곳 : {2}" -f $names[$k], $list.Count, ($list -join ', ')) }

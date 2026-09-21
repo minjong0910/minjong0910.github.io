@@ -179,6 +179,15 @@ function run(w){
     } finally { w.target = saveT; w.startFloor = saveS; }
   }
 
+  /* ── 관리자 후보 평면도 (v83~) : 어느 장소가 1등으로 나와도 평면도에 점이 찍히는가 ── */
+  bad.miniMap = [];
+  if(typeof w.aiMiniMapHtml !== 'function') bad.miniMap.push('(aiMiniMapHtml 없음)');
+  else codes.forEach(function(c){
+    var html = '';
+    try { html = w.aiMiniMapHtml([{code:c, sim:1}], S.codeLabel); } catch(e){ html = 'ERR ' + e.message; }
+    if(html.indexOf('<circle') < 0 || html.indexOf('NaN') >= 0 || html.indexOf('undefined') >= 0) bad.miniMap.push(c);
+  });
+
   checkB3D(w, function(b3dBad){
   bad.b3d = b3dBad;
   var fails = Object.keys(bad).filter(function(k){ return bad[k].length; });

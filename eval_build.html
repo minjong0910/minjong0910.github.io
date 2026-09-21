@@ -38,7 +38,8 @@ function probe(){
   var w;
   try { w = F.contentWindow; } catch(e){ return done({ok:false, error:'iframe 접근 실패 : ' + e.message}); }
   var ready = w && w.SUGAI && w.SUGAI.SCOPE && w.AIVEC_DATA && w.AIVEC_DATA.codes
-              && typeof w.aidKnownCodes === 'function' && typeof w.aidFloorOf === 'function';
+              && typeof w.aidKnownCodes === 'function' && typeof w.aidFloorOf === 'function'
+              && w.FLOOR_LAYOUT && w.FLOOR_LAYOUT[1];
   if(!ready){
     if(Date.now() - t0 > LIMIT) return done({ok:false, error:'앱이 ' + (LIMIT/1000) + '초 안에 준비되지 않음',
       have:{SUGAI:!!(w&&w.SUGAI), AIVEC:!!(w&&w.AIVEC_DATA), aid:!!(w&&w.aidKnownCodes)}});
@@ -70,6 +71,33 @@ function run(w){
   /* 사진 수 : 이름이 같은 벡터는 한 사진이다 */
   var photos = {}; A.names.forEach(function(n){ photos[n] = 1; });
 
+  /* ── 3D (v78~) : AI 가 아는 모든 장소가 3D 건물 위에 자리가 있는가 ──
+     place3D 가 없거나 null 이면 그 장소는 길안내·확신도 지도에 나타날 수 없다.
+     층이 앱의 층 계산과 다르거나 건물 윤곽 밖이면 좌표가 틀린 것이다.
+     평면도에 표시가 없어 어림한 곳(exact:false)은 실패가 아니라 따로 알린다. */
+  bad.place3D = []; bad.floor3D = []; bad.outside3D = [];
+  var approx3D = [], kinds3D = {};
+  if(typeof w.place3D !== 'function'){ bad.place3D.push('(place3D 함수 없음)'); }
+  else codes.forEach(function(c){
+    var p = w.place3D(c);
+    if(!p){ bad.place3D.push(c); return; }
+    kinds3D[p.kind] = (kinds3D[p.kind] || 0) + 1;
+    if(!p.exact) approx3D.push(c);
+    var fg = S.floorGuess([{code:c, sim:1}]);
+    var mine = p.floor === 'B1' ? '지하 1층' : p.floor + '층';
+    if(!fg || fg.floor !== mine) bad.floor3D.push(c);
+    var L = w.FLOOR_LAYOUT[p.floor === 'B1' ? 1 : p.floor];
+    var zMin = Math.min(L.bottomOuterZ, w.GLOBAL_BOT_Z) - 0.5, zMax = L.topOuterZ + 0.5, xMax = L.halfX + 0.5;
+    if(Math.abs(p.x) > xMax || p.z < zMin || p.z > zMax) bad.outside3D.push(c);
+  });
+
+  /* 3D 에 그려진 호실 중 AI 사진이 한 장도 없는 곳 — 실패는 아니고 '사진을 더 찍을 곳' 목록 */
+  var aiSet = {}; codes.forEach(function(c){ aiSet[c.replace(/-[A-Z]$/, '')] = 1; });
+  var roomsNoPhoto = [];
+  [1,2,3,4,5].forEach(function(lv){
+    Object.keys(w.FLOOR_LAYOUT[lv].lookup).forEach(function(rc){ if(!aiSet[String(rc).toUpperCase()]) roomsNoPhoto.push(rc); });
+  });
+
   var fails = Object.keys(bad).filter(function(k){ return bad[k].length; });
   done({
     ok: fails.length === 0,
@@ -79,7 +107,10 @@ function run(w){
     vectors: A.n,
     three: typeof w.THREE === 'object',
     bad: bad,
-    fails: fails
+    fails: fails,
+    approx3D: approx3D,
+    kinds3D: kinds3D,
+    roomsNoPhoto: roomsNoPhoto
   });
 }
 

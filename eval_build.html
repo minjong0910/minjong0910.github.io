@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>빌드 검사</title>
+<style>
+  body{background:#0E1420;color:#E6EDF5;font:13px/1.6 system-ui,"Malgun Gothic",sans-serif;margin:0;padding:16px}
+  pre{white-space:pre-wrap;word-break:break-all;background:#131C2B;padding:10px;border-radius:8px}
+  iframe{width:400px;height:300px;border:1px solid #2A3852;opacity:.25}
+</style>
+</head>
+<body>
+<h3>빌드 검사 — 빌드한 앱이 AI 가 아는 모든 장소를 다룰 수 있는가</h3>
+<div>빌드.ps1 이 Edge 헤드리스로 이 페이지를 열고, 아래 결과 칸을 읽어 갑니다. 사람이 열어 봐도 됩니다.</div>
+<pre id="R">검사 중…</pre>
+<iframe id="F"></iframe>
+
+<script>
+/* 왜 이런 검사가 필요한가
+   사진 폴더를 새로 만들면(예: LNG1~LNG5) AI 는 그 장소를 바로 배우지만, 앱의 여러 곳이
+   그 이름을 따로 알아야 한다. 하나라도 빠지면 조용히 망가진다.
+     · SCOPE.allow  — 빠지면 AI 가 그 장소로 판별하는 순간 제보가 "범위 밖"으로 거절된다 (v65 사고)
+     · codeLabel    — 빠지면 사용자에게 "LNG3" 같은 코드가 그대로 보인다
+     · floorOf      — 빠지면 층 추정·층 혼동 계산에서 그 장소가 사라진다
+     · aidFloorOf   — 빠지면 관리자 화면에서 '기타'로 빠진다 (v73·v76 에서 고친 것)
+     · aidKnownCodes — 빠지면 관리자가 그 장소를 고를 수 없다 (v75 에서 고친 것)
+   이 다섯을 AI 가 아는 모든 장소에 대해 한 번에 확인한다. */
+(function(){
+var R = document.getElementById('R'), F = document.getElementById('F');
+var t0 = Date.now(), LIMIT = 150000;
+
+function done(res){
+  R.textContent = JSON.stringify(res, null, 1);
+  document.title = res.ok ? 'BUILD-CHECK-OK' : 'BUILD-CHECK-FAIL';
+}
+
+function probe(){
+  var w;
+  try { w = F.contentWindow; } catch(e){ return done({ok:false, error:'iframe 접근 실패 : ' + e.message}); }
+  var ready = w && w.SUGAI && w.SUGAI.SCOPE && w.AIVEC_DATA && w.AIVEC_DATA.codes
+              && typeof w.aidKnownCodes === 'function' && typeof w.aidFloorOf === 'function';
+  if(!ready){
+    if(Date.now() - t0 > LIMIT) return done({ok:false, error:'앱이 ' + (LIMIT/1000) + '초 안에 준비되지 않음',
+      have:{SUGAI:!!(w&&w.SUGAI), AIVEC:!!(w&&w.AIVEC_DATA), aid:!!(w&&w.aidKnownCodes)}});
+    return setTimeout(probe, 500);
+  }
+  run(w);
+}
+
+function run(w){
+  var S = w.SUGAI, A = w.AIVEC_DATA;
+  var codes = [], seen = {};
+  A.codes.forEach(function(c){ c = String(c).toUpperCase(); if(!seen[c]){ seen[c] = 1; codes.push(c); } });
+  codes.sort();
+
+  var known = w.aidKnownCodes(), knownSet = {};
+  known.forEach(function(c){ knownSet[c] = 1; });
+
+  var bad = { scope:[], label:[], floor:[], adminFloor:[], adminPick:[] };
+  codes.forEach(function(c){
+    if(!S.SCOPE.allow(c)) bad.scope.push(c);
+    var lb = S.codeLabel(c);
+    if(!lb || lb === c) bad.label.push(c);
+    var fg = S.floorGuess([{code:c, sim:1}]);
+    if(!fg || !fg.floor) bad.floor.push(c);
+    if(w.aidFloorOf(c) === '기타') bad.adminFloor.push(c);
+    if(!knownSet[c]) bad.adminPick.push(c);
+  });
+
+  /* 사진 수 : 이름이 같은 벡터는 한 사진이다 */
+  var photos = {}; A.names.forEach(function(n){ photos[n] = 1; });
+
+  var fails = Object.keys(bad).filter(function(k){ return bad[k].length; });
+  done({
+    ok: fails.length === 0,
+    secs: Math.round((Date.now() - t0)/1000),
+    places: codes.length,
+    photos: Object.keys(photos).length,
+    vectors: A.n,
+    three: typeof w.THREE === 'object',
+    bad: bad,
+    fails: fails
+  });
+}
+
+/* ?app=다른파일.html 로 다른 빌드를 검사할 수 있다 (검사가 실패를 잡는지 시험할 때 쓴다) */
+var app = (location.search.match(/[?&]app=([^&]+)/) || [])[1] || 'index_new.html';
+F.addEventListener('load', function(){ setTimeout(probe, 300); });
+F.src = decodeURIComponent(app);
+setTimeout(function(){ if(R.textContent === '검사 중…') probe(); }, 5000);
+})();
+</script>
+</body>
+</html>

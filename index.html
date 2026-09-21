@@ -18746,6 +18746,7 @@ var SUGAI = (function(){
     var mw = code.match(/^WIN(\d)([LR]?)$/);
     if(mw) return mw[1] + (ko()?'층 ':'F ') + (mw[2]==='L' ? (ko()?'왼쪽 ':'left ') : mw[2]==='R' ? (ko()?'오른쪽 ':'right ') : '') + (ko()?'창밖':'window view');
     if(code === 'EVB1') return ko()?'엘리베이터 지하 1층':'Elevator B1';
+    if(code === 'KTC')  return ko()?'4층 KTC 동아리방':'4F KTC club room';     /* v77 */
     /* v75 : 같은 문이 GATE_E 와 GATE_EAST 두 가지로 불린다 — 둘 다 받는다 */
     var GATE_KO = {MAIN:'정문', BACK:'후문', E:'동문', W:'서문', EAST:'동문', WEST:'서문'},
         GATE_EN = {MAIN:'Main gate', BACK:'Back gate', E:'East gate', W:'West gate', EAST:'East gate', WEST:'West gate'};
@@ -20989,6 +20990,7 @@ var AID_FLOORS = ['지하 1층','1층','2층','3층','4층','5층','건물 외�
 function aidFloorOf(code){
   var c = String(code || '').toUpperCase();
   if(c === 'B1' || c === 'EVB1') return '지하 1층';                 /* v76 : EVB1 이 '기타'로 빠졌다 */
+  if(/^GATE_/.test(c)) return '건물 외부';                          /* v77 : 출입문이 '기타'로 빠졌다 */
   if(c === 'BLD') return '건물 외부';
   if(c === 'KTC') return '4층';
   /* v73 : EVIN·SIGN·EMS·WIN·LNG 이 전부 '기타'로 빠지고 있었다 (EV 뒤가 숫자가 아니라서) */

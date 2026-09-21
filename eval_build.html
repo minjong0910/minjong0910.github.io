@@ -179,6 +179,8 @@ function run(w){
     } finally { w.target = saveT; w.startFloor = saveS; }
   }
 
+  checkB3D(w, function(b3dBad){
+  bad.b3d = b3dBad;
   var fails = Object.keys(bad).filter(function(k){ return bad[k].length; });
   done({
     ok: fails.length === 0,
@@ -195,6 +197,33 @@ function run(w){
     graph: graph,
     unlisted: unlisted
   });
+  });
+}
+
+/* ── 실사 3D (v81~) : 실제로 띄워서 three.js 가 실리는가 ──
+   v81 부터 실사 3D 페이지에는 three.js 대신 자리표시만 있고, 띄울 때 앱 본문 것을 채운다.
+   채우는 쪽이 망가지면 실사 3D 화면만 조용히 비므로, 여기서 직접 띄워 본다.
+   iframe 이 부모의 THREE 객체를 빌려 쓰면 안 된다 (자기 창에서 따로 실행해야 예전과 같다). */
+function checkB3D(w, cb){
+  var out = [];
+  if(typeof w.mountBld3D !== 'function'){ out.push('mountBld3D 없음'); return cb(out); }
+  try { w.mountBld3D(); } catch(e){ out.push('mountBld3D 오류 : ' + e.message); return cb(out); }
+  var t1 = Date.now();
+  (function poll(){
+    var fr = w.document.getElementById('b3dFrame'), cw = null;
+    try { cw = fr && fr.contentWindow; } catch(e){}
+    if(cw && cw.THREE && cw.THREE.REVISION){
+      if(cw.THREE === w.THREE) out.push('실사 3D 가 앱의 THREE 를 빌려 씀');
+      if(fr.srcdoc.indexOf('THREE_FROM_PARENT') >= 0) out.push('자리표시가 채워지지 않음');
+      return cb(out);
+    }
+    if(Date.now() - t1 > 30000){
+      var ld = w.document.getElementById('b3dLoad');
+      out.push('실사 3D 가 30초 안에 three.js 를 싣지 못함' + (ld ? ' (' + ld.textContent.trim().slice(0, 40) + ')' : ''));
+      return cb(out);
+    }
+    setTimeout(poll, 300);
+  })();
 }
 
 /* ?app=다른파일.html 로 다른 빌드를 검사할 수 있다 (검사가 실패를 잡는지 시험할 때 쓴다) */

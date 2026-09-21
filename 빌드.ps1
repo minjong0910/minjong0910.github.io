@@ -136,10 +136,11 @@ if(-not $up){
                   adminFloor='관리자 화면 층 묶음'; adminPick='관리자가 고를 수 있는 목록';
                   place3D='3D 위치(place3D)'; floor3D='3D 층이 앱 층과 일치'; outside3D='3D 건물 윤곽 안';
                   graph='길찾기 그래프'; reach='정문에서 계단 없이 갈 수 있는 곳'; turnTruth='확정된 좌우와 맞는 안내';
-                  guideGraph='안내와 그래프가 맞는 곳' }
-      foreach($k in 'scope','label','floor','adminFloor','adminPick','place3D','floor3D','outside3D','graph','reach','turnTruth','guideGraph'){
+                  guideGraph='안내와 그래프가 맞는 곳'; b3d='실사 3D 띄우기' }
+      foreach($k in 'scope','label','floor','adminFloor','adminPick','place3D','floor3D','outside3D','graph','reach','turnTruth','guideGraph','b3d'){
         $list = @($res.bad.$k)
-        if($list.Count){ Bad ("{0}에 빠진 장소 {1}곳 : {2}" -f $names[$k], $list.Count, ($list -join ', ')) }
+        if($list.Count -and $k -eq 'b3d'){ Bad ("{0} 실패 : {1}" -f $names[$k], ($list -join ', ')) }
+        elseif($list.Count){ Bad ("{0}에 빠진 장소 {1}곳 : {2}" -f $names[$k], $list.Count, ($list -join ', ')) }
       }
       if($res.ok){ Ok ("장소 {0}곳 모두 — 접수·이름·층·관리자 목록·3D 위치·길찾기 통과 (사진 {1}장 · 벡터 {2}개)" -f $res.places, $res.photos, $res.vectors) }
       if($res.graph){ Ok ("길찾기 그래프 : 점 {0}개 · 선 {1}개 · 장소 {2}곳 — 안내 좌우·차례를 그래프와 대조함" -f $res.graph.nodes, $res.graph.edges, $res.graph.places) }

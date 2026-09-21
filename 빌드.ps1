@@ -158,6 +158,41 @@ else {
 }
 $commit = ''
 try { $commit = (& git -C $ROOT rev-parse --short HEAD 2>$null) } catch {}
+
+# 올리는 법 — 빌드할 때마다 새로 쓴다. 손으로 쓴 안내문은 낡는다
+# (2026-09-21 : 9월 18일 안내문이 "aivec.js 하나만 올리면 된다"고 해서, 따라 하면 앱 수정이 배포되지 않을 뻔했다)
+if(-not $NoCopy){
+  function Blob($f){ try { return (& git -C $ROOT hash-object --no-filters $f 2>$null).Trim() } catch { return '(git 없음)' } }
+  $b1 = Blob (Join-Path $DEPLOY 'index.html'); $b2 = Blob (Join-Path $DEPLOY 'aivec.js')
+  $s1 = (Get-Item (Join-Path $DEPLOY 'index.html')).Length; $s2 = (Get-Item (Join-Path $DEPLOY 'aivec.js')).Length
+  $guide = @"
+================================================================
+  깃허브에 올리기                       $(Get-Date -Format 'yyyy-MM-dd HH:mm') 빌드 · git $commit
+  (이 파일은 빌드.ps1 이 빌드할 때마다 새로 씁니다 — 손으로 고치지 마세요)
+================================================================
+
+  두 파일을 모두 올리세요.
+
+    index.html   $('{0,12:N0}' -f $s1) bytes
+    aivec.js     $('{0,12:N0}' -f $s2) bytes
+
+  올리는 법
+    저장소 첫 화면 → Add file → Upload files
+    → 두 파일을 함께 끌어다 놓기 → Commit changes
+
+  제대로 올라갔는지 확인 (깃허브 파일 화면의 blob SHA-1)
+    index.html   $b1
+    aivec.js     $b2
+
+  한쪽만 올리면 : index.html 만 → 새 장소를 AI 가 모름 · aivec.js 만 → 앱 수정이 안 들어감
+
+================================================================
+"@
+  [System.IO.File]::WriteAllText((Join-Path $DEPLOY '올리는법.txt'), $guide, (New-Object System.Text.UTF8Encoding($true)))
+  Ok '올리는법.txt 새로 씀 (크기·SHA-1 포함)'
+  $extra = @(Get-ChildItem $DEPLOY -File | Where-Object { $_.Name -notin @('index.html','aivec.js','올리는법.txt') })
+  if($extra.Count){ Warn ("배포 폴더에 앱과 상관없는 파일이 있습니다 — 올리지 마세요 : " + (($extra | ForEach-Object Name) -join ', ')) }
+}
 $dirty = ''
 try { if((& git -C $ROOT status --porcelain 2>$null)){ $dirty = ' (커밋 안 한 변경 있음)' } } catch {}
 $secs = [int]((Get-Date) - $t0).TotalSeconds

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>공대 3호관 실내 길안내 — 중간 발표 자료</title>
+<style>
+  @page {
+    size: A4; margin: 16mm 14mm 16mm 14mm;
+    @top-right { content: "공대 3호관 실내 길안내 · 중간 발표 자료"; font: 7.5pt "Malgun Gothic"; color: #9AA7B6; }
+    @bottom-center { content: counter(page) " / " counter(pages); font: 8pt "Malgun Gothic"; color: #7C8AA0; }
+  }
+  @page :first { margin-top: 0; @top-right { content: none; } @bottom-center { content: none; } }
+  :root {
+    --ink: #16202B; --ink2: #52514e; --muted: #7C8AA0;
+    --navy: #10345E; --blue: #1B4F8C; --line: #C9D3DF; --soft: #EEF2F7; --soft2: #F5F8FB;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --grid: #E4E7EC;
+    --ok: #1F7A45; --wait: #9A6400; --todo: #6B7A8C;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: #ffffff; }
+  body { font-family: "Malgun Gothic","맑은 고딕",sans-serif; font-size: 9.3pt; line-height: 1.58; color: var(--ink);
+         margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  h1 { font-size: 16pt; color: var(--navy); margin: 0 0 4px; letter-spacing: -0.3px; }
+  h2 { font-size: 11.8pt; color: var(--navy); margin: 15px 0 7px; padding-bottom: 4px; border-bottom: 2px solid #C9D9EA; page-break-after: avoid; break-after: avoid; }
+  h3 { font-size: 10pt; color: var(--blue); margin: 11px 0 5px; page-break-after: avoid; break-after: avoid; }
+  p { margin: 0 0 6px; }
+  ul, ol { margin: 0 0 7px; padding-left: 18px; }
+  li { margin-bottom: 3px; }
+  b.hl { background: #FFF2C4; padding: 0 2px; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 8px; font-size: 8.6pt; page-break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 4px 7px; text-align: left; vertical-align: top; }
+  th { background: var(--soft); font-weight: 700; }
+  td.n, th.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  tr.tot td, tr.tot th { background: #E6EEF8; font-weight: 700; }
+  tr.cur td { background: #EAF4EC; }
+  .note { color: #4E5C6B; font-size: 8.5pt; background: var(--soft2); border-left: 3px solid #9FC0E0; padding: 6px 9px; margin: 7px 0; page-break-inside: avoid; }
+  .warn { border-left-color: #D99A9A; background: #FCF5F5; }
+  .good { border-left-color: #8CC5A0; background: #F2F9F4; }
+  .pb { page-break-before: always; }
+  .avoid { page-break-inside: avoid; }
+  .part { font-size: 9pt; color: var(--muted); letter-spacing: 1px; margin: 0 0 2px; }
+  .lead { font-size: 10.4pt; line-height: 1.7; }
+  .two { display: table; width: 100%; table-layout: fixed; border-spacing: 8px 0; margin: 0 -8px; }
+  .two > div { display: table-cell; vertical-align: top; }
+  .kv { font-variant-numeric: tabular-nums; }
+
+  /* 표지 */
+  .cover { height: 263mm; position: relative; padding-top: 30mm; }
+  .cover .band { background: var(--navy); color: #fff; padding: 14mm 12mm 12mm; border-radius: 4px; }
+  .cover .kicker { font-size: 10pt; opacity: .8; letter-spacing: 2px; margin-bottom: 8px; }
+  .cover .title { font-size: 25pt; font-weight: 700; line-height: 1.3; letter-spacing: -0.5px; }
+  .cover .subt { font-size: 11pt; margin-top: 8px; opacity: .92; }
+  .cover .meta { margin-top: 12mm; font-size: 10pt; color: var(--ink2); line-height: 1.9; }
+  .cover .meta b { color: var(--ink); }
+  .kpis { display: table; width: 100%; table-layout: fixed; margin-top: 10mm; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .kpis > div { display: table-cell; text-align: center; padding: 9px 4px; border-right: 1px solid var(--grid); }
+  .kpis > div:last-child { border-right: 0; }
+  .kpis .v { font-size: 15pt; font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; }
+  .kpis .s { font-size: 7.8pt; color: var(--muted); }
+  .kpis .l { font-size: 8.2pt; color: var(--ink2); margin-top: 2px; }
+  .toc { margin-top: 10mm; font-size: 9.6pt; }
+  .toc div { display: table; width: 100%; padding: 3px 0; border-bottom: 1px dotted #D5DCE5; }
+  .toc span { display: table-cell; }
+  .toc .no { width: 40px; color: var(--blue); font-weight: 700; white-space: nowrap; }
+  .toc .pg { text-align: right; color: var(--muted); width: 60px; }
+  .cover .foot { position: absolute; bottom: 0; left: 0; right: 0; font-size: 8.4pt; color: var(--muted); border-top: 1px solid var(--grid); padding-top: 6px; }
+
+  /* 상태 표 */
+  .st { display: inline-block; font-size: 8pt; font-weight: 700; padding: 0 6px; border-radius: 3px; border: 1px solid; white-space: nowrap; }
+  .st.ok   { color: var(--ok);   border-color: #9FCDB2; background: #EEF8F1; }
+  .st.wait { color: var(--wait); border-color: #E3C27E; background: #FFF7E6; }
+  .st.todo { color: var(--todo); border-color: #C9D3DF; background: #F6F8FA; }
+
+  /* 요약 3열 */
+  .cols3 { display: table; width: 100%; table-layout: fixed; border-spacing: 6px 0; margin: 4px -6px 8px; }
+  .cols3 > div { display: table-cell; border: 1px solid var(--line); border-radius: 5px; padding: 8px 10px; vertical-align: top; font-size: 9pt; }
+  .cols3 .h { font-weight: 700; margin-bottom: 4px; }
+  .cols3 ul { padding-left: 15px; margin: 0; }
+
+  /* 흐름도 */
+  .flow { display: table; width: 100%; table-layout: fixed; margin: 6px 0; }
+  .flow > div { display: table-cell; vertical-align: middle; }
+  .flow .step { background: #EEF4FB; border: 1px solid #C9D9EA; border-radius: 5px; padding: 6px 7px; font-size: 8.6pt; line-height: 1.45; }
+  .flow .arr { width: 16px; text-align: center; color: var(--muted); font-size: 9pt; }
+
+  /* 질문 카드 */
+  .card { border: 1px solid #D5DCE5; border-radius: 6px; padding: 9px 12px; margin-bottom: 9px; page-break-inside: avoid; }
+  .q { font-size: 10.4pt; font-weight: 700; color: var(--blue); margin-bottom: 6px; }
+  .q .n { display: inline-block; background: var(--blue); color: #fff; font-size: 8.4pt; min-width: 20px; height: 18px; line-height: 18px;
+          text-align: center; border-radius: 4px; margin-right: 7px; vertical-align: 1px; padding: 0 3px; }
+  .q .new { font-size: 7.6pt; color: var(--wait); border: 1px solid #E3C27E; border-radius: 3px; padding: 0 4px; margin-left: 6px; font-weight: 700; vertical-align: 1px; }
+  .key { background: #EEF4FB; border-left: 4px solid var(--blue); padding: 6px 10px; margin-bottom: 7px; font-weight: 700; }
+
+  /* 차트 */
+  figure { margin: 8px 0 10px; page-break-inside: avoid; }
+  figcaption { font-size: 8.6pt; color: var(--ink2); margin-top: 3px; }
+  .legend { font-size: 8.4pt; color: var(--ink2); margin: 2px 0 2px; }
+  .legend i { display: inline-block; width: 14px; height: 3px; vertical-align: 3px; margin: 0 5px 0 12px; border-radius: 2px; }
+  .legend i.sq { width: 10px; height: 10px; vertical-align: -1px; border-radius: 2px; }
+  .legend i.dash { background: repeating-linear-gradient(90deg, var(--s3) 0 5px, transparent 5px 8px) !important; }
+  svg text { font-family: "Malgun Gothic","맑은 고딕",sans-serif; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ 표지 ═══════════════════════════ -->
+<section class="cover">
+  <div class="band">
+    <div class="kicker">졸업작품 중간 발표 자료</div>
+    <div class="title">공대 3호관 실내 길안내</div>
+    <div class="subt">진행 현황 · 무엇을 어떻게 검사했나 · 검사 결과 · 시스템 설명 · 예상 질문</div>
+  </div>
+  <div class="meta">
+    <b>군산대학교 공과대학 3호관</b> (지하 1층 ~ 5층) 실내에서 사진 한 장으로 위치를 알아내고 3D 건물 위에 길을 안내하는 웹앱<br>
+    팀 &nbsp; <b>김민종 · 손의윤 · 문성일</b><br>
+    발표 &nbsp; <b>2026년 9월 22일</b> &nbsp;·&nbsp; 이 문서의 숫자는 <b>2026년 9월 21일</b>에 측정한 값입니다
+  </div>
+  <div class="kpis">
+    <div><div class="v">1,753<span style="font-size:10pt">장</span></div><div class="l">기준 사진 · 152곳</div></div>
+    <div><div class="v">53.3%</div><div class="s">95% 구간 45.5~58.2%</div><div class="l">사진만으로 정확한 자리</div></div>
+    <div><div class="v">94.1%</div><div class="s">층은 98.0%</div><div class="l">확신 상위 10%의 자리</div></div>
+    <div><div class="v">+34.6<span style="font-size:10pt">%p</span></div><div class="s">95% 구간 +27.9~+39.1</div><div class="l">가장 나은 단순 방식 대비</div></div>
+    <div><div class="v">0<span style="font-size:10pt">건</span></div><div class="s">번호판·층 표시·안내판</div><div class="l">글자 읽기 오독</div></div>
+  </div>
+  <div class="toc">
+    <div><span class="no">1</span><span>한눈에 보기 — 무엇을 만들었고 어디까지 왔나</span><span class="pg">2</span></div>
+    <div><span class="no">2</span><span>진행 현황 — 영역별 상태 · 데이터 · 버전 이력</span><span class="pg">3</span></div>
+    <div><span class="no">3</span><span>무엇을 검사했나 — 검사 13가지</span><span class="pg">5</span></div>
+    <div><span class="no">4</span><span>검사 결과 — 정확도 · 신뢰구간 · 확신도 · 기준선 · 제거 실험 · 글자 읽기 · 감사 · 빌드</span><span class="pg">6</span></div>
+    <div><span class="no">5</span><span>시스템 설명 — 구성 · 두 갈래 판별 · 데이터의 위치 · 안전장치</span><span class="pg">12</span></div>
+    <div><span class="no">6</span><span>한계와 대응</span><span class="pg">14</span></div>
+    <div><span class="no">7</span><span>다음 할 일</span><span class="pg">14</span></div>
+    <div><span class="no">8</span><span>예상 질문과 답 — 15문항</span><span class="pg">15</span></div>
+    <div><span class="no">부록</span><span>숫자를 다시 만드는 법 · 파일</span><span class="pg">18</span></div>
+  </div>
+  <div class="foot">모든 숫자는 직접 측정한 값이며, 저장소의 측정 페이지로 누구나 다시 만들 수 있습니다(부록). 추측은 추측이라고 적었습니다.</div>
+</section>
+
+<!-- ═══════════════════════════ 1. 한눈에 보기 ═══════════════════════════ -->
+<section class="pb">
+  <div class="part">PART 1</div>
+  <h1>한눈에 보기</h1>
+  <p class="lead">공대 3호관 안에서 <b>사진을 찍으면 어디인지 알아내고</b>, 3D 건물 위에 목적지까지 길을 보여 주는 웹앱입니다.
+    설치 없이 폰 브라우저에서 돌고, <b>AI 계산도 폰 안에서</b> 합니다. 서버는 사용자가 보낸 사진 제보를 받아
+    관리자가 승인하면 모든 기기에 나눠 주는 일만 합니다.</p>
+
+  <h2>지금 어디까지 왔나</h2>
+  <div class="cols3">
+    <div><div class="h"><span class="st ok">완료</span></div>
+      <ul>
+        <li>3D 건물 모형 · 길찾기 (지하 1층 ~ 5층)</li>
+        <li>사진 1,753장 · 152곳 수집과 분류</li>
+        <li>사진으로 위치 판별 + 글자 읽기</li>
+        <li>건의함 → 관리자 승인 → 모든 기기 반영 <span style="color:var(--muted)">(9/21 서버 도착 확인)</span></li>
+        <li>측정 체계 · 빌드 자동 검사 · 버전 관리</li>
+      </ul></div>
+    <div><div class="h"><span class="st wait">진행 중</span></div>
+      <ul>
+        <li>5층 재촬영 (5층 복도 층 맞힘 41%)</li>
+        <li>엘리베이터 문 사진 보강 (층마다 3~9장)</li>
+        <li>승인한 라운지 사진을 길안내에 보여 주기 (방식 결정 대기)</li>
+      </ul></div>
+    <div><div class="h"><span class="st todo">남음</span></div>
+      <ul>
+        <li>처음 보는 사람 5명 사용자 평가</li>
+        <li>폰에서 판별 시간 재기</li>
+        <li>시연 영상</li>
+        <li>앱으로 감싸기 (아이폰·안드로이드)</li>
+      </ul></div>
+  </div>
+
+  <h2>이번 발표에서 보여 드리고 싶은 것 세 가지</h2>
+  <table>
+    <tr><th style="width:172px">① 숫자를 정직하게 잰다</th>
+      <td>같은 사람이 찍은 사진은 서로 닮아서 함께 맞히면 숫자가 부풀려집니다. 그래서 <b>다른 사람이 찍은 사진으로만</b> 잽니다.
+        그 결과 53.3%이고, 사진들이 촬영 묶음으로 뭉쳐 있다는 점까지 반영한 <b>95% 구간은 45.5~58.2%</b>입니다.</td></tr>
+    <tr><th>② 모델이 정말 일을 한다</th>
+      <td>같은 사진·같은 시험에서 특징만 바꿔 비교했습니다. 색 분포 8.1%, 작은 흑백 사진 18.6%, <b>CNN 53.2%</b>.
+        차이 +34.6%p는 우연으로 설명되지 않습니다(95% 구간 +27.9~+39.1%p).</td></tr>
+    <tr><th>③ 틀려도 안전하다</th>
+      <td>사진만으로는 절반이 틀리므로 <b>AI 혼자 확정하지 않습니다.</b> 글자가 읽히면 글자를 믿고(오독 0건),
+        아니면 후보를 사람에게 보여 줍니다. 확신이 높은 상위 10%만 보면 자리 94.1%, 층 98.0%입니다.</td></tr>
+  </table>
+
+  <h2>어떻게 동작하나</h2>
+  <div class="flow">
+    <div class="step"><b>①</b> 사진 찍기<br><span style="color:var(--ink2)">1280px로 줄여 둠</span></div><div class="arr">▶</div>
+    <div class="step"><b>②</b> 품질 검사<br><span style="color:var(--ink2)">흐림·어두움 반려</span></div><div class="arr">▶</div>
+    <div class="step"><b>③</b> 두 갈래 동시에<br><span style="color:var(--ink2)">글자 읽기 · 생김새</span></div><div class="arr">▶</div>
+    <div class="step"><b>④</b> 합치기<br><span style="color:var(--ink2)">글자가 읽히면 글자를 믿음</span></div>
+  </div>
+  <div class="flow">
+    <div class="step"><b>⑤</b> 후보 5개<br><span style="color:var(--ink2)">AI 혼자 확정 안 함</span></div><div class="arr">▶</div>
+    <div class="step"><b>⑥</b> 관리자가 고름<br><span style="color:var(--ink2)">층 → 장소, 한글 이름</span></div><div class="arr">▶</div>
+    <div class="step"><b>⑦</b> 승인<br><span style="color:var(--ink2)">서버에 올라감</span></div><div class="arr">▶</div>
+    <div class="step"><b>⑧</b> 모든 기기가 배움<br><span style="color:var(--ink2)">다음부터 더 잘 맞힘</span></div>
+  </div>
+  <p style="font-size:8.9pt;color:var(--ink2)">생김새 판별은 MobileNetV2가 사진을 1,280개 숫자로 바꿔 기준 3,506개와 비교하고,
+    글자 읽기는 호실 번호판 · 엘리베이터 층 표시 · 비상대피 안내판의 "N층"을 읽습니다. 자세한 것은 5장.</p>
+
+  <div class="note warn"><b>먼저 말씀드릴 한계</b> — 강의실은 문이 모두 똑같아서 사진으로 6%밖에 못 맞힙니다(번호판 글자 읽기가 맡습니다).
+    5층은 사진이 적어 층 맞힘이 41%입니다(재촬영 중). 처음 보는 사람의 사용자 평가는 아직 하지 않았습니다.
+    자세한 것은 6장에 있습니다.</div>
+</section>
+
+<!-- ═══════════════════════════ 2. 진행 현황 ═══════════════════════════ -->
+<section class="pb">
+  <div class="part">PART 2</div>
+  <h1>진행 현황</h1>
+
+  <h2>영역별 상태</h2>
+  <table>
+    <tr><th style="width:150px">영역</th><th style="width:64px">상태</th><th>내용</th></tr>
+    <tr><td>3D 건물 · 길찾기</td><td><span class="st ok">완료</span></td><td>지하 1층 ~ 5층 모형, 목적지까지 경로 안내, 출입문 QR로 시작 위치 잡기</td></tr>
+    <tr><td>사진 수집 · 분류</td><td><span class="st ok">완료</span></td><td>1,753장 · 152곳. 층·좌우는 건물 평면도를 근거로 분류. 9/21 층별 라운지 179장을 따로 갈라냄</td></tr>
+    <tr><td>사진으로 위치 판별</td><td><span class="st ok">완료</span></td><td>MobileNetV2로 1,280개 숫자로 바꿔 기준 3,506개와 비교. 자리 53.3% · 층 65.6%</td></tr>
+    <tr><td>글자 읽기</td><td><span class="st ok">완료</span></td><td>호실 번호판 37% · 엘리베이터 안 층 표시 97% · 비상대피 안내판 층 45% (모두 오독 0)</td></tr>
+    <tr><td>건의함 · 관리자</td><td><span class="st ok">완료</span></td><td>사진 제보 → AI 후보 → 관리자가 <b>한글 이름으로</b> 층·장소 선택 → 승인 (코드 외울 필요 없음)</td></tr>
+    <tr><td>서버 반영</td><td><span class="st ok">확인</span></td><td>9/21 승인 사진 2건이 서버에 도착 — 모든 기기가 받아 배우는 경로가 실제로 동작</td></tr>
+    <tr><td>측정 체계</td><td><span class="st ok">완료</span></td><td>정확도·확신도·신뢰구간 / 기준선·제거 실험 / 배치 감사 / 글자 읽기 — 버튼 하나로 다시 잼</td></tr>
+    <tr><td>빌드 · 버전 관리</td><td><span class="st ok">완료</span></td><td>git 저장소. 빌드가 실제로 났던 사고 7가지를 자동 검사하고 걸리면 멈춤 (18초)</td></tr>
+    <tr><td>5층 · 엘리베이터 사진 보강</td><td><span class="st wait">진행 중</span></td><td>조원별 재촬영 요청서 배포. 5층 복도 61장 → 보강 후 다시 측정</td></tr>
+    <tr><td>라운지 사진 표시</td><td><span class="st wait">결정 대기</span></td><td>승인은 되지만 길안내에 라운지 자리가 없어 보이지 않음. 엘리베이터 앞에 같이 보일지, 목적지로 만들지 결정</td></tr>
+    <tr><td>폰 속도</td><td><span class="st todo">남음</span></td><td>PC에서만 잼 (번호판 읽히면 1~2초, 못 읽으면 7~9초). 측정 방법 문서는 준비됨</td></tr>
+    <tr><td>사용자 평가</td><td><span class="st todo">남음</span></td><td>처음 보는 학생 5명에게 목적지 찾기를 시키고 시간·막힌 곳·한 줄 평 기록</td></tr>
+    <tr><td>앱 포장</td><td><span class="st todo">남음</span></td><td>Capacitor로 감싸 아이폰·안드로이드 앱으로 (지금 코드 그대로)</td></tr>
+  </table>
+
+  <h2>데이터 현황</h2>
+  <table>
+    <tr><th style="width:150px">기준 사진 · 장소</th><td>1,753장 · 152곳 (지하 1층 ~ 5층) · 비교에 쓰는 기준 벡터 3,506개 (사진당 2개)</td></tr>
+    <tr><th>촬영</th><td>조원 3명 · 촬영 묶음(사람·날짜·폰) 36개 · 기기 정보가 남은 사진 48% (iPhone 14 · Galaxy S20)</td></tr>
+    <tr><th>시험 대상</th><td id="t-data"></td></tr>
+  </table>
+</section>
+
+<section class="pb">
+  <h2 style="margin-top:0">버전 이력 — 무엇을 바꿨고 무엇으로 확인했나</h2>
+  <table>
+    <tr><th style="width:62px">버전</th><th>한 일</th><th style="width:170px">확인한 것</th></tr>
+    <tr><td><b>v52</b></td><td>사진 판별 첫 형태</td><td>시험 사진이 기준에 들어간 채 재서 100% → 빼고 재니 <b>3.6%</b>. 측정 방법부터 고침</td></tr>
+    <tr><td><b>v58</b></td><td>AI 단독 확정 제거, 후보 5개를 사람에게. 번호판 조각 + 정사각 2장 시점, 평균·주성분 제거</td><td>자동 확정 정답률 0%로 나옴</td></tr>
+    <tr><td><b>v63</b></td><td>AI 기준 데이터를 aivec.js 로 분리</td><td>단일 파일 24MB가 깃허브 업로드 한계(25MB)에 닿음</td></tr>
+    <tr><td><b>v64</b></td><td>관리자가 승인하면 모든 기기에 사진·학습 반영</td><td></td></tr>
+    <tr><td><b>v65</b></td><td>앱이 모르던 장소 이름 24곳(엘리베이터 안·안내판·창밖 등) 접수</td><td>AI가 그 장소를 1등으로 고르면 제보가 거절되던 것 실사진으로 재현</td></tr>
+    <tr><td><b>v66</b></td><td>글자 읽기 개선 — 번호판 숫자 줄 다시 그리기, 엘리베이터 층 표시, 안내판 "N층"</td><td>복도 번호판 60장 9→22장, 오독 0</td></tr>
+    <tr><td><b>v67</b></td><td>사진 줄이는 방식을 앱과 기준 데이터가 똑같이 (블록 평균, 1280px 사본). 번호판 조각 시점 제외</td><td>같은 사진 유사도 0.88→<b>0.997</b>, 자리 <b>41.1→53.3%</b></td></tr>
+    <tr><td><b>v69</b></td><td>같은 자리 두 장 합치기, 복도 좌우 표시, 네 자리 숫자 보정 조임, 판별 시간 표시</td><td>두 장이면 자리 55.8→61.9%</td></tr>
+    <tr><td><b>v70</b></td><td>학습 한도에 닿으면 내장 기준이 지워지던 버그 수정</td><td></td></tr>
+    <tr><td><b>v71</b></td><td>승인이 서버에 올라갔는지 관리자 화면에 표시 (조용한 실패 제거)</td><td></td></tr>
+    <tr><td><b>v72</b></td><td>층마다 라운지를 새 장소로 — "엘리베이터 앞" 217장 중 179장이 라운지였음</td><td>라운지 묶음 층 70.0→79.9%</td></tr>
+    <tr><td><b>v73~76</b></td><td>관리자가 코드 대신 <b>한글 이름</b>으로 층·장소 선택 (관리자를 넘겨줄 수 있게)</td><td>띄워 보고 결함 3개 발견·수정</td></tr>
+    <tr><td><b>v77</b></td><td>빌드 검사가 찾은 두 가지 — KTC 한글 이름, 출입문 분류</td><td>빌드 검사 152곳 전부 통과</td></tr>
+    <tr><td><b>9/21</b></td><td>git 저장소 · 빌드 자동 검사 · 확신도 · 신뢰구간 · 기준선 · 제거 실험</td><td>검사를 만들며 결함 13개 발견 (4.9)</td></tr>
+  </table>
+
+  <h3>정확도 측정 방법의 변천 — 왜 숫자가 내려갔다 올라갔나</h3>
+  <table>
+    <tr><th style="width:175px">측정 방법</th><th>숫자</th><th style="width:210px">문제</th></tr>
+    <tr><td>시험 사진이 기준에 들어간 채</td><td>100%</td><td>사진이 자기 자신을 알아본 것</td></tr>
+    <tr><td>장소별로 사진을 반씩 나눠</td><td>사진이 늘며 18.6% → 66.8%</td><td>같은 사람이 연달아 찍은 사진이 양쪽에 섞여 후함</td></tr>
+    <tr class="cur"><td><b>다른 사람이 찍은 사진으로만 (지금)</b></td><td><b>41.1% → 53.3%</b> (v67)</td><td>처음 온 사용자와 같은 조건</td></tr>
+  </table>
+  <p style="font-size:8.9pt;color:var(--ink2)">66.8%와 53.3%는 같은 앱의 다른 측정입니다. 발표에서 말할 숫자는 엄격한 쪽입니다.</p>
+</section>
+
+<!-- ═══════════════════════════ 3. 무엇을 검사했나 ═══════════════════════════ -->
+<section class="pb">
+  <div class="part">PART 3</div>
+  <h1>무엇을 검사했나</h1>
+  <p>"잘 된다"를 말하려면 무엇으로 확인했는지가 있어야 합니다. 아래 13가지를 했고, 모두 저장소의 페이지나 스크립트로 다시 돌릴 수 있습니다.</p>
+  <table>
+    <tr><th style="width:18px">#</th><th style="width:138px">검사</th><th>무엇을 확인하나 · 어떻게</th><th style="width:170px">결과 한 줄</th></tr>
+    <tr><td>1</td><td><b>정확도</b></td><td>다른 사람이 찍은 사진으로 맞히기. 같은 촬영 묶음 사진은 기준에서 모두 뺌</td><td>자리 53.3% · 층 65.6% · 5등 안 82.4%</td></tr>
+    <tr><td>2</td><td><b>신뢰구간</b></td><td>숫자가 얼마나 흔들리나. 촬영 묶음 36개를 통째로 복원추출 2,000번</td><td>자리 45.5~58.2% · 층 60.6~69.7%</td></tr>
+    <tr><td>3</td><td><b>확신도별 정확도</b></td><td>확신이 높은 것만 답하면 얼마나 맞나. 반으로 나눠 문턱을 검증</td><td>상위 10% 자리 94.1% · 층 98.0% (검증 93.1%)</td></tr>
+    <tr><td>4</td><td><b>기준선 비교</b></td><td>모델이 정말 일을 하나. 같은 사진에서 특징만 바꿈 (우연·흔한 곳·색·흑백)</td><td>CNN이 +34.6%p, 우연 아님</td></tr>
+    <tr><td>5</td><td><b>제거 실험</b></td><td>구성요소마다 효과가 있나. 하나씩 빼고 사진마다 짝지어 비교</td><td>번호판 조각 제거 +2.4%p 유효 · 후처리는 효과 없음</td></tr>
+    <tr><td>6</td><td><b>글자 읽기</b></td><td>번호판·엘리베이터 층 표시·안내판을 읽는 비율과 오독</td><td>37% · 97% · 45% — 오독 0</td></tr>
+    <tr><td>7</td><td><b>두 장 · 좌우</b></td><td>같은 자리 두 장이면 나아지나, 층을 몰라도 좌우는 아나</td><td>두 장 +6.1%p · 좌우 81.0% (확실 97.7%)</td></tr>
+    <tr><td>8</td><td><b>층 혼동</b></td><td>틀리면 어느 층으로 틀리나 (복도 920장)</td><td>5층이 41%로 가장 약함</td></tr>
+    <tr><td>9</td><td><b>사진 배치 감사</b></td><td>1,753장 각각이 자기 폴더를 닮았나 (이름표가 틀린 사진 찾기)</td><td>명백한 오배치 1장</td></tr>
+    <tr><td>10</td><td><b>빌드 검사</b></td><td>빌드한 앱을 띄워 AI가 아는 152곳 전부를 접수·이름·층·관리자 목록에서 다루나</td><td>152곳 통과 (첫 실행에서 결함 2개 발견)</td></tr>
+    <tr><td>11</td><td><b>재현성</b></td><td>같은 입력이면 같은 결과인가 — 빌드 두 번, 측정 두 번, 실험 페이지 vs 배포 파일</td><td>바이트까지 같음 · 코사인 0.9967</td></tr>
+    <tr><td>12</td><td><b>검사가 실패를 잡나</b></td><td>일부러 망가뜨린 빌드, 가짜 사진 한 장을 넣어 봄</td><td>둘 다 잡고 멈춤</td></tr>
+    <tr><td>13</td><td><b>서버 반영</b></td><td>승인한 사진이 서버에 도착했나, 제보 원본은 막혀 있나 (읽기만)</td><td>승인 2건 도착 · 제보 원본 비공개</td></tr>
+  </table>
+  <div class="note"><b>측정 조건</b> — 시험 대상은 강의실을 뺀 1,522장입니다. 두 촬영 묶음 이상에서 찍힌 장소의 사진만 넣었습니다(한 묶음만 찍힌 곳은 "다른 사람 사진으로" 맞힐 수가 없으므로).
+    강의실 216장은 문이 똑같이 생겨 따로 "한 장씩 빼고 맞히기"로 잽니다.</div>
+</section>
+
+<!-- ═══════════════════════════ 4. 검사 결과 ═══════════════════════════ -->
+<section class="pb">
+  <div class="part">PART 4</div>
+  <h1>검사 결과</h1>
+
+  <h2>4.1 정확도 — 다른 사람이 찍은 사진으로 맞히기</h2>
+  <table id="t-kind"></table>
+  <div class="note good"><b>신뢰구간</b> — 자리 <b>53.3% (95% 구간 45.5~58.2%)</b>, 층 <b>65.6% (60.6~69.7%)</b>.<br>
+    같은 사람이 한 번에 찍은 사진은 조명·각도·폰이 같아서 함께 맞거나 함께 틀립니다. 그래서 촬영 묶음 36개를 통째로 다시 뽑아(2,000번) 구간을 구했습니다.
+    사진 1,522장을 서로 독립으로 보고 계산하면 50.8~55.8%로 <b>폭이 절반</b>으로 좁게 나오는데, 이것은 실제보다 자신 있게 말하는 것입니다.
+    → "53%"는 "46~58% 어딘가"라는 뜻이므로, 1~2%p 차이로 방식을 고르면 안 됩니다.</div>
+  <figure>
+    <div class="legend"><svg width="26" height="10" style="vertical-align:-1px;margin-left:12px"><line x1="1" y1="5" x2="25" y2="5" stroke="#2a78d6" stroke-width="3"/></svg> 촬영 묶음 단위 (정직한 값)
+      <svg width="26" height="10" style="vertical-align:-1px;margin-left:12px"><line x1="1" y1="5" x2="25" y2="5" stroke="#9AA3AE" stroke-width="3"/></svg> 사진을 독립으로 볼 때 (너무 좁음)</div>
+    <svg id="c-ci" width="100%" viewBox="0 0 640 132"></svg>
+    <figcaption>95% 신뢰구간 · 점 = 측정값 · 강의실 제외 1,522장, 촬영 묶음 36개</figcaption>
+  </figure>
+  <div class="note">잘 맞는 곳과 못 맞는 곳이 분명합니다. 지하 홀·후문 계단처럼 <b>그 층에만 있는 것</b>이 찍히면 80~90%이고,
+    비상계단·화장실·창밖처럼 <b>층마다 똑같이 지은 곳</b>은 20%대입니다. 그래서 층마다 똑같은 곳은 글자 읽기(4.5)로 풉니다.</div>
+</section>
+
+<section class="pb">
+  <h2 style="margin-top:0">4.2 확신도별 정확도 — 확신할 때만 답하면 얼마나 맞나</h2>
+  <p>확신이 높은 사진부터 줄을 세워 위에서 X%만 "자동 확정"한다고 칠 때의 정확도입니다.
+    확신도는 <b>1등 장소와 2등 장소의 유사도 차이</b>로 쟀습니다. 비교용으로 1등 유사도로 줄 세운 것도 함께 그렸습니다.</p>
+  <figure>
+    <div class="legend"><i style="background:var(--s1)"></i>자리 (차이 기준)<i style="background:var(--s2)"></i>층 (차이 기준)
+      <svg width="26" height="10" style="vertical-align:-1px;margin:0 5px 0 12px"><line x1="1" y1="5" x2="25" y2="5" stroke="#1baf7a" stroke-width="2" stroke-dasharray="5 3"/></svg>자리 (1등 유사도 기준)</div>
+    <svg id="c-sel" width="100%" viewBox="0 0 640 250"></svg>
+    <figcaption>가로 : 확신 순으로 줄 세워 위에서부터 답하는 비율 · 세로 : 그 안에서 맞은 비율 · 강의실 제외 1,522장.
+      100%에서는 모든 사진에 답하므로 두 "자리" 선이 같은 값(53.3%)에서 만납니다.</figcaption>
+  </figure>
+  <table id="t-sel"></table>
+  <div class="note good">
+    · <b>차이로 줄 세우면</b> 상위 10%에서 자리 94.1%, 층 98.0%. 층 정확도 95%를 지키며 <b>사진의 29.0%</b>를 자동으로 답할 수 있습니다.<br>
+    · <b>1등 유사도는 확신도로 쓸 수 없습니다.</b> 상위 10%도 60.5%로 전체(53.3%)와 거의 같습니다.
+      줄 세우기 성능(AURC, 낮을수록 좋음) — 차이 0.260 · 1등 유사도 0.406 · 무작위 0.467.<br>
+    · <b>문턱을 검증했습니다.</b> 짝수 번째 사진으로 "자리 95%" 문턱을 정해 홀수 번째 사진에 적용하면 93.1%입니다.
+      그래서 "95%"가 아니라 <b>"약 93~95%"</b>라고 말하는 것이 정확합니다. 층은 같은 방법으로 97.9%입니다.</div>
+  <div class="note">앱은 지금 자동 확정을 꺼 두고 모든 제보를 사람에게 넘깁니다. 이 결과는 나중에 자동 확정을 켠다면
+    <b>무엇을 기준으로, 어디까지</b> 켜도 되는지의 근거입니다 — 1등 유사도가 아니라 1·2등 차이여야 합니다.</div>
+</section>
+
+<section class="pb">
+  <h2 style="margin-top:0">4.3 기준선 비교 — 모델이 정말 일을 하나</h2>
+  <p>CNN과 <b>같은 224px 사진, 같은 시험 대상, 같은 규칙</b>으로 특징만 바꿔 잽니다. 차이는 순전히 특징의 차이입니다.</p>
+  <figure>
+    <div class="legend"><i class="sq" style="background:var(--s1)"></i>정확한 자리<i class="sq" style="background:var(--s2)"></i>층</div>
+    <svg id="c-base" width="100%" viewBox="0 0 640 230"></svg>
+    <figcaption>강의실 제외 1,522장 · 우연은 AI가 고르는 152곳 전체 중 아무거나</figcaption>
+  </figure>
+  <div class="note good">CNN은 가장 나은 단순 방식(작은 흑백 사진)보다 <b>+34.6%p</b>, 95% 구간 <b>+27.9 ~ +39.1%p</b>로 우연이 아닙니다.
+    <b>색 분포는 "가장 흔한 곳만 답하기"보다도 못합니다</b> — 폰마다 색감이 달라 오히려 방해가 됩니다.</div>
+
+  <h2>4.4 제거 실험 — 각 구성요소가 효과가 있나</h2>
+  <p>하나씩 빼고 같은 1,522장으로 잰 뒤, 사진마다 짝을 지어 차이를 봅니다. 촬영 묶음 단위로 복원추출해(2,000번) 구간을 구하고,
+    <b>구간이 0을 넘지 않을 때만</b> 효과가 있다고 봅니다.</p>
+  <figure>
+    <svg id="c-forest" width="100%" viewBox="0 0 640 220"></svg>
+    <figcaption>정확한 자리 차이 (%p) 와 95% 구간 · 채운 점 = 우연과 구분됨 · 빈 점 = 우연과 구분 안 됨 · (지금) = 지금 앱의 방식</figcaption>
+  </figure>
+  <div class="two">
+    <div><table id="t-abl1"></table></div>
+    <div><table id="t-abl2"></table></div>
+  </div>
+</section>
+
+<section class="pb">
+  <div class="note warn" style="margin-top:0"><b>이 실험으로 알게 된 것</b><br>
+    · <b>번호판 조각을 뺀 v67 결정은 옳았습니다</b> (+2.4%p, 구간 +0.4~+5.0).<br>
+    · <b>지금 앱의 후처리(평균 빼기 + 주성분 2개 제거)는 효과가 측정되지 않았습니다</b> (+0.4%p, 구간 −1.3~+2.0).
+      예전 기록에는 "2개가 1개보다 꾸준히 나았다"고 되어 있고 그것은 맞지만, <b>아무것도 안 한 것과는 비교한 적이 없었습니다.</b><br>
+    · 주성분을 5개 걷어내면 +1.9%p로 유의하게 나왔지만, <b>6가지를 시험해 가장 좋은 것을 고른 결과</b>라 우연히 좋아 보일 수 있습니다.
+      그래서 앱은 바꾸지 않았고, 5층 재촬영 사진처럼 <b>새 사진으로 다시 확인한 뒤</b> 정합니다.</div>
+  <div class="note"><b>실험 페이지가 앱과 같은 계산을 하는지 먼저 확인</b> — 실험 페이지가 "지금 앱 방식"으로 만든 벡터를 실제 배포된 aivec.js와
+    사진 1,753장마다 견줬습니다. 코사인 유사도 평균 0.9967 (배포 파일이 8비트로 줄여 저장하는 오차), 번호판 유무 불일치 0장.
+    여기서 어긋나면 위 숫자는 믿을 수 없습니다. 같은 이유로 4.3·4.4의 CNN 값(53.2% · 65.7%)은 배포 파일로 잰 4.1(53.3% · 65.6%)과 0.1%p 다릅니다.</div>
+
+  <h2>4.5 글자 읽기 — 층마다 똑같은 곳은 글자로 푼다</h2>
+  <table>
+    <tr><th>대상</th><th class="n">시험</th><th class="n">읽은 비율</th><th class="n">잘못 읽음</th><th>얻는 것</th><th class="n">사진만으로</th></tr>
+    <tr><td>복도 호실 번호판</td><td class="n">60장</td><td class="n">37%</td><td class="n">0</td><td>호실 → 층과 좌우 동시 확정</td><td class="n">—</td></tr>
+    <tr><td>엘리베이터 안 층 표시</td><td class="n">30장</td><td class="n">97%</td><td class="n">0</td><td>층 확정</td><td class="n">층 45.7%</td></tr>
+    <tr><td>비상대피 안내판 제목</td><td class="n">51장</td><td class="n">45%</td><td class="n">0</td><td>층 확정</td><td class="n">층 54.9%</td></tr>
+    <tr><td>비상계단</td><td class="n">75장</td><td class="n">3%</td><td class="n">0</td><td>층을 알 글자가 거의 없음 → 코드를 넣지 않음</td><td class="n">층 26.7%</td></tr>
+  </table>
+  <div class="note">엘리베이터 <b>바깥</b>의 층 표시는 "엘리베이터 칸이 지금 있는 층"이라 정확히 읽어도 사용자가 서 있는 층이 아닙니다.
+    그래서 AI가 "엘리베이터 안"으로 볼 때만 읽고, 지하 "B1"을 1층으로 읽지 않게 막았습니다.</div>
+
+  <h2>4.6 두 장 합치기 · 복도 좌우</h2>
+  <div class="two">
+    <div><table id="t-two"></table></div>
+    <div><table id="t-side"></table></div>
+  </div>
+  <p style="font-size:8.9pt;color:var(--ink2)">복도 좌우는 상위 20개 후보의 유사도를 왼쪽·오른쪽으로 모아 투표합니다. 여유 = |왼쪽합 − 오른쪽합| ÷ 합.
+    그래서 "몇 층인지는 모르지만 <b>왼쪽 복도인 것은 확실합니다</b>"라고 말할 수 있습니다.</p>
+</section>
+
+<section class="pb">
+  <h2 style="margin-top:0">4.7 층 혼동 — 틀리면 어느 층으로 틀리나 (복도 920장)</h2>
+  <figure>
+    <svg id="c-conf" width="100%" viewBox="0 0 640 215"></svg>
+    <figcaption>칸의 수 = 사진 장수, 괄호 = 그 줄(실제 층)에서의 비율, 색이 진할수록 비율이 큼</figcaption>
+  </figure>
+  <div class="note">5층이 41%로 가장 약합니다. 5층 복도 사진은 61장뿐이고(왼쪽 44·오른쪽 17), 오른쪽은 번호판이 찍힌 사진이 0장,
+    왼쪽은 한 사람 사진이 39장 : 5장으로 치우쳐 있습니다. <b>라벨은 정확합니다</b> — 번호판이 읽힌 4·5층 56장에서 층·좌우 오류 0건.
+    사진의 양과 촬영자 편중 문제이므로 재촬영으로 풉니다.</div>
+
+  <h2>4.8 사진 배치 감사 — 이름표가 틀린 사진이 있나</h2>
+  <p>사진 한 장을 두고 <b>그 사진만 빼고</b> 나머지 1,752장과 견줘, 자기 폴더 동료보다 다른 폴더를 더 닮은 사진을 뽑았습니다.</p>
+  <table>
+    <tr><th style="width:190px">구분</th><th class="n">장수</th><th>해석</th></tr>
+    <tr><td>강의실</td><td class="n">217</td><td>문이 똑같아 전부 걸림 — 이미 아는 문제, 번호판이 맡음</td></tr>
+    <tr><td>그 외 중 "의심"</td><td class="n">208 (13.5%)</td><td>대부분 "같은 자리인데 이름이 둘"이거나 "원래 닮은 곳" (복도↔복도 71, 라운지↔복도 28)</td></tr>
+    <tr><td>눈으로 확인한 <b>명백한 오배치</b></td><td class="n"><b>1</b></td><td>비상계단 폴더의 창밖 사진 한 장 (자기 폴더와 12%, 창밖과 87%)</td></tr>
+  </table>
+  <div class="note">9/21에 "엘리베이터 앞" 217장을 한 장씩 보고, 엘리베이터 문이 보이지도 않는 라운지 사진 179장을 새 장소로 갈라냈습니다.
+    AI가 라운지를 "엘리베이터 앞"이라고 답하던 원인이 앱이 아니라 <b>이름표</b>였습니다.</div>
+
+  <h2>4.9 빌드 검사 · 재현성 · 검사가 찾아낸 결함</h2>
+  <table>
+    <tr><th style="width:170px">검사</th><th>결과</th></tr>
+    <tr><td>빌드 전 검사</td><td>사진(폴더·이름) = 기준벡터 1,753장 · batches.json = 사진 · 로컬 모델 없음 · 줄바꿈 보호</td></tr>
+    <tr><td>결과 파일 검사</td><td>3D 작업 흔적 36종 · 파일 25MB 미만 (index.html 18.6MB · aivec.js 8.1MB)</td></tr>
+    <tr><td>빌드한 앱을 띄워 검사</td><td>AI가 아는 152곳 전부 — 제보 접수 · 한글 이름 · 층 계산 · 관리자 목록 통과</td></tr>
+    <tr><td>검사가 실패를 잡나</td><td>라운지를 접수 범위에서 뺀 빌드 → 5곳 잡음 · 가짜 사진 1장 → 빌드 전에 멈춤</td></tr>
+    <tr><td>재현성</td><td>두 번 빌드 → index.html 바이트까지 같음 · 측정 두 번 → 측정 시각 빼고 같음</td></tr>
+  </table>
+</section>
+
+<section class="pb">
+  <h3 style="margin-top:0">검사를 만들자 바로 나온 결함 13개 — 모두 고침</h3>
+  <table>
+    <tr><th style="width:62px">어디</th><th>결함</th><th style="width:190px">그대로 뒀다면</th></tr>
+    <tr><td>앱</td><td>새로 만든 함수 이름이 학생용 화면의 변수와 겹쳐 덮어써짐</td><td>관리자 층 선택이 눌러도 반응 없음 (오류 표시도 없음)</td></tr>
+    <tr><td>앱</td><td>관리자가 고를 수 있는 장소 목록에 8곳 누락 (창밖·지하 엘리베이터·동문·서문)</td><td>AI가 "3층 창밖"이라 해도 관리자는 못 고름</td></tr>
+    <tr><td>앱</td><td>같은 문이 두 이름으로 존재 (GATE_E / GATE_EAST)</td><td>짧은 쪽으로 승인하면 화면에 반영 안 됨</td></tr>
+    <tr><td>앱</td><td>KTC 한글 이름 없음 · 출입문이 개발자 화면에서 '기타'로 빠짐</td><td>"KTC 사진으로 확인했어요"라고 표시</td></tr>
+    <tr><td>앱</td><td>엘리베이터 안·안내판·비상계단·창밖이 관리자 층 묶음에서 '기타'로 빠짐</td><td>층별로 찾을 수 없음</td></tr>
+    <tr><td>사진</td><td>"엘리베이터 앞" 폴더에 라운지 사진 179장</td><td>라운지를 엘리베이터 앞이라고 답함</td></tr>
+    <tr><td>측정</td><td>측정 버튼이 촬영 묶음 정보를 읽기 전부터 켜져 있었음</td><td>숫자가 조용히 낮게 나올 수 있음</td></tr>
+    <tr><td>측정</td><td>결과를 한 파일에 덮어씀</td><td>직전 값과 비교 불가 (실제로 잃음)</td></tr>
+    <tr><td>측정</td><td>화면에 안 보이는 창에서 타이머가 느려짐</td><td>90초 측정이 12분</td></tr>
+    <tr><td>측정</td><td>KTC 층을 모름 · 우연 기준선을 52곳으로 셈 (실제 152곳)</td><td>층 계산과 기준선이 틀림</td></tr>
+    <tr><td>배포</td><td>배포 안내문이 "aivec.js 하나만 올리면 된다"로 남아 있었음</td><td>앱 수정이 하나도 배포되지 않음</td></tr>
+    <tr><td>저장소</td><td>이 PC의 git이 파일을 꺼낼 때 줄바꿈을 바꿈</td><td>모든 수정 스크립트가 깨짐 (반대 실험으로 확인)</td></tr>
+    <tr><td>문서</td><td>README의 촬영 묶음 수(41→36) · 실험 소요 시간</td><td>틀린 숫자로 발표</td></tr>
+  </table>
+  <div class="note">대부분 <b>화면은 멀쩡한데 조용히 틀리는</b> 종류였습니다. 코드를 읽는 것만으로는 못 찾았고, 실제로 띄워 눌러 보거나 검사를 만들어 돌려서 나왔습니다.</div>
+</section>
+
+<!-- ═══════════════════════════ 5. 시스템 ═══════════════════════════ -->
+<section class="pb">
+  <div class="part">PART 5</div>
+  <h1>시스템 설명</h1>
+
+  <h2>무엇으로 이루어져 있나</h2>
+  <table>
+    <tr><th style="width:84px">화면</th><td>3D 건물 보기 · 길찾기 · 건의함(사진 제보) · 관리자 화면(로그인 필요)</td></tr>
+    <tr><th>판별기</th><td>① 생김새로 맞히기 (CNN) &nbsp; ② 사진 속 글자 읽기 (OCR) &nbsp; ③ 출입문 QR 읽기</td></tr>
+    <tr><th>기술</th><td>3D : Three.js · 사진 판별 : TensorFlow.js + MobileNetV2 (α 0.5) · 글자 : Tesseract.js · 서버 : Firebase Firestore · 배포 : GitHub Pages</td></tr>
+    <tr><th>배포 파일</th><td><b>index.html</b> (18.6MB, 앱 전체) + <b>aivec.js</b> (8.1MB, AI 기준 데이터) — 설치 없이 주소만 열면 폰 브라우저에서 동작</td></tr>
+  </table>
+
+  <p style="color:var(--ink2)">사진 한 장이 위치가 되기까지의 여덟 단계는 1장(한눈에 보기)에 있습니다. 여기서는 두 갈래를 자세히 봅니다.</p>
+
+  <h3>갈래 ① — 생김새로 맞히기</h3>
+  <p>사진을 두 가지로 잘라(정사각 전체 · 가운데 확대) 각각을 MobileNetV2에 넣어 <b>1,280개의 숫자</b>로 바꾸고,
+    미리 만들어 둔 3,506개와 비교해 가장 비슷한 장소를 찾습니다. 모델은 폰 브라우저에서 돌고 이미 학습된 것을 그대로 씁니다(미세조정 안 함).
+    사진을 224px로 줄이는 방식을 앱과 기준 데이터가 <b>바이트 단위로 똑같이</b> 하도록 맞췄습니다(v67, 같은 사진 유사도 0.997).</p>
+
+  <h3>갈래 ② — 사진 속 글자 읽기</h3>
+  <table>
+    <tr><th style="width:120px">호실 번호판</th><td>파란 판을 찾아 그 안의 <b>숫자 줄만 오려 다시 그려</b> 읽습니다. 읽히면 호실이 나오므로 층과 좌우가 동시에 확정됩니다.
+      사진 전체를 그대로 글자 인식에 넣으면 "글자 줄 찾기"에서 실패한다는 것을 확인하고 바꾼 방식입니다.</td></tr>
+    <tr><th>엘리베이터 층 표시</th><td>검은 판 위에서 빛나는 숫자를 찾아 읽습니다. 화살표(↑↓)는 모양과 위치로 걸러냅니다.</td></tr>
+    <tr><th>비상대피 안내판</th><td>제목 띠 "공과대학 3호관 <b>N층</b> 비상대피 경로"를 한국어 모델로 읽습니다(1.1MB, 필요할 때만 내려받음).</td></tr>
+  </table>
+
+  <h3>관리자 화면 — 코드를 몰라도 되게</h3>
+  <p>관리자가 위치 코드(LNG3 · HALL4L 같은)를 알아야 승인할 수 있으면 관리자를 다른 사람에게 넘길 수 없습니다.
+    그래서 <b>[층 ▾] [장소 ▾]</b>를 한글 이름으로 고르고, 고른 것을 "✔ 3층 라운지"처럼 승인 직전에 한 번 더 보여 줍니다.
+    강의실은 "13310호 · 전자공학과 이재호 교수님 연구실"처럼 학과·교수님 이름까지 나옵니다.</p>
+</section>
+
+<section class="pb">
+  <h2 style="margin-top:0">사진은 어디에 있고 어디로 가나</h2>
+  <table>
+    <tr><th style="width:130px">① AI 기준 사진<br>1,753장</th>
+      <td><b>앱에 들어가지 않습니다.</b> 원본은 개발 PC에만 있고, 앱에는 사진 대신 숫자로 바꾼 것(aivec.js)만 들어갑니다.</td></tr>
+    <tr><th>② 앱이 보여 주는<br>장소 사진</th>
+      <td>index.html 안에 들어 있어 인터넷 없이도 보입니다.</td></tr>
+    <tr><th>③ 위치를 알려고<br>찍은 사진</th>
+      <td><b>폰 밖으로 나가지 않습니다.</b> 판별은 폰 안에서 끝납니다.</td></tr>
+    <tr><th>④ 건의함에<br>제보한 사진</th>
+      <td><b>유일하게 서버로 갑니다.</b> 제보 원본은 외부에서 읽을 수 없습니다(확인함).
+        관리자가 승인한 사진은 모든 기기가 받아 배우도록 <b>로그인 없이 읽을 수 있게</b> 저장됩니다.</td></tr>
+  </table>
+  <div class="note warn">승인된 사진이 공개라는 점, 복도 사진에 지나가는 사람 얼굴이 찍힐 수 있다는 점, 제보에 횟수 제한이 없다는 점은
+    한계로 적어 두었습니다(6장). 지금은 관리자가 보고 거절하는 것이 유일한 장치입니다.</div>
+
+  <h2>틀려도 안전하게 만든 장치</h2>
+  <table>
+    <tr><th style="width:150px">AI 단독 확정 금지</th><td>사진 판별만으로는 위치를 확정하지 않습니다. 글자를 읽었거나 사람이 고른 경우에만 확정합니다.
+      (처음 측정에서 사진 판별로 자동 확정한 것의 정답률이 0%였습니다)</td></tr>
+    <tr><th>근거 표시</th><td>관리자 화면에 "번호판으로 확정 / 엘리베이터 층 표시로 층 확정 / 사진 판별(참고용)"처럼 무엇으로 정했는지 적습니다.</td></tr>
+    <tr><th>오독 차단</th><td>네 자리 숫자 보정은 확신이 높을 때만. 실측에서 "1313"을 13313으로 읽어 1층 사진을 3층으로 만들 뻔한 사례를 찾아 막았습니다.</td></tr>
+    <tr><th>잘못 배우지 않기</th><td>승인된 것만 배웁니다. 승인 직전에 고른 장소를 한글로 다시 보여 주고, 잘못 승인한 사진은 사진 관리에서 지울 수 있습니다.</td></tr>
+    <tr><th>조용한 실패 없애기</th><td>승인이 서버에 올라갔는지(또는 왜 실패했는지) 관리자 화면에 표시합니다(v71).</td></tr>
+    <tr><th>빌드가 사고를 막음</th><td>실제로 났던 사고 7가지(사진-기준 불일치, 3D 작업 소실, 로컬 모델, 모르는 장소 등)를 빌드가 검사하고 걸리면 멈춥니다.</td></tr>
+  </table>
+
+  <h2>개발 방식</h2>
+  <ul>
+    <li><b>git 저장소</b> — 커밋마다 무엇을, 왜 바꿨고, 무엇으로 확인했는지 적습니다. 사진(2.9GB)과 빌드 결과물은 넣지 않습니다.</li>
+    <li><b>수정 스크립트</b> — 앱 원본에 거는 수정은 번호 붙은 스크립트(v58~v77)로 남기고, 바꿀 자리가 정확히 한 곳일 때만 적용합니다.</li>
+    <li><b>한 번에 빌드</b> — 버튼 하나로 빌드·검사·배포 파일 준비까지 18초. 배포 안내문과 확인용 SHA-1도 빌드가 새로 씁니다.</li>
+    <li><b>측정도 코드</b> — 발표 숫자는 전부 측정 페이지가 만듭니다. 결과는 날짜별로 남습니다.</li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════ 6. 한계 ═══════════════════════════ -->
+<section class="pb">
+  <div class="part">PART 6</div>
+  <h1>한계와 대응</h1>
+  <p>약점을 먼저 말하면 질문이 대화가 됩니다. 아래는 모두 측정했거나 코드에서 직접 확인한 사실입니다.</p>
+  <table>
+    <tr><th style="width:150px">한계</th><th style="width:200px">사실</th><th>대응</th></tr>
+    <tr><td><b>사진만으로는 절반</b></td><td>자리 53.3% (45.5~58.2%)</td><td>글자 읽기 우선(오독 0) · 확신도 · 두 장 · 사람 승인의 네 겹. AI 혼자 확정하지 않음</td></tr>
+    <tr><td><b>강의실</b></td><td>사진으로 자리 6.0% (216장)</td><td>문이 모두 같아 사진을 늘려도 안 풀림 → 번호판 글자 읽기가 맡음</td></tr>
+    <tr><td><b>5층</b></td><td>복도 층 맞힘 41% (61장)</td><td>라벨은 정확(오류 0), 양과 촬영자 편중 문제 → 재촬영 중</td></tr>
+    <tr><td><b>층마다 똑같은 곳</b></td><td>비상계단 24.0% · 화장실 28.1% · 창밖 22.3%</td><td>비상계단 글자는 75장 중 2장만 → 층별 QR 스티커가 현실적 (지금 QR은 출입문 4곳 전용)</td></tr>
+    <tr><td><b>모델 미세조정 안 함</b></td><td>ImageNet 학습 모델을 그대로 사용. 후처리는 효과 측정 안 됨</td><td>사진이 모이면 이 건물 사진으로 미세조정이 가장 큰 개선 여지</td></tr>
+    <tr><td><b>측정의 한계</b></td><td>평가 사진을 찍은 사람이 조원 3명뿐</td><td>처음 온 사용자의 폰·각도·시간대와 다를 수 있음. 게시물이 바뀌면 떨어질 수 있음(추측)</td></tr>
+    <tr><td><b>폰 속도</b></td><td>PC에서만 측정 (1~9초)</td><td>관리자 화면에 판별 시간을 표시해 두었음 → 폰 실측 예정</td></tr>
+    <tr><td><b>사용자 평가 없음</b></td><td>조원 2명은 이미 앱을 앎</td><td>처음 보는 학생 5명으로 평가 예정</td></tr>
+    <tr><td><b>개인정보·운영</b></td><td>승인 사진 공개 읽기 · 얼굴 가림 없음 · 제보 횟수 제한 없음</td><td>관리자 승인이 유일한 장치 → 얼굴 가리기, 기기당 제보 수 제한 검토</td></tr>
+    <tr><td><b>파일 크기</b></td><td>깃허브 웹 업로드 25MB 한계 (지금 18.6MB · 8.1MB)</td><td>빌드가 23MB에서 경고, 25MB에서 멈춤</td></tr>
+  </table>
+
+  <!-- ═══════════════════════════ 7. 다음 할 일 ═══════════════════════════ -->
+  <div class="part" style="margin-top:16px">PART 7</div>
+  <h1>다음 할 일</h1>
+  <table>
+    <tr><th style="width:22px">#</th><th>할 일</th><th style="width:210px">끝났다는 기준</th></tr>
+    <tr><td>1</td><td><b>사용자 평가</b> — 처음 보는 학생 5명에게 "3층 13310호를 찾아가세요", 말없이 지켜보기</td><td>도착 시간 · 막힌 지점 · 한 줄 평 표</td></tr>
+    <tr><td>2</td><td><b>5층·엘리베이터 문 재촬영</b> 후 기준 다시 만들고 전체 재측정</td><td>5층 복도 층 맞힘이 신뢰구간 밖으로 오르는지</td></tr>
+    <tr><td>3</td><td><b>주성분 5개 확인</b> — 재촬영 사진(새 데이터)으로 2개 vs 5개 비교</td><td>새 사진에서도 구간이 0을 넘지 않으면 채택</td></tr>
+    <tr><td>4</td><td><b>폰 속도</b> — 아이폰·갤럭시에서 판별 시간 재기</td><td>종류별 중앙값·최댓값</td></tr>
+    <tr><td>5</td><td><b>라운지를 길안내에</b> — 엘리베이터 앞에 같이 보일지, 목적지로 만들지</td><td>승인한 라운지 사진이 앱에 보임</td></tr>
+    <tr><td>6</td><td><b>시연 영상 2분</b> — 제보 → 승인 → 다른 기기 반영까지</td><td>발표장 네트워크 없이도 보여 줄 수 있음</td></tr>
+    <tr><td>7</td><td>층별 QR · 얼굴 가리기 · 제보 수 제한 · 앱 포장 (여유가 되면)</td><td></td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════ 8. 예상 질문 ═══════════════════════════ -->
+<section class="pb">
+  <div class="part">PART 8</div>
+  <h1>예상 질문과 답</h1>
+  <p style="color:var(--ink2)">굵은 칸이 첫 문장입니다. <span class="st wait" style="font-size:7.6pt">새 질문</span> 표시는 이번 검증 작업으로 새로 대비한 질문입니다.</p>
+
+  <div class="card">
+    <div class="q"><span class="n">1</span>이 앱은 어떤 구성을 가지고 있습니까?</div>
+    <div class="key">화면 4개 · 판별기 3개 · 배포 파일 2개입니다.</div>
+    <p>화면은 3D 건물 보기 / 길찾기 / 건의함 / 관리자 화면이고, 판별기는 생김새로 맞히기 · 글자 읽기 · 출입문 QR입니다.
+      배포는 index.html(앱 전체)과 aivec.js(AI 기준 데이터) 두 파일입니다. 사용자는 앞의 세 화면만 쓰고, 관리자 화면은 로그인해야 들어갑니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">2</span>이 앱은 어떤 시스템으로 움직입니까?</div>
+    <div class="key">폰 안에서 도는 웹앱 하나 + 제보만 받는 작은 서버 하나입니다.</div>
+    <table>
+      <tr><th style="width:92px">3D 건물</th><td>Three.js — 폰 GPU로 그립니다</td></tr>
+      <tr><th>사진 판별</th><td>TensorFlow.js + MobileNetV2 (폰에서 돌릴 수 있는 작은 모델)</td></tr>
+      <tr><th>글자 읽기</th><td>Tesseract.js — 번호판 숫자, 엘리베이터 층, 안내판 "N층"</td></tr>
+      <tr><th>서버</th><td>Firebase Firestore — 제보 저장, 관리자 로그인, 승인 사진 배포</td></tr>
+      <tr><th>배포</th><td>GitHub Pages — 주소만 열면 설치 없이 동작</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">3</span>앱 안의 구동 방식은 어떻게 됩니까?</div>
+    <div class="key">사진 한 장을 두 갈래로 동시에 보고, 확실한 쪽을 따릅니다.</div>
+    <p><b>글자로 읽기</b> — 번호판이 읽히면 그 층·그 방으로 확정합니다. 복도 60장 중 22장(37%), 엘리베이터 안 30장 중 29장, 안내판 51장 중 23장을 읽고, 잘못 읽은 것은 0장입니다.
+      <b>생김새로 맞히기</b> — 사진을 1,280개 숫자로 바꿔 기준 3,506개와 비교합니다.
+      <b>합치기</b> — 글자가 읽히면 글자를 따르고, 아니면 확정하지 않고 후보를 관리자에게 보여 줍니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">4</span>서비스 배포는 어떻게 하실 겁니까?</div>
+    <div class="key">지금은 웹 주소 하나. 다음 단계는 아이폰·안드로이드 앱입니다.</div>
+    <p>GitHub Pages에 두 파일을 올리면 끝입니다. 빌드가 검사를 통과해야 배포 파일이 만들어지고, 올린 파일이 맞는지 확인할 SHA-1도 함께 나옵니다.
+      다음은 Capacitor로 감싸 지금 코드 그대로 앱으로 만드는 것이고, 그러면 모델과 글자 인식 파일까지 안에 들어가 인터넷 없이 동작합니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">5</span>비즈니스 도메인으로 나갈 수 있습니까?</div>
+    <div class="key">파는 것은 앱이 아니라 <b>건물 하나를 앱으로 바꾸는 비용을 낮춘 방법</b>입니다.</div>
+    <p>지금 실내지도는 사람이 측량하거나 건물에 장비(비콘 등)를 설치해 만들어서 큰 건물만 대상입니다. 대학 건물·병원 별관·관공서 같은 <b>중간 크기 건물</b>은 비용이 안 맞아 빠져 있습니다.
+      이 방식은 측량 장비 없이 폰 사진과 평면도로 만들었습니다. 다만 사진 수가 정확도를 좌우하므로(5층 사례), 건물당 필요한 사진 양은 아직 정량화하지 못했습니다.</p>
+  </div>
+</section>
+
+<section class="pb">
+  <div class="card">
+    <div class="q"><span class="n">6</span>서버에서 다 구동하고 폰은 데이터만 받아서 씁니까?</div>
+    <div class="key">반대입니다. 계산은 전부 폰에서 하고, 서버는 제보를 받아 두고 승인된 것을 나눠 주는 일만 합니다.</div>
+    <p><b>비용</b> — 폰에서 돌리면 사용자가 늘어도 서버 계산 비용이 늘지 않습니다.
+      <b>개인정보</b> — 위치를 알려고 찍은 사진은 폰 밖으로 나가지 않습니다(건의함에 제보한 사진만 서버로 갑니다).
+      <b>안정성</b> — 건물 안에서 신호가 약해도 판별이 됩니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">7</span>사진들은 어디에 있고, 어디로 이동하고, 어디에 보관됩니까?</div>
+    <div class="key">기준 사진은 앱에 안 들어가고, 보여 줄 사진은 앱 안에 있고, 제보한 사진만 서버에 있습니다.</div>
+    <p>기준 사진 1,753장은 개발 PC에만 있고 앱에는 숫자로 바꾼 것(aivec.js)만 들어갑니다. 건의함 사진은 줄여서 서버에 저장되고,
+      관리자가 승인하면 모든 기기가 받을 수 있게 <b>공개로 읽히는 곳</b>에 올라갑니다. 얼굴 가리기가 없어 지금은 관리자가 보고 거절하는 것이 장치입니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">8</span>폰으로만 구동된다면 프로그램은 어디서 돌아갑니까?</div>
+    <div class="key">폰에 들어 있는 <b>웹브라우저 엔진</b> 위에서 돕니다.</div>
+    <p>아이폰은 WebKit, 안드로이드는 Chromium이고, 3D와 AI 계산 모두 WebGL로 폰 GPU를 씁니다. 앱으로 감싸도 같은 엔진이라 코드를 고치지 않습니다.
+      <b>폰에서 걸리는 시간은 아직 재지 않았습니다</b> — PC에서는 번호판이 바로 읽히면 1~2초, 못 읽으면 7~9초입니다. 관리자 화면에 판별 시간이 표시되게 해 두어 폰 실측을 준비했습니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">9</span>앱 내부를 구성하는 절차나 시스템에는 무엇이 있습니까?</div>
+    <div class="key">데이터를 만드는 절차와, 쓰면서 좋아지는 순환이 있습니다.</div>
+    <p><b>절차</b> — 촬영(문서로 정한 방법) → 분류(평면도 근거) → 걸러내기(흰 벽·흔들림) → 기준 데이터 만들기 → 사진 배치 감사 → 정확도 측정 → <b>빌드 검사를 통과해야</b> 배포 파일 생성.
+      <b>순환</b> — 사용자 제보 → AI 후보 → 관리자가 고름 → 승인 → 모든 기기가 배움. AI 혼자서는 확정하지 못하게 막아 둔 것이 핵심입니다(틀린 것을 배우지 않도록).</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">10</span>다른 사람이나 회사가 이 아이디어를 산다면, 어느 부분 때문이겠습니까?</div>
+    <div class="key"><b>구축 절차</b> · <b>정확도를 증명하는 측정 절차</b> · <b>틀려도 안전한 구조</b> 세 가지입니다.</div>
+    <p>사진만 찍으면 그 건물이 대상이 되는 절차, "얼마나 맞는지"를 신뢰구간과 기준선까지 붙여 숫자로 댈 수 있는 측정, AI가 틀려도 틀린 값이 들어가지 않는 구조입니다.
+      화면 디자인과 3D 모델은 대체 가능한 부분이라고 솔직하게 덧붙이면 오히려 신뢰를 얻습니다.</p>
+  </div>
+</section>
+
+<section class="pb">
+  <div class="card">
+    <div class="q"><span class="n">11</span>정확도가 53%면 실제로 쓸 수 있습니까?<span class="new">새 질문</span></div>
+    <div class="key">사진만으로 확정하지 않기 때문에 쓸 수 있습니다. 확신할 때만 보면 94%입니다.</div>
+    <p>① 글자가 읽히면 글자를 믿습니다(오독 0건). ② 1·2등 차이로 확신이 높은 상위 10%는 자리 94.1%, 층 98.0%이고, 층만이라면 사진의 29%를 95% 정확도로 답할 수 있습니다.
+      ③ 같은 자리에서 한 장 더 찍으면 55.8%→61.9%. ④ 나머지는 관리자가 후보 중에서 고릅니다. 53%는 "아무 도움 없이 사진 한 장만"일 때의 숫자입니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">12</span>그 숫자는 믿을 만합니까? 어떻게 쟀습니까?<span class="new">새 질문</span></div>
+    <div class="key">다른 사람이 찍은 사진으로만 쟀고, 흔들림의 폭(95% 구간)까지 붙였습니다.</div>
+    <p>같은 사람 사진이 섞이면 66.8%까지 후하게 나오지만 그것은 자기 사진을 알아본 것이라 쓰지 않습니다. 사진이 촬영 묶음으로 뭉쳐 있어서
+      묶음 단위로 다시 뽑아 구간을 구했습니다(45.5~58.2%). 측정은 두 번 돌려 측정 시각만 빼면 바이트까지 같게 나오고, 측정 페이지는 저장소에 있어 누구나 다시 돌릴 수 있습니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">13</span>AI가 정말 뭔가를 알아보는 겁니까? 색깔만 맞추는 것 아닙니까?<span class="new">새 질문</span></div>
+    <div class="key">색만으로는 8.1%로 "가장 흔한 곳만 답하기"(9.6%)보다도 못합니다. CNN은 53.2%입니다.</div>
+    <p>같은 사진·같은 시험에서 특징만 바꿔 비교했습니다. 우연 0.7% · 색 분포 8.1% · 작은 흑백 사진 18.6% · CNN 53.2%.
+      CNN과 흑백 사진의 차이 +34.6%p는 사진마다 짝지어 검정했을 때 95% 구간이 +27.9~+39.1%p로 우연이 아닙니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">14</span>왜 이 건물 사진으로 모델을 학습(미세조정)시키지 않았습니까?<span class="new">새 질문</span></div>
+    <div class="key">폰에서 돌아야 했고, 사진을 넣기만 하면 바로 배우는 구조가 필요했기 때문입니다. 다음 개선 여지로 보고 있습니다.</div>
+    <p>미세조정은 학습용 GPU와 시간이 들고, 사진이 늘 때마다 다시 해야 합니다. 대신 이미 학습된 모델의 특징을 그대로 씁니다.
+      솔직하게 말씀드리면, 그 위에 얹은 후처리(평균 빼기·주성분 제거)는 이번 제거 실험에서 <b>효과가 측정되지 않았습니다</b>. 그래서 미세조정이 가장 큰 개선 여지라고 봅니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q"><span class="n">15</span>이 작업에서 가장 크게 배운 것은 무엇입니까?<span class="new">새 질문</span></div>
+    <div class="key">측정을 고치는 것이 성능을 고치는 것보다 먼저라는 것입니다.</div>
+    <p>처음 100%는 사진이 자기 자신을 알아본 것이었고(빼고 재니 3.6%), 가장 큰 개선(41→53%)은 모델이 아니라 앱과 기준 데이터가 사진을 다르게 줄이던 것을 맞춘 것이었습니다.
+      라운지 오류도 앱이 아니라 이름표 문제였습니다. 검사를 만들어 돌리자 화면은 멀쩡한데 조용히 틀리는 결함 13개가 나왔습니다.</p>
+  </div>
+
+  <div class="card">
+    <div class="q">막혔을 때 쓰는 문장</div>
+    <ul>
+      <li>모르는 질문 → <b>"정확히는 모르겠습니다. 확인해서 말씀드리겠습니다."</b></li>
+      <li>안 해 본 것 → <b>"지금은 못 했습니다. 다만 이렇게 하면 될 것 같습니다."</b></li>
+      <li>숫자가 기억 안 날 때 → <b>"대략 ○○ 정도이고, 정확한 값은 자료에 있습니다."</b></li>
+    </ul>
+    <p style="color:var(--ink2);margin:0">가장 강한 답은 한계를 먼저 말하는 것입니다 — "복도는 층마다 똑같이 생겨서 사진만으로는 잘 못 맞힙니다. 그래서 자동으로 확정하지 않습니다."</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ 부록 ═══════════════════════════ -->
+<section class="pb">
+  <div class="part">부록</div>
+  <h1>숫자를 다시 만드는 법 · 파일</h1>
+  <table>
+    <tr><th style="width:150px">페이지 · 스크립트</th><th>만드는 숫자</th><th class="n" style="width:70px">걸리는 시간</th></tr>
+    <tr><td>eval_all.html</td><td>정확도(4.1) · 확신도(4.2) · 신뢰구간 · 두 장 · 좌우 · 층 혼동</td><td class="n">약 90초</td></tr>
+    <tr><td>eval_ablation.html</td><td>기준선(4.3) · 제거 실험(4.4) · 실험 페이지 재현 확인</td><td class="n">약 10분</td></tr>
+    <tr><td>eval_audit.html</td><td>사진 배치 감사(4.8)</td><td class="n">56초</td></tr>
+    <tr><td>ocrtest.html</td><td>글자 읽기(4.5)</td><td class="n"></td></tr>
+    <tr><td>빌드.ps1 · eval_build.html</td><td>빌드 검사 · 재현성(4.9) · 배포 파일과 SHA-1</td><td class="n">18초</td></tr>
+    <tr><td>gen.html</td><td>사진 → 기준 데이터 (사진이 바뀌었을 때만)</td><td class="n">약 7분</td></tr>
+  </table>
+  <div class="note">측정 결과는 <code>생성물/</code>에 날짜별 JSON으로 남습니다. 이 문서의 표와 차트는 2026-09-21 측정 JSON에서 그대로 읽어 그렸습니다.</div>
+
+  <h2>주요 파일</h2>
+  <table>
+    <tr><th style="width:150px">파일</th><th>역할</th></tr>
+    <tr><td>index.html</td><td>앱 원본 (3D · AI · 글자 읽기 · 건의함 · 관리자). 기능 수정은 여기에 건다</td></tr>
+    <tr><td>도구/patch_v58~v77.ps1</td><td>기능 수정 기록. 바꿀 자리가 정확히 한 곳일 때만 적용</td></tr>
+    <tr><td>batches.json</td><td>사진 1,753장 → 촬영 묶음(층 · 파일 계열 · 기기). 측정의 기준</td></tr>
+    <tr><td>README.md</td><td>저장소 설명 · 정확도 · 빌드 방법</td></tr>
+    <tr><td>한계와_대응.txt</td><td>6장의 원문</td></tr>
+    <tr><td>발표자료_모음.txt</td><td>작업 기록 원문 (1~19절)</td></tr>
+  </table>
+  <div class="note" style="margin-top:12px">이 문서의 숫자 중 표·차트는 측정 JSON에서 자동으로 채웠고, 본문 숫자는 JSON과 한 줄씩 대조했습니다.</div>
+</section>
+
+<script>
+var DATA = /*DATA*/null;
+(function(){
+  var D = DATA;
+  function pct(a,b){ return b ? (100*a/b).toFixed(1)+'%' : '-'; }
+  function fx(v){ return (v*100).toFixed(1)+'%'; }
+  function sp(v){ return Math.abs(v) < 0.0005 ? '0.0' : (v > 0 ? '+' : '−') + Math.abs(v*100).toFixed(1); }
+  function el(id){ return document.getElementById(id); }
+  var NS = 'http://www.w3.org/2000/svg';
+  function S(tag, attrs, parent, text){
+    var e = document.createElementNS(NS, tag);
+    for(var k in attrs) e.setAttribute(k, attrs[k]);
+    if(text !== undefined) e.textContent = text;
+    if(parent) parent.appendChild(e);
+    return e;
+  }
+  var C = { s1:'#2a78d6', s2:'#eb6834', s3:'#1baf7a', ink:'#0b0b0b', ink2:'#52514e', grid:'#E4E7EC', axis:'#9AA3AE' };
+
+  /* ── 데이터 현황 표 (시험 대상 기준) ── */
+  var order = ['복도','라운지·로비','창밖','비상계단','후문·중앙계단','비상대피 안내판','엘리베이터 앞·로비','엘리베이터 안','화장실','지하 홀'];
+  var h = '<b>강의실 제외 ' + D.kind['전체(강의실 제외)'].n.toLocaleString() + '장</b> — '
+    + order.filter(function(k){ return D.kind[k]; }).map(function(k){ return k + ' ' + D.kind[k].n; }).join(' · ')
+    + '<br>강의실 ' + D.kind['강의실'].n + '장은 문이 똑같아 따로 "한 장씩 빼고 맞히기"로 잼 (4.1)';
+  el('t-data').innerHTML = h;
+
+  /* ── 4.1 종류별 정확도 ── */
+  var ko = ['지하 홀','후문·중앙계단','엘리베이터 앞·로비','라운지·로비','복도','비상대피 안내판','엘리베이터 안','화장실','비상계단','창밖'];
+  h = '<tr><th>종류</th><th class="n">장수</th><th class="n">정확한 자리</th><th class="n">층</th><th class="n">5등 안</th></tr>';
+  ko.forEach(function(k){ var s = D.kind[k]; if(!s) return;
+    h += '<tr><td>'+k+'</td><td class="n">'+s.n+'</td><td class="n">'+pct(s.e,s.n)+'</td><td class="n">'+pct(s.f,s.n)+'</td><td class="n">'+pct(s.t5,s.n)+'</td></tr>'; });
+  var T = D.kind['전체(강의실 제외)'];
+  h += '<tr class="tot"><td>전체 (강의실 제외)</td><td class="n">'+T.n.toLocaleString()+'</td><td class="n">'+pct(T.e,T.n)+'</td><td class="n">'+pct(T.f,T.n)+'</td><td class="n">'+pct(T.t5,T.n)+'</td></tr>';
+  var R = D.kind['강의실'];
+  h += '<tr><td>강의실 (한 장씩 빼고 맞히기)</td><td class="n">'+R.n+'</td><td class="n">'+pct(R.e,R.n)+'</td><td class="n">'+pct(R.f,R.n)+'</td><td class="n">'+pct(R.t5,R.n)+'</td></tr>';
+  el('t-kind').innerHTML = h;
+
+  /* ── 4.2 확신도 : 선 그래프 ── */
+  (function(){
+    var svg = el('c-sel'), W = 640, H = 250, L = 46, Rt = 120, Tp = 12, B = 32;
+    var pw = W - L - Rt, ph = H - Tp - B;
+    function X(c){ return L + (c - 0.1) / 0.9 * pw; }
+    function Y(v){ return Tp + (1 - (v - 0.4) / 0.6) * ph; }
+    [0.4,0.5,0.6,0.7,0.8,0.9,1.0].forEach(function(v){
+      S('line', {x1:L, x2:L+pw, y1:Y(v), y2:Y(v), stroke:C.grid, 'stroke-width':1}, svg);
+      S('text', {x:L-6, y:Y(v)+3.5, 'text-anchor':'end', 'font-size':10, fill:C.ink2}, svg, Math.round(v*100)+'%');
+    });
+    D.sel.g.forEach(function(p){ S('text', {x:X(p.cov), y:Tp+ph+16, 'text-anchor':'middle', 'font-size':10, fill:C.ink2}, svg, Math.round(p.cov*100)+'%'); });
+    S('text', {x:L+pw/2, y:H-2, 'text-anchor':'middle', 'font-size':10, fill:C.ink2}, svg, '확신 순으로 위에서부터 답하는 비율');
+    /* 이름표는 선들이 가장 벌어진 60% 지점에 붙인다. 100% 지점은 두 "자리" 선이 같은 값이라 겹친다. */
+    function line(pts, key, color, dash, label, dy, ldy){
+      var d = pts.map(function(p,i){ return (i?'L':'M') + X(p.cov).toFixed(1) + ',' + Y(p[key]).toFixed(1); }).join(' ');
+      var a = {d:d, fill:'none', stroke:color, 'stroke-width':2, 'stroke-linejoin':'round', 'stroke-linecap':'round'};
+      if(dash) a['stroke-dasharray'] = '5 4';
+      S('path', a, svg);
+      pts.forEach(function(p){ S('circle', {cx:X(p.cov), cy:Y(p[key]), r:3.6, fill: dash ? '#fff' : color, stroke: color, 'stroke-width': dash ? 1.8 : 1.5}, svg); });
+      var first = pts[0], mid = pts[5];
+      S('text', {x:X(first.cov)+8, y:Y(first[key])+dy, 'font-size':10, 'font-weight':700, fill:C.ink}, svg, fx(first[key]));
+      S('text', {x:X(mid.cov)+6, y:Y(mid[key])+ldy, 'font-size':10, fill:C.ink2}, svg, label);
+    }
+    line(D.sel.g,  'f', C.s2, false, '층 (차이 기준)',       -8, -9);
+    line(D.sel.g,  'e', C.s1, false, '자리 (차이 기준)',     16, -9);
+    line(D.sel.s1, 'e', C.s3, true,  '자리 (1등 유사도 기준)', 16, 21);
+    S('text', {x:X(1.0)+8, y:Y(D.sel.g[9].e)+4, 'font-size':10, 'font-weight':700, fill:C.ink}, svg, fx(D.sel.g[9].e));
+    S('text', {x:X(1.0)+8, y:Y(D.sel.g[9].f)+4, 'font-size':10, 'font-weight':700, fill:C.ink}, svg, fx(D.sel.g[9].f));
+  })();
+  h = '<tr><th>답하는 비율</th>';
+  D.sel.g.forEach(function(p){ if([0.1,0.2,0.3,0.5,0.7,1.0].some(function(c){ return Math.abs(c-p.cov)<1e-6; })) h += '<th class="n">'+Math.round(p.cov*100)+'%</th>'; });
+  h += '</tr>';
+  [['자리 (차이 기준)', D.sel.g, 'e'], ['층 (차이 기준)', D.sel.g, 'f'], ['자리 (1등 유사도 기준)', D.sel.s1, 'e']].forEach(function(r){
+    h += '<tr><td>'+r[0]+'</td>';
+    r[1].forEach(function(p){ if([0.1,0.2,0.3,0.5,0.7,1.0].some(function(c){ return Math.abs(c-p.cov)<1e-6; })) h += '<td class="n">'+fx(p[r[2]])+'</td>'; });
+    h += '</tr>';
+  });
+  el('t-sel').innerHTML = h;
+
+  /* ── 4.3 기준선 : 가로 막대 ── */
+  (function(){
+    var A = D.abl, n = A.pc2.n;
+    var rows = [
+      ['우연 (152곳 중)', A.chance.e/n, A.chance.f/n],
+      ['가장 흔한 곳만', A.prior.e/n, A.prior.f/n],
+      ['색 분포 RGB', A.hist.e/n, A.hist.f/n],
+      ['흑백 사진 16×16', A.tiny.e/n, A.tiny.f/n],
+      ['CNN — 지금 앱', A.pc2.e/n, A.pc2.f/n]
+    ];
+    var svg = el('c-base'), W = 640, L = 118, Rt = 56, Tp = 6, rowH = 42, bh = 13;
+    var pw = W - L - Rt;
+    function X(v){ return L + v * pw; }
+    [0,0.2,0.4,0.6,0.8,1.0].forEach(function(v){
+      S('line', {x1:X(v), x2:X(v), y1:Tp, y2:Tp+rows.length*rowH, stroke:C.grid, 'stroke-width':1}, svg);
+      S('text', {x:X(v), y:Tp+rows.length*rowH+14, 'text-anchor':'middle', 'font-size':10, fill:C.ink2}, svg, Math.round(v*100)+'%');
+    });
+    rows.forEach(function(r, i){
+      var y0 = Tp + i*rowH + 6, bold = i === rows.length-1;
+      S('text', {x:L-8, y:y0+bh+3, 'text-anchor':'end', 'font-size':10.5, 'font-weight': bold?700:400, fill:C.ink}, svg, r[0]);
+      [[r[1], C.s1, 0], [r[2], C.s2, 1]].forEach(function(b){
+        var y = y0 + b[2]*(bh+2), w = Math.max(1.5, X(b[0]) - L);
+        S('rect', {x:L, y:y, width:w, height:bh, rx:2, fill:b[1]}, svg);
+        S('text', {x:L+w+5, y:y+bh-2.5, 'font-size':9.5, fill:C.ink, 'font-weight': bold?700:400}, svg, fx(b[0]));
+      });
+    });
+  })();
+
+  /* ── 4.4 제거 실험 : 짝지은 차이 (숲 그림) ── */
+  (function(){
+    var P = D.pair;
+    var rows = [
+      ['번호판 조각 뺌(지금) vs 넣음', P['pc2-vp']],
+      ['정사각 두 장(지금) vs 한 장', P['pc2-v1']],
+      ['주성분 2개(지금) vs 1개', P['pc2-pc1']],
+      ['후처리(지금) vs 정규화만', P['pc2-raw']],
+      ['주성분 5개 vs 2개(지금)', P['pc5-pc2']]
+    ];
+    var svg = el('c-forest'), W = 640, L = 200, Rt = 150, Tp = 8, rowH = 36;
+    var pw = W - L - Rt, lo = -0.03, hi = 0.06;
+    function X(v){ return L + (v - lo) / (hi - lo) * pw; }
+    [-0.02,0,0.02,0.04,0.06].forEach(function(v){
+      S('line', {x1:X(v), x2:X(v), y1:Tp, y2:Tp+rows.length*rowH, stroke: v===0 ? '#6B7480' : C.grid, 'stroke-width': v===0 ? 1.2 : 1, 'stroke-dasharray': v===0 ? '4 3' : ''}, svg);
+      S('text', {x:X(v), y:Tp+rows.length*rowH+14, 'text-anchor':'middle', 'font-size':10, fill:C.ink2}, svg, (v>0?'+':'')+(v*100).toFixed(0)+'%p');
+    });
+    S('text', {x:X(0)-4, y:Tp+rows.length*rowH+28, 'text-anchor':'end', 'font-size':9, fill:C.ink2}, svg, '← vs 뒤쪽이 나음');
+    S('text', {x:X(0)+4, y:Tp+rows.length*rowH+28, 'font-size':9, fill:C.ink2}, svg, 'vs 앞쪽이 나음 →');
+    rows.forEach(function(r, i){
+      var e = r[1]['자리'], y = Tp + i*rowH + rowH/2, sig = e.lo > 0 || e.hi < 0;
+      S('text', {x:L-10, y:y+4, 'text-anchor':'end', 'font-size':10.5, fill:C.ink}, svg, r[0]);
+      S('line', {x1:X(e.lo), x2:X(e.hi), y1:y, y2:y, stroke:C.s1, 'stroke-width':2, 'stroke-linecap':'round'}, svg);
+      S('line', {x1:X(e.lo), x2:X(e.lo), y1:y-5, y2:y+5, stroke:C.s1, 'stroke-width':2}, svg);
+      S('line', {x1:X(e.hi), x2:X(e.hi), y1:y-5, y2:y+5, stroke:C.s1, 'stroke-width':2}, svg);
+      S('circle', {cx:X(e.d), cy:y, r:5, fill: sig ? C.s1 : '#fff', stroke:C.s1, 'stroke-width':2}, svg);
+      S('text', {x:L+pw+10, y:y+4, 'font-size':10, fill:C.ink, 'font-weight': sig?700:400}, svg,
+        sp(e.d)+'%p  ('+sp(e.lo)+' ~ '+sp(e.hi)+')');
+    });
+  })();
+  var A = D.abl, n = A.pc2.n;
+  function ablTable(id, head, rows){
+    var t = '<tr><th>'+head+'</th><th class="n">자리</th><th class="n">층</th><th class="n">5등 안</th></tr>';
+    rows.forEach(function(r){ var s = A[r[1]];
+      t += '<tr'+(r[2]?' class="cur"':'')+'><td>'+r[0]+'</td><td class="n">'+pct(s.e,s.n)+'</td><td class="n">'+pct(s.f,s.n)+'</td><td class="n">'+pct(s.t5,s.n)+'</td></tr>'; });
+    el(id).innerHTML = t;
+  }
+  ablTable('t-abl1', 'CNN 후처리', [['정규화만','raw'],['+ 평균 빼기','mean'],['+ 주성분 1개','pc1'],['+ 주성분 2개 (지금)','pc2',1],['+ 주성분 3개','pc3'],['+ 주성분 5개','pc5']]);
+  ablTable('t-abl2', '시점 (한 사진을 자르는 방식)', [['정사각 1.0 한 장','v1'],['정사각 0.6 한 장','v06'],['1.0 + 0.6 (지금)','pc2',1],['+ 번호판 조각 (v58~v66)','vp']]);
+
+  /* ── 4.6 두 장 · 좌우 ── */
+  var o = D.two['한장'], t = D.two['두장'];
+  el('t-two').innerHTML = '<tr><th>복도 '+o.n+'장</th><th class="n">한 장</th><th class="n">두 장</th></tr>'
+    + '<tr><td>정확한 자리</td><td class="n">'+pct(o.e,o.n)+'</td><td class="n"><b>'+pct(t.e,t.n)+'</b></td></tr>'
+    + '<tr><td>층</td><td class="n">'+pct(o.f,o.n)+'</td><td class="n"><b>'+pct(t.f,t.n)+'</b></td></tr>'
+    + '<tr><td>5등 안</td><td class="n">'+pct(o.t5,o.n)+'</td><td class="n"><b>'+pct(t.t5,t.n)+'</b></td></tr>';
+  h = '<tr><th>복도 좌우 (여유)</th><th class="n">사진 비율</th><th class="n">좌우 정확</th></tr>';
+  D.sidecuts.forEach(function(c){ h += '<tr><td>'+c[0].replace('여유 ','')+'</td><td class="n">'+c[2]+'</td><td class="n">'+c[3]+'</td></tr>'; });
+  el('t-side').innerHTML = h;
+
+  /* ── 4.7 층 혼동 : 열지도 ── */
+  (function(){
+    var svg = el('c-conf'), rowsF = ['1','2','3','4','5'], colsF = ['B','1','2','3','4','5'];
+    var L = 110, Tp = 36, cw = 78, ch = 34;
+    function ramp(t){   /* 순차 파랑 : 0 → 연한 색, 1 → 진한 색 */
+      var a = [247,250,253], b = [28,92,171];
+      return 'rgb(' + a.map(function(x,i){ return Math.round(x + (b[i]-x)*Math.pow(t,0.8)); }).join(',') + ')';
+    }
+    S('text', {x:L + cw*colsF.length/2, y:10, 'text-anchor':'middle', 'font-size':10, fill:C.ink2}, svg, 'AI 가 답한 층 →');
+    colsF.forEach(function(c, j){ S('text', {x:L + j*cw + cw/2, y:Tp-6, 'text-anchor':'middle', 'font-size':10, 'font-weight':700, fill:C.ink}, svg, c==='B'?'지하':c+'층'); });
+    S('text', {x:14, y:Tp + ch*rowsF.length/2, 'font-size':10, fill:C.ink2, transform:'rotate(-90 14 '+(Tp + ch*rowsF.length/2)+')', 'text-anchor':'middle'}, svg, '실제 층');
+    rowsF.forEach(function(r, i){
+      var tot = 0; colsF.forEach(function(c){ tot += D.conf[r+'→'+c] || 0; });
+      S('text', {x:L-8, y:Tp + i*ch + ch/2 + 4, 'text-anchor':'end', 'font-size':10, 'font-weight':700, fill:C.ink}, svg, r+'층 ('+tot+'장)');
+      colsF.forEach(function(c, j){
+        var v = D.conf[r+'→'+c] || 0, f = tot ? v/tot : 0, x = L + j*cw, y = Tp + i*ch;
+        S('rect', {x:x+1, y:y+1, width:cw-2, height:ch-2, rx:3, fill: v ? ramp(f) : '#FAFBFC', stroke: r===c ? '#10345E' : 'none', 'stroke-width': r===c ? 1.5 : 0}, svg);
+        if(v) S('text', {x:x+cw/2, y:y+ch/2+4, 'text-anchor':'middle', 'font-size':10, fill: f > 0.45 ? '#fff' : C.ink, 'font-weight': r===c?700:400}, svg,
+          v + ' (' + Math.round(100*f) + '%)');
+      });
+    });
+  })();
+
+  /* ── 4.1 신뢰구간 : 묶음 단위 vs 사진 독립 ── */
+  (function(){
+    var svg = el('c-ci'), W = 640, L = 70, Rt = 24, Tp = 10, rowH = 50;
+    var pw = W - L - Rt, lo = 0.40, hi = 0.75;
+    function X(v){ return L + (v - lo) / (hi - lo) * pw; }
+    [0.40,0.45,0.50,0.55,0.60,0.65,0.70,0.75].forEach(function(v){
+      S('line', {x1:X(v), x2:X(v), y1:Tp, y2:Tp+2*rowH, stroke:C.grid, 'stroke-width':1}, svg);
+      S('text', {x:X(v), y:Tp+2*rowH+14, 'text-anchor':'middle', 'font-size':10, fill:C.ink2}, svg, Math.round(v*100)+'%');
+    });
+    [['정확한 자리', D.ci['자리']], ['층', D.ci['층']]].forEach(function(r, i){
+      var c = r[1], y = Tp + i*rowH + 16;
+      S('text', {x:L-10, y:y+10, 'text-anchor':'end', 'font-size':10.5, 'font-weight':700, fill:C.ink}, svg, r[0]);
+      /* 묶음 단위 (위) */
+      S('line', {x1:X(c.lo), x2:X(c.hi), y1:y, y2:y, stroke:C.s1, 'stroke-width':3, 'stroke-linecap':'round'}, svg);
+      S('text', {x:X(c.lo)-5, y:y+4, 'text-anchor':'end', 'font-size':9.5, fill:C.ink}, svg, fx(c.lo));
+      S('text', {x:X(c.hi)+5, y:y+4, 'font-size':9.5, fill:C.ink}, svg, fx(c.hi));
+      /* 사진 독립 (아래) */
+      S('line', {x1:X(c.wilsonLo), x2:X(c.wilsonHi), y1:y+14, y2:y+14, stroke:'#9AA3AE', 'stroke-width':3, 'stroke-linecap':'round'}, svg);
+      S('circle', {cx:X(c.p), cy:y+7, r:4.5, fill:C.ink, stroke:'#fff', 'stroke-width':1.5}, svg);
+      S('text', {x:X(c.p), y:y-7, 'text-anchor':'middle', 'font-size':10, 'font-weight':700, fill:C.ink}, svg, fx(c.p));
+    });
+  })();
+})();
+</script>
+</body>
+</html>

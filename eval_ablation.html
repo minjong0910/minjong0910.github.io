@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>기준선과 제거 실험</title>
+<style>
+  body{background:#0E1420;color:#E6EDF5;font:14px/1.7 system-ui,"Malgun Gothic",sans-serif;margin:0;padding:18px 20px 60px;}
+  h1{font-size:19px;margin:0 0 4px}
+  .sub{color:#8FA3BC;font-size:12.5px;margin-bottom:14px}
+  button{background:#1B4F8C;color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer}
+  button:disabled{background:#33405A;color:#8FA3BC;cursor:default}
+  .bar{height:6px;background:#1B2536;border-radius:3px;margin:12px 0;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:#00E5FF;transition:width .2s}
+  .st{color:#8FA3BC;font-size:12.5px;margin-bottom:10px}
+  h2{font-size:15px;margin:22px 0 6px;color:#9FD0FF}
+  table{border-collapse:collapse;margin:6px 0 4px;font-size:13px}
+  th,td{border:1px solid #2A3852;padding:5px 9px;text-align:right}
+  th{background:#16203050;color:#9FD0FF;font-weight:600}
+  td.l,th.l{text-align:left}
+  tr.cur td{background:#16301F}
+  .note{color:#8FA3BC;font-size:12px;background:#131C2B;border-left:3px solid #2A4A75;padding:8px 11px;margin:8px 0;line-height:1.65}
+  .warn{border-left-color:#7C3B3B;color:#FFC9C9}
+</style>
+</head>
+<body>
+<h1>기준선과 제거 실험 — 이 방식이 정말 일을 하고 있나</h1>
+<div class="sub">사진 1,753장을 한 번 읽어 여러 방식으로 같은 시험을 칩니다. 약 15~20분 걸립니다.</div>
+<div class="note">
+  <b>공정한 비교를 위해 전부 같게 둔 것</b> — 사진을 줄이는 방식(앱과 같은 1280px 사본 → 블록 평균 224px),
+  시험 대상(강의실 제외, 두 배치 이상 찍힌 곳 — eval_all.html 의 「전체(강의실 제외)」와 같은 사진들), 같은 배치 사진은 기준에서 빼기, 장소마다 가장 닮은 사진 점수로 순위 매기기.
+  <b>바꾸는 것은 한 가지씩만</b> 바꿉니다.<br>
+  <b>재현 확인</b> — 이 페이지가 "지금 앱 방식"으로 만든 벡터를 실제 배포된 aivec.js 와 사진마다 견줘,
+  같은 파이프라인인지 스스로 확인합니다. 여기서 어긋나면 아래 숫자는 믿으면 안 됩니다.
+</div>
+
+<button id="go" disabled>실험 시작</button>
+<button id="dl" disabled>결과 JSON 받기</button>
+<div class="bar"><i id="pg"></i></div>
+<div class="st" id="st">준비 중…</div>
+<div id="out"></div>
+
+<script src="aivec.js"></script>
+<script src="lib/tf.min.js"></script>
+<script src="lib/mobilenet.min.js"></script>
+<script>
+(function(){
+var ST=document.getElementById('st'), PG=document.getElementById('pg'), OUT=document.getElementById('out');
+var RESULT=null, PHOTOS=[], BATCH=null, net=null, DIM=1280;
+function prog(f){ PG.style.width=(f*100).toFixed(1)+'%'; }
+function pct(a,b){ return b ? (100*a/b).toFixed(1)+'%' : '-'; }
+function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+function table(head, rows){
+  var h='<table><tr>'+head.map(function(c,i){ return '<th class="'+(i===0?'l':'')+'">'+esc(c)+'</th>'; }).join('')+'</tr>';
+  rows.forEach(function(r){ h+='<tr class="'+(r.cls||'')+'">'+r.c.map(function(c,i){ return '<td class="'+(i===0?'l':'')+'">'+c+'</td>'; }).join('')+'</tr>'; });
+  return h+'</table>';
+}
+/* setTimeout 대신 MessageChannel 로 양보한다 — 안 보이는 탭에서 타이머는 초당 1번으로 늦춰진다 */
+var MC = new MessageChannel(), MCQ = [];
+MC.port1.onmessage = function(){ var f = MCQ.shift(); if(f) f(); };
+var tick = function(){ return new Promise(function(r){ MCQ.push(r); MC.port2.postMessage(0); }); };
+
+/* ═══ gen.html 에서 그대로 옮긴 전처리 — gen.html 을 바꾸면 여기도 바꿀 것 ═══
+   (아래 '재현 확인'이 어긋남을 잡아 준다) */
+var PLATE={W:512,MINPX:60,MAXAREA:0.10,MINFILL:0.35,ARLO:0.25,ARHI:4.0,MAX:3};
+function plateBoxes(img){
+  var k=Math.min(1,PLATE.W/Math.max(img.width||1,img.height||1));
+  var w=Math.max(1,Math.round((img.width||1)*k)), h=Math.max(1,Math.round((img.height||1)*k));
+  var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+  var cx=cv.getContext('2d',{willReadFrequently:true}), d;
+  try{ cx.drawImage(img,0,0,w,h); d=cx.getImageData(0,0,w,h).data; }catch(e){ return []; }
+  var n=w*h, mask=new Uint8Array(n), i,p,r,g,b,mx,mn;
+  for(i=0;i<n;i++){ p=i<<2; r=d[p]; g=d[p+1]; b=d[p+2];
+    mx=r>g?(r>b?r:b):(g>b?g:b); mn=r<g?(r<b?r:b):(g<b?g:b);
+    if(b-r>35&&b-g>20&&b>55&&b<240&&mx-mn>38) mask[i]=1; }
+  var seen=new Uint8Array(n), stk=new Int32Array(n), out=[], sp,j,x,y,x0,y0,x1,y1,c;
+  for(i=0;i<n;i++){
+    if(!mask[i]||seen[i]) continue;
+    sp=0; stk[sp++]=i; seen[i]=1; x0=w; y0=h; x1=-1; y1=-1; c=0;
+    while(sp){ j=stk[--sp]; c++; x=j%w; y=(j/w)|0;
+      if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;
+      if(x+1<w&&mask[j+1]&&!seen[j+1]){seen[j+1]=1;stk[sp++]=j+1;}
+      if(x>0&&mask[j-1]&&!seen[j-1]){seen[j-1]=1;stk[sp++]=j-1;}
+      if(y+1<h&&mask[j+w]&&!seen[j+w]){seen[j+w]=1;stk[sp++]=j+w;}
+      if(y>0&&mask[j-w]&&!seen[j-w]){seen[j-w]=1;stk[sp++]=j-w;} }
+    var bw=x1-x0+1, bh=y1-y0+1, ar=bw/bh;
+    if(c<PLATE.MINPX||bw*bh>PLATE.MAXAREA*n) continue;
+    if(c/(bw*bh)<PLATE.MINFILL) continue;
+    if(ar<PLATE.ARLO||ar>PLATE.ARHI) continue;
+    out.push({n:c,x0:x0/w,y0:y0/h,x1:(x1+1)/w,y1:(y1+1)/h});
+  }
+  out.sort(function(a,b){return b.n-a.n;});
+  return out.slice(0,PLATE.MAX);
+}
+function sqView(img, zoom){
+  var w = img.width || img.naturalWidth, h = img.height || img.naturalHeight;
+  var sz = Math.min(w, h) * zoom, S = Math.max(1, Math.round(sz));
+  var sx = Math.round((w - sz)/2), sy = Math.round((h - sz)/2);
+  var cv = document.createElement('canvas'); cv.width = 224; cv.height = 224;
+  var cx = cv.getContext('2d'); cx.fillStyle = '#000'; cx.fillRect(0, 0, 224, 224);
+  if(S < 270){ cx.drawImage(img, sx, sy, S, S, 0, 0, 224, 224); return cv; }
+  var c0 = document.createElement('canvas'); c0.width = S; c0.height = S;
+  var d;
+  try{
+    var x0 = c0.getContext('2d', {willReadFrequently:true});
+    x0.drawImage(img, sx, sy, S, S, 0, 0, S, S);
+    d = x0.getImageData(0, 0, S, S).data;
+  }catch(e){ cx.drawImage(img, sx, sy, S, S, 0, 0, 224, 224); return cv; }
+  var od = cx.createImageData(224, 224), x, y, xx, yy;
+  for(y=0;y<224;y++){
+    var ya = Math.floor(y*S/224), yb = Math.max(ya+1, Math.floor((y+1)*S/224));
+    for(x=0;x<224;x++){
+      var xa = Math.floor(x*S/224), xb = Math.max(xa+1, Math.floor((x+1)*S/224));
+      var r=0, g=0, b=0, cnt=0;
+      for(yy=ya; yy<yb; yy++){
+        var p = (yy*S+xa)<<2;
+        for(xx=xa; xx<xb; xx++){ r+=d[p]; g+=d[p+1]; b+=d[p+2]; p+=4; cnt++; }
+      }
+      var o = (y*224+x)<<2;
+      od.data[o]=r/cnt; od.data[o+1]=g/cnt; od.data[o+2]=b/cnt; od.data[o+3]=255;
+    }
+  }
+  cx.putImageData(od, 0, 0);
+  return cv;
+}
+function plateView(img){
+  var bs=plateBoxes(img); if(!bs.length) return null;
+  var b=bs[0], bw=b.x1-b.x0, bh=b.y1-b.y0;
+  var x0=Math.max(0,b.x0-0.40*bw), x1=Math.min(1,b.x1+0.40*bw);
+  var y0=Math.max(0,b.y0-0.95*bh), y1=Math.min(1,b.y1+0.30*bh);
+  var sx=Math.round(x0*img.width), sy=Math.round(y0*img.height);
+  var sw=Math.round((x1-x0)*img.width), sh=Math.round((y1-y0)*img.height);
+  if(sw<10||sh<10) return null;
+  var cv=document.createElement('canvas'); cv.width=224; cv.height=224;
+  var cx=cv.getContext('2d'); cx.fillStyle='#000'; cx.fillRect(0,0,224,224);
+  cx.drawImage(img,sx,sy,sw,sh,0,0,224,224);
+  return cv;
+}
+function loadImg(src){ return new Promise(function(res,rej){
+  var im=new Image(); im.onload=function(){res(im);}; im.onerror=function(){rej(src);}; im.src=src; }); }
+var PH_MAXDIM=1280, PH_Q=0.72;
+async function appImg(path){
+  var blob = await (await fetch(path)).blob();
+  var el, w, h, bm=null;
+  if(window.createImageBitmap){
+    try{ bm = await createImageBitmap(blob, {imageOrientation:'from-image'}); el=bm; w=bm.width; h=bm.height; }catch(e){ bm=null; }
+  }
+  if(!bm){
+    var url = await new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){res(r.result);}; r.onerror=rej; r.readAsDataURL(blob); });
+    el = await loadImg(url); w = el.naturalWidth; h = el.naturalHeight;
+  }
+  var sc = Math.min(1, PH_MAXDIM/Math.max(w,h));
+  var cv = document.createElement('canvas');
+  cv.width = Math.max(1, Math.round(w*sc)); cv.height = Math.max(1, Math.round(h*sc));
+  cv.getContext('2d').drawImage(el, 0, 0, cv.width, cv.height);
+  if(bm && bm.close) bm.close();
+  return await loadImg(cv.toDataURL('image/jpeg', PH_Q));
+}
+function l2(v){ var s=0,j,n=v.length; for(j=0;j<n;j++) s+=v[j]*v[j]; s=Math.sqrt(s)||1;
+  var o=new Float32Array(n); for(j=0;j<n;j++) o[j]=v[j]/s; return o; }
+/* ═══ 옮긴 코드 끝 ═══ */
+
+/* ── 기준선 특징 : CNN 과 똑같은 224px 정사각 사진에서 뽑는다 (특징만 다르게) ── */
+function pixels(cv){ return cv.getContext('2d', {willReadFrequently:true}).getImageData(0,0,224,224).data; }
+/* 작은 흑백 사진 (Torralba 2008 "80 million tiny images") — 16×16, 자기 평균을 빼고 정규화 */
+function tinyFeat(d){
+  var f = new Float32Array(256), x, y, xx, yy, m = 0;
+  for(y=0;y<16;y++) for(x=0;x<16;x++){
+    var s = 0;
+    for(yy=y*14; yy<y*14+14; yy++) for(xx=x*14; xx<x*14+14; xx++){
+      var p = (yy*224+xx)<<2; s += 0.299*d[p] + 0.587*d[p+1] + 0.114*d[p+2];
+    }
+    f[y*16+x] = s/196; m += f[y*16+x];
+  }
+  m /= 256; for(x=0;x<256;x++) f[x] -= m;
+  return l2(f);
+}
+/* 색 분포 — RGB 각 8칸, 512칸. 합 1 → 제곱근 → 정규화 (내적이 Bhattacharyya 계수가 된다) */
+function histFeat(d){
+  var f = new Float32Array(512), i;
+  for(i=0;i<d.length;i+=4) f[((d[i]>>5)<<6)|((d[i+1]>>5)<<3)|(d[i+2]>>5)] += 1;
+  var t = d.length/4; for(i=0;i<512;i++) f[i] = Math.sqrt(f[i]/t);
+  return l2(f);
+}
+
+/* ── 1) 사진을 한 번씩 읽어 모든 특징을 뽑는다 ─────────────────── */
+var P = [];   // {code,name,g,plate,s1,s06,tiny,hist}
+async function extract(){
+  ST.textContent = '모델 준비 중…';
+  await tf.setBackend('webgl').catch(function(){ return tf.setBackend('cpu'); });
+  await tf.ready();
+  net = await mobilenet.load({version:2, alpha:0.5});
+  var t0 = Date.now();
+  async function emb(cv){ var t = net.infer(cv, true); var a = await t.data(); t.dispose(); return l2(Float32Array.from(a)); }
+  for(var i=0;i<PHOTOS.length;i++){
+    var ph = PHOTOS[i], img;
+    try{ img = await appImg(ph.path); }catch(e){ continue; }
+    var pv = plateView(img), c1 = sqView(img, 1.0), c06 = sqView(img, 0.6);
+    var d1 = pixels(c1);
+    P.push({ code:ph.label, name:ph.name, g:(BATCH && BATCH[ph.name]) || ('?' + ph.name),
+             plate: pv ? await emb(pv) : null, s1: await emb(c1), s06: await emb(c06),
+             tiny: tinyFeat(d1), hist: histFeat(d1) });
+    if(i % 5 === 0){
+      prog(0.5*(i+1)/PHOTOS.length);
+      var el = (Date.now()-t0)/1000, left = el/(i+1)*(PHOTOS.length-i-1);
+      ST.textContent = '① 사진 읽기 ' + (i+1) + ' / ' + PHOTOS.length + ' · 남은 시간 약 ' + Math.ceil(left/60) + '분';
+      await tick();
+    }
+  }
+  return Math.round((Date.now()-t0)/1000);
+}
+
+/* ── 2) CNN 후처리 : gen.html 과 같은 방법 (평균 → 거듭제곱 반복으로 주성분, 차례로 걷어냄) ──
+   gen.html 처럼 평균·주성분은 번호판 조각까지 포함한 모든 벡터로 구한다. */
+var MEAN = null, PCS = [];
+function fitPost(maxPc){
+  var RAW = [];
+  P.forEach(function(p){ if(p.plate) RAW.push(p.plate); RAW.push(p.s1); RAW.push(p.s06); });
+  var n = RAW.length, j, i;
+  MEAN = new Float32Array(DIM);
+  for(i=0;i<n;i++) for(j=0;j<DIM;j++) MEAN[j] += RAW[i][j]/n;
+  var CEN = RAW.map(function(v){ var o = new Float32Array(DIM); for(var k=0;k<DIM;k++) o[k] = v[k]-MEAN[k]; return o; });
+  /* gen.html 의 시작값 : 1번 sin(j*0.7654), 2번 cos(j*1.2345). 3번부터는 이 실험에만 있다. */
+  var SEED = [function(k){ return Math.sin((k+1)*0.7654)+0.001; }, function(k){ return Math.cos((k+1)*1.2345)+0.001; },
+              function(k){ return Math.sin((k+1)*2.1113)+0.001; }, function(k){ return Math.cos((k+1)*0.3917)+0.001; },
+              function(k){ return Math.sin((k+1)*1.7071)+0.001; }];
+  PCS = [];
+  for(var c=0; c<maxPc; c++){
+    if(c > 0){   /* 앞 주성분을 걷어낸다 (deflation) */
+      var prev = PCS[c-1];
+      for(i=0;i<n;i++){ var dd=0; for(j=0;j<DIM;j++) dd += CEN[i][j]*prev[j]; for(j=0;j<DIM;j++) CEN[i][j] -= dd*prev[j]; }
+    }
+    var pc = new Float32Array(DIM); for(j=0;j<DIM;j++) pc[j] = SEED[c](j); pc = l2(pc);
+    for(var it=0; it<30; it++){
+      var u = new Float32Array(DIM);
+      for(i=0;i<n;i++){ var d=0; for(j=0;j<DIM;j++) d += CEN[i][j]*pc[j]; for(j=0;j<DIM;j++) u[j] += d*CEN[i][j]; }
+      pc = l2(u);
+    }
+    PCS.push(pc);
+  }
+}
+/* k = -1 : 정규화만 · 0 : 평균 빼기 · 1~5 : 주성분 k 개까지 걷어냄 */
+function post(v, k){
+  if(k < 0) return v;
+  var o = new Float32Array(DIM), j;
+  for(j=0;j<DIM;j++) o[j] = v[j]-MEAN[j];
+  for(var c=0;c<k;c++){ var pc = PCS[c], d = 0; for(j=0;j<DIM;j++) d += o[j]*pc[j]; for(j=0;j<DIM;j++) o[j] -= d*pc[j]; }
+  return l2(o);
+}
+
+/* ── 3) 재현 확인 : 지금 앱 방식(주성분 2개)으로 만든 벡터 vs 배포된 aivec.js ── */
+function reproduce(){
+  var A = window.AIVEC_DATA; if(!A) return null;
+  var D = A.dim, bin = atob(A.q), by = {};
+  A.names.forEach(function(nm, i){ (by[nm] = by[nm] || []).push(i); });
+  function vecAt(i){ var v = new Float32Array(D), s = 0;
+    for(var j=0;j<D;j++){ var b = bin.charCodeAt(i*D+j); var q = (b>127?b-256:b)/127; v[j] = q; s += q*q; }
+    s = Math.sqrt(s)||1; for(j=0;j<D;j++) v[j] /= s; return v; }
+  function cos(a,b){ var t=0; for(var j=0;j<D;j++) t += a[j]*b[j]; return t; }
+  var c1 = [], c06 = [], plateMismatch = 0, missing = 0;
+  P.forEach(function(p){
+    var ix = by[p.name]; if(!ix){ missing++; return; }
+    var hasPlate = ix.length === 3;
+    if(hasPlate !== !!p.plate) plateMismatch++;
+    var o = hasPlate ? 1 : 0;
+    c1.push(cos(post(p.s1,2), vecAt(ix[o]))); c06.push(cos(post(p.s06,2), vecAt(ix[o+1])));
+  });
+  function summ(a){ a.sort(function(x,y){return x-y;}); var m=0; a.forEach(function(x){m+=x;});
+    return {mean:m/a.length, min:a[0], p01:a[Math.floor(a.length*0.01)]}; }
+  return {s1:summ(c1), s06:summ(c06), plateMismatch:plateMismatch, missing:missing, n:c1.length};
+}
+
+/* ── 4) 같은 시험 : eval_all.html 과 같은 대상·같은 배치 제외·같은 순위 ── */
+function floorOf(c){
+  c = String(c);
+  if(c === 'B1' || c === 'EVB1') return 'B';
+  if(/^GATE/.test(c)) return '1';
+  var m = c.match(/^HALL([1-5])[LR]$/) || c.match(/^13([1-5])/) || c.match(/^(?:EVIN|EMS|SIGN|WIN|LNG|EV|WC|ES)([1-5])/);
+  return m ? m[1] : '?';
+}
+function isRoom(c){ return /^13/.test(c); }
+var TEST = null;
+function testSet(){
+  var cb = {};
+  P.forEach(function(p){ (cb[p.code] = cb[p.code] || {})[p.g] = 1; });
+  TEST = []; P.forEach(function(p, i){ if(!isRoom(p.code) && Object.keys(cb[p.code]).length > 1) TEST.push(i); });
+}
+/* vecs(p) : 그 사진의 벡터 목록 (시점이 여럿이면 여럿) */
+async function evaluate(vecs, label){
+  var V = P.map(vecs), n = P.length, e = 0, f = 0, t5 = 0;
+  for(var ti=0; ti<TEST.length; ti++){
+    var qi = TEST[ti], q = V[qi], g = P[qi].g, best = {};
+    for(var ri=0; ri<n; ri++){
+      if(P[ri].g === g) continue;
+      var R = V[ri], s = -2;
+      for(var a=0;a<q.length;a++) for(var b=0;b<R.length;b++){
+        var x = q[a], y = R[b], t = 0, L = x.length;
+        for(var j=0;j<L;j++) t += x[j]*y[j];
+        if(t > s) s = t;
+      }
+      var c = P[ri].code; if(!(c in best) || s > best[c]) best[c] = s;
+    }
+    var arr = Object.keys(best).sort(function(u,w){ return best[w]-best[u]; });
+    var own = P[qi].code;
+    if(arr[0] === own) e++;
+    if(floorOf(arr[0]) === floorOf(own)) f++;
+    if(arr.slice(0,5).indexOf(own) >= 0) t5++;
+    if(ti % 40 === 0){ ST.textContent = '② ' + label + ' · ' + ti + ' / ' + TEST.length; await tick(); }
+  }
+  return {n:TEST.length, e:e, f:f, t5:t5};
+}
+
+/* ── 5) 해석적 기준선 : 우연 · 가장 흔한 것만 답하기 ── */
+function analytic(){
+  var codes = {}, floors = {}, n = TEST.length;
+  P.forEach(function(p){ if(!isRoom(p.code)) codes[p.code] = 1; });
+  var K = Object.keys(codes).length;
+  var fl = {}; Object.keys(codes).forEach(function(c){ fl[floorOf(c)] = 1; });
+  var cc = {}; TEST.forEach(function(i){ var c = P[i].code; cc[c] = (cc[c]||0)+1; floors[floorOf(c)] = (floors[floorOf(c)]||0)+1; });
+  var top = Object.keys(cc).sort(function(a,b){ return cc[b]-cc[a]; });
+  var fTop = Object.keys(floors).sort(function(a,b){ return floors[b]-floors[a]; })[0];
+  var t5 = 0; top.slice(0,5).forEach(function(c){ t5 += cc[c]; });
+  return {
+    chance:{n:n, e:n/K, f:n/Object.keys(fl).length, t5:5*n/K, K:K},
+    prior:{n:n, e:cc[top[0]], f:floors[fTop], t5:t5, code:top[0], floor:fTop}
+  };
+}
+
+var CNN = [
+  {id:'raw', label:'CNN · 정규화만',                          k:-1, v:['s1','s06']},
+  {id:'mean',label:'CNN · + 평균 빼기',                       k: 0, v:['s1','s06']},
+  {id:'pc1', label:'CNN · + 주성분 1개 제거',                 k: 1, v:['s1','s06']},
+  {id:'pc2', label:'CNN · + 주성분 2개 제거  ← 지금 앱',       k: 2, v:['s1','s06'], cur:true},
+  {id:'pc3', label:'CNN · + 주성분 3개 제거',                 k: 3, v:['s1','s06']},
+  {id:'pc5', label:'CNN · + 주성분 5개 제거',                 k: 5, v:['s1','s06']}
+];
+var VIEWS = [
+  {id:'v1',  label:'정사각 1.0 한 장만',                      k: 2, v:['s1']},
+  {id:'v06', label:'정사각 0.6 한 장만',                      k: 2, v:['s06']},
+  {id:'v2',  label:'정사각 1.0 + 0.6  ← 지금 앱',              k: 2, v:['s1','s06'], cur:true},
+  {id:'vp',  label:'+ 번호판 조각 (v58~v66 방식)',            k: 2, v:['plate','s1','s06']}
+];
+
+async function run(){
+  document.getElementById('go').disabled = true;
+  var T0 = Date.now();
+  var readSecs = await extract();
+  ST.textContent = '후처리 준비 (평균 · 주성분 5개)…'; await tick();
+  fitPost(5);
+  var rep = reproduce();
+  testSet();
+
+  var res = {}, an = analytic();
+  res.chance = an.chance; res.prior = an.prior;
+  var list = [
+    {id:'tiny', label:'작은 흑백 사진 16×16', vecs:function(p){ return [p.tiny]; }},
+    {id:'hist', label:'색 분포 RGB 8×8×8',    vecs:function(p){ return [p.hist]; }}
+  ];
+  function cnnVecs(cfg){ return function(p){
+    return cfg.v.map(function(w){ return p[w] ? post(p[w], cfg.k) : null; }).filter(Boolean); }; }
+  CNN.concat(VIEWS).forEach(function(c){ if(c.id !== 'v2') list.push({id:c.id, label:c.label, vecs:cnnVecs(c)}); });
+
+  for(var i=0;i<list.length;i++){
+    prog(0.5 + 0.5*i/list.length);
+    res[list[i].id] = await evaluate(list[i].vecs, list[i].label);
+  }
+  res.v2 = res.pc2;   /* 같은 설정이라 다시 재지 않는다 */
+  render(res, rep, readSecs, Math.round((Date.now()-T0)/1000));
+}
+
+function render(res, rep, readSecs, secs){
+  function row(id, label, cur){ var r = res[id];
+    return {cls:cur?'cur':'', c:[esc(label), r.n, pct(r.e,r.n), pct(r.f,r.n), pct(r.t5,r.n)]}; }
+  var n = TEST.length, h = '';
+
+  h += '<h2>재현 확인 — 이 페이지의 "지금 앱 방식" = 배포된 aivec.js 인가</h2>';
+  if(rep){
+    var okRep = rep.s1.mean >= 0.99 && rep.s06.mean >= 0.99 && rep.plateMismatch === 0 && rep.missing === 0;
+    h += '<div class="note ' + (okRep ? '' : 'warn') + '">'
+       + '사진 ' + rep.n + '장 · 코사인 유사도 평균 <b>정사각 1.0 : ' + rep.s1.mean.toFixed(4) + '</b> (최저 ' + rep.s1.min.toFixed(4) + ')'
+       + ' · <b>정사각 0.6 : ' + rep.s06.mean.toFixed(4) + '</b> (최저 ' + rep.s06.min.toFixed(4) + ')'
+       + ' · 번호판 유무 불일치 ' + rep.plateMismatch + '장 · aivec 에 없는 사진 ' + rep.missing + '장<br>'
+       + (okRep ? '→ <b>같은 파이프라인입니다.</b> 1.0 이 아닌 것은 aivec.js 가 벡터를 8비트로 줄여 저장하기 때문입니다.'
+                : '→ <b>어긋납니다. 아래 숫자를 믿지 마세요.</b> gen.html 과 이 페이지의 전처리가 달라졌을 수 있습니다.')
+       + '</div>';
+  }
+
+  h += '<h2>① 기준선 — 모델이 실제로 일을 하고 있나</h2>'
+     + table(['방식','장수','정확한 자리','층','5등 안'], [
+        {c:['우연 (' + res.chance.K + '곳 중 아무거나)', n, pct(res.chance.e,n), pct(res.chance.f,n), pct(res.chance.t5,n)]},
+        {c:['가장 흔한 장소만 답하기 (' + res.prior.code + ')', n, pct(res.prior.e,n), pct(res.prior.f,n), pct(res.prior.t5,n)]},
+        row('tiny', '작은 흑백 사진 16×16'),
+        row('hist', '색 분포 RGB 8×8×8'),
+        row('pc2',  'CNN (MobileNetV2) — 지금 앱', true)])
+     + '<div class="note">세 기준선 모두 CNN 과 <b>같은 224px 사진</b>에서 특징만 다르게 뽑았습니다. 차이는 순전히 특징의 차이입니다.</div>';
+
+  h += '<h2>② 후처리 제거 실험 — 평균 빼기·주성분 제거가 도움이 되나</h2>'
+     + table(['방식','장수','정확한 자리','층','5등 안'],
+         CNN.map(function(c){ return row(c.id, c.label, c.cur); }))
+     + '<div class="note">평균·주성분은 gen.html 과 같게 번호판 조각까지 포함한 모든 벡터로 구했습니다. '
+     + '주성분은 모든 사진이 공통으로 가진 성분(밝기·색감 같은)이라, 걷어내면 장소 차이가 드러납니다.</div>';
+
+  h += '<h2>③ 시점 제거 실험 — 한 사진을 몇 가지로 잘라 보나</h2>'
+     + table(['방식','장수','정확한 자리','층','5등 안'],
+         VIEWS.map(function(c){ return row(c.id, c.label, c.cur); }));
+
+  h += '<div class="note">사진 읽기 ' + readSecs + '초 · 전체 ' + secs + '초 · 시험 대상 ' + n + '장 (강의실 제외, 두 배치 이상 찍힌 곳)</div>';
+  OUT.innerHTML = h;
+  ST.textContent = '실험 완료'; prog(1);
+
+  RESULT = {when:Date.now(), made:window.AIVEC_DATA && AIVEC_DATA.made, n:n, 재현:rep, 결과:res};
+  document.getElementById('dl').disabled = false;
+  var d = new Date(), pad = function(x){ return (x<10?'0':'')+x; };
+  var stamp = d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'_'+pad(d.getHours())+pad(d.getMinutes());
+  var body = JSON.stringify(RESULT);
+  try{ fetch('api/save?name=eval_ablation.json', {method:'POST', body:body}); }catch(e){}
+  try{ fetch('api/save?name=eval_ablation_' + stamp + '.json', {method:'POST', body:body}); }catch(e){}
+}
+
+Promise.all([
+  fetch('api/photos').then(function(r){ return r.json(); }),
+  fetch('batches.json').then(function(r){ return r.ok ? r.json() : null; })['catch'](function(){ return null; })
+]).then(function(x){
+  PHOTOS = x[0]; BATCH = x[1];
+  if(!BATCH){ ST.textContent = 'batches.json 을 읽지 못했습니다 — 배치 없이는 공정한 비교가 안 됩니다.'; return; }
+  ST.textContent = '사진 ' + PHOTOS.length + '장 · 배치표 ' + Object.keys(BATCH).length + '장 준비됨';
+  document.getElementById('go').disabled = false;
+});
+document.getElementById('go').onclick = function(){ run()['catch'](function(e){ ST.textContent = '오류 : ' + (e && e.message || e); }); };
+document.getElementById('dl').onclick = function(){
+  var b = new Blob([JSON.stringify(RESULT, null, 1)], {type:'application/json'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'eval_ablation.json'; a.click();
+};
+})();
+</script>
+</body>
+</html>

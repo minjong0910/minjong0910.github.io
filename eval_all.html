@@ -34,7 +34,7 @@
   <br>번호판 조각 시점은 v67 부터 비교에서 빼므로 여기서도 뺍니다. 글자 읽기(OCR) 측정은 <code>ocrtest.html</code> 에서 따로 합니다(사진 원본이 필요).
 </div>
 
-<button id="go">전체 측정 시작</button>
+<button id="go" disabled>전체 측정 시작</button>
 <button id="dl" disabled>결과 JSON 받기</button>
 <div class="bar"><i id="pg"></i></div>
 <div class="st" id="st">기준 데이터를 읽는 중…</div>
@@ -44,7 +44,12 @@
 <script>
 (function(){
 var ST=document.getElementById('st'), PG=document.getElementById('pg'), OUT=document.getElementById('out');
-var RESULT=null;
+var RESULT=null, SEL=[];
+/* 다음 조각을 이어서 돌린다. setTimeout 은 화면에 안 보이는 탭에서 초당 1번으로 늦춰져
+   (두 장 합치기가 30초 → 12분) MessageChannel 로 넘긴다 — 타이머가 아니라 늦춰지지 않는다. */
+var MC = new MessageChannel(), MCQ = [];
+MC.port1.onmessage = function(){ var f = MCQ.shift(); if(f) f(); };
+function later(f){ MCQ.push(f); MC.port2.postMessage(0); }
 
 function pct(a,b){ return b ? (100*a/b).toFixed(1)+'%' : '-'; }
 function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
@@ -140,6 +145,7 @@ function rankOf(qs, skipGroup, ownIdx){
 function run(){
   document.getElementById('go').disabled = true;
   var t0 = Date.now();
+  SEL = [];
   var codeBatches = {}, cnt = {};
   photos.forEach(function(p){ (codeBatches[p.code] = codeBatches[p.code] || {})[p.g] = 1; cnt[p.code] = (cnt[p.code]||0)+1; });
 
@@ -168,6 +174,8 @@ function run(){
       var o5 = rk.slice(0,5).indexOf(p.code) >= 0 ? 1 : 0;
       add(catOf(p.code), o1, of, o5);
       if(!room) add('전체(강의실 제외)', o1, of, o5);
+      /* ⑥ 확신도 : 1등 장소 점수(s1)와, 1등과 2등 장소의 점수 차이(g) */
+      if(!room) SEL.push({s1: E[0][1], g: E[0][1] - (E[1] ? E[1][1] : -1), e: o1, f: of});
       var bc = byCode[p.code] = byCode[p.code] || {n:0,e:0,f:0};
       bc.n++; bc.e += o1; bc.f += of;
       if(/^HALL/.test(p.code)){
@@ -185,10 +193,52 @@ function run(){
     }
     PG.style.width = (100*i/test.length).toFixed(1) + '%';
     ST.textContent = '① 정확도 측정 ' + i + ' / ' + test.length + '장';
-    if(i < test.length) return setTimeout(step, 0);
+    if(i < test.length) return later(step);
     pass2(test, stat, conf, sideRows, byCode, t0);
   }
   step();
+}
+
+/* ⑥ 확신도별 정확도 (선택적 예측)
+   확신도가 높은 순으로 줄 세우고 위에서부터 X% 만 "자동 확정"한다고 치면, 그 안에서 몇 % 가 맞나.
+   앱은 지금 자동 확정을 꺼 두고(MATCH 9.99) 전부 사람에게 넘긴다 — 이 표는 "어디까지는 켜도 되나"의 근거다.
+   · g  = 1등 장소 점수 − 2등 장소 점수   · s1 = 1등 장소 점수
+   · AURC = 모든 비율에서의 오답률 평균 (낮을수록 확신도가 잘 줄 세운 것). 무작위로 세우면 전체 오답률과 같다.
+   · 20장 미만 구간의 정확도는 믿지 않는다 (3장 중 3장 = 100% 같은 착시). */
+function selective(rows){
+  var MINK = 20;
+  function curve(key){
+    var r = rows.slice().sort(function(a,b){ return b[key] - a[key]; });
+    var n = r.length, ce = 0, cf = 0, aurc = 0, e95 = null, e90 = null, f95 = null;
+    for(var k = 1; k <= n; k++){
+      ce += r[k-1].e; cf += r[k-1].f; aurc += 1 - ce/k;
+      if(k < MINK) continue;
+      if(ce/k >= 0.95) e95 = {cov:k/n, acc:ce/k, t:r[k-1][key], k:k};
+      if(ce/k >= 0.90) e90 = {cov:k/n, acc:ce/k, t:r[k-1][key], k:k};
+      if(cf/k >= 0.95) f95 = {cov:k/n, acc:cf/k, t:r[k-1][key], k:k};
+    }
+    var pts = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0].map(function(c){
+      var k = Math.max(1, Math.round(c*n)), e = 0, f = 0;
+      for(var j = 0; j < k; j++){ e += r[j].e; f += r[j].f; }
+      return {cov:c, k:k, e:e/k, f:f/k};
+    });
+    return {pts:pts, aurc:aurc/n, e95:e95, e90:e90, f95:f95};
+  }
+  /* 문턱을 이 데이터로 골랐으니, 그 문턱이 처음 보는 사진에도 통하는지 반으로 나눠 확인한다.
+     짝수 번째 사진으로 문턱을 정하고 홀수 번째 사진에 그대로 적용한다. */
+  function holdout(key, field, target){
+    var A = rows.filter(function(_, i){ return i % 2 === 0; });
+    var B = rows.filter(function(_, i){ return i % 2 === 1; });
+    var ra = A.slice().sort(function(a,b){ return b[key] - a[key]; }), c = 0, t = null;
+    for(var k = 1; k <= ra.length; k++){ c += ra[k-1][field]; if(k >= MINK && c/k >= target) t = ra[k-1][key]; }
+    if(t === null) return null;
+    var sel = B.filter(function(x){ return x[key] >= t; }), ok = 0;
+    sel.forEach(function(x){ ok += x[field]; });
+    return {t:t, cov:sel.length/B.length, acc:sel.length ? ok/sel.length : 0, n:sel.length, nB:B.length};
+  }
+  var all = 0; rows.forEach(function(x){ all += x.e; });
+  return {n:rows.length, g:curve('g'), s1:curve('s1'), randomAurc:1 - all/rows.length,
+          hold:{e95:holdout('g','e',0.95), f95:holdout('g','f',0.95)}};
 }
 
 /* ② 같은 자리에서 두 장 (복도) */
@@ -219,7 +269,7 @@ function pass2(test, stat, conf, sideRows, byCode, t0){
     }
     PG.style.width = (100*i/halls.length).toFixed(1) + '%';
     ST.textContent = '② 두 장 합치기 측정 ' + i + ' / ' + halls.length + '장';
-    if(i < halls.length) return setTimeout(step, 0);
+    if(i < halls.length) return later(step);
     report(stat, conf, sideRows, byCode, one, two, t0);
   }
   step();
@@ -269,16 +319,48 @@ function report(stat, conf, sideRows, byCode, one, two, t0){
      + table(['위치','장수','정확한 자리','층'], weakRows)
      + '<div class="note warn">여기가 낮은 이유는 대개 ① 그 자리를 한 배치만 찍었거나 ② 사진 수가 적기 때문입니다. 사진을 보태면 바로 올라갑니다.</div>';
 
+  var sv = selective(SEL);
+  function fx(v){ return v === null || v === undefined ? '-' : (v*100).toFixed(1)+'%'; }
+  function op(o, what){
+    return o ? ('<b>' + fx(o.cov) + '</b>의 사진에서 ' + what + ' ' + fx(o.acc) + ' <span style="color:#6E7F96">(차이 ≥ ' + o.t.toFixed(3) + ', ' + o.k + '장)</span>')
+             : '해당 구간 없음';
+  }
+  var hv = sv.hold;
+  h += '<h2>⑥ 확신도별 정확도 — 확신할 때만 답하면 얼마나 맞나</h2>'
+     + table(['자동 확정 비율','장수','자리 (차이 기준)','층 (차이 기준)','자리 (1등 점수 기준)','층 (1등 점수 기준)'],
+         sv.g.pts.map(function(p, i){ var q = sv.s1.pts[i];
+           return [Math.round(p.cov*100) + '%', p.k, fx(p.e), fx(p.f), fx(q.e), fx(q.f)]; }))
+     + '<div class="note">'
+     + '확신도 = <b>1등 장소와 2등 장소의 유사도 차이</b>. 확신도가 높은 사진부터 위에서 X% 만 자동 확정한다고 칠 때의 정확도입니다.<br>'
+     + '· 자리 정확도 95% 를 지키며 : ' + op(sv.g.e95, '자리') + '<br>'
+     + '· 자리 정확도 90% 를 지키며 : ' + op(sv.g.e90, '자리') + '<br>'
+     + '· 층 정확도 95% 를 지키며 : ' + op(sv.g.f95, '층') + '<br>'
+     + '<b>반으로 나눠 확인</b> — 짝수 번째 사진으로 문턱을 정해 홀수 번째 사진에 적용하면 : '
+     + (hv.e95 ? '자리 ' + fx(hv.e95.acc) + ' (비율 ' + fx(hv.e95.cov) + ')' : '자리 -') + ' · '
+     + (hv.f95 ? '층 ' + fx(hv.f95.acc) + ' (비율 ' + fx(hv.f95.cov) + ')' : '층 -') + '<br>'
+     + '<b>줄 세우기 성능(AURC, 낮을수록 좋음)</b> — 차이 ' + sv.g.aurc.toFixed(3) + ' · 1등 점수 ' + sv.s1.aurc.toFixed(3)
+     + ' · 무작위 ' + sv.randomAurc.toFixed(3)
+     + '</div>';
+
   h += '<div class="note">걸린 시간 ' + Math.round((Date.now()-t0)/1000) + '초 · 기준 데이터 생성 시각 ' + new Date(A.made).toLocaleString() + '</div>';
   OUT.innerHTML = h;
   ST.textContent = '측정 완료';
   PG.style.width = '100%';
-  RESULT = {made:A.made, 측정시각:Date.now(), 종류별:stat, 좌우:sideRows.length, 좌우구간:cuts, 두장:{한장:one, 두장:two}, 혼동:conf, 자리별:byCode};
+  RESULT = {made:A.made, 측정시각:Date.now(), 종류별:stat, 좌우:sideRows.length, 좌우구간:cuts, 두장:{한장:one, 두장:two}, 혼동:conf, 자리별:byCode,
+            확신도:{n:sv.n, 차이:sv.g, 일등점수:sv.s1, 무작위AURC:sv.randomAurc, 반나눠확인:sv.hold}};
   document.getElementById('dl').disabled = false;
-  try{ fetch('api/save?name=eval_all.json', {method:'POST', body:JSON.stringify(RESULT)}); }catch(e){}
+  /* 최신 결과 + 날짜 붙은 사본. 하나에 덮어쓰기만 하면 직전 값과 비교할 수 없게 된다 (2026-09-21 실제로 잃었다) */
+  var d = new Date(), pad = function(x){ return (x < 10 ? '0' : '') + x; };
+  var stamp = d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes());
+  var body = JSON.stringify(RESULT);
+  try{ fetch('api/save?name=eval_all.json', {method:'POST', body:body}); }catch(e){}
+  try{ fetch('api/save?name=eval_all_' + stamp + '.json', {method:'POST', body:body}); }catch(e){}
 }
 
-/* 배치 표를 먼저 읽는다 (없으면 거친 규칙으로 계속) */
+/* 배치 표를 먼저 읽는다 (없으면 거친 규칙으로 계속).
+   다 읽기 전에는 측정 버튼을 켜지 않는다 — 그 사이에 누르면 배치가 거칠게 나뉘어 숫자가 조용히 낮게 나온다. */
+var READY = {vec:false, batch:false};
+function arm(){ if(READY.vec && READY.batch) document.getElementById('go').disabled = false; }
 fetch('batches.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
   if(j){
     BATCH = j;
@@ -288,14 +370,14 @@ fetch('batches.json').then(function(r){ return r.ok ? r.json() : null; }).then(f
   }else{
     ST.textContent += ' · batches.json 없음 — 파일 이름만으로 배치를 나눕니다(숫자가 낮게 나옵니다)';
   }
-})['catch'](function(){});
+})['catch'](function(){}).then(function(){ READY.batch = true; arm(); });
 
 document.getElementById('go').onclick = function(){ run(); };
 document.getElementById('dl').onclick = function(){
   var b = new Blob([JSON.stringify(RESULT, null, 1)], {type:'application/json'});
   var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'eval_all.json'; a.click();
 };
-if(load()) document.getElementById('go').disabled = false;
+if(load()){ READY.vec = true; arm(); }
 })();
 </script>
 </body>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>새 기준 데이터 생성</title>
+<style>
+ body{margin:0;background:#0B0E13;color:#E8EEF6;padding:24px;
+      font:14px/1.6 "Malgun Gothic",system-ui,sans-serif}
+ h1{font-size:18px;margin:0 0 14px}
+ .p{background:#141A23;border:1px solid #242D3A;border-radius:10px;padding:16px;margin-bottom:14px}
+ button{background:#00E5FF;color:#04121A;border:0;border-radius:8px;padding:10px 18px;font:700 14px inherit;cursor:pointer}
+ button:disabled{background:#2A3542;color:#6B7888}
+ #log{height:300px;overflow:auto;background:#080B10;border:1px solid #242D3A;border-radius:8px;
+      padding:10px;font:12px/1.5 Consolas,monospace;color:#8A97A8;white-space:pre-wrap}
+ .bar{height:6px;background:#1B2330;border-radius:3px;overflow:hidden;margin-top:8px}
+ .bar>i{display:block;height:100%;background:#00E5FF;width:0}
+</style></head>
+<body>
+<h1>새 기준 데이터 생성 — 표지판 크롭 + 정사각 1.0 + 0.6, 평균빼기 + 주성분 2개 제거</h1>
+<div class="p">
+  <div id="st">준비 중…</div>
+  <div class="bar"><i id="pg"></i></div>
+  <div style="margin-top:12px"><button id="go" disabled>생성 시작</button></div>
+</div>
+<div class="p"><div id="log"></div></div>
+
+<script src="lib/tf.min.js"></script>
+<script src="lib/mobilenet.min.js"></script>
+<script>
+(function(){
+var L=document.getElementById('log'), ST=document.getElementById('st'), PG=document.getElementById('pg');
+function log(s){ L.textContent+=s+'\n'; L.scrollTop=L.scrollHeight; }
+function prog(f){ PG.style.width=(f*100).toFixed(1)+'%'; }
+var PHOTOS=[], net=null, DIM=1280;
+
+/* ─────────── 앱에 그대로 넣을 전처리 (index.html 과 같은 코드) ─────────── */
+var PLATE={W:512,MINPX:60,MAXAREA:0.10,MINFILL:0.35,ARLO:0.25,ARHI:4.0,MAX:3};
+function plateBoxes(img){
+  var k=Math.min(1,PLATE.W/Math.max(img.width||1,img.height||1));
+  var w=Math.max(1,Math.round((img.width||1)*k)), h=Math.max(1,Math.round((img.height||1)*k));
+  var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+  var cx=cv.getContext('2d',{willReadFrequently:true}), d;
+  try{ cx.drawImage(img,0,0,w,h); d=cx.getImageData(0,0,w,h).data; }catch(e){ return []; }
+  var n=w*h, mask=new Uint8Array(n), i,p,r,g,b,mx,mn;
+  for(i=0;i<n;i++){ p=i<<2; r=d[p]; g=d[p+1]; b=d[p+2];
+    mx=r>g?(r>b?r:b):(g>b?g:b); mn=r<g?(r<b?r:b):(g<b?g:b);
+    if(b-r>35&&b-g>20&&b>55&&b<240&&mx-mn>38) mask[i]=1; }
+  var seen=new Uint8Array(n), stk=new Int32Array(n), out=[], sp,j,x,y,x0,y0,x1,y1,c;
+  for(i=0;i<n;i++){
+    if(!mask[i]||seen[i]) continue;
+    sp=0; stk[sp++]=i; seen[i]=1; x0=w; y0=h; x1=-1; y1=-1; c=0;
+    while(sp){ j=stk[--sp]; c++; x=j%w; y=(j/w)|0;
+      if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;
+      if(x+1<w&&mask[j+1]&&!seen[j+1]){seen[j+1]=1;stk[sp++]=j+1;}
+      if(x>0&&mask[j-1]&&!seen[j-1]){seen[j-1]=1;stk[sp++]=j-1;}
+      if(y+1<h&&mask[j+w]&&!seen[j+w]){seen[j+w]=1;stk[sp++]=j+w;}
+      if(y>0&&mask[j-w]&&!seen[j-w]){seen[j-w]=1;stk[sp++]=j-w;} }
+    var bw=x1-x0+1, bh=y1-y0+1, ar=bw/bh;
+    if(c<PLATE.MINPX||bw*bh>PLATE.MAXAREA*n) continue;
+    if(c/(bw*bh)<PLATE.MINFILL) continue;
+    if(ar<PLATE.ARLO||ar>PLATE.ARHI) continue;
+    out.push({n:c,x0:x0/w,y0:y0/h,x1:(x1+1)/w,y1:(y1+1)/h});
+  }
+  out.sort(function(a,b){return b.n-a.n;});
+  return out.slice(0,PLATE.MAX);
+}
+/* v67 : 224 로 줄일 때 블록 평균을 직접 계산한다 (앱의 aiSqView 와 같은 코드여야 한다)
+   브라우저 기본 축소는 상황에 따라 계단 무늬가 달라져 같은 사진도 벡터가 흔들렸다(0.82~0.92 → 0.98~0.99) */
+function sqView(img, zoom){
+  var w = img.width || img.naturalWidth, h = img.height || img.naturalHeight;
+  var sz = Math.min(w, h) * zoom, S = Math.max(1, Math.round(sz));
+  var sx = Math.round((w - sz)/2), sy = Math.round((h - sz)/2);
+  var cv = document.createElement('canvas'); cv.width = 224; cv.height = 224;
+  var cx = cv.getContext('2d'); cx.fillStyle = '#000'; cx.fillRect(0, 0, 224, 224);
+  if(S < 270){ cx.drawImage(img, sx, sy, S, S, 0, 0, 224, 224); return cv; }
+  var c0 = document.createElement('canvas'); c0.width = S; c0.height = S;
+  var d;
+  try{
+    var x0 = c0.getContext('2d', {willReadFrequently:true});
+    x0.drawImage(img, sx, sy, S, S, 0, 0, S, S);
+    d = x0.getImageData(0, 0, S, S).data;
+  }catch(e){ cx.drawImage(img, sx, sy, S, S, 0, 0, 224, 224); return cv; }
+  var od = cx.createImageData(224, 224), x, y, xx, yy;
+  for(y=0;y<224;y++){
+    var ya = Math.floor(y*S/224), yb = Math.max(ya+1, Math.floor((y+1)*S/224));
+    for(x=0;x<224;x++){
+      var xa = Math.floor(x*S/224), xb = Math.max(xa+1, Math.floor((x+1)*S/224));
+      var r=0, g=0, b=0, cnt=0;
+      for(yy=ya; yy<yb; yy++){
+        var p = (yy*S+xa)<<2;
+        for(xx=xa; xx<xb; xx++){ r+=d[p]; g+=d[p+1]; b+=d[p+2]; p+=4; cnt++; }
+      }
+      var o = (y*224+x)<<2;
+      od.data[o]=r/cnt; od.data[o+1]=g/cnt; od.data[o+2]=b/cnt; od.data[o+3]=255;
+    }
+  }
+  cx.putImageData(od, 0, 0);
+  return cv;
+}
+function plateView(img){
+  var bs=plateBoxes(img); if(!bs.length) return null;
+  var b=bs[0], bw=b.x1-b.x0, bh=b.y1-b.y0;
+  var x0=Math.max(0,b.x0-0.40*bw), x1=Math.min(1,b.x1+0.40*bw);
+  var y0=Math.max(0,b.y0-0.95*bh), y1=Math.min(1,b.y1+0.30*bh);
+  var sx=Math.round(x0*img.width), sy=Math.round(y0*img.height);
+  var sw=Math.round((x1-x0)*img.width), sh=Math.round((y1-y0)*img.height);
+  if(sw<10||sh<10) return null;
+  var cv=document.createElement('canvas'); cv.width=224; cv.height=224;
+  var cx=cv.getContext('2d'); cx.fillStyle='#000'; cx.fillRect(0,0,224,224);
+  cx.drawImage(img,sx,sy,sw,sh,0,0,224,224);
+  return cv;
+}
+function views(img){
+  var out=[];
+  var p=plateView(img); if(p) out.push(p);
+  out.push(sqView(img,1.0));
+  out.push(sqView(img,0.6));
+  return out;
+}
+
+/* ─────────── 벡터 연산 ─────────── */
+function l2(v){ var s=0,j; for(j=0;j<DIM;j++) s+=v[j]*v[j]; s=Math.sqrt(s)||1;
+  var o=new Float32Array(DIM); for(j=0;j<DIM;j++) o[j]=v[j]/s; return o; }
+function dot(a,b){ var t=0,j; for(j=0;j<DIM;j++) t+=a[j]*b[j]; return t; }
+
+function f32ToB64(f){
+  var u=new Uint8Array(f.buffer.slice(f.byteOffset, f.byteOffset+f.byteLength)), s='', i;
+  for(i=0;i<u.length;i++) s+=String.fromCharCode(u[i]);
+  return btoa(s);
+}
+function i8ToB64(f){
+  var s='', i;
+  for(i=0;i<f.length;i++){ var q=Math.round(Math.max(-1,Math.min(1,f[i]))*127); s+=String.fromCharCode(q&0xFF); }
+  return btoa(s);
+}
+function loadImg(src){ return new Promise(function(res,rej){
+  var im=new Image(); im.onload=function(){res(im);}; im.onerror=function(){rej(src);}; im.src=src; }); }
+
+/* ── v67 : 앱이 사진을 다루는 방식 그대로 (2026-09-20) ──────────────
+   앱은 제보 사진을 먼저 1280px JPEG(품질 0.72)로 줄인 뒤 그 사본으로 벡터를 만든다.
+   그런데 기준 벡터는 원본(4032px)에서 바로 만들고 있었다. 224px 로 줄일 때 생기는
+   계단 무늬가 두 쪽이 서로 달라서, 같은 사진인데도 유사도가 0.88~0.96 밖에 안 나왔다
+   (같은 방식이면 0.997). 그래서 여기서도 앱과 똑같이 줄인 뒤 시점을 만든다.       */
+var PH_MAXDIM=1280, PH_Q=0.72;
+async function appImg(path){
+  var blob = await (await fetch(path)).blob();
+  var el, w, h, bm=null;
+  if(window.createImageBitmap){
+    try{ bm = await createImageBitmap(blob, {imageOrientation:'from-image'}); el=bm; w=bm.width; h=bm.height; }catch(e){ bm=null; }
+  }
+  if(!bm){
+    var url = await new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){res(r.result);}; r.onerror=rej; r.readAsDataURL(blob); });
+    el = await loadImg(url); w = el.naturalWidth; h = el.naturalHeight;
+  }
+  var sc = Math.min(1, PH_MAXDIM/Math.max(w,h));
+  var cv = document.createElement('canvas');
+  cv.width = Math.max(1, Math.round(w*sc)); cv.height = Math.max(1, Math.round(h*sc));
+  cv.getContext('2d').drawImage(el, 0, 0, cv.width, cv.height);
+  if(bm && bm.close) bm.close();
+  return await loadImg(cv.toDataURL('image/jpeg', PH_Q));
+}
+
+async function run(){
+  document.getElementById('go').disabled=true;
+  log('모델 준비 중…');
+  await tf.setBackend('webgl').catch(function(){ return tf.setBackend('cpu'); });
+  await tf.ready();
+  try{ net=await mobilenet.load({version:2,alpha:0.5}); log('  준비 완료 (인터넷)'); }
+  catch(e){ net=await mobilenet.load({version:2,alpha:0.5,modelUrl:new URL('model/model.json',location.href).href}); log('  준비 완료 (로컬)'); }
+
+  /* 1) 모든 사진의 시점별 원시 벡터 */
+  var RAW=[], CODE=[], NAME=[], plateHit=0, t0=Date.now();
+  for(var i=0;i<PHOTOS.length;i++){
+    var img;
+    try{ img=await appImg(PHOTOS[i].path); }catch(e){ log('  못 읽음 '+PHOTOS[i].path); continue; }   /* v67 : 앱과 같은 1280px 사본으로 */
+    var vs=views(img);
+    if(vs.length===3) plateHit++;
+    for(var k=0;k<vs.length;k++){
+      var t=net.infer(vs[k],true); var a=await t.data(); t.dispose();
+      DIM=a.length;
+      RAW.push(l2(Float32Array.from(a))); CODE.push(PHOTOS[i].label); NAME.push(PHOTOS[i].name);
+    }
+    if(i%5===0){ prog((i+1)/PHOTOS.length);
+      ST.textContent='사진 '+(i+1)+' / '+PHOTOS.length;
+      await new Promise(function(r){ setTimeout(r,0); }); }
+  }
+  log('벡터 '+RAW.length+'개 (사진 '+PHOTOS.length+'장, 표지판 찾음 '+plateHit+'장) — '+Math.round((Date.now()-t0)/1000)+'초');
+
+  /* 2) 평균 */
+  var mean=new Float32Array(DIM), j;
+  for(var a2=0;a2<RAW.length;a2++) for(j=0;j<DIM;j++) mean[j]+=RAW[a2][j]/RAW.length;
+  log('평균 벡터 계산 완료');
+
+  /* 3) 제1 주성분 (거듭제곱 반복) */
+  var CEN=RAW.map(function(v){ var o=new Float32Array(DIM); for(var j2=0;j2<DIM;j2++) o[j2]=v[j2]-mean[j2]; return o; });
+  var pc=new Float32Array(DIM);
+  for(j=0;j<DIM;j++) pc[j]=Math.sin((j+1)*0.7654)+0.001;
+  pc=l2(pc);
+  for(var it=0; it<30; it++){
+    var u=new Float32Array(DIM);
+    for(var b2=0;b2<CEN.length;b2++){ var d=0; for(j=0;j<DIM;j++) d+=CEN[b2][j]*pc[j];
+      for(j=0;j<DIM;j++) u[j]+=d*CEN[b2][j]; }
+    pc=l2(u);
+  }
+  log("제1 주성분 계산 완료");
+
+  /* 3b) 제2 주성분 — 제1주성분 성분을 빼낸 뒤(deflation) 같은 방법으로 한 번 더.
+     실측에서 주성분 2개를 걷어내는 쪽이 1개보다 꾸준히 나았다(세 번의 측정 모두). */
+  for(var c1=0;c1<CEN.length;c1++){
+    var dd=0; for(j=0;j<DIM;j++) dd+=CEN[c1][j]*pc[j];
+    for(j=0;j<DIM;j++) CEN[c1][j]-=dd*pc[j];
+  }
+  var pc2=new Float32Array(DIM);
+  for(j=0;j<DIM;j++) pc2[j]=Math.cos((j+1)*1.2345)+0.001;
+  pc2=l2(pc2);
+  for(var it2=0; it2<30; it2++){
+    var u2=new Float32Array(DIM);
+    for(var b3=0;b3<CEN.length;b3++){ var d2=0; for(j=0;j<DIM;j++) d2+=CEN[b3][j]*pc2[j];
+      for(j=0;j<DIM;j++) u2[j]+=d2*CEN[b3][j]; }
+    pc2=l2(u2);
+  }
+  log("제2 주성분 계산 완료");
+
+  /* 4) 최종 기준벡터 = 평균빼기 → 주성분 제거 → 정규화 */
+  function post(v){
+    var o=new Float32Array(DIM), j3;
+    for(j3=0;j3<DIM;j3++) o[j3]=v[j3]-mean[j3];
+    var d=0; for(j3=0;j3<DIM;j3++) d+=o[j3]*pc[j3];
+    for(j3=0;j3<DIM;j3++) o[j3]-=d*pc[j3];
+    var e=0; for(j3=0;j3<DIM;j3++) e+=o[j3]*pc2[j3];
+    for(j3=0;j3<DIM;j3++) o[j3]-=e*pc2[j3];
+    return l2(o);
+  }
+  var REF=RAW.map(post);
+  log('기준벡터 '+REF.length+'개 준비');
+
+  /* 5) 유사도 분포 — 판정 문턱을 정하기 위해 */
+  var cnt={}; CODE.forEach(function(c){ cnt[c]=(cnt[c]||0)+1; });
+  var same=[], diff=[];
+  for(var x=0;x<REF.length;x++) for(var y=x+1;y<REF.length;y++){
+    (CODE[x]===CODE[y]?same:diff).push(dot(REF[x],REF[y]));
+  }
+  same.sort(function(p,q){return p-q;}); diff.sort(function(p,q){return p-q;});
+  function pct(arr,p){ return arr[Math.min(arr.length-1, Math.max(0, Math.round(p*(arr.length-1))))]; }
+  var stats={
+    같은장소:{n:same.length, p05:+pct(same,0.05).toFixed(3), p25:+pct(same,0.25).toFixed(3),
+              중앙값:+pct(same,0.50).toFixed(3), p75:+pct(same,0.75).toFixed(3)},
+    다른장소:{n:diff.length, 중앙값:+pct(diff,0.50).toFixed(3), p95:+pct(diff,0.95).toFixed(3),
+              p99:+pct(diff,0.99).toFixed(3), p999:+pct(diff,0.999).toFixed(3), 최대:+pct(diff,1).toFixed(3)}
+  };
+  log('\n유사도 분포');
+  log('  같은 장소  중앙값 '+stats.같은장소.중앙값+'   하위5% '+stats.같은장소.p05);
+  log('  다른 장소  중앙값 '+stats.다른장소.중앙값+'   상위1% '+stats.다른장소.p99+'   최대 '+stats.다른장소.최대);
+
+  /* 제안 문턱 */
+  var TH={
+    RELEVANT:+pct(diff,0.95).toFixed(3),   // 이보다 낮으면 "무관"
+    MATCH   :+pct(diff,0.99).toFixed(3),   // 이 이상 + 여유 있으면 "일치"
+    SAME    :+pct(same,0.50).toFixed(3),   // 이 이상이면 "확실"
+    MARGIN  :0.03
+  };
+  log('\n제안 문턱  RELEVANT '+TH.RELEVANT+'  MATCH '+TH.MATCH+'  SAME '+TH.SAME+'  MARGIN '+TH.MARGIN);
+
+  /* 6) 내보내기 */
+  var q='';
+  for(var z=0;z<REF.length;z++) q+=i8ToB64(REF[z]);   // 벡터마다 따로 base64 (앱은 이어붙인 것을 기대하므로 아래에서 합침)
+  // 앱의 loadVectors 는 (n*DIM) 바이트가 한 덩어리 base64 인 것을 기대한다
+  var flat=new Int8Array(REF.length*DIM);
+  for(var z2=0;z2<REF.length;z2++) for(j=0;j<DIM;j++)
+    flat[z2*DIM+j]=Math.round(Math.max(-1,Math.min(1,REF[z2][j]))*127);
+  var bin='', CH=8192;
+  for(var s2=0;s2<flat.length;s2+=CH)
+    bin+=String.fromCharCode.apply(null, new Uint8Array(flat.buffer, s2, Math.min(CH, flat.length-s2)));
+  var payload={
+    dim:DIM, n:REF.length, codes:CODE, names:NAME,
+    q:btoa(bin),
+    mean:f32ToB64(mean), pc:f32ToB64(pc), pc2:f32ToB64(pc2),
+    views:["plate","sq1.0","sq0.6"], post:"center+pc2",
+    made:Date.now(), 사진수:PHOTOS.length, 표지판찾음:plateHit,
+    분포:stats, 제안문턱:TH
+  };
+  ST.textContent='저장 중…';
+  var r=await fetch('api/save?name=aivec_new.json',{method:'POST',body:JSON.stringify(payload)});
+  var j4=await r.json();
+  log('\n저장 완료 — 생성물\\aivec_new.json  ('+(j4.bytes/1048576).toFixed(2)+' MB)');
+  window.__PAYLOAD_STATS__={분포:stats, 문턱:TH, n:REF.length, 표지판:plateHit};
+  ST.textContent='완료';
+  prog(1);
+}
+
+fetch('api/photos').then(function(r){ return r.json(); }).then(function(list){
+  PHOTOS=list; ST.textContent='사진 '+list.length+'장 준비됨';
+  log('사진 '+list.length+'장');
+  document.getElementById('go').disabled=false;
+});
+document.getElementById('go').onclick=function(){ run()['catch'](function(e){ log('오류: '+(e&&e.message||e)); ST.textContent='오류'; }); };
+})();
+</script>
+</body></html>

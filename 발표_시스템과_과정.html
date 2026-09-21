@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>졸업작품 발표 — 시스템과 만든 과정</title>
+<style>
+  @page { size: A4; margin: 14mm 13mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "맑은 고딕","Malgun Gothic",sans-serif; font-size: 10.2pt; line-height: 1.62;
+         color: #16202B; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 3px; color: #10345E; }
+  .sub { color: #6B7A8C; font-size: 9.5pt; margin-bottom: 10px; }
+  .rule { height: 3px; background: #1B4F8C; margin-bottom: 14px; }
+  h2 { font-size: 12.5pt; color: #10345E; margin: 18px 0 7px; padding-bottom: 4px;
+       border-bottom: 2px solid #C9D9EA; }
+  h3 { font-size: 10.6pt; margin: 12px 0 5px; color: #1B4F8C; }
+  p { margin: 0 0 6px; }
+  ul { margin: 0 0 7px; padding-left: 18px; }
+  li { margin-bottom: 3px; }
+  b.hl { background: #FFF2C4; padding: 0 2px; }
+  table { width: 100%; border-collapse: collapse; margin: 7px 0; font-size: 9.5pt; }
+  th, td { border: 1px solid #C9D3DF; padding: 5px 7px; text-align: left; vertical-align: top; }
+  th { background: #EEF2F7; font-weight: 700; }
+  td.num, th.num { text-align: right; }
+  .summary { background: #1B4F8C; color: #fff; border-radius: 6px; padding: 13px 15px; margin-bottom: 14px; }
+  .summary .big { font-size: 11pt; line-height: 1.6; }
+  .nums { display: table; width: 100%; margin-top: 10px; border-top: 1px solid rgba(255,255,255,.3); padding-top: 9px; }
+  .nums div { display: table-cell; text-align: center; }
+  .nums .v { font-size: 14pt; font-weight: 700; }
+  .nums .l { font-size: 8.4pt; opacity: .85; }
+  .flow { margin: 8px 0; }
+  .flow .row { display: table; width: 100%; margin-bottom: 5px; }
+  .flow .step { display: table-cell; background: #EEF4FB; border: 1px solid #C9D9EA; border-radius: 5px;
+                padding: 6px 8px; font-size: 9.2pt; }
+  .flow .arr { display: table-cell; width: 26px; text-align: center; color: #7C8AA0; vertical-align: middle; }
+  .note { color: #5D6B7A; font-size: 9.2pt; background: #F5F8FB; border-left: 3px solid #9FC0E0;
+          padding: 6px 9px; margin: 7px 0; }
+  .bad { border-left-color: #E0A0A0; background: #FCF5F5; }
+  .pagebreak { page-break-before: always; }
+  .foot { margin-top: 16px; padding-top: 8px; border-top: 1px solid #D5DCE5; color: #7C8AA0; font-size: 8.8pt; }
+</style>
+</head>
+<body>
+
+<h1>공대 3호관 실내 길안내 앱 — 시스템과 만든 과정</h1>
+<div class="sub">졸업작품 발표 보조 자료 &nbsp;·&nbsp; 2026-09-20 기준</div>
+<div class="rule"></div>
+
+<div class="summary">
+  <div class="big">
+    공대 3호관 안에서 길을 찾아주는 웹앱입니다. 사진을 찍으면 어디인지 알아내고 3D 건물 위에 길을 보여줍니다.
+    <b>AI 계산은 전부 폰 안에서</b> 돌고, 서버는 사용자가 보낸 제보를 받아 두는 데만 씁니다.
+    정확도는 <b>직접 재서 숫자로 말할 수 있게</b> 만들었고, 틀릴 수 있는 곳은 틀려도 안전하도록 막아 두었습니다.
+  </div>
+  <div class="nums">
+    <div><div class="v">1,753장</div><div class="l">학습 사진</div></div>
+    <div><div class="v">147곳</div><div class="l">등록 장소</div></div>
+    <div><div class="v">53.3%</div><div class="l">1등 정답률 (제3자 사진)</div></div>
+    <div><div class="v">79.9%</div><div class="l">5등 안</div></div>
+    <div><div class="v">0건</div><div class="l">글자 읽기 오독</div></div>
+  </div>
+</div>
+
+<h2>1. 무엇으로 이루어져 있나</h2>
+<table>
+  <tr><th style="width:80px">화면</th><td>3D 건물 보기 · 길찾기 · 건의함(사진 제보) · 관리자 화면(PIN 잠금)</td></tr>
+  <tr><th>데이터</th><td>건물 도면과 호실 목록 · 호실 사진 · AI 기준 데이터(벡터 3,506개)</td></tr>
+  <tr><th>판별기</th><td>① 생김새로 맞히기(CNN) &nbsp; ② 사진 속 글자 읽기(OCR) &nbsp; ③ QR 읽기</td></tr>
+  <tr><th>배포</th><td>깃허브 페이지에 파일 두 개 — <b>index.html</b>(19.5MB) + <b>aivec.js</b>(8.5MB)</td></tr>
+</table>
+<p>설치가 필요 없습니다. 주소만 열면 되고, 아이폰·안드로이드 어느 쪽이든 브라우저에서 같은 코드가 돕니다.</p>
+
+<h2>2. 사진 한 장이 '위치'가 되기까지</h2>
+<div class="flow">
+  <div class="row">
+    <div class="step"><b>①</b> 사진 찍기<br><span style="color:#5D6B7A">(1280px로 줄여 저장)</span></div>
+    <div class="arr">▶</div>
+    <div class="step"><b>②</b> 품질 검사<br><span style="color:#5D6B7A">흐림·어두움·너무 작음은 반려</span></div>
+    <div class="arr">▶</div>
+    <div class="step"><b>③</b> 두 갈래로 동시에<br><span style="color:#5D6B7A">글자 읽기 · 생김새 맞히기</span></div>
+    <div class="arr">▶</div>
+    <div class="step"><b>④</b> 합치기<br><span style="color:#5D6B7A">글자가 읽히면 그 층으로 확정</span></div>
+  </div>
+  <div class="row">
+    <div class="step"><b>⑤</b> 후보 5개 제시<br><span style="color:#5D6B7A">AI 혼자 확정하지 않음</span></div>
+    <div class="arr">▶</div>
+    <div class="step"><b>⑥</b> 관리자가 고름<br><span style="color:#5D6B7A">한 번 눌러 확정</span></div>
+    <div class="arr">▶</div>
+    <div class="step"><b>⑦</b> 승인<br><span style="color:#5D6B7A">서버에 올라가 모든 기기에 반영</span></div>
+    <div class="arr">▶</div>
+    <div class="step"><b>⑧</b> AI가 학습<br><span style="color:#5D6B7A">다음부터 그 자리를 더 잘 맞힘</span></div>
+  </div>
+</div>
+
+<h3>갈래 ① — 생김새로 맞히기</h3>
+<p>사진을 두 가지로 자르고(정사각 전체 · 가운데 확대) 각각을 MobileNet V2(α=0.5)에 넣어
+  <b>1,280개의 숫자</b>로 바꿉니다. 미리 만들어 둔 3,506개와 비교해 가장 비슷한 곳을 찾습니다.
+  모델은 브라우저에서 돌고(TensorFlow.js), 서버로 사진을 보내지 않습니다.</p>
+
+<h3>갈래 ② — 사진 속 글자 읽기</h3>
+<table>
+  <tr><th style="width:120px">호실 번호판</th><td>파란 판을 찾아 그 안의 <b>숫자 줄만 오려 다시 그려</b> 읽습니다. 읽히면 호실이 나오므로 층과 좌우가 동시에 확정됩니다.</td></tr>
+  <tr><th>엘리베이터 층 표시</th><td>검은 판 위에서 빛나는 숫자를 찾아 읽습니다. 화살표(↑↓)는 모양과 자리로 걸러냅니다.</td></tr>
+  <tr><th>비상대피 안내판</th><td>제목 띠 "공과대학 3호관 <b>N층</b> 비상대피 경로"를 한국어 모델로 읽습니다(1.1MB, 필요할 때만 내려받음).</td></tr>
+</table>
+
+<h2>3. 데이터</h2>
+<table>
+  <tr><th style="width:120px">사진</th><td>1,753장 · 147곳 (지하 1층~5층, 복도·강의실·엘리베이터·계단·화장실·출입문)<br>
+    <b>앱에는 사진이 들어가지 않습니다.</b> 숫자로 바꾼 것만 들어갑니다.</td></tr>
+  <tr><th>기준 벡터</th><td>사진마다 2~3개, 파일에는 4,847개. 이 중 비교에 쓰는 것은 3,506개<br>
+    (번호판 조각 시점은 층을 가리는 방해가 되어 비교에서 뺐습니다 — 번호판은 글자 읽기가 맡습니다)</td></tr>
+  <tr><th>촬영 규칙</th><td>한 자리에서 앞 4장·뒤돌아 4장. 층·좌우는 건물 평면도를 근거로 분류.<br>
+    흰 벽만 찍힌 것, 흔들린 것은 버립니다(4층 201장 중 49장 폐기).</td></tr>
+</table>
+
+<div class="pagebreak"></div>
+<h2>4. 정확도 — 어떻게 쟀고 얼마나 맞나</h2>
+<div class="note"><b>측정 방법</b> : 한 조원이 찍은 사진만 기준으로 두고, <b>다른 조원이 다른 날 찍은 사진</b>으로 맞히게 했습니다.
+  실제 사용자(제3자)와 가장 비슷한 조건입니다. 같은 사람이 같은 자리에서 연달아 찍은 사진을 기준에 함께 넣으면
+  숫자가 후하게 나오는데(66.8%), 그것은 "자기 사진을 자기가 알아본 것"에 가깝습니다.</div>
+
+<h3>생김새로 맞히기 (강의실 제외 1,468장)</h3>
+<table>
+  <tr><th>종류</th><th class="num">장수</th><th class="num">정확한 자리</th><th class="num">층</th><th class="num">5등 안</th></tr>
+  <tr><td>복도</td><td class="num">920</td><td class="num">54.9%</td><td class="num">65.9%</td><td class="num">81.6%</td></tr>
+  <tr><td>엘리베이터 앞·로비</td><td class="num">230</td><td class="num">58.3%</td><td class="num">70.0%</td><td class="num">78.3%</td></tr>
+  <tr><td>후문·중앙계단</td><td class="num">61</td><td class="num">80.3%</td><td class="num">95.1%</td><td class="num">93.4%</td></tr>
+  <tr><td>지하 홀</td><td class="num">29</td><td class="num">89.7%</td><td class="num">96.6%</td><td class="num">100%</td></tr>
+  <tr><td>비상대피 안내판</td><td class="num">51</td><td class="num">39.2%</td><td class="num">52.9%</td><td class="num">70.6%</td></tr>
+  <tr><td>창밖</td><td class="num">55</td><td class="num">38.2%</td><td class="num">41.8%</td><td class="num">70.9%</td></tr>
+  <tr><td>비상계단</td><td class="num">62</td><td class="num">29.0%</td><td class="num">29.0%</td><td class="num">80.6%</td></tr>
+  <tr><td>화장실</td><td class="num">32</td><td class="num">25.0%</td><td class="num">28.1%</td><td class="num">56.3%</td></tr>
+  <tr><td>엘리베이터 안</td><td class="num">26</td><td class="num">7.7%</td><td class="num">42.3%</td><td class="num">50.0%</td></tr>
+  <tr><th>전체</th><th class="num">1,468</th><th class="num">53.3%</th><th class="num">64.1%</th><th class="num">79.9%</th></tr>
+</table>
+
+<h3>글자 읽기 (여기서 층이 확정된다)</h3>
+<table>
+  <tr><th>대상</th><th class="num">시험</th><th class="num">읽은 비율</th><th class="num">잘못 읽음</th><th>얻는 것</th></tr>
+  <tr><td>복도 호실 번호판</td><td class="num">60장</td><td class="num">37%</td><td class="num">0</td><td>호실 → 층 + 좌우 확정</td></tr>
+  <tr><td>엘리베이터 안 층 표시</td><td class="num">30장</td><td class="num">97%</td><td class="num">0</td><td>층 확정</td></tr>
+  <tr><td>비상대피 안내판 제목</td><td class="num">51장</td><td class="num">45%</td><td class="num">0</td><td>층 확정</td></tr>
+</table>
+<p>생김새만으로는 7.7%였던 엘리베이터 안이 글자 읽기로 <b class="hl">97%</b>가 됩니다.
+  층마다 똑같이 생긴 곳은 "닮은 것 찾기"가 아니라 "글자 읽기"로 풀어야 한다는 것이 이 작업의 결론입니다.</p>
+
+<h3>사진 두 장이면 더 좋아진다</h3>
+<table>
+  <tr><th>복도 920장</th><th class="num">한 장</th><th class="num">같은 자리 두 장</th></tr>
+  <tr><td>정확한 자리</td><td class="num">54.9%</td><td class="num">61.5%</td></tr>
+  <tr><td>층</td><td class="num">63.3%</td><td class="num">70.1%</td></tr>
+  <tr><td>5등 안</td><td class="num">81.6%</td><td class="num">87.8%</td></tr>
+</table>
+
+<h3>층은 몰라도 좌우는 안다</h3>
+<p>상위 20개 후보의 유사도를 왼쪽 복도/오른쪽 복도로 모아 투표하면 <b>81.6%</b>입니다.
+  양쪽 차이가 클수록 정확해서, 차이 0.3 이상인 사진(전체의 13%)은 <b class="hl">98.3%</b> 맞습니다.
+  그래서 "몇 층인지는 확실하지 않지만 <b>왼쪽 복도인 것은 확실합니다</b>"라고 말할 수 있습니다.</p>
+
+<div class="pagebreak"></div>
+<h2>5. 만든 과정 — 무엇을 재고 무엇을 고쳤나</h2>
+<table>
+  <tr><th style="width:52px">단계</th><th>한 일과 근거</th></tr>
+  <tr><td><b>v52</b></td><td>사진 판별 첫 형태. 이때는 "시험 사진이 이미 기준에 들어 있는" 상태로 재서 정답률 100%가 나왔다 —
+    사진이 자기 자신을 알아본 것이었다.</td></tr>
+  <tr><td><b>v58</b></td><td>자기 사진을 빼고 다시 측정. 자동 확정의 정답률이 <b>0%</b>로 나와
+    <b class="hl">AI 단독 확정을 없앴다.</b> 대신 후보 5개를 사람에게 보여주는 구조로 바꿨다.
+    전처리도 바꿨다(모든 실내 사진이 공유하는 성분 제거).</td></tr>
+  <tr><td><b>v62~65</b></td><td>번호판이 없으면 신뢰도를 '낮음'으로 표시. 새로 만든 장소 이름(엘리베이터 안·안내판 등)이
+    허용 목록에 없어 제보가 '범위 밖'으로 거절되던 버그 수정.</td></tr>
+  <tr><td><b>v66</b></td><td><b>글자 읽기 개선.</b> 사람 눈에 또렷한 번호도 못 읽던 원인이 "글자 줄 찾기"임을 확인하고,
+    숫자 덩어리만 오려 다시 그려 읽게 했다(복도 60장 : 9장 → 22장).
+    엘리베이터 층 표시와 안내판 제목 읽기를 새로 넣었다.</td></tr>
+  <tr><td><b>v67</b></td><td><b>가장 큰 개선.</b> 앱은 사진을 1280px로 줄여 쓰는데 기준 데이터는 원본에서 만들고 있었고,
+    224px로 줄일 때 브라우저의 축소 방식이 상황마다 달라 같은 사진도 다르게 보였다(유사도 0.88).
+    양쪽을 같은 방식으로 맞추니 <b class="hl">0.997</b>이 되고, 정확도가 41.1% → 53.3%로 올랐다.</td></tr>
+  <tr><td><b>v69</b></td><td>같은 자리 두 장 합치기(선택), 복도 좌우 표시, 번호판 마지막 수단(사진 전체 훑기),
+    네 자리 숫자 보정을 조여 오독 차단, 판별 시간 표시.</td></tr>
+  <tr><td><b>v70</b></td><td>학습이 한도(250장)에 닿으면 오래된 학습분 대신 <b>내장 기준 벡터가 지워지던</b> 버그 수정.</td></tr>
+</table>
+
+<h2>6. 찾아낸 문제 세 가지 (발표에서 말할 만한 것)</h2>
+<div class="note bad"><b>① 측정이 거짓말을 하고 있었다</b><br>
+  "정답률 100%"는 시험 사진이 기준에 들어 있어서 나온 값이었습니다. 자기 사진을 빼고 다시 재니 자동 확정 정답률이 0%였습니다.
+  <b>그래서 AI가 혼자 확정하지 못하게 막았습니다.</b> 측정 방법을 고친 것이 성능을 고친 것보다 중요했습니다.</div>
+<div class="note bad"><b>② 같은 사진인데 AI가 다르게 봤다</b><br>
+  앱은 1280px 사본에서, 기준 데이터는 원본에서 벡터를 만들고 있었습니다. 게다가 224px로 줄일 때 브라우저가 쓰는
+  축소 방식이 상황마다 달라 계단 무늬가 다르게 남았습니다. 같은 사진의 유사도가 0.88(한 장은 0.52)이었습니다.
+  줄이는 방식을 직접 고정(블록 평균)하고 양쪽을 맞추니 0.997이 되었고, 정확도가 12%p 올랐습니다.</div>
+<div class="note bad"><b>③ 맞게 읽어도 틀린 답이 되는 경우</b><br>
+  엘리베이터 <b>바깥</b>의 층 표시기는 "엘리베이터 칸이 지금 있는 층"을 보여 줍니다. 글자를 정확히 읽어도
+  사용자가 서 있는 층이 아닙니다. 그래서 AI가 "엘리베이터 안"으로 볼 때만 읽고, 밝기 대비로 로비 간판을 걸러내고,
+  지하("B1")를 1층으로 읽지 않도록 막았습니다. 엘리베이터 앞 사진 230장에서 틀린 층은 0장입니다.</div>
+
+<h2>7. 틀려도 안전하게 만든 장치</h2>
+<ul>
+  <li><b>AI 단독 확정 금지</b> — 사진 판별만으로는 위치를 확정하지 않습니다(문턱을 닿을 수 없는 값으로 두었습니다).
+    번호판을 읽었거나 사람이 고른 경우에만 확정합니다.</li>
+  <li><b>근거 표시</b> — 관리자 화면에 "🔢 번호판으로 확정 / 🛗 엘리베이터 층 표시로 층 확정 / 📷 사진 판별(참고용·자주 틀림)"처럼
+    무엇으로 정했는지 적습니다.</li>
+  <li><b>오독 차단</b> — 네 자리 숫자 보정은 확신이 높을 때만. (실측에서 "1313"을 13313으로 읽어 1층 사진을 3층으로
+    만들 뻔한 사례를 찾아 막았습니다.)</li>
+  <li><b>잘못 배우지 않기</b> — 승인된 것만 학습합니다. 틀린 위치가 들어가면 AI가 그 틀린 것을 배우기 때문입니다.</li>
+</ul>
+
+<h2>8. 한계와 다음 할 일</h2>
+<ul>
+  <li>번호판이 멀거나 비스듬하면 여전히 못 읽습니다(복도 60장 중 38장). 사진 전체를 훑는 마지막 수단을 넣었지만 한 장을 더 건질 뿐입니다.</li>
+  <li>비상계단·화장실은 층을 알 수 있는 글자가 사진에 없습니다. QR을 붙이거나, 안내판이 함께 찍히도록 안내하는 방법을 검토 중입니다.</li>
+  <li>속도는 PC 기준으로만 쟀습니다(번호판이 바로 읽히면 1~2초, 못 읽으면 7~9초). 폰 실측이 남아 있습니다.</li>
+  <li>사용자 평가(조원이 아닌 학생이 실제로 길을 찾는 시간)를 아직 재지 않았습니다.</li>
+</ul>
+
+<div class="foot">이 문서의 모든 숫자는 직접 측정한 값입니다. 측정 원본은 작업 폴더의 발표자료_모음.txt(15절)에 있습니다.</div>
+
+</body>
+</html>

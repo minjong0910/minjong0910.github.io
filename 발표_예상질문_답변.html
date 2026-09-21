@@ -1,0 +1,251 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>졸업작품 발표 — 예상 질문과 답</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 14mm 15mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
+    color: #1A1A1A; font-size: 10.5pt; line-height: 1.6; margin: 0;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  h1 { font-size: 19pt; margin: 0 0 4px; letter-spacing: -0.5px; }
+  .sub { color: #666; font-size: 9.5pt; margin-bottom: 16px; }
+  .rule { height: 3px; background: #1B4F8C; margin: 0 0 16px; }
+
+  .card {
+    border: 1px solid #D5DCE5; border-radius: 6px; padding: 12px 14px;
+    margin-bottom: 11px; page-break-inside: avoid;
+  }
+  .q { font-size: 11.5pt; font-weight: 700; color: #1B4F8C; margin-bottom: 8px; }
+  .q .n {
+    display: inline-block; background: #1B4F8C; color: #fff; font-size: 9pt;
+    width: 19px; height: 19px; line-height: 19px; text-align: center;
+    border-radius: 4px; margin-right: 7px; vertical-align: 1px;
+  }
+  .key {
+    background: #EEF4FB; border-left: 4px solid #1B4F8C;
+    padding: 8px 11px; margin-bottom: 9px; font-weight: 700; font-size: 10.5pt;
+  }
+  .card p { margin: 0 0 6px; }
+  ul { margin: 0 0 6px; padding-left: 19px; }
+  li { margin-bottom: 3px; }
+  b.hl { background: #FFF2C4; padding: 0 2px; }
+  .note { color: #666; font-size: 9.3pt; margin-top: 7px; padding-top: 7px; border-top: 1px dashed #D5DCE5; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 9.6pt; }
+  th, td { border: 1px solid #C9D3DF; padding: 5px 7px; text-align: left; vertical-align: top; }
+  th { background: #EEF2F7; font-weight: 700; }
+
+  .summary { background: #1B4F8C; color: #fff; border-radius: 6px; padding: 14px 16px; margin-bottom: 16px; }
+  .summary .t { font-size: 10pt; opacity: .85; margin-bottom: 5px; }
+  .summary .big { font-size: 11.5pt; line-height: 1.65; }
+  .nums { display: table; width: 100%; margin-top: 11px; border-top: 1px solid rgba(255,255,255,.3); padding-top: 10px; }
+  .nums div { display: table-cell; text-align: center; }
+  .nums .v { font-size: 15pt; font-weight: 700; }
+  .nums .l { font-size: 8.6pt; opacity: .85; }
+
+  .pb { }
+  .foot { margin-top: 14px; padding-top: 9px; border-top: 1px solid #D5DCE5; color: #777; font-size: 9pt; }
+</style>
+</head>
+<body>
+
+<h1>졸업작품 발표 — 예상 질문과 답</h1>
+<div class="sub">공대 3호관 실내 길안내 앱 &nbsp;·&nbsp; 2026-09-20 기준</div>
+<div class="rule"></div>
+
+<div class="summary">
+  <div class="t">먼저 이 한 문단을 외우세요. 대부분의 질문은 여기서 갈라져 나옵니다.</div>
+  <div class="big">
+    공대 3호관 안에서 길을 찾아주는 앱입니다. 사진을 찍으면 어디인지 알아내고,
+    3D 건물 위에 길을 보여줍니다. <b>AI 계산은 전부 폰 안에서 돌고</b>,
+    서버는 사용자가 보낸 제보를 받아 두는 데만 씁니다.
+  </div>
+  <div class="nums">
+    <div><div class="v">1,753장</div><div class="l">학습 사진</div></div>
+    <div><div class="v">147곳</div><div class="l">등록 장소</div></div>
+    <div><div class="v">53.3%</div><div class="l">1등 정답률 (제3자 사진)</div></div>
+    <div><div class="v">79.9%</div><div class="l">5등 안</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">1</span>이 앱은 어떤 구성을 가지고 있습니까?</div>
+  <div class="key">화면 4개 · 데이터 3덩어리 · 판별기 3개로 되어 있습니다.</div>
+  <table>
+    <tr><th style="width:74px">화면</th><td>3D 건물 보기 / 길찾기 / 건의함(제보) / 관리자 화면</td></tr>
+    <tr><th>데이터</th><td>건물 도면과 호실 목록 &nbsp;·&nbsp; 호실 사진 &nbsp;·&nbsp; AI 기준 데이터(3,506개)</td></tr>
+    <tr><th>판별기</th><td>사진으로 위치 맞히기 &nbsp;·&nbsp; 호실 번호판 글자 읽기 &nbsp;·&nbsp; QR 읽기</td></tr>
+  </table>
+  <p>사용자는 앞의 세 화면만 씁니다. 관리자 화면은 PIN으로 잠겨 있고 제보를 확인·승인하는 곳입니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">2</span>이 앱은 어떤 시스템으로 움직입니까?</div>
+  <div class="key">폰 안에서 도는 웹앱 하나 + 제보만 받는 작은 서버 하나입니다.</div>
+  <table>
+    <tr><th style="width:96px">앱 본체</th><td>HTML·자바스크립트 파일 하나 (index.html)</td></tr>
+    <tr><th>3D 건물</th><td>Three.js — 폰 GPU로 그립니다</td></tr>
+    <tr><th>사진 판별</th><td>TensorFlow.js + MobileNetV2 (폰에서 돌릴 수 있는 작은 모델)</td></tr>
+    <tr><th>글자 읽기</th><td>Tesseract.js — 호실 번호판 숫자를 읽습니다</td></tr>
+    <tr><th>서버</th><td>Firebase Firestore — 제보 저장, 관리자 로그인</td></tr>
+    <tr><th>배포</th><td>GitHub Pages — 주소만 열면 설치 없이 동작</td></tr>
+  </table>
+  <div class="note">덧붙일 말: 모델을 새로 학습시키지 않습니다. 이미 학습된 모델에서 특징만 꺼내 쓰기 때문에,
+    사진이 늘어도 재학습이 필요 없습니다.</div>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">3</span>앱 안의 구동 방식은 어떻게 됩니까?</div>
+  <div class="key">사진 한 장을 두 갈래로 동시에 보고, 확실한 쪽을 따릅니다.</div>
+  <p><b>갈래 ① 글자로 읽기</b> — 사진에서 파란 호실 번호판을 찾아 잘라내고, 원래 해상도로 글자를 읽습니다.
+    숫자가 읽히면 <b class="hl">그 층·그 방으로 확정</b>합니다. 복도 사진 60장으로 시험했을 때 22장(37%)에서 호실 번호를 읽었고, 잘못 읽은 것은 0장입니다. 엘리베이터 안의 층 표시는 30장 중 29장, 비상대피 안내판의 "N층"은 51장 중 23장을 읽습니다.</p>
+  <p><b>갈래 ② 생김새로 맞히기</b> — 사진을 두 가지로 잘라(정사각 전체·가운데 확대)
+    각각을 1,280개의 숫자로 바꾸고, 미리 넣어둔 3,506개와 비교해 가장 비슷한 곳을 찾습니다.</p>
+  <p><b>합치기</b> — 번호판이 읽히면 ①을 따릅니다. 번호판이 없으면 <b class="hl">확정하지 않고</b>
+    후보 5개를 관리자에게 보여줍니다.</p>
+  <div class="note">왜 번호판을 따로 자르나: 사진을 224×224로 줄여 모델에 넣으면 번호판 글자가 뭉개집니다.
+    강의실 문은 전부 똑같이 생겨서 번호만이 유일한 단서인데, 그 단서가 사라지는 것입니다.</div>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">4</span>서비스 배포는 어떻게 하실 겁니까?</div>
+  <div class="key">지금은 웹 주소 하나. 다음 단계는 아이폰·안드로이드 앱입니다.</div>
+  <table>
+    <tr><th style="width:74px">지금</th><td>GitHub Pages에 올려 둡니다. 설치 없이 주소만 열면 폰에서 바로 동작합니다.
+      업데이트는 파일 하나를 덮어쓰면 끝입니다.</td></tr>
+    <tr><th>다음</th><td>Capacitor로 감싸면 지금 코드 그대로 아이폰·안드로이드 앱이 됩니다.
+      화면을 새로 만들지 않습니다.</td></tr>
+  </table>
+  <p>앱이 되면 AI 모델과 글자인식 파일까지 안에 들어가서 <b>인터넷이 없어도 전부 동작</b>합니다.
+    지금은 그 파일들을 인터넷에서 받아옵니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">5</span>비즈니스 도메인으로 나갈 수 있습니까?</div>
+  <div class="key">나갈 수 있습니다. 파는 것은 앱이 아니라 <b>건물 하나를 앱으로 바꾸는 비용을 낮춘 방법</b>입니다.</div>
+  <p><b>왜 시장이 있나</b> — 지금 실내지도 서비스는 사람이 건물을 측량해서 만듭니다.
+    그래서 백화점·공항 같은 큰 건물만 대상입니다. 대학 건물, 병원 별관, 관공서처럼
+    <b class="hl">중간 크기 건물은 비용이 안 맞아 빠져 있습니다.</b></p>
+  <p><b>이 방식의 비용</b> — 사진 약 1,000장과 평면도면 됩니다. 측량 장비도, 건물에 설치하는 기계도 없습니다.
+    한 사람이 하루면 찍습니다.</p>
+  <p><b>수익 구조</b> — 건물당 구축비 + 유지비. 또는 건물 관리자가 직접 사진을 넣도록 도구만 제공하는 방식.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">6</span>서버에서 다 구동하고 폰은 데이터만 받아서 씁니까?</div>
+  <div class="key">반대입니다. 계산은 전부 폰에서 하고, 서버는 제보를 받아 두는 일만 합니다.</div>
+  <table>
+    <tr><th style="width:96px">폰이 하는 일</th><td>사진 판별 · 글자 읽기 · QR 읽기 · 3D 그리기 · 길찾기</td></tr>
+    <tr><th>서버가 하는 일</th><td>제보 저장 · 관리자 로그인 · 관리자 승인 결과 보관</td></tr>
+  </table>
+  <p><b>이렇게 만든 이유 세 가지</b></p>
+  <ul>
+    <li><b>비용</b> — 서버에서 AI를 돌리면 사용자가 늘수록 서버 비용이 늘어납니다. 폰에서 돌리면 <b class="hl">사용자가 늘어도 비용이 0</b>입니다.</li>
+    <li><b>개인정보</b> — 사용자가 찍은 사진이 서버로 나가지 않습니다.</li>
+    <li><b>안정성</b> — 건물 안에서 신호가 약해도 위치 판별이 됩니다.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">7</span>이 앱의 사진들은 어디에 있고, 어디로 이동하고, 어디에 보관됩니까?</div>
+  <div class="key">사진은 <b>세 종류</b>이고, 각각 완전히 다른 곳에 있습니다.</div>
+  <table>
+    <tr>
+      <th style="width:105px">① AI 학습에 쓴 사진<br>1,753장</th>
+      <td><b>앱에 들어가지 않습니다.</b> 원본 JPG는 제 PC에만 있습니다.
+        앱에는 사진 대신 <b class="hl">숫자로 바꾼 것만</b> 들어갑니다 — 3,506개 × 1,280개 숫자, 8.1MB.
+        이 숫자로는 원래 사진을 복원할 수 없습니다.</td>
+    </tr>
+    <tr>
+      <th>② 앱이 보여주는<br>호실 사진</th>
+      <td><b>앱 파일 안에 들어 있습니다.</b> index.html 안에 글자로 바꿔 넣어 두었고 약 12MB입니다.
+        서버에서 받아오지 않으므로 인터넷 없이도 보입니다.</td>
+    </tr>
+    <tr>
+      <th>③ 사용자가 건의함에<br>올린 사진</th>
+      <td><b>유일하게 서버로 갑니다.</b> 900KB 이하로 줄여서 Firestore의 제보 문서 안에 저장합니다.
+        인터넷이 없으면 폰 안에 임시로 두었다가, 연결되면 자동으로 보냅니다.
+        관리자가 확인해 승인하거나 반려합니다.</td>
+    </tr>
+  </table>
+  <div class="note">한 문장으로: <b>학습용 사진은 폰에 안 들어가고, 보여줄 사진은 앱 안에 있고,
+    사용자가 올린 사진만 서버에 있습니다.</b></div>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">8</span>폰으로만 구동된다면 프로그램은 어디서 돌아갑니까?</div>
+  <div class="key">폰에 들어 있는 <b>웹브라우저 엔진</b> 위에서 돕니다.</div>
+  <p>브라우저는 단순히 화면을 보여주는 것이 아니라, 자바스크립트를 실행하는 작은 컴퓨터입니다.
+    아이폰은 WebKit, 안드로이드는 Chromium이 들어 있고, 이 위에서 프로그램이 돕니다.</p>
+  <ul>
+    <li>3D 건물은 <b>WebGL</b>로 폰의 GPU를 직접 씁니다.</li>
+    <li>AI 계산도 같은 WebGL로 GPU에서 돕니다. 그래서 폰에서도 1초 안에 끝납니다.</li>
+    <li>앱으로 감싸도 <b class="hl">같은 엔진</b>을 쓰므로 코드를 고치지 않아도 그대로 돕니다.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">9</span>앱 내부를 구성하는 절차나 시스템에는 무엇이 있습니까?</div>
+  <div class="key">데이터를 만드는 절차 6단계와, 쓰면서 좋아지는 순환 구조가 있습니다.</div>
+  <p><b>데이터를 만드는 절차</b></p>
+  <table>
+    <tr><th style="width:20px">1</th><td><b>촬영</b> — 찍는 방법을 문서로 정해 조원들에게 나눠 줍니다(한 자리에서 앞 4장·뒤돌아 4장).</td></tr>
+    <tr><th>2</th><td><b>분류</b> — 층·좌우·용도별로 나눕니다. 좌우는 건물 평면도를 근거로 정합니다.</td></tr>
+    <tr><th>3</th><td><b>걸러내기</b> — 흰 벽만 찍힌 것, 흔들린 것은 뺍니다(4층 201장 중 49장 폐기).</td></tr>
+    <tr><th>4</th><td><b>기준 데이터 만들기</b> — 사진을 숫자로 바꾸고, 모든 실내 사진이 공유하는 성분을 걷어냅니다.</td></tr>
+    <tr><th>5</th><td><b>정확도 측정</b> — 다른 조원이 찍은 사진으로만 맞히게 해서 잽니다(실제 사용자와 같은 조건).</td></tr>
+    <tr><th>6</th><td><b>앱에 넣기</b> — 측정을 통과한 것만 넣습니다.</td></tr>
+  </table>
+  <p><b>쓰면서 좋아지는 순환</b></p>
+  <p style="text-align:center; background:#EEF4FB; padding:9px; border-radius:5px; font-weight:700;">
+    사용자 제보 &nbsp;→&nbsp; AI 추정 &nbsp;→&nbsp; 관리자 확인·수정 &nbsp;→&nbsp; 승인 &nbsp;→&nbsp; AI가 학습
+  </p>
+  <div class="note">중요한 설계: <b>AI 혼자서는 위치를 확정하지 못하게 막아 두었습니다.</b>
+    번호판을 읽었거나 사용자가 직접 고른 경우에만 확정합니다.
+    틀린 위치가 데이터에 들어가면 AI가 그 틀린 것을 배우기 때문입니다.</div>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">10</span>다른 사람이나 회사가 이 아이디어를 산다면, 어느 부분 때문이겠습니까?</div>
+  <div class="key">화면이 아니라 <b>구축 비용을 낮춘 절차</b>, <b>검증된 데이터</b>, <b>틀려도 안전한 구조</b> 세 가지입니다.</div>
+  <table>
+    <tr><th style="width:92px">① 구축 절차</th>
+      <td>사진만 찍으면 그 건물이 대상이 됩니다. 측량도, 건물에 설치하는 장비도 없습니다.
+        경쟁 방식(비콘 설치·WiFi 측위)은 건물마다 공사가 필요합니다.</td></tr>
+    <tr><th>② 검증된 데이터</th>
+      <td>1,753장·147곳과, <b class="hl">정확도를 증명하는 측정 절차</b>가 같이 있습니다.
+        "얼마나 맞는지"를 숫자로 댈 수 있다는 것 자체가 값입니다.
+        대부분은 이 숫자를 못 댑니다.</td></tr>
+    <tr><th>③ 안전 구조</th>
+      <td>AI가 틀릴 때 틀린 값이 그대로 들어가지 않게 막는 설계 —
+        번호판이 읽힐 때만 확정, 아니면 사람이 후보 중에서 고름, 고른 것이 다시 학습으로.
+        실제 서비스에서는 이 구조가 없으면 쓸 수 없습니다.</td></tr>
+  </table>
+  <div class="note">솔직하게 덧붙일 것: 화면 디자인과 3D 모델 자체는 대체 가능한 부분입니다.
+    값이 있는 것은 위의 세 가지입니다. — 이렇게 말하면 오히려 신뢰를 얻습니다.</div>
+</div>
+
+<div class="card">
+  <div class="q">부록 &nbsp;막혔을 때 쓰는 문장</div>
+  <ul>
+    <li>모르는 질문 → <b>"정확히는 모르겠습니다. 확인해서 말씀드리겠습니다."</b>
+      (아는 척하는 것보다 훨씬 낫습니다)</li>
+    <li>안 해본 것 → <b>"지금은 못 했습니다. 다만 이렇게 하면 될 것 같습니다."</b>
+      (＂생각 안 해봤습니다＂로 끝내지 마세요)</li>
+    <li>숫자를 묻는데 기억이 안 날 때 → <b>"대략 ○○ 정도인데, 정확한 값은 자료에 있습니다."</b></li>
+  </ul>
+  <div class="note">가장 강한 답은 <b>한계를 먼저 말하는 것</b>입니다.
+    "복도 사진은 층마다 똑같이 생겨서 사진만으로는 잘 못 맞힙니다. 그래서 자동으로 확정하지 않습니다."
+    — 이렇게 말하면 질문이 공격이 아니라 대화가 됩니다.</div>
+</div>
+
+<div class="foot">
+  공대 3호관 실내 길안내 앱 &nbsp;·&nbsp; 발표 대비 자료 &nbsp;·&nbsp; 숫자는 2026-09-18 측정 기준
+</div>
+
+</body>
+</html>

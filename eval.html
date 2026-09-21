@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진 위치판별 정확도 측정</title>
+<style>
+  :root{
+    --bg:#0B0E13; --panel:#141A23; --line:#242D3A;
+    --fg:#E8EEF6; --dim:#8A97A8; --accent:#00E5FF; --good:#34D399; --bad:#F87171; --warn:#FBBF24;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:14px/1.6 "Malgun Gothic","맑은 고딕",system-ui,sans-serif;padding:24px}
+  h1{font-size:19px;margin:0 0 4px}
+  .sub{color:var(--dim);margin:0 0 20px;font-size:13px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+  button{background:var(--accent);color:#04121A;border:0;border-radius:8px;padding:10px 18px;
+         font:700 14px inherit;cursor:pointer}
+  button:disabled{background:#2A3542;color:#6B7888;cursor:default}
+  button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  #log{height:180px;overflow:auto;background:#080B10;border:1px solid var(--line);border-radius:8px;
+       padding:10px;font:12px/1.5 Consolas,monospace;color:var(--dim);white-space:pre-wrap}
+  table{border-collapse:collapse;width:100%;margin-top:10px;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:right}
+  th{background:#1B2330;color:var(--dim);font-weight:600;text-align:center}
+  td.name{text-align:left}
+  .big{font-size:16px;font-weight:700;color:var(--good)}
+  .bar{height:6px;background:#1B2330;border-radius:3px;overflow:hidden;margin-top:8px}
+  .bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+  .k{color:var(--dim)}
+  .hint{color:var(--warn);font-size:12.5px}
+</style>
+</head>
+<body>
+
+<h1>사진 위치판별 정확도 측정</h1>
+<p class="sub">사진원본\ 폴더의 사진으로 여러 방식을 비교합니다. 폴더 이름이 정답입니다.</p>
+
+<div class="panel">
+  <div id="status">사진 목록을 불러오는 중…</div>
+  <div class="bar"><i id="prog"></i></div>
+  <div style="margin-top:14px">
+    <button id="run" disabled>측정 시작</button>
+    <button id="dump" class="ghost" disabled>결과 JSON 보기</button>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="k">진행 기록</div>
+  <div id="log"></div>
+</div>
+
+<div class="panel" id="resultPanel" style="display:none">
+  <div class="k">결과 — Top-1 정확도 (leave-one-out)</div>
+  <div id="result"></div>
+</div>
+
+<script src="lib/tf.min.js"></script>
+<script src="lib/mobilenet.min.js"></script>
+<script>
+(function(){
+  var logEl=document.getElementById('log'), statusEl=document.getElementById('status'),
+      progEl=document.getElementById('prog'), runBtn=document.getElementById('run'),
+      dumpBtn=document.getElementById('dump');
+  function log(s){ logEl.textContent += s+'\n'; logEl.scrollTop=logEl.scrollHeight; }
+  function prog(f){ progEl.style.width=(f*100).toFixed(1)+'%'; }
+
+  var PHOTOS=[], net=null;
+  var DIM=1280;
+
+  /* ── 정답 라벨에서 층 뽑기 ───────────────────────────── */
+  function floorOf(code){
+    if(/^\d{5}$/.test(code)) return code[2];
+    var m=/^(HALL|EV|WC)(\d)/.exec(code); if(m) return m[2];
+    if(/^B1$/i.test(code)) return 'B';
+    if(/^BLD$/i.test(code)) return '외부';
+    return '?';
+  }
+
+  /* ── 전처리 방식들 ───────────────────────────────────
+     stretch : 지금 앱이 쓰는 방식. 사진 전체를 224x224로 늘린다(종횡비 깨짐)
+     crop    : 가운데를 정사각으로 잘라낸 뒤 224로 줄인다(종횡비 보존)
+     auto    : 히스토그램 2~98% 자동 명암 보정을 걸지 여부           */
+  function makeCanvas(img, mode, auto, zoom){
+    var cv=document.createElement('canvas'); cv.width=224; cv.height=224;
+    var cx=cv.getContext('2d', {willReadFrequently:true});
+    cx.fillStyle='#000'; cx.fillRect(0,0,224,224);
+    var z = zoom||1;
+    if(mode==='stretch'){
+      var sw=img.width*z, sh=img.height*z;
+      cx.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,0,0,224,224);
+    }else{
+      var s=Math.min(img.width,img.height)*z;
+      cx.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,224,224);
+    }
+    if(auto){
+      var d=cx.getImageData(0,0,224,224), p=d.data, hist=new Uint32Array(256), i;
+      for(i=0;i<p.length;i+=4) hist[(0.299*p[i]+0.587*p[i+1]+0.114*p[i+2])|0]++;
+      var total=p.length/4, acc=0, lo=0, hi=255, v;
+      for(v=0;v<256;v++){ acc+=hist[v]; if(acc>=total*0.02){lo=v;break;} }
+      acc=0; for(v=0;v<256;v++){ acc+=hist[v]; if(acc>=total*0.98){hi=v;break;} }
+      var range=Math.max(24,hi-lo), sc=255/range;
+      for(i=0;i<p.length;i+=4){
+        p[i]  =Math.max(0,Math.min(255,(p[i]  -lo)*sc));
+        p[i+1]=Math.max(0,Math.min(255,(p[i+1]-lo)*sc));
+        p[i+2]=Math.max(0,Math.min(255,(p[i+2]-lo)*sc));
+      }
+      cx.putImageData(d,0,0);
+    }
+    return cv;
+  }
+
+  var VARIANTS=[
+    {key:'A', name:'지금 방식 (늘리기 + 자동명암)', mode:'stretch', auto:true },
+    {key:'B', name:'종횡비 보존 (가운데 정사각)',    mode:'crop',    auto:true },
+    {key:'C', name:'늘리기 + 자동명암 끔',           mode:'stretch', auto:false},
+    {key:'D', name:'종횡비 보존 + 자동명암 끔',      mode:'crop',    auto:false},
+    {key:'E', name:'종횡비 보존 + 가운데 확대(0.6)', mode:'crop',    auto:false, zoom:0.6}
+  ];
+
+  /* ── 벡터 후처리 방식들 ─────────────────────────────── */
+  function l2(v){ var s=0,j; for(j=0;j<v.length;j++) s+=v[j]*v[j]; s=Math.sqrt(s)||1;
+    var o=new Float32Array(v.length); for(j=0;j<v.length;j++) o[j]=v[j]/s; return o; }
+  function sqrtNorm(v){ var o=new Float32Array(v.length),j;
+    for(j=0;j<v.length;j++) o[j]=Math.sqrt(v[j]<0?0:v[j]); return l2(o); }
+  function centerAll(vs){
+    var n=vs.length, d=vs[0].length, m=new Float32Array(d), i, j;
+    for(i=0;i<n;i++) for(j=0;j<d;j++) m[j]+=vs[i][j]/n;
+    return vs.map(function(v){ var o=new Float32Array(d);
+      for(var j=0;j<d;j++) o[j]=v[j]-m[j]; return l2(o); });
+  }
+  var POSTS=[
+    {key:'raw',        name:'그대로(L2)',            fn:function(vs){ return vs.map(l2); }},
+    {key:'sqrt',       name:'제곱근(지금 앱 방식)',  fn:function(vs){ return vs.map(sqrtNorm); }},
+    {key:'center',     name:'평균빼기',              fn:function(vs){ return centerAll(vs.map(l2)); }},
+    {key:'sqrt+center',name:'제곱근 + 평균빼기',     fn:function(vs){ return centerAll(vs.map(sqrtNorm)); }}
+  ];
+
+  /* ── leave-one-out 평가 ─────────────────────────────── */
+  function dot(a,b){ var t=0,j; for(j=0;j<a.length;j++) t+=a[j]*b[j]; return t; }
+  function evaluate(vs, labels){
+    var cnt={}, i, j;
+    labels.forEach(function(x){ cnt[x]=(cnt[x]||0)+1; });
+    var ok1=0, ok5=0, tot=0, same=[], diff=[];
+    for(i=0;i<vs.length;i++){
+      if(cnt[labels[i]]<2) continue;
+      var sc=[];
+      for(j=0;j<vs.length;j++){
+        if(i===j) continue;
+        var d=dot(vs[i],vs[j]);
+        sc.push({l:labels[j], d:d});
+        if(j>i) (labels[i]===labels[j]?same:diff).push(d);
+      }
+      sc.sort(function(a,b){ return b.d-a.d; });
+      tot++;
+      if(sc[0].l===labels[i]) ok1++;
+      var seen={}, hit=false, k=0, c=0;
+      while(k<sc.length && c<5){
+        if(!seen[sc[k].l]){ seen[sc[k].l]=1; c++; if(sc[k].l===labels[i]) hit=true; }
+        k++;
+      }
+      if(hit) ok5++;
+    }
+    var avg=function(a){ return a.length? a.reduce(function(x,y){return x+y;},0)/a.length : 0; };
+    var sd =function(a){ var m=avg(a); return a.length? Math.sqrt(avg(a.map(function(y){return (y-m)*(y-m);}))) : 0; };
+    var ms=avg(same), md=avg(diff), pooled=Math.sqrt((sd(same)*sd(same)+sd(diff)*sd(diff))/2)||1e-9;
+    return { top1:tot?100*ok1/tot:0, top5:tot?100*ok5/tot:0, n:tot,
+             같은평균:ms, 다른평균:md, 분리도:(ms-md)/pooled };
+  }
+
+  /* ── 실행 ───────────────────────────────────────────── */
+  function loadImg(src){
+    return new Promise(function(res,rej){
+      var im=new Image(); im.onload=function(){res(im);}; im.onerror=function(){rej(src);}; im.src=src;
+    });
+  }
+
+  var RESULTS=null;
+
+  async function run(){
+    runBtn.disabled=true;
+    log('모델을 불러옵니다…');
+    await tf.setBackend('webgl').catch(function(){ return tf.setBackend('cpu'); });
+    await tf.ready();
+    log('  백엔드: '+tf.getBackend());
+    /* 모델은 인터넷(CDN)에서 받는다.
+       내 PC 서버는 한 번에 한 요청만 처리하는데 TF.js 가 모델 조각 2개를 동시에 요청해서 막힌다.
+       인터넷이 안 되면 로컬 model\ 로 되돌아간다(조각을 하나씩 받게 되어 느리지만 동작). */
+    try{
+      net = await mobilenet.load({version:2, alpha:0.5});
+      log('  MobileNetV2 alpha=0.5 준비 완료 (인터넷)');
+    }catch(e){
+      log('  인터넷 실패 — 내 PC의 model\\ 로 다시 시도합니다');
+      net = await mobilenet.load({version:2, alpha:0.5, modelUrl:new URL('model/model.json',location.href).href});
+      log('  MobileNetV2 alpha=0.5 준비 완료 (로컬)');
+    }
+
+    var labels = PHOTOS.map(function(p){ return p.label; });
+    var floors = labels.map(floorOf);
+    var embByVariant = {};
+    var totalSteps = VARIANTS.length * PHOTOS.length, step = 0;
+
+    /* 사진 한 장을 한 번만 읽고, 그 자리에서 5가지 전처리를 모두 돌린다.
+       (전처리마다 다시 읽으면 374MB를 다섯 번 읽게 된다) */
+    VARIANTS.forEach(function(V){ embByVariant[V.key]=[]; });
+    var t0 = Date.now(), bad = 0;
+    for(var i=0;i<PHOTOS.length;i++){
+      var img = null;
+      try{ img = await loadImg(PHOTOS[i].path); }
+      catch(e){ log('  !! 못 읽음: '+PHOTOS[i].path); bad++; }
+      for(var vi=0; vi<VARIANTS.length; vi++){
+        var V = VARIANTS[vi];
+        if(!img){ embByVariant[V.key].push(new Float32Array(DIM)); step++; continue; }
+        var cv = makeCanvas(img, V.mode, V.auto, V.zoom);
+        var t = net.infer(cv, true);
+        var arr = await t.data();
+        t.dispose();
+        DIM = arr.length;
+        embByVariant[V.key].push(Float32Array.from(arr));
+        step++;
+      }
+      if(i%5===0 || i===PHOTOS.length-1){
+        prog(step/totalSteps);
+        var el=(Date.now()-t0)/1000, eta=el/Math.max(1,i+1)*(PHOTOS.length-i-1);
+        statusEl.textContent='사진 '+(i+1)+' / '+PHOTOS.length+'   (남은 시간 약 '+Math.ceil(eta)+'초)';
+        await new Promise(function(r){ setTimeout(r,0); });
+      }
+      if(i%40===0 && i) log('  '+(i)+'장 완료  ('+Math.round((Date.now()-t0)/1000)+'초 경과)');
+    }
+    log('사진 처리 끝 — '+PHOTOS.length+'장, 실패 '+bad+'장, '+Math.round((Date.now()-t0)/1000)+'초');
+
+    /* 계산한 벡터를 남겨 둔다 — 다시 추론하지 않고 다른 조합을 시험할 수 있게 */
+    window.__EMB__    = embByVariant;
+    window.__LABELS__ = labels;
+    window.__FLOORS__ = floors;
+    window.__PHOTOS__ = PHOTOS;
+    window.__EVAL__   = evaluate;
+
+    log('\n평가 중…');
+    var rows=[];
+    VARIANTS.forEach(function(V){
+      POSTS.forEach(function(P){
+        var vs = P.fn(embByVariant[V.key]);
+        var r  = evaluate(vs, labels);
+        var rf = evaluate(vs, floors);
+        rows.push({ 전처리:V.name, 전처리키:V.key, 후처리:P.name, 후처리키:P.key,
+                    호실_Top1:+r.top1.toFixed(1), 호실_Top5:+r.top5.toFixed(1),
+                    층_Top1:+rf.top1.toFixed(1),
+                    분리도:+r.분리도.toFixed(3),
+                    같은평균:+r.같은평균.toFixed(4), 다른평균:+r.다른평균.toFixed(4), 비교수:r.n });
+      });
+    });
+    rows.sort(function(a,b){ return b.호실_Top1-a.호실_Top1; });
+
+    var codes={}; labels.forEach(function(x){ codes[x]=(codes[x]||0)+1; });
+    var multi=Object.keys(codes).filter(function(k){ return codes[k]>=2; });
+    var chance = 100/Math.max(1,multi.length);
+
+    RESULTS = { 사진수:PHOTOS.length, 장소수:Object.keys(codes).length,
+                사진2장이상_장소수:multi.length, 찍었을때_기대정확도:+chance.toFixed(1),
+                장소별_사진수:codes, 결과:rows };
+    window.__RESULTS__ = RESULTS;
+
+    try{
+      var rr = await fetch('api/save?name=eval1_result.json',{method:'POST',body:JSON.stringify(RESULTS,null,1)});
+      var jj = await rr.json();
+      log('결과 저장됨 → 생성물\\\\eval1_result.json  ('+Math.round(jj.bytes/1024)+' KB)');
+    }catch(e){ log('결과 저장 실패: '+e); }
+
+    render(rows, chance);
+    log('\n끝났습니다. 가장 좋은 조합: '+rows[0].전처리+' + '+rows[0].후처리+'  →  호실 Top-1 '+rows[0].호실_Top1+'%');
+    statusEl.textContent='측정 완료';
+    prog(1); dumpBtn.disabled=false;
+  }
+
+  function render(rows, chance){
+    var h='<table><tr><th>전처리</th><th>후처리</th><th>호실 Top-1</th><th>호실 Top-5</th><th>층 Top-1</th><th>분리도</th></tr>';
+    rows.forEach(function(r,i){
+      var c = i===0 ? ' class="big"' : '';
+      h+='<tr><td class="name">'+r.전처리+'</td><td class="name">'+r.후처리+'</td>'
+       +'<td'+c+'>'+r.호실_Top1+'%</td><td>'+r.호실_Top5+'%</td><td>'+r.층_Top1+'%</td><td>'+r.분리도+'</td></tr>';
+    });
+    h+='</table><p class="hint">찍었을 때 기대 정확도: '+chance.toFixed(1)+'%  — 이 숫자보다 충분히 높아야 의미가 있습니다.</p>';
+    document.getElementById('result').innerHTML=h;
+    document.getElementById('resultPanel').style.display='';
+  }
+
+  /* ── 시작 ───────────────────────────────────────────── */
+  fetch('api/photos').then(function(r){ return r.json(); }).then(function(list){
+    PHOTOS=list;
+    var codes={}; list.forEach(function(p){ codes[p.label]=(codes[p.label]||0)+1; });
+    var multi=Object.keys(codes).filter(function(k){ return codes[k]>=2; });
+    if(!list.length){
+      statusEl.innerHTML='<span class="hint">사진원본\\ 폴더가 비어 있습니다. 장소별 폴더를 만들고 사진을 넣어 주세요.</span>';
+      return;
+    }
+    statusEl.textContent='사진 '+list.length+'장, 장소 '+Object.keys(codes).length+'곳 (사진 2장 이상인 곳 '+multi.length+'곳)';
+    log('사진 '+list.length+'장을 찾았습니다.');
+    Object.keys(codes).sort().forEach(function(k){ log('  '+k+' : '+codes[k]+'장'+(codes[k]<5?'   <- 5장 이상 권장':'')); });
+    runBtn.disabled=false;
+  })['catch'](function(e){
+    statusEl.innerHTML='<span class="hint">사진 목록을 못 불러왔습니다. 미리보기 서버로 열었는지 확인하세요.</span>';
+  });
+
+  runBtn.onclick=function(){ run()['catch'](function(e){ log('오류: '+(e&&e.message||e)); statusEl.textContent='오류로 중단'; }); };
+  dumpBtn.onclick=function(){
+    var w=window.open('','_blank');
+    w.document.write('<pre>'+JSON.stringify(RESULTS,null,2).replace(/</g,'&lt;')+'</pre>');
+  };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>인덱스 시트</title>
+<style>body{background:#111;color:#eee;font:14px system-ui;padding:16px}
+#log{height:240px;overflow:auto;background:#000;padding:8px;font:12px monospace;white-space:pre-wrap}</style>
+</head><body>
+<h3>인덱스 시트 만들기</h3>
+<div id="st">준비 중…</div>
+<div id="log"></div>
+<script src="_검토_4층b/list.js"></script>
+<script>
+(async function(){
+  const L=document.getElementById('log'), ST=document.getElementById('st');
+  const log=s=>{L.textContent+=s+'\n';L.scrollTop=L.scrollHeight;};
+  const DIR='_검토_4층b/';
+  const COLS=4, ROWS=4, PER=COLS*ROWS;      // 한 판에 16장
+  const CW=420, CH=560, PAD=26;             // 칸 크기 + 이름표 자리
+  const files=window.FILES;
+  log('사진 '+files.length+'장');
+  const sheets=Math.ceil(files.length/PER);
+  for(let s=0;s<sheets;s++){
+    const cv=document.createElement('canvas');
+    cv.width=COLS*CW; cv.height=ROWS*(CH+PAD);
+    const cx=cv.getContext('2d');
+    cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height);
+    for(let k=0;k<PER;k++){
+      const idx=s*PER+k; if(idx>=files.length) break;
+      const f=files[idx];
+      const img=await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=DIR+f;});
+      const col=k%COLS, row=(k/COLS)|0;
+      const x=col*CW, y=row*(CH+PAD)+PAD;
+      if(img){
+        const sc=Math.min(CW/img.width, CH/img.height);
+        const w=img.width*sc, h=img.height*sc;
+        cx.drawImage(img, x+(CW-w)/2, y+(CH-h)/2, w, h);
+      }
+      cx.fillStyle='#000'; cx.font='bold 20px monospace';
+      cx.fillText('#'+(idx+1)+'  '+f.replace('KakaoTalk_20260917_','').replace('.jpg',''), x+6, y-7);
+      cx.strokeStyle='#999'; cx.strokeRect(x, y, CW, CH);
+    }
+    const data=cv.toDataURL('image/jpeg', 0.82);
+    const r=await fetch('api/save?name=g4_'+(s+1)+'.json',{method:'POST',body:JSON.stringify({b64:data.split(',')[1]})});
+    await r.json();
+    log('시트 '+(s+1)+'/'+sheets+' 저장 ('+Math.round(data.length/1024)+'KB)');
+    ST.textContent='시트 '+(s+1)+'/'+sheets;
+  }
+  ST.textContent='완료 — 시트 '+sheets+'장';
+  log('끝');
+})();
+</script></body></html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>정확도 측정 — 한 번에</title>
+<style>
+  body{background:#0E1420;color:#E6EDF5;font:14px/1.7 system-ui,"Malgun Gothic",sans-serif;margin:0;padding:18px 20px 60px;}
+  h1{font-size:19px;margin:0 0 4px}
+  .sub{color:#8FA3BC;font-size:12.5px;margin-bottom:14px}
+  button{background:#1B4F8C;color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer}
+  button:disabled{background:#33405A;color:#8FA3BC;cursor:default}
+  .bar{height:6px;background:#1B2536;border-radius:3px;margin:12px 0;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:#00E5FF;transition:width .2s}
+  .st{color:#8FA3BC;font-size:12.5px;margin-bottom:10px}
+  h2{font-size:15px;margin:22px 0 6px;color:#9FD0FF}
+  table{border-collapse:collapse;margin:6px 0 4px;font-size:13px}
+  th,td{border:1px solid #2A3852;padding:5px 9px;text-align:right}
+  th{background:#16203050;color:#9FD0FF;font-weight:600}
+  td.l,th.l{text-align:left}
+  .note{color:#8FA3BC;font-size:12px;background:#131C2B;border-left:3px solid #2A4A75;padding:8px 11px;margin:8px 0;line-height:1.65}
+  .warn{border-left-color:#7C3B3B;color:#FFC9C9}
+  code{background:#16203a;padding:1px 5px;border-radius:4px;font-size:12px}
+</style>
+</head>
+<body>
+<h1>공대 3호관 길안내 — 정확도 측정</h1>
+<div class="sub">이 페이지 하나로 발표에 쓰는 숫자를 전부 다시 만듭니다. 결과는 화면에 표로 나오고 JSON 으로도 받을 수 있습니다.</div>
+
+<div class="note">
+  <b>측정 방법</b> — 사진 한 장을 질의로 두고, <b>같은 배치(같은 사람이 한 번에 찍어 보낸 묶음)의 사진은 기준에서 모두 빼고</b> 맞힙니다.
+  실제 사용자는 우리가 찍은 사진을 갖고 있지 않으므로, 이 조건이 실제와 가장 가깝습니다.
+  배치는 파일 이름 계열(<code>e###·d###·c###·b###·n###·v##·w##·x###·y###·f###</code> 등)로 나눕니다.
+  같은 장소를 한 배치만 찍었다면 그 장소는 이 측정에서 맞힐 방법이 없습니다 — 그것도 결과에 그대로 드러납니다.
+  <br>번호판 조각 시점은 v67 부터 비교에서 빼므로 여기서도 뺍니다. 글자 읽기(OCR) 측정은 <code>ocrtest.html</code> 에서 따로 합니다(사진 원본이 필요).
+</div>
+
+<button id="go">전체 측정 시작</button>
+<button id="dl" disabled>결과 JSON 받기</button>
+<div class="bar"><i id="pg"></i></div>
+<div class="st" id="st">기준 데이터를 읽는 중…</div>
+<div id="out"></div>
+
+<script src="aivec.js"></script>
+<script>
+(function(){
+var ST=document.getElementById('st'), PG=document.getElementById('pg'), OUT=document.getElementById('out');
+var RESULT=null;
+
+function pct(a,b){ return b ? (100*a/b).toFixed(1)+'%' : '-'; }
+function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+function table(head, rows, cls){
+  var h='<table><tr>'+head.map(function(c,i){ return '<th class="'+(i===0?'l':'')+'">'+esc(c)+'</th>'; }).join('')+'</tr>';
+  rows.forEach(function(r){ h+='<tr>'+r.map(function(c,i){ return '<td class="'+(i===0?'l':'')+'">'+c+'</td>'; }).join('')+'</tr>'; });
+  return h+'</table>';
+}
+
+/* ── 배치(촬영 묶음) 구분 ─────────────────────────────────────
+   batches.json : 사진마다 "층|파일계열|기기(또는 사진크기)" 를 적어 둔 표.
+   같은 letter 계열 안에도 서로 다른 사람이 섞여 있어서(예: 1층 e### 은 카톡 압축 207장 +
+   아이폰 원본 181장) 파일 이름만으로는 나눌 수 없다. 그래서 사진의 EXIF 기기와 해상도로
+   자동 분류한 표를 쓴다. 표가 없으면 파일 이름 계열로만 나눈다(더 거칠게 나옴). */
+var BATCH = null;
+function batchOf(name){
+  if(BATCH && BATCH[name]) return BATCH[name];
+  var floor = String(name).split('-')[0];
+  var m = String(name).match(/-([a-z])\d+\.jpg$/i);
+  if(m) return floor + '|' + m[1].toLowerCase();
+  if(/-\d+\.jpg$/.test(name)) return floor + '|숫자';
+  return floor + '|' + name;
+}
+function catOf(c){
+  if(/^HALL/.test(c)) return '복도';
+  if(/^EVIN/.test(c)) return '엘리베이터 안';
+  if(/^(EV[1-5]|EVB1)$/.test(c)) return '엘리베이터 앞·로비';
+  if(/^LNG[1-5]$/.test(c)) return '라운지·로비';
+  if(/^SIGN/.test(c)) return '비상대피 안내판';
+  if(/^EMS/.test(c)) return '비상계단';
+  if(/^WIN/.test(c)) return '창밖';
+  if(/^WC/.test(c)) return '화장실';
+  if(c === 'B1') return '지하 홀';
+  if(/^(GATE|ES)/.test(c)) return '후문·중앙계단';
+  if(/^13/.test(c)) return '강의실';
+  return '기타';
+}
+function floorOf(c){
+  c = String(c);
+  if(c === 'B1' || c === 'EVB1') return 'B';
+  if(/^GATE/.test(c)) return '1';
+  var m = c.match(/^HALL([1-5])[LR]$/) || c.match(/^13([1-5])/) || c.match(/^(?:EVIN|EMS|SIGN|WIN|LNG|EV|WC|ES)([1-5])/);
+  return m ? m[1] : '?';
+}
+function sideOf(c){ var m = String(c).match(/^HALL[1-5]([LR])$/); return m ? m[1] : null; }
+
+var A, D, N, V, G, photos, isPlate;
+function load(){
+  A = window.AIVEC_DATA;
+  if(!A || !A.dim){ ST.textContent = 'aivec.js 를 읽지 못했습니다. 이 파일과 같은 폴더에 aivec.js 가 있어야 합니다.'; return false; }
+  D = A.dim; N = A.n;
+  var bin = atob(A.q);
+  V = new Float32Array(N*D);
+  for(var i=0;i<N;i++){
+    var s=0;
+    for(var j=0;j<D;j++){ var b=bin.charCodeAt(i*D+j); var q=(b>127?b-256:b)/127; V[i*D+j]=q; s+=q*q; }
+    s = Math.sqrt(s)||1;
+    for(var k=0;k<D;k++) V[i*D+k] /= s;
+  }
+  G = A.names.map(batchOf);
+  photos = []; var by = {};
+  A.names.forEach(function(nm,i){
+    if(!by[nm]){ by[nm] = {name:nm, code:A.codes[i], idx:[], g:G[i]}; photos.push(by[nm]); }
+    by[nm].idx.push(i);
+  });
+  isPlate = new Uint8Array(N);
+  photos.forEach(function(p){ if(p.idx.length === 3) isPlate[p.idx[0]] = 1; });   /* 3개짜리의 첫 벡터가 번호판 조각 */
+  ST.textContent = '사진 ' + photos.length + '장 · 기준 벡터 ' + (N - photos.filter(function(p){return p.idx.length===3;}).length) + '개 준비됨';
+  return true;
+}
+
+/* 한 장을 맞혀 본다 : 같은 배치를 빼고, 번호판 조각을 빼고 */
+function rankOf(qs, skipGroup, ownIdx){
+  var m = {};
+  for(var i=0;i<N;i++){
+    if(isPlate[i]) continue;
+    if(skipGroup ? (G[i] === skipGroup) : ownIdx.has(i)) continue;
+    var d = -2;
+    for(var k=0;k<qs.length;k++){
+      var a = qs[k]*D, b = i*D, t = 0;
+      for(var j=0;j<D;j++) t += V[a+j]*V[b+j];
+      if(t > d) d = t;
+    }
+    var c = A.codes[i];
+    if(!(c in m) || d > m[c]) m[c] = d;
+  }
+  var arr = [];
+  for(var key in m) arr.push([key, m[key]]);
+  arr.sort(function(x,y){ return y[1]-x[1]; });
+  return arr;
+}
+
+function run(){
+  document.getElementById('go').disabled = true;
+  var t0 = Date.now();
+  var codeBatches = {}, cnt = {};
+  photos.forEach(function(p){ (codeBatches[p.code] = codeBatches[p.code] || {})[p.g] = 1; cnt[p.code] = (cnt[p.code]||0)+1; });
+
+  /* 강의실은 한 배치만 찍은 곳이 많아 '한 장씩 빼고 맞히기'로 따로 잰다 */
+  var test = photos.filter(function(p){
+    var multi = Object.keys(codeBatches[p.code]).length > 1;
+    return catOf(p.code) === '강의실' ? cnt[p.code] > 1 : multi;
+  });
+
+  var stat = {}, conf = {}, sideRows = [], weak = {}, byCode = {};
+  function add(key, o1, of, o5){
+    var s = stat[key] = stat[key] || {n:0,e:0,f:0,t5:0};
+    s.n++; s.e += o1; s.f += of; s.t5 += o5;
+  }
+  var i = 0;
+  function step(){
+    var end = Math.min(i + 5, test.length);
+    for(; i < end; i++){
+      var p = test[i], room = catOf(p.code) === '강의실';
+      var own = new Set(p.idx);
+      var qs = p.idx.filter(function(x){ return !isPlate[x]; });
+      var E = rankOf(qs, room ? null : p.g, own);
+      var rk = E.map(function(e){ return e[0]; });
+      var o1 = rk[0] === p.code ? 1 : 0;
+      var of = floorOf(rk[0]) === floorOf(p.code) ? 1 : 0;
+      var o5 = rk.slice(0,5).indexOf(p.code) >= 0 ? 1 : 0;
+      add(catOf(p.code), o1, of, o5);
+      if(!room) add('전체(강의실 제외)', o1, of, o5);
+      var bc = byCode[p.code] = byCode[p.code] || {n:0,e:0,f:0};
+      bc.n++; bc.e += o1; bc.f += of;
+      if(/^HALL/.test(p.code)){
+        var kk = floorOf(p.code) + '→' + floorOf(rk[0]);
+        conf[kk] = (conf[kk]||0) + 1;
+        var L=0, R=0;
+        for(var q2=0;q2<Math.min(20,E.length);q2++){
+          var sd = sideOf(E[q2][0]); if(!sd) continue;
+          var v = E[q2][1] > 0 ? E[q2][1] : 0;
+          if(sd === 'L') L += v; else R += v;
+        }
+        var tot = L + R;
+        if(tot > 0) sideRows.push({m: Math.abs(L-R)/tot, ok: ((L >= R ? 'L' : 'R') === sideOf(p.code)) ? 1 : 0});
+      }
+    }
+    PG.style.width = (100*i/test.length).toFixed(1) + '%';
+    ST.textContent = '① 정확도 측정 ' + i + ' / ' + test.length + '장';
+    if(i < test.length) return setTimeout(step, 0);
+    pass2(test, stat, conf, sideRows, byCode, t0);
+  }
+  step();
+}
+
+/* ② 같은 자리에서 두 장 (복도) */
+function pass2(test, stat, conf, sideRows, byCode, t0){
+  var halls = test.filter(function(p){ return /^HALL/.test(p.code); });
+  var mate = {};
+  halls.forEach(function(p){ (mate[p.code+'|'+p.g] = mate[p.code+'|'+p.g] || []).push(p); });
+  var two = {n:0,e:0,f:0,t5:0}, one = {n:0,e:0,f:0,t5:0};
+  var i = 0;
+  function step(){
+    var end = Math.min(i + 5, halls.length);
+    for(; i < end; i++){
+      var p = halls[i];
+      var friends = (mate[p.code+'|'+p.g] || []).filter(function(q){ return q !== p; });
+      if(!friends.length) continue;
+      var q2 = friends[i % friends.length];
+      var qsOne = p.idx.filter(function(x){ return !isPlate[x]; });
+      var qsTwo = qsOne.concat(q2.idx.filter(function(x){ return !isPlate[x]; }));
+      [['one', qsOne], ['two', qsTwo]].forEach(function(pair){
+        var E = rankOf(pair[1], p.g, null);
+        var rk = E.map(function(e){ return e[0]; });
+        var s = pair[0] === 'one' ? one : two;
+        s.n++;
+        if(rk[0] === p.code) s.e++;
+        if(floorOf(rk[0]) === floorOf(p.code)) s.f++;
+        if(rk.slice(0,5).indexOf(p.code) >= 0) s.t5++;
+      });
+    }
+    PG.style.width = (100*i/halls.length).toFixed(1) + '%';
+    ST.textContent = '② 두 장 합치기 측정 ' + i + ' / ' + halls.length + '장';
+    if(i < halls.length) return setTimeout(step, 0);
+    report(stat, conf, sideRows, byCode, one, two, t0);
+  }
+  step();
+}
+
+function report(stat, conf, sideRows, byCode, one, two, t0){
+  var order = ['복도','라운지·로비','엘리베이터 앞·로비','후문·중앙계단','지하 홀','비상대피 안내판','창밖','비상계단','화장실','엘리베이터 안','기타','전체(강의실 제외)','강의실'];
+  var rows = [];
+  order.forEach(function(k){
+    var s = stat[k]; if(!s) return;
+    rows.push([k, s.n, pct(s.e,s.n), pct(s.f,s.n), pct(s.t5,s.n)]);
+  });
+  var h = '<h2>① 종류별 정확도 (다른 배치 사진으로 맞히기)</h2>'
+        + table(['종류','장수','정확한 자리','층','5등 안'], rows);
+
+  sideRows.sort(function(a,b){ return b.m - a.m; });
+  var cuts = [0.3, 0.2, 0.1, 0].map(function(c){
+    var g = sideRows.filter(function(x){ return x.m >= c; });
+    return ['여유 ' + c.toFixed(1) + ' 이상', g.length, pct(g.length, sideRows.length), pct(g.filter(function(x){return x.ok;}).length, g.length)];
+  });
+  h += '<h2>② 복도 좌우 (층은 몰라도 좌우는 맞히는가)</h2>'
+     + table(['조건','장수','전체 중 비율','좌우 정확'], cuts)
+     + '<div class="note">상위 20개 후보의 유사도를 왼쪽/오른쪽으로 모아 투표한다. 여유 = |왼쪽합−오른쪽합| ÷ 합.</div>';
+
+  h += '<h2>③ 같은 자리에서 두 장 (복도)</h2>'
+     + table(['방식','장수','정확한 자리','층','5등 안'], [
+        ['한 장', one.n, pct(one.e,one.n), pct(one.f,one.n), pct(one.t5,one.n)],
+        ['두 장', two.n, pct(two.e,two.n), pct(two.f,two.n), pct(two.t5,two.n)]]);
+
+  var fl = ['B','1','2','3','4','5'];
+  var crow = fl.map(function(a){
+    var tot = 0; fl.concat(['?']).forEach(function(b){ tot += conf[a+'→'+b] || 0; });
+    if(!tot) return null;
+    return [a + '층'].concat(fl.map(function(b){
+      var v = conf[a+'→'+b] || 0;
+      return v ? (v + ' <span style="color:#6E7F96">(' + Math.round(100*v/tot) + '%)</span>') : '·';
+    })).concat([tot]);
+  }).filter(Boolean);
+  h += '<h2>④ 복도 층 혼동표 (실제 → AI 판단)</h2>'
+     + table(['실제\\판단'].concat(fl.map(function(x){return x+'층';})).concat(['합계']), crow);
+
+  var weakRows = Object.keys(byCode).map(function(c){ return [c, byCode[c].n, byCode[c].e, byCode[c].f]; })
+      .filter(function(r){ return r[1] >= 5; })
+      .sort(function(a,b){ return (a[2]/a[1]) - (b[2]/b[1]); }).slice(0,12)
+      .map(function(r){ return [r[0], r[1], pct(r[2],r[1]), pct(r[3],r[1])]; });
+  h += '<h2>⑤ 가장 약한 자리 12곳 (사진 5장 이상인 곳)</h2>'
+     + table(['위치','장수','정확한 자리','층'], weakRows)
+     + '<div class="note warn">여기가 낮은 이유는 대개 ① 그 자리를 한 배치만 찍었거나 ② 사진 수가 적기 때문입니다. 사진을 보태면 바로 올라갑니다.</div>';
+
+  h += '<div class="note">걸린 시간 ' + Math.round((Date.now()-t0)/1000) + '초 · 기준 데이터 생성 시각 ' + new Date(A.made).toLocaleString() + '</div>';
+  OUT.innerHTML = h;
+  ST.textContent = '측정 완료';
+  PG.style.width = '100%';
+  RESULT = {made:A.made, 측정시각:Date.now(), 종류별:stat, 좌우:sideRows.length, 좌우구간:cuts, 두장:{한장:one, 두장:two}, 혼동:conf, 자리별:byCode};
+  document.getElementById('dl').disabled = false;
+  try{ fetch('api/save?name=eval_all.json', {method:'POST', body:JSON.stringify(RESULT)}); }catch(e){}
+}
+
+/* 배치 표를 먼저 읽는다 (없으면 거친 규칙으로 계속) */
+fetch('batches.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+  if(j){
+    BATCH = j;
+    if(photos){ G = A.names.map(batchOf); photos.forEach(function(p){ p.g = batchOf(p.name); }); }
+    var b = {}; Object.keys(j).forEach(function(k){ b[j[k]] = 1; });
+    ST.textContent += ' · 촬영 배치 ' + Object.keys(b).length + '개 (batches.json)';
+  }else{
+    ST.textContent += ' · batches.json 없음 — 파일 이름만으로 배치를 나눕니다(숫자가 낮게 나옵니다)';
+  }
+})['catch'](function(){});
+
+document.getElementById('go').onclick = function(){ run(); };
+document.getElementById('dl').onclick = function(){
+  var b = new Blob([JSON.stringify(RESULT, null, 1)], {type:'application/json'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'eval_all.json'; a.click();
+};
+if(load()) document.getElementById('go').disabled = false;
+})();
+</script>
+</body>
+</html>

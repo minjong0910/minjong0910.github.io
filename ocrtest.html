@@ -1,0 +1,602 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>번호판 읽기 시험</title>
+<style>body{background:#111;color:#eee;font:13px system-ui;padding:14px}#log{white-space:pre-wrap;font:12px monospace;background:#000;padding:8px;max-height:70vh;overflow:auto}</style>
+</head><body>
+<h3>번호판 읽기 시험 — 방식별 비교</h3>
+<div id="st">준비 중…</div><div id="log"></div>
+<script src="lib/tess/tesseract.min.js"></script>
+<script>
+/* ───────── 공통 ───────── */
+const L=document.getElementById('log'), ST=document.getElementById('st');
+const log=s=>{L.textContent+=s+'\n';L.scrollTop=L.scrollHeight;};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let KNOWN={};
+function floorOfCode(c){ const m=String(c||'').match(/^13([1-5])/); return m?m[1]:null; }
+function truthFloor(code){ if(code==='B1'||code==='EVB1') return 'B'; const m=code.match(/^(?:EVIN|EMS|SIGN|WIN|EV|HALL|WC|ES)([1-5])/)||code.match(/^13([1-5])/); return m?m[1]:null; }
+function loadImg(src, tries){ tries=tries||0; return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>{ if(tries<3) setTimeout(()=>loadImg(src,tries+1).then(res,rej), 800); else rej(src); }; im.src=src+(tries?('?r='+tries):''); }); }   // 서버가 바쁠 때 한 번씩 실패한다 → 재시도
+
+/* 앱의 ocrParse 와 같은 규칙 (숫자 토큰 → 호실 번호) */
+function parse(words, minConf){
+  const toks=[]; for(const w of words){ const t=String(w.text||'').replace(/\D/g,''); if(t.length>=3 && (w.confidence||0)>=minConf) toks.push({t, c:w.confidence}); }
+  let best=null, floorOnly=null;
+  for(const {t,c:c0} of toks){ let c=c0, cand=null, m;
+    if((m=t.match(/13[1-5]\d{2}/))){ cand=m[0]; if(t.length!==5) c*=0.9; }
+    else if(t.length===4 && /^3[1-5]\d{2}$/.test(t) && KNOWN['1'+t]){ cand='1'+t; c*=0.8; }
+    else if(t.length===4 && /^1[1-5]\d{2}$/.test(t) && KNOWN['13'+t.slice(1)]){ cand='13'+t.slice(1); c*=0.7; }
+    else if(/^13[1-5]\d?$/.test(t) && c>=60){ floorOnly=floorOnly||t.charAt(2); }
+    if(cand){ const s=KNOWN[cand]?c*1.35:c; if(!best||s>best.s) best={code:cand,c,s,raw:t}; } }
+  if(best) return {floor:best.code.charAt(2), code:best.code, conf:Math.round(best.c), known:!!KNOWN[best.code]};
+  if(floorOnly) return {floor:floorOnly, code:null, conf:60};
+  return null;
+}
+
+/* ───────── 번호판 찾기 (파란 덩어리) ─ 매개변수화 ───────── */
+function plateBoxes(img, P){
+  const k=Math.min(1,P.W/Math.max(img.width,img.height)), w=Math.max(1,Math.round(img.width*k)), h=Math.max(1,Math.round(img.height*k));
+  const cv=document.createElement('canvas'); cv.width=w; cv.height=h; const cx=cv.getContext('2d',{willReadFrequently:true});
+  cx.drawImage(img,0,0,w,h); const d=cx.getImageData(0,0,w,h).data;
+  const n=w*h, mask=new Uint8Array(n);
+  for(let i=0;i<n;i++){ const p=i<<2, r=d[p], g=d[p+1], b=d[p+2]; const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+    if(b-r>35 && b-g>20 && b>55 && b<240 && mx-mn>38) mask[i]=1; }
+  const seen=new Uint8Array(n), st=new Int32Array(n), out=[];
+  for(let i=0;i<n;i++){ if(!mask[i]||seen[i]) continue; let sp=0; st[sp++]=i; seen[i]=1; let x0=w,y0=h,x1=-1,y1=-1,c=0;
+    while(sp){ const j=st[--sp]; c++; const x=j%w, y=(j/w)|0; if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;
+      if(x+1<w&&mask[j+1]&&!seen[j+1]){seen[j+1]=1;st[sp++]=j+1;} if(x>0&&mask[j-1]&&!seen[j-1]){seen[j-1]=1;st[sp++]=j-1;}
+      if(y+1<h&&mask[j+w]&&!seen[j+w]){seen[j+w]=1;st[sp++]=j+w;} if(y>0&&mask[j-w]&&!seen[j-w]){seen[j-w]=1;st[sp++]=j-w;} }
+    const bw=x1-x0+1, bh=y1-y0+1, area=bw*bh, ar=bw/bh;
+    if(c<P.MINPX*(P.W/512)*(P.W/512) || area>P.MAXAREA*n) continue; if(c/area<P.MINFILL) continue; if(ar<P.ARLO||ar>P.ARHI) continue;
+    out.push({n:c,x0:x0/w,y0:y0/h,x1:(x1+1)/w,y1:(y1+1)/h}); }
+  out.sort((a,b)=>b.n-a.n); return out.slice(0,P.MAX);
+}
+function crop(img, b, up, down, side, stretch){
+  const bw=b.x1-b.x0, bh=b.y1-b.y0;
+  const x0=Math.max(0,b.x0-side*bw), x1=Math.min(1,b.x1+side*bw), y0=Math.max(0,b.y0-up*bh), y1=Math.min(1,b.y1+down*bh);
+  const sx=Math.round(x0*img.width), sy=Math.round(y0*img.height), sw=Math.round((x1-x0)*img.width), sh=Math.round((y1-y0)*img.height);
+  if(sw<8||sh<8) return null;
+  let k=Math.min(420/sh, 1100/(sw*stretch)); k=Math.max(1,Math.min(8,k));
+  const cv=document.createElement('canvas'); cv.width=Math.round(sw*k*stretch); cv.height=Math.round(sh*k);
+  cv.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,cv.width,cv.height); return cv;
+}
+function prep(src, inv, bin){
+  const w=src.width, h=src.height, cx=src.getContext('2d',{willReadFrequently:true}), im=cx.getImageData(0,0,w,h), d=im.data, n=w*h;
+  const g=new Uint8Array(n), hist=new Uint32Array(256);
+  for(let i=0;i<n;i++){ const v=(d[i<<2]*0.299+d[(i<<2)+1]*0.587+d[(i<<2)+2]*0.114)|0; g[i]=v; hist[v]++; }
+  let lo=0,hi=255,acc=0,cut=n*0.03; for(let i=0;i<256;i++){acc+=hist[i]; if(acc>=cut){lo=i;break;}} acc=0; for(let i=255;i>=0;i--){acc+=hist[i]; if(acc>=cut){hi=i;break;}}
+  const sp=hi>lo?255/(hi-lo):1, out=document.createElement('canvas'); out.width=w; out.height=h;
+  const oc=out.getContext('2d'), o=oc.createImageData(w,h), od=o.data;
+  let mean=0; for(let i=0;i<n;i++){ let v=(g[i]-lo)*sp; v=v<0?0:v>255?255:v; g[i]=v; mean+=v; } mean/=n;
+  for(let i=0;i<n;i++){ let v=g[i]; if(bin) v = v>mean?255:0; if(inv) v=255-v; od[i<<2]=od[(i<<2)+1]=od[(i<<2)+2]=v; od[(i<<2)+3]=255; }
+  oc.putImageData(o,0,0); return out;
+}
+
+/* ───────── 방식들 ───────── */
+const BASE={W:512, MINPX:60, MAXAREA:0.10, MINFILL:0.35, ARLO:0.25, ARHI:4.0, MAX:3};
+const METHODS={
+  '지금 앱':      {P:BASE, crops:[[0.95,0.30,0.40,1]], inv:[false,true], bin:false, psm:[11]},
+  '해상도↑·후보↑': {P:{...BASE, W:1024, MAX:6}, crops:[[0.95,0.30,0.40,1]], inv:[false,true], bin:false, psm:[11]},
+  '+가로로 펴기':   {P:{...BASE, W:1024, MAX:6}, crops:[[0.95,0.30,0.40,1],[0.95,0.30,0.40,1.8]], inv:[false,true], bin:false, psm:[11]},
+  '+흑백 이진화':   {P:{...BASE, W:1024, MAX:6}, crops:[[0.95,0.30,0.40,1],[0.95,0.30,0.40,1.8]], inv:[false,true], bin:true, psm:[11]},
+  '+한 줄 모드':    {P:{...BASE, W:1024, MAX:6}, crops:[[0.95,0.30,0.40,1],[0.95,0.30,0.40,1.8]], inv:[false,true], bin:false, psm:[11,7]},
+};
+async function runMethod(worker, img, M, keepCrops){
+  const boxes=plateBoxes(img, M.P); let words=[]; const shots=[];
+  for(const b of boxes) for(const [u,dn,sd,str] of M.crops){ const c=crop(img,b,u,dn,sd,str); if(!c) continue;
+    for(const inv of M.inv){ shots.push(prep(c,inv,M.bin)); } }
+  for(const s of shots){ for(const psm of M.psm){
+      await worker.setParameters({tessedit_pageseg_mode:String(psm)});
+      const r=await worker.recognize(s); words=words.concat((r&&r.data&&r.data.words)||[]);
+      const got=parse(words,40); if(got&&got.code&&got.known&&got.conf>=55) return {got, boxes:boxes.length, shots:shots.length, crops:keepCrops?shots:null}; } }
+  return {got:parse(words,40), boxes:boxes.length, shots:shots.length, crops:keepCrops?shots:null};
+}
+
+/* ───────── v66 후보 : 숫자 자리만 딱 잘라 크게 ───────── */
+function tight(img, b, kind){
+  const bw=b.x1-b.x0, bh=b.y1-b.y0; let x0,x1,y0,y1;
+  if(kind==='top'){ x0=b.x0-0.06*bw; x1=b.x1+0.06*bw; y0=b.y0-0.04*bh; y1=b.y0+0.34*bh; }        // 세로 종이 : 파란 종이 맨 위
+  else if(kind==='above'){ x0=b.x0-0.12*bw; x1=b.x1+0.12*bw; y0=b.y0-0.75*bh; y1=b.y0+0.08*bh; } // 튀어나온 표지판 : 파란 몸통 바로 위 흰 칸
+  else { x0=b.x0-0.06*bw; x1=b.x1+0.06*bw; y0=b.y0-0.04*bh; y1=b.y0+0.55*bh; }                  // 가로 파란 판 : 위쪽 절반
+  x0=Math.max(0,x0); x1=Math.min(1,x1); y0=Math.max(0,y0); y1=Math.min(1,y1);
+  const sx=Math.round(x0*img.width), sy=Math.round(y0*img.height), sw=Math.round((x1-x0)*img.width), sh=Math.round((y1-y0)*img.height);
+  if(sw<6||sh<6) return null;
+  let k=Math.min(170/sh, 900/sw); k=Math.max(1,Math.min(10,k));
+  const cv=document.createElement('canvas'); cv.width=Math.round(sw*k)+40; cv.height=Math.round(sh*k)+40;
+  const cx=cv.getContext('2d'); cx.fillStyle='#888'; cx.fillRect(0,0,cv.width,cv.height);
+  cx.drawImage(img,sx,sy,sw,sh,20,20,cv.width-40,cv.height-40); return cv;
+}
+async function runPrecise(worker, img){
+  const boxes=plateBoxes(img, {...BASE, W:1024, MAX:5}); let words=[];
+  const plan=[];
+  for(const b of boxes){ const ar=(b.x1-b.x0)/(b.y1-b.y0);
+    const kinds = ar<0.75 ? ['top','above'] : ['above','wide'];
+    for(const kd of kinds){ const c=tight(img,b,kd); if(!c) continue; plan.push([prep(c,true,false),7],[prep(c,false,false),7]); } }
+  for(const b of boxes.slice(0,3)){ const c=crop(img,b,0.95,0.30,0.40,1); if(c){ plan.push([prep(c,false,false),11],[prep(c,true,false),11]); } }
+  for(const [s,psm] of plan){
+    await worker.setParameters({tessedit_pageseg_mode:String(psm)});
+    const r=await worker.recognize(s); words=words.concat((r&&r.data&&r.data.words)||[]);
+    const got=parse2(words,40); if(got&&got.code&&got.known&&got.conf>=55) return {got, boxes:boxes.length}; }
+  return {got:parse2(words,40), boxes:boxes.length};
+}
+/* 한 글자 틀린 것도 앱이 아는 호실이면 살린다 (예: 43313 → 13313) */
+function parse2(words, minConf){
+  const p=parse(words,minConf); if(p&&p.code&&p.known) return p;
+  let best=p&&p.code?{...p, s:p.conf}:null;
+  for(const w of words){ const t=String(w.text||'').replace(/\D/g,''), c=w.confidence||0; if(c<minConf) continue;
+    const tries=[];
+    if(t.length===5){ tries.push(['1'+t.slice(1),0.75], ['13'+t.slice(2),0.7], [t.slice(0,4)+'',0]); }
+    if(t.length===6){ for(let i=0;i<2;i++) tries.push([t.slice(i,i+5),0.8]); }
+    for(const [cand,pen] of tries){ if(pen && /^13[1-5]\d\d$/.test(cand) && KNOWN[cand]){ const s=c*pen*1.35; if(!best||s>best.s) best={floor:cand.charAt(2), code:cand, conf:Math.round(c*pen), known:true, s}; } } }
+  return best || p;
+}
+METHODS['정밀']={precise:true};
+
+/* ───────── 시험 ───────── */
+function seeded(seed){ let s=seed; return ()=>{ s=(s*1103515245+12345)&0x7fffffff; return s/0x7fffffff; }; }
+async function main(){
+  const q=new URLSearchParams(location.search);
+  const kinds=(q.get('kinds')||'HALL').split(','), per=+(q.get('per')||8), methods=(q.get('m')||Object.keys(METHODS).join('|')).split('|');
+  const list=await (await fetch('api/photos')).json();
+  const R=await (await fetch('aivec.js')).text(); const A=JSON.parse(R.slice(R.indexOf('=')+1, R.lastIndexOf(';')));
+  // 앱이 아는 호실 번호 = 사진원본 폴더 이름 중 5자리
+  new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
+  const plateSet=new Set(); const cnt={}; A.names.forEach(n=>cnt[n]=(cnt[n]||0)+1); Object.keys(cnt).forEach(n=>{ if(cnt[n]===3) plateSet.add(n); });
+  const rnd=seeded(20260919); const test=[];
+  for(const kind of kinds){ for(const f of ['1','2','3','4','5','B']){
+      const pool=list.filter(p=>p.label.startsWith(kind) && truthFloor(p.label)===f && (kind!=='HALL'||plateSet.has(p.name)));
+      const a=pool.slice(); for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; }
+      test.push(...a.slice(0,per)); } }
+  log('시험 사진 '+test.length+'장 ('+kinds.join(',')+', 층마다 최대 '+per+'장) · 방식 '+methods.length+'개');
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  await worker.setParameters({tessedit_char_whitelist:'0123456789'});
+  const res={}; methods.forEach(m=>res[m]={ok:0,wrong:0,none:0,t:0});
+  const detail=[];
+  for(let i=0;i<test.length;i++){ const p=test[i], tf=truthFloor(p.label); let img;
+    try{ img=await loadImg(p.path); }catch(e){ log('못 읽음 '+p.path); continue; }
+    const row={name:p.name, code:p.label};
+    for(const m of methods){ const t0=performance.now(); const r=METHODS[m].lines ? await runLines(worker,img,METHODS[m].fallback,METHODS[m].whole) : METHODS[m].precise ? await runPrecise(worker,img) : await runMethod(worker,img,METHODS[m],false); const dt=performance.now()-t0;
+      const f=r.got&&r.got.floor; const o=res[m]; o.t+=dt; if(!f) o.none++; else if(f===tf) o.ok++; else o.wrong++;
+      row[m]=(f?(f===tf?'O ':'X ')+(r.got.code||('?'+f)):'-')+' ['+r.boxes+'판]'; if(r.words) row[m+"_w"]=r.words.filter(w=>/\d{3}/.test(w.text)).map(w=>w.text+"/"+Math.round(w.confidence)+(w.gray?"g":"")).join(" "); }
+    detail.push(row); ST.textContent=(i+1)+' / '+test.length;
+  }
+  await worker.terminate();
+  log('\n방식                층 맞게 읽음   틀리게 읽음   못 읽음   한 장 평균');
+  for(const m of methods){ const o=res[m], n=o.ok+o.wrong+o.none;
+    log(m.padEnd(14,' ')+'   '+String(o.ok).padStart(3)+' ('+(100*o.ok/n).toFixed(0)+'%)      '+String(o.wrong).padStart(3)+'          '+String(o.none).padStart(3)+'      '+(o.t/n/1000).toFixed(1)+'초'); }
+  window.__RES={res, detail};
+  await fetch('api/save?name=ocrtest_'+kinds.join('_')+'.json',{method:'POST',body:JSON.stringify({res,detail})});
+  ST.textContent='완료'; log('\n저장됨');
+}
+/* ───────── 진단 : 찾은 번호판 자리와 잘라낸 조각, 읽은 글자를 한 장에 ───────── */
+async function diag(){
+  const q=new URLSearchParams(location.search); const per=+(q.get('per')||3), kind=q.get('kinds')||'HALL';
+  const list=await (await fetch('api/photos')).json();
+  new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
+  const R=await (await fetch('aivec.js')).text(); const A=JSON.parse(R.slice(R.indexOf('=')+1, R.lastIndexOf(';')));
+  const cnt={}; A.names.forEach(n=>cnt[n]=(cnt[n]||0)+1);
+  const rnd=seeded(+(q.get('seed')||7)); const test=[];
+  for(const f of ['1','2','3','4','5','B']){ const pool=list.filter(p=>p.label.startsWith(kind)&&truthFloor(p.label)===f&&(kind!=='HALL'||cnt[p.name]===3));
+    const a=pool.slice(); for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; } test.push(...a.slice(0,per)); }
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  await worker.setParameters({tessedit_char_whitelist:'0123456789', tessedit_pageseg_mode:'11'});
+  const P={...BASE, W:1024, MAX:6};
+  const SW=1600, ROWH=300; const sheet=document.createElement('canvas'); sheet.width=SW; sheet.height=ROWH*test.length; const sx=sheet.getContext('2d');
+  sx.fillStyle='#fff'; sx.fillRect(0,0,SW,sheet.height); sx.font='bold 15px monospace';
+  for(let i=0;i<test.length;i++){ const p=test[i], img=await loadImg(p.path), y=i*ROWH;
+    const th=ROWH-24, tw=Math.round(img.width*th/img.height); sx.drawImage(img,0,y+20,tw,th);
+    const boxes=plateBoxes(img,P); sx.strokeStyle='#f00'; sx.lineWidth=2;
+    boxes.forEach((b,k)=>{ sx.strokeRect(b.x0*tw, y+20+b.y0*th, (b.x1-b.x0)*tw, (b.y1-b.y0)*th); sx.fillStyle='#f00'; sx.fillText(String(k+1), b.x0*tw, y+18+b.y0*th); });
+    let x=tw+8; const texts=[];
+    for(let k=0;k<boxes.length && x<SW-60;k++){ const c=crop(img,boxes[k],0.95,0.30,0.40,1); if(!c) continue;
+      const pr=prep(c,false,false), pi=prep(c,true,false);
+      const r1=await worker.recognize(pr), r2=await worker.recognize(pi);
+      const t1=(r1.data.words||[]).map(w=>w.text+'('+Math.round(w.confidence)+')').join(' '), t2=(r2.data.words||[]).map(w=>w.text+'('+Math.round(w.confidence)+')').join(' ');
+      const ch=th-40, cw=Math.min(260, Math.round(c.width*ch/c.height)); sx.drawImage(c,x,y+20,cw,ch);
+      sx.fillStyle='#000'; sx.fillText(k+1+': '+(t1||'-').slice(0,26), x, y+20+ch+16); sx.fillText('  반전: '+(t2||'-').slice(0,22), x, y+20+ch+33);
+      texts.push((k+1)+':['+t1+'|'+t2+']'); x+=cw+10; }
+    sx.fillStyle='#00f'; sx.fillText('#'+(i+1)+' '+p.label+' '+p.name.slice(-12)+'  번호판후보 '+boxes.length, 4, y+15);
+    log('#'+(i+1)+' '+p.label+' '+texts.join(' ')); ST.textContent=(i+1)+'/'+test.length; }
+  await worker.terminate();
+  const data=sheet.toDataURL('image/jpeg',0.85);
+  await fetch('api/save?name=ocrdiag_'+kind+'.json',{method:'POST',body:JSON.stringify({b64:data.split(',')[1]})});
+  ST.textContent='진단 완료';
+}
+
+async function diag2(){
+  const q=new URLSearchParams(location.search); const kind=q.get('kinds')||'HALL2R', n=+(q.get('per')||8);
+  const list=await (await fetch('api/photos')).json();
+  new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
+  const rnd=seeded(+(q.get('seed')||11)); const pool=list.filter(p=>p.label===kind); const a=pool.slice();
+  for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; } const test=a.slice(0,n);
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  await worker.setParameters({tessedit_char_whitelist:'0123456789', tessedit_pageseg_mode:'7'});
+  const SW=1600, ROWH=260, sheet=document.createElement('canvas'); sheet.width=SW; sheet.height=ROWH*test.length; const sx=sheet.getContext('2d');
+  sx.fillStyle='#fff'; sx.fillRect(0,0,SW,sheet.height); sx.font='bold 14px monospace';
+  for(let i=0;i<test.length;i++){ const p=test[i], img=await loadImg(p.path), y=i*ROWH, th=ROWH-24, tw=Math.round(img.width*th/img.height);
+    sx.drawImage(img,0,y+20,tw,th); const boxes=plateBoxes(img,{...BASE,W:1024,MAX:5});
+    sx.strokeStyle='#f00'; sx.lineWidth=2; boxes.forEach((b,k)=>{ sx.strokeRect(b.x0*tw,y+20+b.y0*th,(b.x1-b.x0)*tw,(b.y1-b.y0)*th); sx.fillStyle='#f00'; sx.fillText(String(k+1),b.x0*tw,y+18+b.y0*th); });
+    let x=tw+8;
+    for(let k=0;k<boxes.length&&x<SW-80;k++){ const b=boxes[k], ar=(b.x1-b.x0)/(b.y1-b.y0);
+      for(const kd of (ar<0.75?['top','above']:['above','wide'])){ const c=tight(img,b,kd); if(!c) continue; const pr=prep(c,true,false);
+        const r=await worker.recognize(pr), t=(r.data.words||[]).map(w=>w.text+'('+Math.round(w.confidence)+')').join(' ');
+        const ch=Math.min(th-30, 110), cw=Math.min(300, Math.round(pr.width*ch/pr.height)); if(x+cw>SW) break;
+        sx.drawImage(pr,x,y+20,cw,ch); sx.fillStyle='#000'; sx.fillText(k+1+kd[0]+': '+(t||'-').slice(0,30), x, y+20+ch+15); x+=cw+8; } }
+    sx.fillStyle='#00f'; sx.fillText('#'+(i+1)+' '+p.label+' '+p.name.slice(-12)+' 판 '+boxes.length, 4, y+15); ST.textContent=(i+1)+'/'+test.length; }
+  await worker.terminate();
+  await fetch('api/save?name=ocrdiag2.json',{method:'POST',body:JSON.stringify({b64:sheet.toDataURL('image/jpeg',0.85).split(',')[1]})});
+  ST.textContent='진단2 완료';
+}
+
+/* Otsu 이진화 + 어두운 큰 덩어리(로고 띠) 지우기 */
+function otsu(src, inv){
+  const w=src.width,h=src.height,cx=src.getContext('2d',{willReadFrequently:true}),d=cx.getImageData(0,0,w,h).data,n=w*h,g=new Uint8Array(n),hist=new Float64Array(256);
+  for(let i=0;i<n;i++){ const v=(d[i<<2]*0.299+d[(i<<2)+1]*0.587+d[(i<<2)+2]*0.114)|0; g[i]=v; hist[v]++; }
+  let sum=0; for(let i=0;i<256;i++) sum+=i*hist[i]; let sB=0,wB=0,best=0,th=128;
+  for(let t=0;t<256;t++){ wB+=hist[t]; if(!wB) continue; const wF=n-wB; if(!wF) break; sB+=t*hist[t]; const mB=sB/wB, mF=(sum-sB)/wF, v=wB*wF*(mB-mF)*(mB-mF); if(v>best){best=v;th=t;} }
+  const out=document.createElement('canvas'); out.width=w; out.height=h; const oc=out.getContext('2d'), o=oc.createImageData(w,h), od=o.data;
+  for(let i=0;i<n;i++){ let v=g[i]>th?255:0; if(inv) v=255-v; od[i<<2]=od[(i<<2)+1]=od[(i<<2)+2]=v; od[(i<<2)+3]=255; }
+  oc.putImageData(o,0,0); return out;
+}
+async function diag3(){
+  const q=new URLSearchParams(location.search); const kind=q.get('kinds')||'HALL2R', n=+(q.get('per')||8);
+  const list=await (await fetch('api/photos')).json();
+  new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
+  const rnd=seeded(+(q.get('seed')||11)); const a=list.filter(p=>p.label===kind).slice();
+  for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; } const test=a.slice(0,n);
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  await worker.setParameters({tessedit_char_whitelist:'0123456789'});
+  const V=[]; for(const psm of [6,7,8,11,13]) for(const pre of ['stretch','stretch-inv','otsu','otsu-inv']) V.push({psm,pre});
+  const score={}; V.forEach(v=>score[v.psm+'/'+v.pre]=0); let crops=0;
+  for(let i=0;i<test.length;i++){ const img=await loadImg(test[i].path); const boxes=plateBoxes(img,{...BASE,W:1024,MAX:5});
+    for(const b of boxes){ const ar=(b.x1-b.x0)/(b.y1-b.y0);
+      for(const kd of (ar<0.75?['top','above']:['above','wide'])){ const c=tight(img,b,kd); if(!c) continue; crops++;
+        for(const v of V){ await worker.setParameters({tessedit_pageseg_mode:String(v.psm)});
+          const s = v.pre==='stretch'?prep(c,false,false): v.pre==='stretch-inv'?prep(c,true,false): v.pre==='otsu'?otsu(c,false):otsu(c,true);
+          const r=await worker.recognize(s); const got=parse2((r.data.words||[]),30);
+          if(got&&got.code&&got.code.charAt(2)==='2'){ score[v.psm+'/'+v.pre]++; log('#'+(i+1)+' '+kd+' '+v.psm+'/'+v.pre+' → '+got.code+'('+got.conf+')'); } } } }
+    ST.textContent=(i+1)+'/'+test.length; }
+  await worker.terminate();
+  log('\n조각 '+crops+'개 — 설정별로 2층 번호를 읽은 조각 수');
+  Object.entries(score).sort((x,y)=>y[1]-x[1]).forEach(([k,v])=>log('  '+k.padEnd(18)+v));
+  ST.textContent='진단3 완료';
+}
+
+function rotate(src, deg){ const r=deg*Math.PI/180, w=src.width, h=src.height, W=Math.ceil(Math.abs(w*Math.cos(r))+Math.abs(h*Math.sin(r))), H=Math.ceil(Math.abs(w*Math.sin(r))+Math.abs(h*Math.cos(r)));
+  const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,W,H); x.translate(W/2,H/2); x.rotate(r); x.drawImage(src,-w/2,-h/2); return c; }
+async function diag4(){
+  const list=await (await fetch('api/photos')).json();
+  new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
+  const rnd=seeded(11); const a=list.filter(p=>p.label==='HALL2R').slice();
+  for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; }
+  const pick=[[a[0],'w',0,'13209'],[a[2],'t',0,'13213'],[a[3],'w',0,'13212'],[a[6],'t',0,'13208']];
+  const crops=[]; for(const [p,kd,bi,ans] of pick){ const img=await loadImg(p.path); const b=plateBoxes(img,{...BASE,W:1024,MAX:5})[bi];
+    const c=tight(img,b,kd==='w'?'wide':kd==='t'?'top':'above'); crops.push({c,ans}); }
+  const MODELS=[['fast(지금)','lib/tess'],['기본 4.0.0','https://tessdata.projectnaptha.com/4.0.0'],['best 4.0.0','https://tessdata.projectnaptha.com/4.0.0_best']];
+  for(const [mname,lp] of MODELS){
+    let worker; try{ worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:lp, gzip:true}); }catch(e){ log(mname+' 못 불러옴: '+e); continue; }
+    for(const wl of [true,false]){ await worker.setParameters({tessedit_char_whitelist: wl?'0123456789':''});
+      for(const psm of [6,11]){ await worker.setParameters({tessedit_pageseg_mode:String(psm)});
+        let hit=[], t0=performance.now();
+        for(const {c,ans} of crops){ let ok=false;
+          for(const deg of [0,-6,6,-12,12]){ const s=rotate(prep(c,false,false),deg); const r=await worker.recognize(s);
+            const txt=(r.data.words||[]).map(w=>w.text).join(' ').replace(/\D+/g,' ');
+            if(txt.indexOf(ans)>=0){ ok=deg; break; } }
+          hit.push(ok===false?'-':ans+(ok?'@'+ok+'°':'')); }
+        log(mname.padEnd(10)+' '+(wl?'숫자만':'전체  ')+' psm'+psm+' : '+hit.join('  ')+'   ('+((performance.now()-t0)/1000).toFixed(1)+'s)'); ST.textContent=mname; } }
+    await worker.terminate(); }
+  ST.textContent='진단4 완료';
+}
+
+/* ───────── v66 후보 2 : 숫자 줄만 찾아서 깨끗하게 다시 그린다 ─────────
+   번호판 둘레를 넉넉히 잘라 → 주변 밝기와 비교해 어두운 점만 남기고 → 덩어리로 묶고
+   → 키가 비슷하고 한 줄로 늘어선 덩어리 3~8개를 '숫자 줄'로 본다
+   → 그 덩어리 픽셀만 흰 바탕에 검게, 기울기 바로잡아 다시 그려 Tesseract 에 한 줄로 준다.
+   KSNU 로고 띠·종이 테두리·배경이 같이 들어가 Tesseract 가 줄을 못 찾던 문제를 없앤다. */
+function digitLines(img, b, opt){
+  opt=opt||{};
+  const bw=b.x1-b.x0, bh=b.y1-b.y0;
+  const R=opt.R||[-0.85,0.65];
+  let x0=b.x0-0.18*bw, x1=b.x1+0.18*bw, y0=b.y0+R[0]*bh, y1=b.y0+R[1]*bh;
+  x0=Math.max(0,x0); x1=Math.min(1,x1); y0=Math.max(0,y0); y1=Math.min(1,y1);
+  const sx=Math.round(x0*img.width), sy=Math.round(y0*img.height), sw=Math.round((x1-x0)*img.width), sh=Math.round((y1-y0)*img.height);
+  if(sw<10||sh<10) return [];
+  let k=Math.min((opt.TH||420)/sh, 1400/sw); k=Math.max(0.5,Math.min(8,k));
+  const W=Math.round(sw*k), H=Math.round(sh*k);
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const cx=cv.getContext('2d',{willReadFrequently:true}); cx.drawImage(img,sx,sy,sw,sh,0,0,W,H);
+  const d=cx.getImageData(0,0,W,H).data, n=W*H, g=new Float32Array(n);
+  for(let i=0;i<n;i++) g[i]=d[i<<2]*0.299+d[(i<<2)+1]*0.587+d[(i<<2)+2]*0.114;
+  const I=new Float64Array((W+1)*(H+1));
+  for(let y=0;y<H;y++){ let row=0; for(let x=0;x<W;x++){ row+=g[y*W+x]; I[(y+1)*(W+1)+x+1]=I[y*(W+1)+x+1]+row; } }
+  const r=Math.max(6,Math.round(Math.min(W,H)/10)), out=[];
+  for(const [pol,fk] of [[0,0.82],[1,1.18],[0,0.68],[1,1.4]]){   // 0 : 흰 바탕 검은 글씨, 1 : 어두운 바탕 흰 글씨 — 문턱 두 단계(흐려서 글자가 붙을 때 대비)
+    const m=new Uint8Array(n);
+    for(let y=0;y<H;y++){ const ya=Math.max(0,y-r), yb=Math.min(H,y+r+1);
+      for(let x=0;x<W;x++){ const xa=Math.max(0,x-r), xb=Math.min(W,x+r+1);
+        const mean=(I[yb*(W+1)+xb]-I[ya*(W+1)+xb]-I[yb*(W+1)+xa]+I[ya*(W+1)+xa])/((yb-ya)*(xb-xa)), v=g[y*W+x];
+        m[y*W+x] = pol===0 ? (v < mean*fk-4 ? 1:0) : (v > mean*fk+4 ? 1:0); } }
+    const lab=new Int32Array(n), comps=[], st=new Int32Array(n); let L=0;
+    for(let i=0;i<n;i++){ if(!m[i]||lab[i]) continue; L++; let sp=0; st[sp++]=i; lab[i]=L;
+      let cx0=W,cx1=0,cy0=H,cy1=0,cnt=0;
+      while(sp){ const p=st[--sp], px=p%W, py=(p/W)|0; cnt++;
+        if(px<cx0)cx0=px; if(px>cx1)cx1=px; if(py<cy0)cy0=py; if(py>cy1)cy1=py;
+        if(px>0&&m[p-1]&&!lab[p-1]){lab[p-1]=L;st[sp++]=p-1;} if(px<W-1&&m[p+1]&&!lab[p+1]){lab[p+1]=L;st[sp++]=p+1;}
+        if(py>0&&m[p-W]&&!lab[p-W]){lab[p-W]=L;st[sp++]=p-W;} if(py<H-1&&m[p+W]&&!lab[p+W]){lab[p+W]=L;st[sp++]=p+W;} }
+      const w=cx1-cx0+1, h=cy1-cy0+1, fill=cnt/(w*h);
+      if(h>=Math.max(opt.minH||8, opt.minH?0:H*0.035) && h<=H*0.4 && w<=h*4 && w>=h*0.1 && fill>0.12 && fill<0.92 && cx0>0 && cy0>0 && cx1<W-1 && cy1<H-1)
+        comps.push({L,x0:cx0,x1:cx1,y0:cy0,y1:cy1,w,h,cy:(cy0+cy1)/2}); }
+    if(opt.dbg){ const mc=document.createElement("canvas"); mc.width=W; mc.height=H; const mx2=mc.getContext("2d"), md=mx2.createImageData(W,H);
+      for(let i=0;i<n;i++){ const v=m[i]?0:255; md.data[i<<2]=md.data[(i<<2)+1]=md.data[(i<<2)+2]=v; md.data[(i<<2)+3]=255; } mx2.putImageData(md,0,0);
+      mx2.strokeStyle="#f00"; mx2.lineWidth=2; comps.forEach(c=>mx2.strokeRect(c.x0,c.y0,c.w,c.h)); opt.dbg.push(cv, mc); }
+    // 한 줄로 늘어선 것끼리 묶기
+    const par=comps.map((_,i)=>i), f=i=>par[i]===i?i:(par[i]=f(par[i]));
+    comps.sort((a,b)=>a.x0-b.x0);
+    for(let i=0;i<comps.length;i++) for(let j=i+1;j<comps.length;j++){ const a=comps[i], c=comps[j], hm=Math.max(a.h,c.h);
+      if(c.x0-a.x1 > hm*1.0) continue; if(c.x0 < a.x0+ a.w*0.3) continue;
+      if(Math.abs(a.h-c.h) > hm*0.3 || Math.abs(a.cy-c.cy) > hm*0.35) continue;
+      par[f(j)]=f(i); }
+    const G={}; comps.forEach((c,i)=>{ (G[f(i)]=G[f(i)]||[]).push(c); });
+    for(const grp of Object.values(G)){
+      const hm=grp.reduce((s,c)=>s+c.h,0)/grp.length;
+      const est=grp.reduce((s,c)=>s+Math.max(1,Math.round(c.w/(0.6*c.h))),0);   // 붙은 글자는 폭으로 글자 수를 어림
+      if(est<3||est>8) continue; if(grp.length<3 && est<4) continue;
+      // 기울기 : 글자 아래쪽 끝을 직선으로 맞춘다
+      let sxx=0,sxy=0,mx=0,my=0; grp.forEach(c=>{mx+=(c.x0+c.x1)/2; my+=c.y1;}); mx/=grp.length; my/=grp.length;
+      grp.forEach(c=>{const dx=(c.x0+c.x1)/2-mx; sxx+=dx*dx; sxy+=dx*(c.y1-my);}); const ang=sxx?Math.atan(sxy/sxx):0;
+      const gx0=Math.min(...grp.map(c=>c.x0)), gx1=Math.max(...grp.map(c=>c.x1)), gy0=Math.min(...grp.map(c=>c.y0)), gy1=Math.max(...grp.map(c=>c.y1));
+      const set=new Set(grp.map(c=>c.L)), s=40/hm, pad=Math.round(hm*s*0.6);
+      const ow=Math.round((gx1-gx0+1)*s)+2*pad, oh=Math.round((gy1-gy0+1)*s)+2*pad;
+      const src=document.createElement('canvas'); src.width=gx1-gx0+1; src.height=gy1-gy0+1;
+      const sc=src.getContext('2d'), sd=sc.createImageData(src.width,src.height);
+      for(let y=gy0;y<=gy1;y++) for(let x=gx0;x<=gx1;x++){ const o=((y-gy0)*src.width+(x-gx0))<<2, on=set.has(lab[y*W+x]);
+        sd.data[o]=sd.data[o+1]=sd.data[o+2]=on?0:255; sd.data[o+3]=255; }
+      sc.putImageData(sd,0,0);
+      const oc=document.createElement('canvas'); oc.width=ow; oc.height=oh; const o2=oc.getContext('2d');
+      o2.fillStyle='#fff'; o2.fillRect(0,0,ow,oh); o2.imageSmoothingEnabled=true;
+      o2.translate(ow/2,oh/2); o2.rotate(-ang); o2.drawImage(src,-src.width*s/2,-src.height*s/2,src.width*s,src.height*s);
+      const sc0=-Math.abs(est-5)*10 + hm/H*20 + ((fk===0.82||fk===1.18)?1:0);
+      out.push({cv:oc, n:est, h:hm, pol, score:sc0});
+      // 같은 자리를 회색조 그대로 한 번 더 (흐린 사진은 흑백으로 자르면 획이 뭉개진다)
+      const gp=Math.round(hm*0.45), gx=Math.max(0,gx0-gp), gy=Math.max(0,gy0-gp), gw=Math.min(W,gx1+gp+1)-gx, gh=Math.min(H,gy1+gp+1)-gy;
+      const gc=document.createElement('canvas'); gc.width=gw; gc.height=gh; const gcx=gc.getContext('2d'), gd=gcx.createImageData(gw,gh);
+      let lo=255,hi=0; for(let y=0;y<gh;y++) for(let x=0;x<gw;x++){ const v=g[(gy+y)*W+gx+x]; if(v<lo)lo=v; if(v>hi)hi=v; }
+      const spn=hi>lo?255/(hi-lo):1;
+      for(let y=0;y<gh;y++) for(let x=0;x<gw;x++){ let v=(g[(gy+y)*W+gx+x]-lo)*spn; if(pol===1) v=255-v; const o=(y*gw+x)<<2; gd.data[o]=gd.data[o+1]=gd.data[o+2]=v; gd.data[o+3]=255; }
+      gcx.putImageData(gd,0,0);
+      const s2=40/hm, gw2=Math.round(gw*s2)+24, gh2=Math.round(gh*s2)+24, g2=document.createElement('canvas'); g2.width=gw2; g2.height=gh2;
+      const gx2=g2.getContext('2d'); gx2.fillStyle='#fff'; gx2.fillRect(0,0,gw2,gh2); gx2.translate(gw2/2,gh2/2); gx2.rotate(-ang); gx2.drawImage(gc,-gw*s2/2,-gh*s2/2,gw*s2,gh*s2);
+      out.push({cv:g2, n:est, h:hm, pol, score:sc0-0.5, gray:true}); } }
+  out.sort((a,b)=>b.score-a.score);
+  return out.slice(0, opt.max||4);
+}
+/* 판 모양별로 숫자가 있을 만한 곳 */
+function digitRegions(b){ const ar=(b.x1-b.x0)/(b.y1-b.y0);
+  return ar<0.75 ? [{R:[-0.25,0.45],TH:360},{R:[-0.9,0.1],TH:360}]      // 세로 종이 : 맨 위 흰 칸 / 위에 튀어나온 표지판
+                 : [{R:[-0.9,0.1],TH:360},{R:[-0.15,0.7],TH:360}]; }   // 가로 판 : 위 흰 칸 / 판 위쪽
+function allLines(img, boxes){ const out=[]; for(const b of boxes) for(const o of digitRegions(b)){ for(const ln of digitLines(img,b,{...o,max:6})) out.push(ln); } return out; }
+/* v69 후보 : 파란 판을 못 찾아도 사진 전체에서 숫자 줄을 찾는다 (멀리 있는 번호판용) */
+function wholeLines(img){ return digitLines(img, {x0:0,y0:0,x1:1,y1:1}, {R:[0,1], TH:900, max:8, minH:11}); }
+/* v66 후보 : 숫자 줄 찾기 → 한 줄 모드로 읽기 */
+async function runLines(worker, img, fallback, whole){
+  const boxes=plateBoxes(img, {...BASE, W:1024, MAX:5}); let words=[];
+  const lines=allLines(img, boxes).sort((a,b)=>b.score-a.score).slice(0,12);
+  await worker.setParameters({tessedit_pageseg_mode:'7'});
+  for(const ln of lines){ const r=await worker.recognize(ln.cv); const ws=((r&&r.data&&r.data.words)||[]).map(w=>({text:w.text, confidence:w.confidence, gray:!!ln.gray}));
+    words=words.concat(ws); const got=parse2(words,40); if(got&&got.code&&got.known&&got.conf>=55) return {got, boxes:boxes.length, words, lines:lines.length}; }
+  if(whole){                                   // 파란 판을 못 찾았거나 못 읽었으면 사진 전체에서 숫자 줄을 찾는다
+    const wl=wholeLines(img);
+    for(const ln of wl){ const r=await worker.recognize(ln.cv); const ws=((r&&r.data&&r.data.words)||[]).map(w=>({text:w.text, confidence:w.confidence, gray:!!ln.gray}));
+      words=words.concat(ws); const got=parse2(words,40); if(got&&got.code&&got.known&&got.conf>=55) return {got, boxes:boxes.length, words, lines:lines.length+wl.length, via:'전체'}; } }
+  if(fallback){ const r=await runMethod(worker, img, METHODS['지금 앱'], false); if(r.got&&r.got.floor) return {...r, words, lines:lines.length, via:'앱'}; }
+  return {got:parse2(words,40), boxes:boxes.length, words, lines:lines.length};
+}
+METHODS['숫자줄']={lines:true};
+METHODS['숫자줄+앱']={lines:true, fallback:true};
+METHODS['숫자줄+전체']={lines:true, whole:true};
+async function diag5(){
+  const q=new URLSearchParams(location.search); const kind=q.get('kinds')||'HALL2R', n=+(q.get('per')||8);
+  const list=await (await fetch('api/photos')).json();
+  new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
+  const rnd=seeded(+(q.get('seed')||11)); const a=list.filter(p=>p.label===kind).slice();
+  for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; } const test=a.slice(0,n);
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  await worker.setParameters({tessedit_char_whitelist:'0123456789'});
+  const box=document.createElement('div'); document.body.appendChild(box);
+  for(let i=0;i<test.length;i++){ const img=await loadImg(test[i].path); const boxes=plateBoxes(img,{...BASE,W:1024,MAX:5});
+    const row=document.createElement('div'); row.style.cssText='margin:6px 0;border-top:1px solid #444'; row.textContent='#'+(i+1)+' '+test[i].path.split('/').pop()+' 판 '+boxes.length+' : ';
+    box.appendChild(row); let t0=performance.now(), found=[];
+    { const lines=allLines(img,boxes);
+      for(const ln of lines){ ln.cv.style.cssText='height:40px;margin:2px;border:1px solid #666;vertical-align:middle'; row.appendChild(ln.cv);
+        const res=[]; for(const psm of [7,8]){ await worker.setParameters({tessedit_pageseg_mode:String(psm)});
+          const rr=await worker.recognize(ln.cv); const txt=(rr.data.words||[]).map(w=>w.text+'('+Math.round(w.confidence)+')').join(' ');
+          res.push(psm+':'+txt); const got=parse2(rr.data.words||[],30); if(got&&got.code) found.push(got.code+(got.known?'':'?')); }
+        const sp=document.createElement('span'); sp.style.cssText='font:11px monospace;color:#9cf;margin-right:10px'; sp.textContent=res.join(' | '); row.appendChild(sp); } }
+    log('#'+(i+1)+' '+test[i].label+' → '+(found.length?[...new Set(found)].join(','):'-')+'  ('+((performance.now()-t0)/1000).toFixed(1)+'s)');
+    ST.textContent=(i+1)+'/'+test.length; }
+  await worker.terminate(); ST.textContent='진단5 완료';
+}
+
+async function diag6(){
+  const q=new URLSearchParams(location.search); const kind=q.get('kinds')||'HALL2R', idx=(q.get('idx')||'7').split(',').map(Number);
+  const list=await (await fetch('api/photos')).json();
+  const rnd=seeded(+(q.get('seed')||11)); const a=list.filter(p=>p.label===kind).slice();
+  for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; }
+  for(const i of idx){ const img=await loadImg(a[i-1].path); const boxes=plateBoxes(img,{...BASE,W:1024,MAX:5});
+    boxes.forEach((b,bi)=>{ digitRegions(b).forEach((o,oi)=>{ const dbg=[]; digitLines(img,b,{...o,dbg});
+      const row=document.createElement('div'); row.textContent='#'+i+' 판'+(bi+1)+' 영역'+(oi+1)+' ar='+((b.x1-b.x0)/(b.y1-b.y0)).toFixed(2)+' ';
+      dbg.forEach(c=>{ c.style.cssText='height:300px;margin:2px;border:1px solid #666'; row.appendChild(c); }); document.body.appendChild(row); }); }); }
+  ST.textContent='진단6 완료';
+}
+
+/* ───────── 엘리베이터 안 : 문 위 보라색 층 표시 읽기 ─────────
+   보라색으로 빛나는 점만 골라 덩어리로 묶고, 한 줄에 늘어선 덩어리(화살표+숫자) 중
+   맨 오른쪽을 층 숫자로 본다. 그 덩어리만 흰 바탕에 검게 다시 그려 한 글자 모드로 읽는다. */
+/* 화살표(↑↓) : 가는 기둥 한가운데 + 한쪽 끝에 좌우로 똑같이 벌어진 머리.
+   "4" 는 위쪽 절반이 넓고, "1" 은 깃발이 왼쪽에만 있어 여기에 걸리지 않는다. */
+function isArrow(lab, W, L, x0, x1, y0, y1){
+  const h=y1-y0+1, w=x1-x0+1, rmin=new Int32Array(h).fill(1e9), rmax=new Int32Array(h).fill(-1);
+  for(let y=y0;y<=y1;y++) for(let x=x0;x<=x1;x++) if(lab[y*W+x]===L){ const r=y-y0; if(x<rmin[r]) rmin[r]=x; if(x>rmax[r]) rmax[r]=x; }
+  const span=r=>rmax[r]>=0?rmax[r]-rmin[r]+1:0; let mx=0; for(let r=0;r<h;r++) mx=Math.max(mx,span(r));
+  function test(head, stem){
+    let narrow=0; for(const r of stem) if(span(r)<=mx*0.45) narrow++; if(narrow<stem.length*0.85) return false;
+    const cs=stem.filter(r=>rmax[r]>=0).map(r=>(rmin[r]+rmax[r])/2).sort((a,b)=>a-b); if(!cs.length) return false; const sc=cs[cs.length>>1];
+    let hr=-1, hs=0; for(const r of head) if(span(r)>hs){ hs=span(r); hr=r; } if(hr<0 || hs<mx*0.9) return false;
+    const left=sc-rmin[hr], right=rmax[hr]-sc; return Math.min(left,right)>=0.55*Math.max(left,right) && Math.min(left,right)>=0.2*w; }
+  const rng=(a,b)=>{ const o=[]; for(let r=Math.floor(a*h);r<Math.ceil(b*h);r++) o.push(Math.min(h-1,r)); return o; };
+  return test(rng(0.65,1), rng(0,0.5)) || test(rng(0,0.35), rng(0.5,1));          // ↓ 또는 ↑
+}
+function purpleBlobs(img, opt){
+  opt=opt||{}; const k=Math.min(1,(opt.W||1400)/Math.max(img.width,img.height)), W=Math.round(img.width*k), H=Math.round(img.height*k);
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const cx=cv.getContext('2d',{willReadFrequently:true}); cx.drawImage(img,0,0,W,H);
+  const d=cx.getImageData(0,0,W,H).data, n=W*H, m0=new Uint8Array(n), m=new Uint8Array(n), gray=new Uint8Array(n);
+  for(let i=0;i<n;i++){ const r=d[i<<2], g=d[(i<<2)+1], b=d[(i<<2)+2]; gray[i]=(r*0.299+g*0.587+b*0.114)|0;
+    // 파랑~보라로 빛나는 점 : 초록이 가장 약하고 파랑이 뚜렷이 세다 (카메라마다 색상각 240~300 으로 다르게 찍힌다)
+    if(Math.max(r,b)>=90 && b-g>=28 && r-g>=-6 && r<=b*1.35) m0[i]=1; }
+  const R=opt.dil||1;                                                             // 가는 획이 끊기지 않게 R 칸씩 불린다 (끊긴 글꼴은 2~3)
+  for(let y=R;y<H-R;y++) for(let x=R;x<W-R;x++){ let on=0; for(let dy=-R;dy<=R&&!on;dy++) for(let dx=-R;dx<=R;dx++) if(m0[(y+dy)*W+x+dx]){ on=1; break; } if(on) m[y*W+x]=1; }
+  const lab=new Int32Array(n), st=new Int32Array(n), comps=[]; let L=0;
+  for(let i=0;i<n;i++){ if(!m[i]||lab[i]) continue; L++; let sp=0; st[sp++]=i; lab[i]=L; let x0=W,x1=0,y0=H,y1=0,c=0;
+    while(sp){ const p=st[--sp], px=p%W, py=(p/W)|0; c++; if(px<x0)x0=px; if(px>x1)x1=px; if(py<y0)y0=py; if(py>y1)y1=py;
+      if(px>0&&m[p-1]&&!lab[p-1]){lab[p-1]=L;st[sp++]=p-1;} if(px<W-1&&m[p+1]&&!lab[p+1]){lab[p+1]=L;st[sp++]=p+1;}
+      if(py>0&&m[p-W]&&!lab[p-W]){lab[p-W]=L;st[sp++]=p-W;} if(py<H-1&&m[p+W]&&!lab[p+W]){lab[p+W]=L;st[sp++]=p+W;} }
+    const w=x1-x0+1, h=y1-y0+1; if(opt.rej && h>=10 && h<H*0.2) opt.rej.push([x0,y0,w,h,c,(c/(w*h)).toFixed(2)]); if(h<Math.max(10,H*0.009) || h>H*0.15 || h<w*1.0 || h>w*7 || c/(w*h)<0.12 || c/(w*h)>0.85) continue;
+    // 표시기는 검은 판이다 : 글자 둘레가 어두워야 한다 (파란 하늘·창문 빛은 둘레가 밝다)
+    const pd=Math.round(h*0.4); let sum=0, cnt=0;
+    for(let y=Math.max(0,y0-pd);y<=Math.min(H-1,y1+pd);y++) for(let x=Math.max(0,x0-pd);x<=Math.min(W-1,x1+pd);x++){ const j=y*W+x; if(!m[j]){ sum+=gray[j]; cnt++; } }
+    const ring=cnt?sum/cnt:255; if(opt.rej) opt.rej.push(["ring",x0,y0,w,h,Math.round(ring)]); if(ring>115) continue;
+    let same=0, tot=0; for(let y=y0;y<=y1;y++) for(let x=x0;x<=x1;x++){ if(lab[y*W+x]===L){ tot++; if(lab[y*W+(x1-(x-x0))]===L) same++; } }
+    const sym=same/Math.max(1,tot);                                              // 좌우 대칭 정도 (화살표는 거의 1)
+    let bs=0,bn=0; for(let y=y0;y<=y1;y++) for(let x=x0;x<=x1;x++){ const j=y*W+x; if(m0[j]&&lab[j]===L){ bs+=Math.max(d[j<<2],d[(j<<2)+2]); bn++; } } const bright=bn?bs/bn:0; if(ring>80 || bright<130 || bright-ring<70) continue;   // 진짜 표시기 : 어두운 판(둘레 ≤80) 위 밝은 글자(≥130), 대비 ≥70
+    comps.push({L,x0,x1,y0,y1,w,h,c,cx:(x0+x1)/2,cy:(y0+y1)/2,ring,sym,bright,arrow:isArrow(lab,W,L,x0,x1,y0,y1)}); }
+  // 화살표 거르기 : 같은 표시기 안에서 숫자 왼쪽(문 위) 또는 위(버튼판)에 붙은 덩어리는 화살표다
+  for(const a of comps){ for(const b of comps){ if(a===b) continue; const hm=Math.max(a.h,b.h); if(Math.abs(a.h-b.h)>hm*0.4) continue;
+      if(b.x0>a.x1 && b.x0-a.x1<hm*1.6 && Math.abs(a.cy-b.cy)<hm*0.35) a.lead=true;                    // a 오른쪽에 b
+      if(b.y0>a.y1 && b.y0-a.y1<hm*0.9 && Math.abs(a.cx-b.cx)<hm*0.45) a.lead=true; } }               // a 아래에 b
+  const out=[];
+  for(const c of comps){
+    const s=30/c.h, pad=Math.round(c.h*s*0.5), ow=Math.round(c.w*s)+2*pad, oh=Math.round(c.h*s)+2*pad;
+    const src=document.createElement('canvas'); src.width=c.w; src.height=c.h; const sc=src.getContext('2d'), sd=sc.createImageData(c.w,c.h);
+    for(let y=c.y0;y<=c.y1;y++) for(let x=c.x0;x<=c.x1;x++){ const o=((y-c.y0)*c.w+(x-c.x0))<<2, on=lab[y*W+x]===c.L; sd.data[o]=sd.data[o+1]=sd.data[o+2]=on?0:255; sd.data[o+3]=255; }
+    sc.putImageData(sd,0,0); const oc=document.createElement('canvas'); oc.width=ow; oc.height=oh; const o2=oc.getContext('2d');
+    o2.fillStyle='#fff'; o2.fillRect(0,0,ow,oh); o2.drawImage(src,pad,pad,c.w*s,c.h*s);
+    out.push({cv:oc, h:c.h, lead:!!c.lead, arrow:c.arrow, sym:c.sym, bright:c.bright, ring:c.ring, y:c.cy/H, x:c.cx/W, px:c.c}); }
+  out.sort((a,b)=>(a.lead-b.lead) || (b.h-a.h));
+  if(opt.dbg){ const mc=document.createElement('canvas'); mc.width=W; mc.height=H; const x2=mc.getContext('2d'), md=x2.createImageData(W,H);
+    for(let i=0;i<n;i++){ const v=m[i]?0:255; md.data[i<<2]=md.data[(i<<2)+1]=md.data[(i<<2)+2]=v; md.data[(i<<2)+3]=255; } x2.putImageData(md,0,0);
+    x2.lineWidth=2; comps.forEach(c=>{ x2.strokeStyle=c.lead?'#0a0':'#f00'; x2.strokeRect(c.x0,c.y0,c.w,c.h); }); opt.dbg.push(mc); }
+  return out.slice(0, opt.max||8);
+}
+async function readElevator(worker, img, dbg){
+  let last=null; for(const dil of [1,2,3]){ const r=await readElevatorOnce(worker,img,dil===1?dbg:null,dil); r.dil=dil; if(r.floor) return r; if(!last||r.reads.length>last.reads.length) last=r; } return last;
+}
+async function readElevatorOnce(worker, img, dbg, dil){
+  const blobs=purpleBlobs(img,{dbg,dil}); const votes={}, reads=[];
+  await worker.setParameters({tessedit_pageseg_mode:'10', tessedit_char_whitelist:'12345'});
+  let tried=0; for(const b of blobs){ if(b.lead||b.arrow){ reads.push({t:b.arrow?"↕a":"↕",c:0,cv:b.cv}); continue; } if(tried>=5) break; tried++;   // 큰 것부터 5개까지만
+    let r=await worker.recognize(b.cv), t=String((r.data&&r.data.text)||'').replace(/\D/g,''), c=Math.round((r.data&&r.data.confidence)||0);
+    reads.push({t:t+'~b'+Math.round(b.bright)+'r'+Math.round(b.ring),c,cv:b.cv}); if(t.length===1 && c>=50){ const v=votes[t]=votes[t]||{n:0,s:0}; v.n++; v.s+=c; if(v.n>=2) break; } }   // 같은 숫자 두 번이면 끝
+  await worker.setParameters({tessedit_char_whitelist:'0123456789'});
+  // 서로 다른 숫자가 나오면 더 여러 번 읽힌 쪽. 횟수가 같으면 모른다고 한다 (화살표를 숫자로 읽은 경우가 이렇다)
+  const E=Object.entries(votes).sort((a,b)=>b[1].n-a[1].n || b[1].s-a[1].s);
+  const best = E.length && (E.length===1 || E[0][1].n>E[1][1].n) ? E[0] : null;
+  const vv={}; E.forEach(([k,v])=>vv[k]=v.n+'×'+v.s);
+  return {floor:best?best[0]:null, score:best?best[1].s:0, votes:vv, reads, blobs:blobs.length};
+}
+async function diag7(){
+  const q=new URLSearchParams(location.search); const kinds=(q.get('kinds')||'EVIN').split(',');
+  const list=await (await fetch('api/photos')).json();
+  let test=list.filter(p=>kinds.some(k=>p.label.startsWith(k))); if(q.get('names')) test=test.filter(p=>q.get('names').split(',').some(s=>p.name.indexOf(s)>=0)); if(q.get('not')) test=list.filter(p=>!q.get('not').split(',').some(k=>p.label.startsWith(k))); if(q.get('per')){ const per=+q.get('per'), by={}; test=test.filter(p=>{ by[p.label]=(by[p.label]||0)+1; return by[p.label]<=per; }); }
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  let ok=0,wrong=0,none=0,t=0; const box=document.createElement('div'); document.body.appendChild(box); const rows=[];
+  for(let i=0;i<test.length;i++){ const p=test[i], tf=truthFloor(p.label); const img=await loadImg(p.path); const t0=performance.now();
+    const dbg=q.get('show')?[]:null; const r=await readElevator(worker,img,dbg); t+=performance.now()-t0;
+    const mark=!r.floor?'-':r.floor===tf?'O':'X'; if(mark==='O')ok++; else if(mark==='X')wrong++; else none++;
+    rows.push({name:p.name,label:p.label,floor:r.floor,votes:r.votes,reads:r.reads.map(x=>x.t+'/'+x.c).join(' ')});
+    const row=document.createElement('div'); row.style.cssText='border-top:1px solid #444;margin:4px 0'; row.textContent=mark+' '+p.label+' '+p.name+' → '+(r.floor||'-')+' (불림'+r.dil+')  '+JSON.stringify(r.votes)+'  ';
+    r.reads.forEach(x=>{ x.cv.style.cssText='height:34px;margin:2px;border:1px solid #666;vertical-align:middle'; row.appendChild(x.cv); const s=document.createElement('span'); s.style.cssText='font:11px monospace;color:#9cf'; s.textContent=x.t+'/'+x.c+' '; row.appendChild(s); });
+    if(dbg) dbg.forEach(c=>{ c.style.cssText='height:220px;margin:2px;vertical-align:middle'; row.appendChild(c); });
+    box.appendChild(row); ST.textContent=(i+1)+'/'+test.length; }
+  await worker.terminate();
+  const n=test.length; log(kinds.join(',')+' '+n+'장 : 층 맞게 '+ok+' ('+(100*ok/n).toFixed(0)+'%) · 틀리게 '+wrong+' · 못 읽음 '+none+' · 한 장 '+(t/n/1000).toFixed(2)+'초');
+  await fetch('api/save?name=ocrev_'+kinds.join('_')+'.json',{method:'POST',body:JSON.stringify({ok,wrong,none,rows})});
+  ST.textContent='진단7 완료';
+}
+
+/* ───────── 비상대피 안내판 : 제목 "공과대학 3호관 N층 비상대피 경로" 에서 층 읽기 ───────── */
+function scaleTo(img, M){ const k=Math.min(1, M/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=Math.round(img.width*k); c.height=Math.round(img.height*k); c.getContext('2d').drawImage(img,0,0,c.width,c.height); return c; }
+/* 제목 띠는 왼쪽 파랑 → 오른쪽 검정 그라데이션이라 파란 부분만 잡힌다. 어두운 칸이 이어지는 만큼 좌우로 늘린다 */
+function growBar(img, b){
+  const k=Math.min(1,1024/Math.max(img.width,img.height)), W=Math.round(img.width*k), H=Math.round(img.height*k);
+  const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(img,0,0,W,H);
+  const y0=Math.round(b.y0*H), y1=Math.max(y0+1,Math.round(b.y1*H)), d=x.getImageData(0,y0,W,y1-y0).data, h=y1-y0;
+  const col=cx=>{ let s=0; for(let y=0;y<h;y++){ const o=(y*W+cx)<<2; if(d[o]*0.299+d[o+1]*0.587+d[o+2]*0.114<95) s++; } return s/h; };   // 어두운 점의 비율 (흰 글자가 지나가도 절반은 어둡다)
+  let L=Math.round(b.x0*W), R=Math.round(b.x1*W)-1, miss=0;
+  for(let cx=R+1; cx<W; cx++){ if(col(cx)>=0.3){ R=cx; miss=0; } else if(++miss>4) break; }
+  miss=0; for(let cx=L-1; cx>=0; cx--){ if(col(cx)>=0.3){ L=cx; miss=0; } else if(++miss>4) break; }
+  return {...b, x0:L/W, x1:(R+1)/W};
+}
+function signFloor(text){
+  const t=String(text||'').replace(/\s+/g,'');
+  let m=t.match(/호관([1-5])층/) || t.match(/관([1-5])층/) || t.match(/3호.?([1-5])층/);
+  if(m) return {floor:m[1], how:'호관N층'};
+  m=t.match(/([1-5])층비상/) || t.match(/([1-5])층비/); if(m) return {floor:m[1], how:'N층비상'};
+  m=t.match(/(?:^|[^0-9])([1-5])층/); if(m) return {floor:m[1], how:'N층', weak:true};
+  return null;
+}
+/* 제목 띠의 한글 읽기에서 "N층" 의 숫자가 뭉개졌을 때(증·[ 등) : "층/증" 글자 자리(또는 그 앞 한 글자)만 숫자 전용으로 다시 읽는다 */
+async function rescueFloorDigit(we, pc, words){
+  for(let j=0;j<words.length;j++){ if(!/[층증]/.test(words[j].text)) continue;
+    const after=words.slice(j+1,j+4).map(w=>w.text).join(''); if(!/비|상|대|피|경|로/.test(after)) continue;
+    const prev=words[j-1]; let bb;
+    if(prev && String(prev.text).length===1 && !/[관호과학]/.test(prev.text)) bb=prev.bbox;          // 숫자가 따로 떨어져 엉뚱한 글자로 읽힘
+    else { const b=words[j].bbox; bb={x0:b.x0, y0:b.y0, x1:b.x0+Math.round((b.x1-b.x0)*0.45), y1:b.y1}; }   // 숫자와 층이 한 글자로 붙어 읽힘
+    const w=bb.x1-bb.x0, h=bb.y1-bb.y0; if(w<4||h<8) continue;
+    for(const s of [30/h, 1]){                                   // 글자 크기에 따라 tesseract 가 빈칸을 낸다 → 30px 로 줄인 것, 원래 크기 차례로
+      const pad=s===1?Math.round(h*0.3):10;
+      const dc=document.createElement('canvas'); dc.width=Math.round(w*s)+2*pad; dc.height=Math.round(h*s)+2*pad; const x=dc.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,dc.width,dc.height); x.drawImage(pc,bb.x0,bb.y0,w,h,pad,pad,w*s,h*s);
+      const r=await we.recognize(dc); const t=String((r.data&&r.data.text)||'').replace(/\D/g,''), c=Math.round((r.data&&r.data.confidence)||0);
+      if(t.length===1 && c>=60) return {floor:t, how:'띠+숫자', conf:c}; } }
+  return null;
+}
+async function diag8(){
+  const q=new URLSearchParams(location.search); const kinds=(q.get('kinds')||'SIGN').split(','), M=+(q.get('M')||1600), psm=q.get('psm')||'11';
+  const list=await (await fetch('api/photos')).json();
+  let test=list.filter(p=>kinds.some(k=>p.label.startsWith(k))); if(q.get('per')){ const per=+q.get('per'); const by={}; test=test.filter(p=>{ by[p.label]=(by[p.label]||0)+1; return by[p.label]<=per; }); }
+  const t0=performance.now();
+  const worker=await Tesseract.createWorker('kor',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:q.get('lang')||'https://tessdata.projectnaptha.com/4.0.0_fast', gzip:true});
+  log('한국어 모델 준비 '+((performance.now()-t0)/1000).toFixed(1)+'초');
+  const we=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  await we.setParameters({tessedit_pageseg_mode:'10', tessedit_char_whitelist:'12345'});
+  await worker.setParameters({tessedit_pageseg_mode:psm});
+  let ok=0,wrong=0,none=0,tt=0; const rows=[];
+  for(let i=0;i<test.length;i++){ const p=test[i], tf=truthFloor(p.label); const img=await loadImg(p.path); const s=performance.now();
+    let txt='', f=null;
+    if(q.get('mode')!=='whole'){                                  // ① 제목 띠(남색 바탕 흰 글씨) 자체를 잘라 흑백을 뒤집어 한 줄로 읽는다
+      const bars=plateBoxes(img,{...BASE,W:1024,MAX:10,ARHI:25,MINFILL:0.3}).filter(b=>(b.x1-b.x0)*img.width/((b.y1-b.y0)*img.height)>=4).slice(0,4);
+      await worker.setParameters({tessedit_pageseg_mode:'7'});
+      for(const b0 of bars){ const b=growBar(img,b0); const bw=(b.x1-b.x0)*img.width, bh=(b.y1-b.y0)*img.height;
+        const sx=Math.max(0,b.x0*img.width-0.02*bw), ex=Math.min(img.width,b.x1*img.width+0.02*bw), sy=Math.max(0,b.y0*img.height-0.15*bh), ey=Math.min(img.height,b.y1*img.height+0.15*bh);
+        const k=Math.max(1,Math.min(6,90/(ey-sy))); const c=document.createElement('canvas'); c.width=Math.round((ex-sx)*k); c.height=Math.round((ey-sy)*k);
+        c.getContext('2d').drawImage(img,sx,sy,ex-sx,ey-sy,0,0,c.width,c.height);
+        for(const inv of [true,false]){ const pc=prep(c,inv,false); const r=await worker.recognize(pc); txt+=' '+((r.data&&r.data.text)||''); f=signFloor(txt); if(f){ f.how+='·띠'; break; }
+          f=await rescueFloorDigit(we, pc, (r.data&&r.data.words)||[]); if(f) break; }
+        if(f) break; }
+      await worker.setParameters({tessedit_pageseg_mode:psm}); }
+    if(!f && q.get('mode')!=='whole'){                            // ② 안내판 아래 남색 띠를 찾아 그 위(제목)를 크게 잘라 읽는다
+      const bands=plateBoxes(img,{...BASE,W:1024,MAX:8,ARHI:14,MINFILL:0.3}).filter(b=>(b.x1-b.x0)*img.width/((b.y1-b.y0)*img.height)>=2.5).slice(0,3);
+      for(const b of bands){ const bw=(b.x1-b.x0)*img.width, bh=(b.y1-b.y0)*img.height;
+        const sx=Math.max(0,b.x0*img.width-0.08*bw), ex=Math.min(img.width,b.x1*img.width+0.08*bw), sy=Math.max(0,b.y0*img.height-0.95*bw), ey=Math.min(img.height,b.y1*img.height);
+        if(ex-sx<20||ey-sy<20) continue; const k=Math.min(4,1800/(ex-sx)); const c=document.createElement('canvas'); c.width=Math.round((ex-sx)*k); c.height=Math.round((ey-sy)*k);
+        c.getContext('2d').drawImage(img,sx,sy,ex-sx,ey-sy,0,0,c.width,c.height);
+        const r=await worker.recognize(c); txt+=' '+((r.data&&r.data.text)||''); f=signFloor(txt); if(f) break; } }
+    if(!f){ const r=await worker.recognize(scaleTo(img,M)); txt+=' '+((r.data&&r.data.text)||''); f=signFloor(txt); }
+    tt+=performance.now()-s;
+    const mark=!f?'-':f.floor===tf?'O':'X'; if(mark==='O')ok++; else if(mark==='X')wrong++; else none++;
+    const hit=(txt.replace(/\s+/g,' ').match(/.{0,8}층.{0,6}/g)||[]).slice(0,3).join(' | ');
+    rows.push({name:p.name, label:p.label, got:f, hit}); log(mark+' '+p.label+' '+p.name+' → '+(f?f.floor+'('+f.how+')':'-')+'   '+hit);
+    ST.textContent=(i+1)+'/'+test.length; }
+  await worker.terminate(); await we.terminate(); const n=test.length;
+  log('\n'+kinds.join(',')+' '+n+'장 : 층 맞게 '+ok+' ('+(100*ok/n).toFixed(0)+'%) · 틀리게 '+wrong+' · 못 읽음 '+none+' · 한 장 '+(tt/n/1000).toFixed(1)+'초');
+  await fetch('api/save?name=ocrsign_'+kinds.join('_')+'.json',{method:'POST',body:JSON.stringify({ok,wrong,none,rows})});
+  ST.textContent='진단8 완료';
+}
+
+(new URLSearchParams(location.search).get("diag")==="8" ? diag8() : new URLSearchParams(location.search).get("diag")==="7" ? diag7() : new URLSearchParams(location.search).get("diag")==="6" ? diag6() : new URLSearchParams(location.search).get("diag")==="5" ? diag5() : new URLSearchParams(location.search).get("diag")==="4" ? diag4() : new URLSearchParams(location.search).get("diag")==="3" ? diag3() : new URLSearchParams(location.search).get("diag")==="2" ? diag2() : new URLSearchParams(location.search).get("diag") ? diag() : main()).catch(e=>{ log("오류: "+e); ST.textContent="오류"; });
+</script></body></html>

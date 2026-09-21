@@ -98,6 +98,87 @@ function run(w){
     Object.keys(w.FLOOR_LAYOUT[lv].lookup).forEach(function(rc){ if(!aiSet[String(rc).toUpperCase()]) roomsNoPhoto.push(rc); });
   });
 
+  /* ── 길찾기 그래프 (v80~) ──
+     ① 그래프가 AI 가 아는 모든 장소를 아는가, 정문에서 계단 없이(엘리베이터만) 갈 수 있는가
+     ② 화면 안내(buildSteps)가 사용자가 확정한 좌우(2026-09-17)와 맞는가 — 3~5층
+     ③ 화면 안내와 그래프가 서로 맞는가 — 1~5층 모든 방
+        · 도는 방향 : 그래프가 엘리베이터에서 걸어 나가는 쪽(+Z = 왼쪽)
+        · 방이 있는 쪽 : 걷는 방향 기준 문이 있는 벽
+        · '몇 번째 방' : 그래프 경로가 지나는 같은 쪽 문 수(가벽으로 나뉜 방은 하나로)
+     화면 안내는 좌표 공식으로, 그래프는 경로로 따로 계산하므로 한쪽이 틀리면 여기서 어긋난다. */
+  bad.graph = []; bad.reach = []; bad.turnTruth = []; bad.guideGraph = [];
+  var graph = null, unlisted = [];
+  var TRUTH = {   /* 엘리베이터에서 내렸을 때 기준 — 사용자 확정 (2026-09-17) */
+    3:{L:[[13301,13306],[13324,13326]], R:[[13310,13322]]},
+    4:{L:[[13401,13403],'KTC',[13419,13422]], R:[[13405,13417]]},
+    5:{L:[[13501,13506],[13522,13524]], R:[[13508,13520]]}};
+  function truthSide(lv, code){
+    var t = TRUTH[lv]; if(!t) return null;
+    function has(arr){ return arr.some(function(a){ return Array.isArray(a) ? (+code >= a[0] && +code <= a[1]) : a === code; }); }
+    return has(t.L) ? 'L' : (has(t.R) ? 'R' : '?');
+  }
+  var ORD = ['첫','두','세','네','다섯','여섯','일곱','여덟','아홉','열'];
+  if(!w.NAVGRAPH || typeof w.buildSteps !== 'function'){ bad.graph.push('(NAVGRAPH 또는 buildSteps 없음)'); }
+  else {
+    graph = w.NAVGRAPH.stats();
+    codes.forEach(function(c){
+      if(!w.NAVGRAPH.has(c)){ bad.graph.push(c); return; }
+      var r = w.NAVGRAPH.route('GATE_MAIN', c, {noStairs:true});
+      if(!r.ok) bad.reach.push(c + '(' + r.why + ')');
+    });
+    var saveT = w.target, saveS = w.startFloor;
+    try {
+      for(var lv = 1; lv <= 5; lv++){
+        var L = w.FLOOR_LAYOUT[lv], ev = w.evXZ(lv);
+        var cells = L.cells.filter(function(q){ return q.code; });
+        var list = Object.keys(L.lookup).map(function(k){ return {kind:'room', code:k}; });
+        list.push({kind:'emstair', code:'EMS' + lv}, {kind:'toilet', code:'WC' + lv});
+        list.forEach(function(t){
+          /* 다른 층에서 엘리베이터로 올라온 경우 — 1층은 2층에서 내려온 경우 (출입문 안내가 끼지 않게) */
+          w.target = {kind:t.kind, floor:lv, code:t.kind === 'room' ? t.code : null};
+          w.startFloor = (lv === 1) ? 2 : 1;
+          var st = w.buildSteps();
+          var turn = st.filter(function(s){ return s.type === 'turn'; })[0];
+          var arr  = st.filter(function(s){ return s.type === 'arrive'; })[0];
+          var gTurn = turn ? (turn.tko.indexOf('왼쪽') >= 0 ? 'L' : (turn.tko.indexOf('오른쪽') >= 0 ? 'R' : '?')) : '-';
+          var r = w.NAVGRAPH.route('EV' + lv, t.code);
+          if(!r.ok){ bad.guideGraph.push(t.code + ' 그래프 경로 없음'); return; }
+          var pts = r.points.filter(function(p){ return p.floor === lv; });
+          var cz = pts.filter(function(p){ return p.kind === 'corridor'; });
+          var dz = cz.length > 1 ? Math.sign(cz[cz.length-1].z - cz[0].z) : 0;
+          var nTurn = dz > 0 ? 'L' : (dz < 0 ? 'R' : '0');   /* 엘리베이터(+X)에서 나와 −X 를 보면 왼손이 +Z */
+          if(gTurn !== nTurn) bad.guideGraph.push(t.code + ' 도는 방향 : 안내 ' + gTurn + ' / 그래프 ' + nTurn);
+          if(t.kind !== 'room') return;
+          var ts = truthSide(lv, t.code);
+          if(ts === '?') unlisted.push(t.code);
+          else if(ts && ts !== gTurn) bad.turnTruth.push(t.code + ' : 확정 ' + ts + ' / 안내 ' + gTurn);
+          /* 방이 있는 쪽과 몇 번째 문 */
+          var door = pts[pts.length-1];
+          var nSide = (Math.sign(door.x) === dz) ? 'L' : 'R';   /* +Z 를 보고 걸으면 왼손이 +X */
+          var lo = Math.min(ev.z, door.z) - 1e-6, hi = Math.max(ev.z, door.z) + 1e-6;
+          var passed = {}, all = {};
+          cells.forEach(function(q){
+            if(Math.sign(q.x) !== Math.sign(door.x)) return;
+            var k = q.parent || q.code;
+            if(dz > 0 ? q.z > ev.z : q.z < ev.z) all[k] = 1;
+            if(q.z >= lo && q.z <= hi) passed[k] = 1;
+          });
+          var nOrd = Object.keys(passed).length, nAll = Object.keys(all).length;
+          var m = arr.tko.match(/(왼쪽|오른쪽)(에서 (\S+) 번째| 맨 끝)/);
+          if(!m){ bad.guideGraph.push(t.code + ' 도착 문장을 못 읽음 : ' + arr.tko); return; }
+          var gSide = m[1] === '왼쪽' ? 'L' : 'R';
+          if(gSide !== nSide) bad.guideGraph.push(t.code + ' 방이 있는 쪽 : 안내 ' + gSide + ' / 그래프 ' + nSide);
+          if(m[2].indexOf('맨 끝') >= 0){
+            if(nOrd !== nAll) bad.guideGraph.push(t.code + ' 안내는 맨 끝 / 그래프 ' + nOrd + '번째 (그쪽 ' + nAll + '개)');
+          } else {
+            var gOrd = ORD.indexOf(m[3]) + 1;
+            if(gOrd !== nOrd) bad.guideGraph.push(t.code + ' 차례 : 안내 ' + gOrd + ' / 그래프 ' + nOrd);
+          }
+        });
+      }
+    } finally { w.target = saveT; w.startFloor = saveS; }
+  }
+
   var fails = Object.keys(bad).filter(function(k){ return bad[k].length; });
   done({
     ok: fails.length === 0,
@@ -110,7 +191,9 @@ function run(w){
     fails: fails,
     approx3D: approx3D,
     kinds3D: kinds3D,
-    roomsNoPhoto: roomsNoPhoto
+    roomsNoPhoto: roomsNoPhoto,
+    graph: graph,
+    unlisted: unlisted
   });
 }
 

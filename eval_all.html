@@ -84,12 +84,13 @@ function catOf(c){
   if(/^WC/.test(c)) return '화장실';
   if(c === 'B1') return '지하 홀';
   if(/^(GATE|ES)/.test(c)) return '후문·중앙계단';
-  if(/^13/.test(c)) return '강의실';
+  if(/^13/.test(c) || c === 'KTC') return '강의실';     /* KTC = 4층 KTC 동아리방 */
   return '기타';
 }
 function floorOf(c){
   c = String(c);
   if(c === 'B1' || c === 'EVB1') return 'B';
+  if(c === 'KTC') return '4';
   if(/^GATE/.test(c)) return '1';
   var m = c.match(/^HALL([1-5])[LR]$/) || c.match(/^13([1-5])/) || c.match(/^(?:EVIN|EMS|SIGN|WIN|LNG|EV|WC|ES)([1-5])/);
   return m ? m[1] : '?';
@@ -175,7 +176,7 @@ function run(){
       add(catOf(p.code), o1, of, o5);
       if(!room) add('전체(강의실 제외)', o1, of, o5);
       /* ⑥ 확신도 : 1등 장소 점수(s1)와, 1등과 2등 장소의 점수 차이(g) */
-      if(!room) SEL.push({s1: E[0][1], g: E[0][1] - (E[1] ? E[1][1] : -1), e: o1, f: of});
+      if(!room) SEL.push({s1: E[0][1], g: E[0][1] - (E[1] ? E[1][1] : -1), e: o1, f: of, b: p.g});
       var bc = byCode[p.code] = byCode[p.code] || {n:0,e:0,f:0};
       bc.n++; bc.e += o1; bc.f += of;
       if(/^HALL/.test(p.code)){
@@ -239,6 +240,32 @@ function selective(rows){
   var all = 0; rows.forEach(function(x){ all += x.e; });
   return {n:rows.length, g:curve('g'), s1:curve('s1'), randomAurc:1 - all/rows.length,
           hold:{e95:holdout('g','e',0.95), f95:holdout('g','f',0.95)}};
+}
+
+/* ⑦ 신뢰구간 — "53.3%" 가 얼마나 흔들릴 수 있는 숫자인가
+   사진 1,522장은 서로 독립이 아니다. 같은 사람이 한 번에 찍은 사진(배치)끼리는 조명·각도·폰이 같아서
+   함께 맞거나 함께 틀린다. 사진을 독립으로 보고 계산한 구간(Wilson)은 그래서 실제보다 좁다.
+   배치를 통째로 다시 뽑는 부트스트랩이 이 뭉침을 반영한다 (배치 36개를 복원추출, 2,000번).
+   시드를 고정해서 몇 번을 돌려도 같은 구간이 나온다. */
+function bootCI(rows, field){
+  var by = {}, keys;
+  rows.forEach(function(r){ var s = by[r.b] = by[r.b] || {n:0, k:0}; s.n++; s.k += r[field]; });
+  keys = Object.keys(by);
+  var seed = 20260921;
+  function rnd(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
+  var B = 2000, st = [];
+  for(var b = 0; b < B; b++){
+    var n = 0, k = 0;
+    for(var i = 0; i < keys.length; i++){ var s = by[keys[Math.floor(rnd()*keys.length)]]; n += s.n; k += s.k; }
+    st.push(k/n);
+  }
+  st.sort(function(x,y){ return x-y; });
+  var N = rows.length, K = 0; rows.forEach(function(r){ K += r[field]; });
+  var p = K/N, z = 1.96, den = 1 + z*z/N;
+  var mid = (p + z*z/(2*N))/den, half = z*Math.sqrt(p*(1-p)/N + z*z/(4*N*N))/den;
+  return {p:p, lo:st[Math.floor(B*0.025)], hi:st[Math.floor(B*0.975)], batches:keys.length,
+          wilsonLo:mid-half, wilsonHi:mid+half};
 }
 
 /* ② 같은 자리에서 두 장 (복도) */
@@ -342,12 +369,21 @@ function report(stat, conf, sideRows, byCode, one, two, t0){
      + ' · 무작위 ' + sv.randomAurc.toFixed(3)
      + '</div>';
 
+  var ciE = bootCI(SEL, 'e'), ciF = bootCI(SEL, 'f');
+  h += '<h2>⑦ 신뢰구간 — 전체(강의실 제외) 숫자가 얼마나 흔들릴 수 있나</h2>'
+     + table(['항목','값','95% 구간 (배치 부트스트랩)','참고 : 사진을 독립으로 볼 때 (Wilson)'], [
+        ['정확한 자리', fx(ciE.p), fx(ciE.lo) + ' ~ ' + fx(ciE.hi), fx(ciE.wilsonLo) + ' ~ ' + fx(ciE.wilsonHi)],
+        ['층',         fx(ciF.p), fx(ciF.lo) + ' ~ ' + fx(ciF.hi), fx(ciF.wilsonLo) + ' ~ ' + fx(ciF.wilsonHi)]])
+     + '<div class="note">같은 사람이 한 번에 찍은 사진끼리는 함께 맞거나 함께 틀려서, 사진 ' + SEL.length + '장을 독립으로 보면 구간이 실제보다 좁습니다. '
+     + '배치 ' + ciE.batches + '개를 통째로 복원추출해 2,000번 다시 잰 구간이 정직한 값입니다. 발표에서는 왼쪽 구간을 쓰세요.</div>';
+
   h += '<div class="note">걸린 시간 ' + Math.round((Date.now()-t0)/1000) + '초 · 기준 데이터 생성 시각 ' + new Date(A.made).toLocaleString() + '</div>';
   OUT.innerHTML = h;
   ST.textContent = '측정 완료';
   PG.style.width = '100%';
   RESULT = {made:A.made, 측정시각:Date.now(), 종류별:stat, 좌우:sideRows.length, 좌우구간:cuts, 두장:{한장:one, 두장:two}, 혼동:conf, 자리별:byCode,
-            확신도:{n:sv.n, 차이:sv.g, 일등점수:sv.s1, 무작위AURC:sv.randomAurc, 반나눠확인:sv.hold}};
+            확신도:{n:sv.n, 차이:sv.g, 일등점수:sv.s1, 무작위AURC:sv.randomAurc, 반나눠확인:sv.hold},
+            신뢰구간:{자리:ciE, 층:ciF}};
   document.getElementById('dl').disabled = false;
   /* 최신 결과 + 날짜 붙은 사본. 하나에 덮어쓰기만 하면 직전 값과 비교할 수 없게 된다 (2026-09-21 실제로 잃었다) */
   var d = new Date(), pad = function(x){ return (x < 10 ? '0' : '') + x; };

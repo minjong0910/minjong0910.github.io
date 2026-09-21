@@ -24,7 +24,7 @@
 </head>
 <body>
 <h1>기준선과 제거 실험 — 이 방식이 정말 일을 하고 있나</h1>
-<div class="sub">사진 1,753장을 한 번 읽어 여러 방식으로 같은 시험을 칩니다. 약 15~20분 걸립니다.</div>
+<div class="sub">사진 1,753장을 한 번 읽어 여러 방식으로 같은 시험을 칩니다. 약 10분 걸립니다 (탭이 화면에 보일 때).</div>
 <div class="note">
   <b>공정한 비교를 위해 전부 같게 둔 것</b> — 사진을 줄이는 방식(앱과 같은 1280px 사본 → 블록 평균 224px),
   시험 대상(강의실 제외, 두 배치 이상 찍힌 곳 — eval_all.html 의 「전체(강의실 제외)」와 같은 사진들), 같은 배치 사진은 기준에서 빼기, 장소마다 가장 닮은 사진 점수로 순위 매기기.
@@ -190,7 +190,9 @@ async function extract(){
   await tf.ready();
   net = await mobilenet.load({version:2, alpha:0.5});
   var t0 = Date.now();
-  async function emb(cv){ var t = net.infer(cv, true); var a = await t.data(); t.dispose(); return l2(Float32Array.from(a)); }
+  /* dataSync : await t.data() 는 GPU 가 끝났는지 타이머로 거듭 확인하는데, 안 보이는 탭에서는 그 타이머가
+     늦춰져 초당 0.5장까지 떨어졌다. dataSync 는 타이머 없이 기다린다 — 값은 똑같다. */
+  async function emb(cv){ var t = net.infer(cv, true); var a = t.dataSync(); t.dispose(); return l2(Float32Array.from(a)); }
   for(var i=0;i<PHOTOS.length;i++){
     var ph = PHOTOS[i], img;
     try{ img = await appImg(ph.path); }catch(e){ continue; }
@@ -273,11 +275,12 @@ function reproduce(){
 function floorOf(c){
   c = String(c);
   if(c === 'B1' || c === 'EVB1') return 'B';
+  if(c === 'KTC') return '4';                    /* 4층 KTC 동아리방 — 빠지면 '?' 층이 하나 더 생긴다 */
   if(/^GATE/.test(c)) return '1';
   var m = c.match(/^HALL([1-5])[LR]$/) || c.match(/^13([1-5])/) || c.match(/^(?:EVIN|EMS|SIGN|WIN|LNG|EV|WC|ES)([1-5])/);
   return m ? m[1] : '?';
 }
-function isRoom(c){ return /^13/.test(c); }
+function isRoom(c){ return /^13/.test(c) || c === 'KTC'; }
 var TEST = null;
 function testSet(){
   var cb = {};
@@ -287,6 +290,7 @@ function testSet(){
 /* vecs(p) : 그 사진의 벡터 목록 (시점이 여럿이면 여럿) */
 async function evaluate(vecs, label){
   var V = P.map(vecs), n = P.length, e = 0, f = 0, t5 = 0;
+  var EE = new Uint8Array(TEST.length), FF = new Uint8Array(TEST.length);   /* 사진마다 맞았나 — 짝지은 비교용 */
   for(var ti=0; ti<TEST.length; ti++){
     var qi = TEST[ti], q = V[qi], g = P[qi].g, best = {};
     for(var ri=0; ri<n; ri++){
@@ -301,26 +305,52 @@ async function evaluate(vecs, label){
     }
     var arr = Object.keys(best).sort(function(u,w){ return best[w]-best[u]; });
     var own = P[qi].code;
-    if(arr[0] === own) e++;
-    if(floorOf(arr[0]) === floorOf(own)) f++;
+    if(arr[0] === own){ e++; EE[ti] = 1; }
+    if(floorOf(arr[0]) === floorOf(own)){ f++; FF[ti] = 1; }
     if(arr.slice(0,5).indexOf(own) >= 0) t5++;
     if(ti % 40 === 0){ ST.textContent = '② ' + label + ' · ' + ti + ' / ' + TEST.length; await tick(); }
   }
-  return {n:TEST.length, e:e, f:f, t5:t5};
+  return {n:TEST.length, e:e, f:f, t5:t5, E:EE, F:FF};
+}
+
+/* ── 짝지은 비교 : 같은 사진으로 잰 두 방식의 차이가 우연인가 ──
+   두 방식은 같은 1,522장으로 쟀으므로 사진마다 짝을 지어 차이를 본다(독립 비교보다 훨씬 예민하다).
+   같은 배치 사진은 함께 맞고 함께 틀리므로 배치를 통째로 복원추출한다 (2,000번, 시드 고정).
+   95% 구간이 0 을 넘지 않으면 "우연으로 보기 어렵다". */
+function paired(A, B, field){
+  var a = A[field], b = B[field], by = {}, keys;
+  TEST.forEach(function(pi, ti){ var g = P[pi].g; var s = by[g] = by[g] || {n:0, d:0}; s.n++; s.d += a[ti] - b[ti]; });
+  keys = Object.keys(by);
+  var seed = 20260921;
+  function rnd(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
+  var st = [], Bn = 2000;
+  for(var r=0;r<Bn;r++){ var n=0, d=0;
+    for(var i=0;i<keys.length;i++){ var s = by[keys[Math.floor(rnd()*keys.length)]]; n += s.n; d += s.d; }
+    st.push(d/n); }
+  st.sort(function(x,y){ return x-y; });
+  var tot = 0; for(var k=0;k<a.length;k++) tot += a[k] - b[k];
+  return {d:tot/a.length, lo:st[Math.floor(Bn*0.025)], hi:st[Math.floor(Bn*0.975)]};
 }
 
 /* ── 5) 해석적 기준선 : 우연 · 가장 흔한 것만 답하기 ── */
 function analytic(){
-  var codes = {}, floors = {}, n = TEST.length;
-  P.forEach(function(p){ if(!isRoom(p.code)) codes[p.code] = 1; });
-  var K = Object.keys(codes).length;
-  var fl = {}; Object.keys(codes).forEach(function(c){ fl[floorOf(c)] = 1; });
-  var cc = {}; TEST.forEach(function(i){ var c = P[i].code; cc[c] = (cc[c]||0)+1; floors[floorOf(c)] = (floors[floorOf(c)]||0)+1; });
+  var n = TEST.length;
+  /* 우연 : 모델이 답할 수 있는 모든 장소(강의실 포함) 중 아무거나. 모델도 이 전체 중에서 고른다.
+     층이 맞을 확률은 "내 층에 있는 장소 수 ÷ 전체 장소 수"를 사진마다 구해 더한다. */
+  var all = {}, perFloor = {};
+  P.forEach(function(p){ all[p.code] = 1; });
+  var K = Object.keys(all).length;
+  Object.keys(all).forEach(function(c){ var f = floorOf(c); perFloor[f] = (perFloor[f]||0) + 1; });
+  var fChance = 0; TEST.forEach(function(i){ fChance += (perFloor[floorOf(P[i].code)] || 0) / K; });
+  /* 가장 흔한 것만 : 시험 사진에서 가장 많은 장소·층을 늘 답한다 */
+  var cc = {}, floors = {};
+  TEST.forEach(function(i){ var c = P[i].code; cc[c] = (cc[c]||0)+1; floors[floorOf(c)] = (floors[floorOf(c)]||0)+1; });
   var top = Object.keys(cc).sort(function(a,b){ return cc[b]-cc[a]; });
   var fTop = Object.keys(floors).sort(function(a,b){ return floors[b]-floors[a]; })[0];
   var t5 = 0; top.slice(0,5).forEach(function(c){ t5 += cc[c]; });
   return {
-    chance:{n:n, e:n/K, f:n/Object.keys(fl).length, t5:5*n/K, K:K},
+    chance:{n:n, e:n/K, f:fChance, t5:Math.min(5,K)*n/K, K:K},
     prior:{n:n, e:cc[top[0]], f:floors[fTop], t5:t5, code:top[0], floor:fTop}
   };
 }
@@ -397,17 +427,45 @@ function render(res, rep, readSecs, secs){
      + table(['방식','장수','정확한 자리','층','5등 안'],
          CNN.map(function(c){ return row(c.id, c.label, c.cur); }))
      + '<div class="note">평균·주성분은 gen.html 과 같게 번호판 조각까지 포함한 모든 벡터로 구했습니다. '
-     + '주성분은 모든 사진이 공통으로 가진 성분(밝기·색감 같은)이라, 걷어내면 장소 차이가 드러납니다.</div>';
+     + '주성분은 모든 사진이 공통으로 가진 방향입니다. 걷어내는 것이 실제로 도움이 되는지는 아래 ④ 에서 확인합니다.</div>';
 
   h += '<h2>③ 시점 제거 실험 — 한 사진을 몇 가지로 잘라 보나</h2>'
      + table(['방식','장수','정확한 자리','층','5등 안'],
          VIEWS.map(function(c){ return row(c.id, c.label, c.cur); }));
 
+  /* ④ 짝지은 비교 — 차이가 우연인지 */
+  var PAIRS = [
+    ['pc2', 'tiny', 'CNN(지금) vs 작은 흑백 사진'],
+    ['pc2', 'raw',  '주성분 2개 제거(지금) vs 정규화만'],
+    ['pc2', 'pc1',  '주성분 2개 vs 1개'],
+    ['pc5', 'pc2',  '주성분 5개 vs 2개(지금)'],
+    ['pc2', 'v1',   '시점 1.0+0.6(지금) vs 1.0 만'],
+    ['pc2', 'vp',   '시점 1.0+0.6(지금) vs + 번호판 조각']
+  ];
+  var cmp = {};
+  function sp(x){ return (x >= 0 ? '+' : '') + (x*100).toFixed(1) + '%p'; }
+  var prow = PAIRS.map(function(q){
+    var e = paired(res[q[0]], res[q[1]], 'E'), f = paired(res[q[0]], res[q[1]], 'F');
+    cmp[q[0] + '-' + q[1]] = {자리:e, 층:f};
+    var sig = function(c){ return (c.lo > 0 || c.hi < 0) ? '<b>의미 있음</b>' : '우연과 구분 안 됨'; };
+    return {c:[esc(q[2]), sp(e.d), sp(e.lo) + ' ~ ' + sp(e.hi), sig(e), sp(f.d), sp(f.lo) + ' ~ ' + sp(f.hi), sig(f)]};
+  });
+  h += '<h2>④ 짝지은 비교 — 그 차이가 우연인가</h2>'
+     + table(['비교','자리 차이','95% 구간','판정','층 차이','95% 구간','판정'], prow)
+     + '<div class="note">같은 ' + n + '장으로 잰 두 방식을 사진마다 짝지어 비교하고, 배치를 통째로 복원추출해(2,000번) 구간을 구했습니다. '
+     + '구간이 0 을 넘지 않아야 "의미 있음"입니다.<br>'
+     + '<b>주의</b> — 주성분 개수는 이 시험 데이터를 보고 고른 값이 아닙니다(앱은 2개로 고정). 여기서 5개가 낫게 나와도, '
+     + '여섯 가지를 시험해 가장 좋은 것을 고르면 우연히 좋아 보일 수 있으므로 따로 확인하기 전에는 앱을 바꾸지 않습니다.</div>';
+
   h += '<div class="note">사진 읽기 ' + readSecs + '초 · 전체 ' + secs + '초 · 시험 대상 ' + n + '장 (강의실 제외, 두 배치 이상 찍힌 곳)</div>';
   OUT.innerHTML = h;
   ST.textContent = '실험 완료'; prog(1);
 
-  RESULT = {when:Date.now(), made:window.AIVEC_DATA && AIVEC_DATA.made, n:n, 재현:rep, 결과:res};
+  /* 사진별 맞고 틀림(E·F)은 저장하지 않는다 — 방식마다 1,522칸이라 파일만 커진다 */
+  var slim = {};
+  Object.keys(res).forEach(function(k){ var r = res[k], o = {};
+    Object.keys(r).forEach(function(x){ if(x !== 'E' && x !== 'F') o[x] = r[x]; }); slim[k] = o; });
+  RESULT = {when:Date.now(), made:window.AIVEC_DATA && AIVEC_DATA.made, n:n, 재현:rep, 결과:slim, 짝비교:cmp};
   document.getElementById('dl').disabled = false;
   var d = new Date(), pad = function(x){ return (x<10?'0':'')+x; };
   var stamp = d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'_'+pad(d.getHours())+pad(d.getMinutes());

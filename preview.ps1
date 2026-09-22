@@ -1,7 +1,7 @@
 # 공대 3호관 길안내 앱 — 올리기 전 미리보기 서버
 #
-#   index.html · eval.html · eval2.html · gen.html · index_new.html
-#   그리고 lib\ · model\ · 사진원본\ 을 http://localhost:8080/ 으로 내보냅니다.
+#   site\ (앱 — 첫 화면) · tests\ (자동 검사) · 문서\ · 측정 페이지(eval*.html · gen.html …)
+#   그리고 사진원본\ 을 http://localhost:8080/ 으로 내보냅니다.
 #
 #   localhost 는 브라우저가 "안전한 주소"로 쳐주므로 카메라·AI·OCR·로그인이 전부 동작합니다.
 #   끄려면 이 창에서 Ctrl+C 를 누르거나 창을 닫으세요.
@@ -15,8 +15,8 @@ $PORT = 8080
 $LOG  = Join-Path $ROOT '서버기록.txt'
 $WORKERS = 8
 
-if (-not (Test-Path (Join-Path $ROOT 'index.html'))) {
-    Write-Host "  index.html 을 찾을 수 없습니다: $ROOT" -ForegroundColor Red
+if (-not (Test-Path (Join-Path $ROOT 'site\index.html'))) {
+    Write-Host "  site\index.html 을 찾을 수 없습니다: $ROOT" -ForegroundColor Red
     Read-Host "  엔터를 누르면 닫힙니다"; exit 1
 }
 try { Set-Content -Path $LOG -Value ('=== ' + (Get-Date) + ' 서버 시작 ===') -Encoding UTF8 } catch {}
@@ -41,7 +41,8 @@ Write-Host ""
 Write-Host "  ┌──────────────────────────────────────────────────┐" -ForegroundColor Cyan
 Write-Host "  │  미리보기 서버가 켜졌습니다                      │" -ForegroundColor Cyan
 Write-Host ("  │  {0,-48}│" -f $url)                                -ForegroundColor Cyan
-Write-Host ("  │  {0,-48}│" -f ($url + 'eval2.html  ← 정확도 측정'))  -ForegroundColor Cyan
+Write-Host ("  │  {0,-48}│" -f ($url + 'site/index.html  ← 앱'))  -ForegroundColor Cyan
+Write-Host ("  │  {0,-48}│" -f ($url + 'eval_all.html  ← 정확도 측정'))  -ForegroundColor Cyan
 Write-Host "  │  끄려면 Ctrl+C 또는 이 창을 닫으세요             │" -ForegroundColor Cyan
 Write-Host "  └──────────────────────────────────────────────────┘" -ForegroundColor Cyan
 Write-Host ""
@@ -68,7 +69,11 @@ $worker = {
         $req = $ctx.Request
         $res = $ctx.Response
         $rel = [Uri]::UnescapeDataString($req.Url.AbsolutePath).TrimStart('/')
-        if ($rel -eq '') { $rel = 'index.html' }
+        # 첫 화면은 site/index.html — 주소를 옮겨 줘야 그 안의 상대 경로(css/…, js/…)가 site/ 기준으로 풀린다
+        if ($rel -eq '' -or $rel -eq 'site' -or $rel -eq 'site/') {
+            try { $res.StatusCode = 302; $res.RedirectLocation = '/site/index.html'; $res.Close() } catch {}
+            continue
+        }
 
         try {
             Note "REQ $($req.HttpMethod) /$rel"
@@ -118,9 +123,9 @@ $worker = {
                 Note "OK  /api/photos $($list.Count)"
             }
             else {
-                $allowed = ($rel -match '^(index|index_new|eval\w*|gen|sheet|ocrtest)\.html$' -or $rel -match '^발표_.+\.html$') -or
-                           ($rel -eq 'aivec.js') -or ($rel -eq 'batches.json') -or ($rel -like 'lib/*') -or ($rel -like 'model/*') -or ($rel -like '사진원본/*') -or ($rel -like '_검토_*') -or
-                           ($rel -like 'tests/*') -or ($rel -like 'site/*')
+                $allowed = ($rel -match '^(eval\w*|gen|sheet|ocrtest)\.html$') -or ($rel -eq 'batches.json') -or
+                           ($rel -like 'site/*') -or ($rel -like 'tests/*') -or ($rel -like '문서/*') -or
+                           ($rel -like '사진원본/*') -or ($rel -like '_검토_*')
                 $full = [System.IO.Path]::GetFullPath((Join-Path $ROOT ($rel -replace '/','\')))
                 $ok = $allowed -and $full.StartsWith($ROOT,[StringComparison]::OrdinalIgnoreCase) -and (Test-Path $full -PathType Leaf)
 

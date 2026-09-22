@@ -3,7 +3,7 @@
 </head><body>
 <h3>번호판 읽기 시험 — 방식별 비교</h3>
 <div id="st">준비 중…</div><div id="log"></div>
-<script src="lib/tess/tesseract.min.js"></script>
+<script src="site/lib/tess/tesseract.min.js"></script>
 <script>
 /* ───────── 공통 ───────── */
 const L=document.getElementById('log'), ST=document.getElementById('st');
@@ -134,7 +134,7 @@ async function main(){
   const q=new URLSearchParams(location.search);
   const kinds=(q.get('kinds')||'HALL').split(','), per=+(q.get('per')||8), methods=(q.get('m')||Object.keys(METHODS).join('|')).split('|');
   const list=await (await fetch('api/photos')).json();
-  const R=await (await fetch('aivec.js')).text(); const A=JSON.parse(R.slice(R.indexOf('=')+1, R.lastIndexOf(';')));
+  const R=await (await fetch('site/data/aivec.js')).text(); const A=JSON.parse(R.slice(R.indexOf('=')+1, R.lastIndexOf(';')));
   // 앱이 아는 호실 번호 = 사진원본 폴더 이름 중 5자리
   new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
   const plateSet=new Set(); const cnt={}; A.names.forEach(n=>cnt[n]=(cnt[n]||0)+1); Object.keys(cnt).forEach(n=>{ if(cnt[n]===3) plateSet.add(n); });
@@ -144,7 +144,7 @@ async function main(){
       const a=pool.slice(); for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; }
       test.push(...a.slice(0,per)); } }
   log('시험 사진 '+test.length+'장 ('+kinds.join(',')+', 층마다 최대 '+per+'장) · 방식 '+methods.length+'개');
-  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'site/lib/tess/worker.min.js', corePath:'site/lib/tess', langPath:'site/lib/tess', gzip:true});
   await worker.setParameters({tessedit_char_whitelist:'0123456789'});
   const res={}; methods.forEach(m=>res[m]={ok:0,wrong:0,none:0,t:0});
   const detail=[];
@@ -169,12 +169,12 @@ async function diag(){
   const q=new URLSearchParams(location.search); const per=+(q.get('per')||3), kind=q.get('kinds')||'HALL';
   const list=await (await fetch('api/photos')).json();
   new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
-  const R=await (await fetch('aivec.js')).text(); const A=JSON.parse(R.slice(R.indexOf('=')+1, R.lastIndexOf(';')));
+  const R=await (await fetch('site/data/aivec.js')).text(); const A=JSON.parse(R.slice(R.indexOf('=')+1, R.lastIndexOf(';')));
   const cnt={}; A.names.forEach(n=>cnt[n]=(cnt[n]||0)+1);
   const rnd=seeded(+(q.get('seed')||7)); const test=[];
   for(const f of ['1','2','3','4','5','B']){ const pool=list.filter(p=>p.label.startsWith(kind)&&truthFloor(p.label)===f&&(kind!=='HALL'||cnt[p.name]===3));
     const a=pool.slice(); for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; } test.push(...a.slice(0,per)); }
-  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'site/lib/tess/worker.min.js', corePath:'site/lib/tess', langPath:'site/lib/tess', gzip:true});
   await worker.setParameters({tessedit_char_whitelist:'0123456789', tessedit_pageseg_mode:'11'});
   const P={...BASE, W:1024, MAX:6};
   const SW=1600, ROWH=300; const sheet=document.createElement('canvas'); sheet.width=SW; sheet.height=ROWH*test.length; const sx=sheet.getContext('2d');
@@ -205,7 +205,7 @@ async function diag2(){
   new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
   const rnd=seeded(+(q.get('seed')||11)); const pool=list.filter(p=>p.label===kind); const a=pool.slice();
   for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; } const test=a.slice(0,n);
-  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'site/lib/tess/worker.min.js', corePath:'site/lib/tess', langPath:'site/lib/tess', gzip:true});
   await worker.setParameters({tessedit_char_whitelist:'0123456789', tessedit_pageseg_mode:'7'});
   const SW=1600, ROWH=260, sheet=document.createElement('canvas'); sheet.width=SW; sheet.height=ROWH*test.length; const sx=sheet.getContext('2d');
   sx.fillStyle='#fff'; sx.fillRect(0,0,SW,sheet.height); sx.font='bold 14px monospace';
@@ -240,7 +240,7 @@ async function diag3(){
   new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
   const rnd=seeded(+(q.get('seed')||11)); const a=list.filter(p=>p.label===kind).slice();
   for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; } const test=a.slice(0,n);
-  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'site/lib/tess/worker.min.js', corePath:'site/lib/tess', langPath:'site/lib/tess', gzip:true});
   await worker.setParameters({tessedit_char_whitelist:'0123456789'});
   const V=[]; for(const psm of [6,7,8,11,13]) for(const pre of ['stretch','stretch-inv','otsu','otsu-inv']) V.push({psm,pre});
   const score={}; V.forEach(v=>score[v.psm+'/'+v.pre]=0); let crops=0;
@@ -268,9 +268,9 @@ async function diag4(){
   const pick=[[a[0],'w',0,'13209'],[a[2],'t',0,'13213'],[a[3],'w',0,'13212'],[a[6],'t',0,'13208']];
   const crops=[]; for(const [p,kd,bi,ans] of pick){ const img=await loadImg(p.path); const b=plateBoxes(img,{...BASE,W:1024,MAX:5})[bi];
     const c=tight(img,b,kd==='w'?'wide':kd==='t'?'top':'above'); crops.push({c,ans}); }
-  const MODELS=[['fast(지금)','lib/tess'],['기본 4.0.0','https://tessdata.projectnaptha.com/4.0.0'],['best 4.0.0','https://tessdata.projectnaptha.com/4.0.0_best']];
+  const MODELS=[['fast(지금)','site/lib/tess'],['기본 4.0.0','https://tessdata.projectnaptha.com/4.0.0'],['best 4.0.0','https://tessdata.projectnaptha.com/4.0.0_best']];
   for(const [mname,lp] of MODELS){
-    let worker; try{ worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:lp, gzip:true}); }catch(e){ log(mname+' 못 불러옴: '+e); continue; }
+    let worker; try{ worker=await Tesseract.createWorker('eng',1,{workerPath:'site/lib/tess/worker.min.js', corePath:'site/lib/tess', langPath:lp, gzip:true}); }catch(e){ log(mname+' 못 불러옴: '+e); continue; }
     for(const wl of [true,false]){ await worker.setParameters({tessedit_char_whitelist: wl?'0123456789':''});
       for(const psm of [6,11]){ await worker.setParameters({tessedit_pageseg_mode:String(psm)});
         let hit=[], t0=performance.now();
@@ -396,7 +396,7 @@ async function diag5(){
   new Set(list.map(p=>p.label)).forEach(c=>{ if(/^13[1-5]\d\d/.test(c)) KNOWN[c.slice(0,5)]=1; });
   const rnd=seeded(+(q.get('seed')||11)); const a=list.filter(p=>p.label===kind).slice();
   for(let i=a.length-1;i>0;i--){ const r=Math.floor(rnd()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; } const test=a.slice(0,n);
-  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'site/lib/tess/worker.min.js', corePath:'site/lib/tess', langPath:'site/lib/tess', gzip:true});
   await worker.setParameters({tessedit_char_whitelist:'0123456789'});
   const box=document.createElement('div'); document.body.appendChild(box);
   for(let i=0;i<test.length;i++){ const img=await loadImg(test[i].path); const boxes=plateBoxes(img,{...BASE,W:1024,MAX:5});
@@ -503,7 +503,7 @@ async function diag7(){
   const q=new URLSearchParams(location.search); const kinds=(q.get('kinds')||'EVIN').split(',');
   const list=await (await fetch('api/photos')).json();
   let test=list.filter(p=>kinds.some(k=>p.label.startsWith(k))); if(q.get('names')) test=test.filter(p=>q.get('names').split(',').some(s=>p.name.indexOf(s)>=0)); if(q.get('not')) test=list.filter(p=>!q.get('not').split(',').some(k=>p.label.startsWith(k))); if(q.get('per')){ const per=+q.get('per'), by={}; test=test.filter(p=>{ by[p.label]=(by[p.label]||0)+1; return by[p.label]<=per; }); }
-  const worker=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  const worker=await Tesseract.createWorker('eng',1,{workerPath:'site/lib/tess/worker.min.js', corePath:'site/lib/tess', langPath:'site/lib/tess', gzip:true});
   let ok=0,wrong=0,none=0,t=0; const box=document.createElement('div'); document.body.appendChild(box); const rows=[];
   for(let i=0;i<test.length;i++){ const p=test[i], tf=truthFloor(p.label); const img=await loadImg(p.path); const t0=performance.now();
     const dbg=q.get('show')?[]:null; const r=await readElevator(worker,img,dbg); t+=performance.now()-t0;
@@ -560,9 +560,9 @@ async function diag8(){
   const list=await (await fetch('api/photos')).json();
   let test=list.filter(p=>kinds.some(k=>p.label.startsWith(k))); if(q.get('per')){ const per=+q.get('per'); const by={}; test=test.filter(p=>{ by[p.label]=(by[p.label]||0)+1; return by[p.label]<=per; }); }
   const t0=performance.now();
-  const worker=await Tesseract.createWorker('kor',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:q.get('lang')||'https://tessdata.projectnaptha.com/4.0.0_fast', gzip:true});
+  const worker=await Tesseract.createWorker('kor',1,{workerPath:'site/lib/tess/worker.min.js', corePath:'site/lib/tess', langPath:q.get('lang')||'https://tessdata.projectnaptha.com/4.0.0_fast', gzip:true});
   log('한국어 모델 준비 '+((performance.now()-t0)/1000).toFixed(1)+'초');
-  const we=await Tesseract.createWorker('eng',1,{workerPath:'lib/tess/worker.min.js', corePath:'lib/tess', langPath:'lib/tess', gzip:true});
+  const we=await Tesseract.createWorker('eng',1,{workerPath:'site/lib/tess/worker.min.js', corePath:'site/lib/tess', langPath:'site/lib/tess', gzip:true});
   await we.setParameters({tessedit_pageseg_mode:'10', tessedit_char_whitelist:'12345'});
   await worker.setParameters({tessedit_pageseg_mode:psm});
   let ok=0,wrong=0,none=0,tt=0; const rows=[];

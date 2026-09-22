@@ -1,5 +1,5 @@
 # 중간 발표 PDF 만들기
-#   발표_중간발표.html 에 측정 JSON(생성물\eval_all.json · eval_ablation.json)을 넣고 Edge 로 PDF 를 뽑는다.
+#   문서\발표_중간발표.html 에 측정 JSON(생성물\eval_all.json · eval_ablation.json)을 넣고 Edge 로 PDF 를 뽑는다.
 #   표와 차트는 JSON 에서 그대로 그리므로, 측정을 다시 하면 이 스크립트만 다시 돌리면 된다.
 #
 #   pwsh -File 도구\발표PDF_만들기.ps1
@@ -7,7 +7,7 @@
 #   ※ Edge 헤드리스는 한글 경로를 주면 실패한다 — %TEMP% 아래 영문 경로에서 만든 뒤 옮긴다.
 $ErrorActionPreference = 'Stop'
 $ROOT = Split-Path $PSScriptRoot -Parent
-$SRC  = Join-Path $ROOT '발표_중간발표.html'
+$SRC  = Join-Path $ROOT '문서\발표_중간발표.html'
 $OUT  = Join-Path $ROOT '졸업작품_중간발표_자료.pdf'
 $EDGE = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
 $TMP  = Join-Path $env:TEMP 'b3nav_pdf'

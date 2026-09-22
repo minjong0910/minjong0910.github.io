@@ -856,7 +856,7 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
          한 장의 텍스처로 그리고, 캔버스 비율을 판 비율과 정확히 같게 맞춘다.
          표지판 자체도 조금 키워 복도 끝에서도 읽히게 한다. */
       var exSignW=0.86, exSignH=0.26;
-      var exSign=fpMkTex(exSignW, exSignH, fpExitSignTex(ko), 1);
+      var exSign=fpMkTex(exSignW, exSignH, fpExitSignTex(), 1);
       exSign.rotation.y=-Math.PI/2;
       exSign.position.set(FP_WALL_X-0.09, FP_ST_OH+0.34, zc); g.add(exSign);
     }

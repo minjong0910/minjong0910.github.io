@@ -249,7 +249,7 @@ function checkB3D(w, cb){
 }
 
 /* ?app=다른파일.html 로 다른 빌드를 검사할 수 있다 (검사가 실패를 잡는지 시험할 때 쓴다) */
-var app = (location.search.match(/[?&]app=([^&]+)/) || [])[1] || 'index_new.html';
+var app = (location.search.match(/[?&]app=([^&]+)/) || [])[1] || '../site/index.html';
 F.addEventListener('load', function(){ setTimeout(probe, 300); });
 F.src = decodeURIComponent(app);
 setTimeout(function(){ if(R.textContent === '검사 중…') probe(); }, 5000);

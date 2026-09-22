@@ -1,14 +1,14 @@
 # 안전망 돌리기 — Edge 헤드리스로 tests/golden.html 을 열어 결과를 읽는다
 #
-#   기록 : pwsh -File tests\run_golden.ps1 -Mode capture -Tag v83 -App ../index_new.html
-#   비교 : pwsh -File tests\run_golden.ps1 -Mode compare -Tag v83 -App ../site/index.html
+#   기록 : pwsh -File tests\run_golden.ps1 -Mode capture -Tag v86
+#   비교 : pwsh -File tests\run_golden.ps1 -Mode compare -Tag v86
 #
 #   매번 새 브라우저 프로필을 쓴다 — 예전 실행의 localStorage(최근 검색·즐겨찾기 등)가
 #   화면을 바꾸면 비교가 흔들리기 때문이다. 미리보기 서버(8080)가 켜져 있어야 한다.
 param(
   [ValidateSet('capture','compare')][string]$Mode = 'compare',
-  [string]$Tag = 'v83',
-  [string]$App = '../index_new.html',
+  [string]$Tag = 'v86',
+  [string]$App = '../site/index.html',
   [int]$Port = 8080
 )
 $ErrorActionPreference = 'Stop'

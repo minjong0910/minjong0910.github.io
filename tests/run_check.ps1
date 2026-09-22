@@ -1,13 +1,13 @@
-# 앱 검사 돌리기 — Edge 헤드리스로 eval_build.html 을 열어 결과를 읽는다
+# 앱 검사 돌리기 — Edge 헤드리스로 tests/check.html 을 열어 결과를 읽는다
 #   pwsh -File tests\run_check.ps1 [-App site/index.html]
 #   검사 : 152곳의 접수·이름·층·관리자 목록 · 3D 위치 · 길찾기(좌우·차례) · 실사 3D · 후보 평면도 ·
 #          장소 목록(data/places.js)과 AI 자료의 일치
-param([string]$App = 'site/index.html', [int]$Port = 8080)
+param([string]$App = "../site/index.html", [int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $EDGE = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
 $prof = Join-Path $env:TEMP ('b3nav_check_' + [guid]::NewGuid().ToString('N').Substring(0,8))
-$url = "http://localhost:$Port/eval_build.html?app=" + [uri]::EscapeDataString($App)
+$url = "http://localhost:$Port/tests/check.html?app=" + [uri]::EscapeDataString($App)
 $t0 = Get-Date
 $dom = & $EDGE --headless=new --disable-gpu --no-first-run "--user-data-dir=$prof" --virtual-time-budget=180000 --dump-dom $url 2>$null | Out-String
 $secs = [int]((Get-Date) - $t0).TotalSeconds

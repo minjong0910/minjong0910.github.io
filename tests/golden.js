@@ -22,7 +22,7 @@
 'use strict';
 var Q = new URLSearchParams(location.search);
 var MODE = Q.get('mode') || 'compare';
-var APP  = Q.get('app') || '../index_new.html';
+var APP  = Q.get('app') || '../site/index.html';
 var TAG  = Q.get('tag') || 'base';
 var PIX_TOL = +(Q.get('pixtol') || 16);      // 한 점의 색이 이만큼(0~255) 넘게 달라야 '다른 점'
 var PIX_MAX = +(Q.get('pixmax') || 0.002);   // 다른 점이 그림의 이 비율을 넘으면 실패

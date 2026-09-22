@@ -17,7 +17,8 @@
 #     첫 화면 1MB 이하(압축)       예전 16MB
 #     앱 검사(tests/check.html)   152곳 접수·이름·층·관리자 목록·3D·길찾기·실사 3D·후보 지도 (v65·v72·v75·v79)
 #     안전망(tests/golden)        길안내 754가지·사진·화면·CSS·3D 그림 15장이 기록과 같은가
-param([switch]$Full, [switch]$Quick, [string]$Tag = 'v87', [int]$Port = 8080)
+#   pwsh -File 검사.ps1 -Ci      GitHub 자동 검사용 — 다른 컴퓨터라 글꼴·그래픽이 달라, 안전망에서 글자 폭·3D 그림 비교를 뺀다
+param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v87', [int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ROOT = $PSScriptRoot
@@ -55,8 +56,8 @@ if($orphan.Count){ Warn ("목록에 없는 사진 파일 {0}개 (지워도 된�
 
 # 장소 목록 = AI 자료의 장소
 $av = [IO.File]::ReadAllText((Join-Path $SITE 'data\aivec.js'), $UTF)
-$ci = $av.IndexOf('"codes":['); $cj = $av.IndexOf(']', $ci)
-$aCodes = ($av.Substring($ci + 9, $cj - $ci - 9) -split ',') | ForEach-Object { $_.Trim('"').ToUpper() } | Sort-Object -Unique
+$codesAt = $av.IndexOf('"codes":['); $codesEnd = $av.IndexOf(']', $codesAt)
+$aCodes = ($av.Substring($codesAt + 9, $codesEnd - $codesAt - 9) -split ',') | ForEach-Object { $_.Trim('"').ToUpper() } | Sort-Object -Unique
 $pl = [IO.File]::ReadAllText((Join-Path $SITE 'data\places.js'), $UTF)
 $pCodes = ($pl.Substring($pl.IndexOf('[') + 1, $pl.LastIndexOf(']') - $pl.IndexOf('[') - 1) -split ',') | ForEach-Object { $_.Trim().Trim('"').ToUpper() } | Sort-Object -Unique
 if((@($aCodes) -join ',') -ne (@($pCodes) -join ',')){ Bad 'data\places.js 가 AI 자료(aivec.js)의 장소와 다릅니다 — 도구\AI자료_넣기.ps1 로 다시 만드세요' } else { Ok ("장소 목록 {0}곳 = AI 자료의 장소" -f @($aCodes).Count) }
@@ -105,7 +106,7 @@ if(-not $Quick){
   else {
     $tests = @(
       [pscustomobject]@{ name = '앱 검사'; file = 'tests\run_check.ps1'; args = @() },
-      [pscustomobject]@{ name = ('안전망 비교 (' + $Tag + ')'); file = 'tests\run_golden.ps1'; args = @('-Mode', 'compare', '-Tag', $Tag) }
+      [pscustomobject]@{ name = ('안전망 비교 (' + $Tag + $(if($Ci){ ' · 글자 폭·그림 제외' } else { '' }) + ')'); file = 'tests\run_golden.ps1'; args = @('-Mode', 'compare', '-Tag', $Tag) + $(if($Ci){ @('-Parts', 'ci') } else { @() }) }
     )
     if($Full){ $tests += [pscustomobject]@{ name = '로드뷰 9가지 끝까지 재생'; file = 'tests\run_roadview.ps1'; args = @() } }
     foreach($t in $tests){

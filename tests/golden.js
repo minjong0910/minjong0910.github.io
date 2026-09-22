@@ -24,6 +24,11 @@ var Q = new URLSearchParams(location.search);
 var MODE = Q.get('mode') || 'compare';
 var APP  = Q.get('app') || '../site/index.html';
 var TAG  = Q.get('tag') || 'base';
+/* 비교할 부분 — 기본은 전부. GitHub 자동 검사(다른 컴퓨터)에서는 글꼴·그래픽이 달라
+   글자 폭(dom.style)과 3D 그림(shots)이 점 단위로 같을 수 없어서 parts=ci 로 그 둘을 뺀다. */
+var PARTS = (Q.get('parts') === 'ci') ? ['logic', 'photos', 'dom.ids', 'dom.text', 'dom.css', 'dyn']
+          : ['logic', 'photos', 'dom.ids', 'dom.text', 'dom.style', 'dom.css', 'dyn', 'shots'];
+function want(p){ return PARTS.indexOf(p) >= 0; }
 var PIX_TOL = +(Q.get('pixtol') || 16);      // 한 점의 색이 이만큼(0~255) 넘게 달라야 '다른 점'
 var PIX_MAX = +(Q.get('pixmax') || 0.002);   // 다른 점이 그림의 이 비율을 넘으면 실패
 var R = document.getElementById('R'), F = document.getElementById('F');
@@ -362,7 +367,7 @@ function run(){
     return capturePhotos(w);
   }).then(function(ph){
     rec.photos = ph;                  log('사진 : ' + ph.length + '장');
-    rec.shots = captureShots(w);      log('3D 그림 : ' + Object.keys(rec.shots).length + '장');
+    rec.shots = (MODE === 'capture' || want('shots')) ? captureShots(w) : {};      log('3D 그림 : ' + Object.keys(rec.shots).length + '장');
     return MODE === 'capture' ? doCapture() : doCompare();
   }).catch(function(e){ finish({ok:false, error: e.message || String(e)}); });
 
@@ -400,14 +405,14 @@ function run(){
         log((d.length ? '✗ ' : '✓ ') + name + (d.length ? ' — ' + d.length + '곳 다름' : ''));
         d.slice(0, 10).forEach(function(x){ log('    ' + x); });
       }
-      part('logic', ref.logic, rec.logic, 60);
-      part('photos', ref.photos, rec.photos);
-      partList('dom.ids', ref.dom.ids, rec.dom.ids);
-      part('dom.text', ref.dom.text, rec.dom.text);
-      partList('dom.style', ref.dom.style, rec.dom.style);
-      partList('dom.css', ref.dom.css, rec.dom.css, true);
-      part('dyn', ref.dyn, rec.dyn);
-      var names = ref.shots, k = 0; res.detail.shots = {};
+      if(want('logic')) part('logic', ref.logic, rec.logic, 60);
+      if(want('photos')) part('photos', ref.photos, rec.photos);
+      if(want('dom.ids')) partList('dom.ids', ref.dom.ids, rec.dom.ids);
+      if(want('dom.text')) part('dom.text', ref.dom.text, rec.dom.text);
+      if(want('dom.style')) partList('dom.style', ref.dom.style, rec.dom.style);
+      if(want('dom.css')) partList('dom.css', ref.dom.css, rec.dom.css, true);
+      if(want('dyn')) part('dyn', ref.dyn, rec.dyn);
+      var names = want('shots') ? ref.shots : [], k = 0; res.detail.shots = {};
       function next(){
         if(k >= names.length) return Promise.resolve();
         var nm = names[k++];

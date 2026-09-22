@@ -1,0 +1,67 @@
+# 검사 후 배포 — main 에 올리면 GitHub 가 검사.ps1 을 돌리고, 통과해야만 site/ 를 사이트로 내보낸다.
+# 검사가 실패하면 사이트는 바뀌지 않는다 (Actions 탭에서 어느 검사가 왜 실패했는지 볼 수 있다).
+# 저장소 설정 → Pages → Build and deployment → Source 를 "GitHub Actions" 로 두어야 한다.
+name: 검사 후 배포
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: 검사 (파일 · 앱 · 안전망)
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 브라우저 고르기 (Edge, 없으면 Chrome)
+        shell: pwsh
+        run: |
+          $edge = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+          $chrome = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+          $b = if(Test-Path $edge){ $edge } elseif(Test-Path $chrome){ $chrome } else { throw '브라우저가 없습니다' }
+          "B3NAV_BROWSER=$b" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "브라우저 : $b"
+
+      - name: 미리보기 서버 켜기
+        shell: pwsh
+        run: |
+          Start-Process pwsh -ArgumentList '-NoProfile', '-File', 'preview.ps1', '-NoBrowser' -WindowStyle Hidden
+          for($i = 0; $i -lt 30; $i++){
+            try { Invoke-WebRequest 'http://localhost:8080/site/index.html' -UseBasicParsing -Method Head -TimeoutSec 2 | Out-Null; Write-Host '서버 켜짐'; exit 0 } catch { Start-Sleep 1 }
+          }
+          throw '미리보기 서버가 30초 안에 켜지지 않음'
+
+      - name: 검사
+        shell: pwsh
+        run: ./검사.ps1 -Ci
+
+  deploy:
+    name: 사이트 바꾸기
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

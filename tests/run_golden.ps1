@@ -9,13 +9,14 @@ param(
   [ValidateSet('capture','compare')][string]$Mode = 'compare',
   [string]$Tag = 'v87',
   [string]$App = '../site/index.html',
-  [int]$Port = 8080
+  [int]$Port = 8080,
+  [string]$Parts = ''   # 'ci' = 글자 폭·3D 그림 비교를 뺀다 (다른 컴퓨터)
 )
 $ErrorActionPreference = 'Stop'
-$EDGE = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
-if(-not (Test-Path $EDGE)){ throw "Edge 를 찾지 못했습니다 : $EDGE" }
+$EDGE = if($env:B3NAV_BROWSER){ $env:B3NAV_BROWSER } else { 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' }   # 다른 컴퓨터는 환경 변수로
+if(-not (Test-Path $EDGE)){ throw "브라우저를 찾지 못했습니다 : $EDGE" }
 $prof = Join-Path $env:TEMP ('b3nav_golden_' + [guid]::NewGuid().ToString('N').Substring(0,8))
-$url = "http://localhost:$Port/tests/golden.html?mode=$Mode&tag=$Tag&app=" + [uri]::EscapeDataString($App)
+$url = "http://localhost:$Port/tests/golden.html?mode=$Mode&tag=$Tag&parts=$Parts&app=" + [uri]::EscapeDataString($App)
 $t0 = Get-Date
 # Edge 는 UTF-8 로 내보낸다. 이 PC 의 기본(cp949)으로 읽으면 한글이 깨지면서 따옴표까지 먹어 JSON 이 깨진다.
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8

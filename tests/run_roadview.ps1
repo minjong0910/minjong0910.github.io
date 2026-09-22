@@ -2,7 +2,7 @@
 param([string]$App = '../site/index.html', [int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$EDGE = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+$EDGE = if($env:B3NAV_BROWSER){ $env:B3NAV_BROWSER } else { 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' }   # 다른 컴퓨터는 환경 변수로
 $prof = Join-Path $env:TEMP ('b3nav_rv_' + [guid]::NewGuid().ToString('N').Substring(0,8))
 $url = "http://localhost:$Port/tests/roadview.html?app=" + [uri]::EscapeDataString($App)
 $t0 = Get-Date

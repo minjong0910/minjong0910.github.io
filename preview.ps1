@@ -9,6 +9,7 @@
 #   ※ 요청을 8개까지 동시에 처리합니다. AI 모델과 글자인식 파일은 브라우저가
 #     여러 개를 한꺼번에 받아가기 때문에, 하나씩 처리하면 거기서 멈춥니다.
 
+param([switch]$NoBrowser)   # GitHub 자동 검사처럼 화면이 없는 곳에서는 브라우저 창을 띄우지 않는다
 $ErrorActionPreference = 'Stop'
 $ROOT = $PSScriptRoot
 $PORT = 8080
@@ -179,7 +180,7 @@ Write-Host "  요청을 동시에 $WORKERS 개까지 처리합니다." -Foregrou
 Write-Host "  기록 : 서버기록.txt"
 Write-Host ""
 
-Start-Process $url
+if(-not $NoBrowser){ Start-Process ($url + 'site/index.html') }
 
 try {
     while ($listener.IsListening) { Start-Sleep -Seconds 1 }

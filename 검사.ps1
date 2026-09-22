@@ -17,7 +17,7 @@
 #     첫 화면 1MB 이하(압축)       예전 16MB
 #     앱 검사(tests/check.html)   152곳 접수·이름·층·관리자 목록·3D·길찾기·실사 3D·후보 지도 (v65·v72·v75·v79)
 #     안전망(tests/golden)        길안내 754가지·사진·화면·CSS·3D 그림 15장이 기록과 같은가
-param([switch]$Full, [switch]$Quick, [string]$Tag = 'v86', [int]$Port = 8080)
+param([switch]$Full, [switch]$Quick, [string]$Tag = 'v87', [int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ROOT = $PSScriptRoot

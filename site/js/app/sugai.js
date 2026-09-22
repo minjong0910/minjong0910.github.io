@@ -23,9 +23,26 @@ var SUGAI = (function(){
          AI 는 후보를 5개까지 제시하고, 확정은 번호판 OCR 이나 사용자가 한다.     */
     RELEVANT: 0.15,     // 미만 → 범위 밖 사진, 자동 반려 (정상 제보를 잘못 반려하지 않도록 낮게)
     MATCH:    9.99,     // 자동 확정 안 함 (실측 정답률 0%)
-    MARGIN:   0.20,     // 1등과 2등의 차이 — 여유가 클수록 맞을 확률이 오른다(0.20에서 50%)
+    MARGIN:   0.20,     // MATCH 와 함께만 쓰인다 — 지금은 쓰이지 않는다. 확신도는 아래 CONF
     SAME:     0.97      // 이상 → 자료집에 이미 있는 사진과 사실상 동일
   };
+
+  /* 확신도 = 1등과 2등 장소의 유사도 차이(격차). 1등 유사도 자체는 확신도가 못 된다
+     (유사도가 높은 순으로 줄 세우면 상위 10% 도 자리 60%).
+     2026-09-21 eval_all.html 측정 — 다른 조원이 찍은 사진 1,522장(강의실 제외).
+     사진을 반으로 나눠 한쪽에서 문턱을 정하고 다른 쪽에 적용한 값이다(문턱을 맞춘 데이터로 잰 값이 아님).
+       격차 ≥ 0.22 → 자리 93.1% (사진의 약 9%)     격차 ≥ 0.16 → 층 97.9% (약 19%)
+       전체         → 자리 53.3% · 층 65.6%
+     이 문턱으로 '아마 여기' / '층은 N층' / '모름' 을 나눠 말한다. 자동 확정은 여전히 하지 않는다 — 관리자가 승인한다. */
+  var CONF = { PLACE: 0.22, FLOOR: 0.16 };
+  function confTier(ai){
+    if(!ai) return 'none';
+    if(ai.codeSource === 'ocr' || ai.pickedByUser) return 'plate';   // 번호판으로 읽었거나 사람이 고름
+    var m = ai.margin || 0;
+    if(m >= CONF.PLACE) return 'place';
+    if(m >= CONF.FLOOR) return 'floor';
+    return 'none';
+  }
 
   /* 라이브러리는 두 곳에서 찾는다.
      ① 앱과 같은 서버의 lib/ 폴더 — 저장소에 올려두면 외부 인터넷이 막혀도 동작한다
@@ -1295,13 +1312,30 @@ var SUGAI = (function(){
       t.body=ko()?'그래도 접수했어요. 관리자가 확인합니다.':'Submitted anyway — a staff member will review it.';
     } else if(ai.verdict === 'match'){
       t.icon='✅'; t.cls='aiOk'; t.tag=ko()?'위치 확인':'Location matched';
-      t.title=(ko()?'':'') + codeLabel(ai.code) + (ko()?' 사진으로 확인했어요':' identified');
+      t.title = (ai.codeSource === 'ocr')
+        ? (ko() ? ('번호판으로 확인했어요 : ' + codeLabel(ai.code)) : ('Confirmed by room plate: ' + codeLabel(ai.code)))
+        : (codeLabel(ai.code) + (ko() ? ' 로 확인했어요' : ' identified'));
       t.body=ko()?'관리자 화면에 위치가 자동으로 입력됩니다.':'The location is pre-filled for the reviewer.';
     } else if(ai.verdict === 'uncertain'){
-      t.icon='🔍'; t.cls='aiWarn'; t.tag=ko()?'접수됨':'Accepted';
-      t.title=ko()?'위치를 확실히 못 정했어요':'Location is uncertain';
-      t.body=ko()?'가장 비슷한 곳 : ' + ai.top.map(function(x){ return codeLabel(x.code); }).join(' · ')
-                : 'Closest: ' + ai.top.map(function(x){ return codeLabel(x.code); }).join(' · ');
+      /* 격차(확신도)에 따라 세 가지로 말한다 — 기준과 근거는 위 CONF */
+      var tier = confTier(ai), fl = floorOf(ai.code);
+      t.tag = ko()?'접수됨':'Accepted';
+      if(tier === 'place'){
+        t.icon='📍'; t.cls='aiOk';
+        t.title = ko() ? ('아마 여기예요 : ' + codeLabel(ai.code)) : ('Probably: ' + codeLabel(ai.code));
+        t.body = ko() ? '이만큼 뚜렷한 사진은 시험에서 10장 중 9장 넘게 맞았어요. 관리자가 확인한 뒤 반영돼요.'
+                      : 'Photos this distinctive were right more than 9 times in 10 in our tests. A staff member will confirm it.';
+      } else if(tier === 'floor' && fl){
+        t.icon='🔍'; t.cls='aiWarn';
+        t.title = ko() ? ('층은 ' + fl + ' 같아요') : ('Probably ' + fl);
+        t.body = ko() ? '층은 시험에서 거의 다 맞았지만(98%), 같은 층 안의 자리는 확실하지 않아요. 호실 번호판이 보이게 한 장 더 찍으면 자리까지 알 수 있어요.'
+                      : 'The floor was right 98% of the time in our tests, but not the exact spot. Add a photo showing a room-number plate to pin it down.';
+      } else {
+        t.icon='🔍'; t.cls='aiWarn';
+        t.title = ko() ? '어디인지 알 수 없어요' : 'Location unknown';
+        t.body = ko() ? '복도·엘리베이터 앞은 층마다 비슷해서 사진만으로는 구별이 어려워요. 호실 번호판이 보이게 한 장 더 찍어 주시면 확실해져요. 관리자가 확인한 뒤 반영돼요.'
+                      : 'Hallways and elevator lobbies look alike on every floor. Add a photo showing a room-number plate — a staff member will review it.';
+      }
     } else {
       /* v61 : 사용자에게는 접수됐다는 사실 한 줄이면 충분하다.
          AI가 위치를 정했는지, 누가 확인하는지는 안쪽 사정이다. */
@@ -1309,9 +1343,14 @@ var SUGAI = (function(){
       t.title=ko()?'제보가 정상 접수됐습니다.':'Your report was submitted.';
       t.body='';
     }
-    if(ai.sim !== undefined && ai.verdict !== 'unknown'){
-      t.why = (ko()?'유사도 ':'similarity ') + (ai.sim*100).toFixed(0) + '%' +
-              (ai.top && ai.top[1] ? (ko()?' · 다음 후보 ':' · next ') + codeLabel(ai.top[1].code) + ' ' + (ai.top[1].sim*100).toFixed(0) + '%' : '');
+    /* '유사도 72%' 는 맞을 확률처럼 읽혀서 보여 주지 않는다 (유사도가 높아도 자리 정답은 60% 안팎).
+       대신 측정으로 뒷받침되는 확신도만 말한다. 유사도 숫자는 관리자 화면에 그대로 있다. */
+    if(ai.sim !== undefined && ai.verdict !== 'unknown' && ai.verdict !== 'same'){
+      var tw = { plate: ko()?'확신도 : 번호판으로 확인':'Confidence: plate read',
+                 place: ko()?'확신도 : 높음':'Confidence: high',
+                 floor: ko()?'확신도 : 층만':'Confidence: floor only',
+                 none:  ko()?'확신도 : 낮음':'Confidence: low' }[confTier(ai)];
+      t.why = tw + (ai.top && ai.top[1] ? (ko()?' · 다음 후보 ':' · next ') + codeLabel(ai.top[1].code) : '');
     }
     /* v61 : 선명도 수치는 사용자에게 의미가 없다 — 관리자 화면에는 그대로 나온다 */
     if(ai.ocr && ai.ocr.floor){
@@ -1387,7 +1426,10 @@ var SUGAI = (function(){
        — 1등이 5층 복도인 것 0/17, 5등 안에 드는 것 9/17.
        유사도 0.72 짜리가 다른 층 엘리베이터로 나오는 일이 흔했다. */
     var hasPlate = (ai.codeSource==='ocr') || (ai.floorSource==='ocr') || !!ai.pickedByUser;
-    var conf = !hasPlate ? '낮음' : (sure ? '높음' : (t.sim >= 0.70 ? '보통' : '낮음'));
+    /* 번호판이 없으면 격차(확신도)로 판단한다 — 기준과 근거는 CONF */
+    var tier = confTier(ai);
+    var conf = hasPlate ? (sure ? '높음' : (t.sim >= 0.70 ? '보통' : '낮음'))
+             : tier === 'place' ? '보통' : '낮음';
     var low = (conf === '낮음');
     var name = codeLabel(t.code);
     /* '으로/로' 조사 : 마지막 글자에 받침이 있으면 '으로'(ㄹ 받침은 '로') */
@@ -1410,11 +1452,13 @@ var SUGAI = (function(){
         h += '<span class="sub">층 : <b>'+f1+'</b> <span class="num">(다만 '+f2+'일 가능성도 있음 — 격차 '
            + Math.round((t.sim-ai.top[1].sim)*100)+'%p)</span></span>';
       else if(f1) h += '<span class="sub">층 : <b>'+f1+'</b></span>';
-    }else{
+    }else if(tier === 'none'){
+      /* 후보 유사도를 층별로 합친 추정 — 정확도를 잰 적이 없어서 '참고용'으로만 보여 준다.
+         격차로 층·자리를 말할 수 있으면(아래 확신도 줄) 이 줄은 뺀다. */
       var fg = floorGuess(ai.top);
       if(fg){
-        h += '<span class="sub">층 추정 : <b>'+fg.floor+'</b>'
-           + (fg.sure ? ' (후보가 같은 층에 몰려 있음)' : ' 또는 '+fg.others.join('·')+' — 층도 불확실') + '</span>';
+        h += '<span class="sub">층 추정(참고용) : <b>'+fg.floor+'</b>'
+           + (fg.sure ? ' — 상위 후보가 이 층에 몰려 있음' : ' 또는 '+fg.others.join('·')) + '</span>';
       }
     }
     /* v69 : 층을 몰라도 좌우는 잘 맞는다 — 복도로 보일 때만 보여 준다 */
@@ -1422,8 +1466,16 @@ var SUGAI = (function(){
       h += '<span class="sub">복도 좌우 : <b>' + (ai.side.side === 'L' ? '왼쪽' : '오른쪽') + '</b> '
          + '<span class="num">(' + (ai.side.sure ? '확실 — 이 조건에서 실측 98%' : '아마 — 이 조건에서 실측 89%') + ')</span></span>';
     }
-    if(!hasPlate){
-      h += '<span class="sub warnsub">⚠ 사진에 호실 번호판이 안 보입니다 — 층도 자리도 확인할 수 없습니다.'
+    var gapPt = Math.round((ai.margin || 0) * 100);
+    if(!hasPlate && tier === 'place'){
+      h += '<span class="sub">확신도 : <b>1·2등 격차 ' + gapPt + '%p</b> '
+         + '<span class="num">(격차 22%p 이상인 사진은 시험에서 자리 93% 맞음 — 그래도 사진을 보고 승인해 주세요)</span></span>';
+    } else if(!hasPlate && tier === 'floor'){
+      h += '<span class="sub">확신도 : <b>층만</b> — 1·2등 격차 ' + gapPt + '%p '
+         + '<span class="num">(16%p 이상이면 시험에서 층 98% 맞음, 자리는 불확실)</span></span>';
+    }
+    if(!hasPlate && tier === 'none'){
+      h += '<span class="sub warnsub">⚠ 사진에 호실 번호판이 안 보이고 1·2등 격차도 ' + gapPt + '%p 로 작습니다 — 층도 자리도 확인할 수 없습니다.'
          + ' 복도·엘리베이터 앞은 층마다 똑같이 생겨서, 이 경우 1등이 맞는 일이 거의 없습니다'
          + ' (시험한 17장 중 0장 — 5등 안에는 9장).'
          + ' 아래 후보에서 직접 골라 주세요.</span>';

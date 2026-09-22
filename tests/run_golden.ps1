@@ -20,8 +20,9 @@ $url = "http://localhost:$Port/tests/golden.html?mode=$Mode&tag=$Tag&parts=$Part
 $t0 = Get-Date
 # Edge 는 UTF-8 로 내보낸다. 이 PC 의 기본(cp949)으로 읽으면 한글이 깨지면서 따옴표까지 먹어 JSON 이 깨진다.
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$extra = if($env:GITHUB_ACTIONS -eq 'true'){ @('--enable-unsafe-swiftshader', '--ignore-gpu-blocklist') } else { @() }   # 그래픽 카드 없는 컴퓨터
 try {
-  $dom = & $EDGE --headless=new --disable-gpu --no-first-run --window-size=1200,1000 "--user-data-dir=$prof" `
+  $dom = & $EDGE --headless=new --disable-gpu --no-first-run --window-size=1200,1000 @extra "--user-data-dir=$prof" `
            --virtual-time-budget=600000 --dump-dom $url 2>$null | Out-String
 } finally { Remove-Item -Recurse -Force $prof -ErrorAction SilentlyContinue }
 $secs = [int]((Get-Date) - $t0).TotalSeconds

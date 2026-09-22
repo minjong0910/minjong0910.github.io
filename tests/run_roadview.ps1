@@ -6,7 +6,8 @@ $EDGE = if($env:B3NAV_BROWSER){ $env:B3NAV_BROWSER } else { 'C:\Program Files (x
 $prof = Join-Path $env:TEMP ('b3nav_rv_' + [guid]::NewGuid().ToString('N').Substring(0,8))
 $url = "http://localhost:$Port/tests/roadview.html?app=" + [uri]::EscapeDataString($App)
 $t0 = Get-Date
-$dom = & $EDGE --headless=new --disable-gpu --no-first-run --window-size=1000,1000 "--user-data-dir=$prof" --virtual-time-budget=300000 --dump-dom $url 2>$null | Out-String
+$extra = if($env:GITHUB_ACTIONS -eq 'true'){ @('--enable-unsafe-swiftshader', '--ignore-gpu-blocklist') } else { @() }   # 그래픽 카드 없는 컴퓨터
+$dom = & $EDGE --headless=new --disable-gpu --no-first-run --window-size=1000,1000 @extra "--user-data-dir=$prof" --virtual-time-budget=300000 --dump-dom $url 2>$null | Out-String
 $secs = [int]((Get-Date) - $t0).TotalSeconds
 $dec = { param($x) $x.Replace('&lt;','<').Replace('&gt;','>').Replace('&quot;','"').Replace('&amp;','&') }
 Write-Host (& $dec ([regex]::Match($dom, '(?s)<pre id="R">(.*?)</pre>').Groups[1].Value))

@@ -9,7 +9,9 @@ $EDGE = if($env:B3NAV_BROWSER){ $env:B3NAV_BROWSER } else { 'C:\Program Files (x
 $prof = Join-Path $env:TEMP ('b3nav_check_' + [guid]::NewGuid().ToString('N').Substring(0,8))
 $url = "http://localhost:$Port/tests/check.html?app=" + [uri]::EscapeDataString($App)
 $t0 = Get-Date
-$dom = & $EDGE --headless=new --disable-gpu --no-first-run "--user-data-dir=$prof" --virtual-time-budget=180000 --dump-dom $url 2>$null | Out-String
+# 그래픽 카드가 없는 컴퓨터(GitHub 자동 검사)에서는 브라우저가 WebGL 을 꺼 버린다 — 소프트웨어 3D 를 허용한다
+$extra = if($env:GITHUB_ACTIONS -eq 'true'){ @('--enable-unsafe-swiftshader', '--ignore-gpu-blocklist') } else { @() }
+$dom = & $EDGE --headless=new --disable-gpu --no-first-run @extra "--user-data-dir=$prof" --virtual-time-budget=180000 --dump-dom $url 2>$null | Out-String
 $secs = [int]((Get-Date) - $t0).TotalSeconds
 $raw = [regex]::Match($dom, '(?s)<pre id="R">(.*?)</pre>').Groups[1].Value.Replace('&lt;','<').Replace('&gt;','>').Replace('&quot;','"').Replace('&amp;','&')
 $res = $null; try { $res = $raw | ConvertFrom-Json } catch {}

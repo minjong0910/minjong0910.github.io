@@ -25,7 +25,11 @@ $ROOT = $PSScriptRoot
 $SITE = Join-Path $ROOT 'site'
 $fails = New-Object System.Collections.ArrayList; $warns = New-Object System.Collections.ArrayList
 function Ok($m)   { Write-Host "    [통과] $m" -ForegroundColor Green }
-function Bad($m)  { Write-Host "    [실패] $m" -ForegroundColor Red; [void]$fails.Add($m) }
+function Bad($m)  {
+  Write-Host "    [실패] $m" -ForegroundColor Red; [void]$fails.Add($m)
+  # GitHub 자동 검사에서는 실패 이유를 요약(annotation)에 남긴다 — 로그를 열지 않아도 보이게
+  if($env:GITHUB_ACTIONS -eq 'true'){ Write-Host ("::error title=검사 실패::" + ($m -replace "`r?`n", ' / ')) }
+}
 function Warn($m) { Write-Host "    [주의] $m" -ForegroundColor Yellow; [void]$warns.Add($m) }
 function Step($m) { Write-Host ""; Write-Host "[$m]" -ForegroundColor Cyan }
 function Rel($p)  { $p.Substring($SITE.Length + 1) -replace '\\', '/' }
@@ -115,8 +119,9 @@ if(-not $Quick){
       $o = & pwsh @argv 2>&1 | Out-String
       if($LASTEXITCODE -eq 0){ Ok ($t.name + ' — ' + ((($o -split "`n") | Where-Object { $_.Trim() } | Select-Object -Last 1).Trim())) }
       else {
-        Bad ($t.name + ' 실패')
-        ($o -split "`n") | Where-Object { $_ -match '✗|실패|빠짐|생김|오류|    ' } | Select-Object -First 12 | ForEach-Object { Write-Host "        $_" -ForegroundColor DarkGray }
+        $why = @(($o -split "`n") | Where-Object { $_ -match '✗|실패|빠짐|생김|오류|결과|    ' } | Select-Object -First 12 | ForEach-Object { $_.Trim() })
+        Bad ($t.name + ' 실패' + $(if($why.Count){ ' — ' + (($why | Select-Object -First 6) -join ' / ') } else { '' }))
+        $why | ForEach-Object { Write-Host "        $_" -ForegroundColor DarkGray }
       }
     }
   }

@@ -33,18 +33,21 @@ jobs:
           "B3NAV_BROWSER=$b" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Host "브라우저 : $b"
 
-      - name: 미리보기 서버 켜기
+      # 서버 켜기와 검사를 한 단계에서 한다 — 단계가 끝나면 그 단계에서 띄운 서버가 꺼질 수 있어서
+      - name: 미리보기 서버를 켜고 검사
         shell: pwsh
         run: |
-          Start-Process pwsh -ArgumentList '-NoProfile', '-File', 'preview.ps1', '-NoBrowser' -WindowStyle Hidden
-          for($i = 0; $i -lt 30; $i++){
-            try { Invoke-WebRequest 'http://localhost:8080/site/index.html' -UseBasicParsing -Method Head -TimeoutSec 2 | Out-Null; Write-Host '서버 켜짐'; exit 0 } catch { Start-Sleep 1 }
+          $srv = Start-Process pwsh -ArgumentList '-NoProfile', '-File', 'preview.ps1', '-NoBrowser' -WindowStyle Hidden -PassThru
+          $up = $false
+          for($i = 0; $i -lt 30 -and -not $up; $i++){
+            try { Invoke-WebRequest 'http://localhost:8080/site/index.html' -UseBasicParsing -Method Head -TimeoutSec 2 | Out-Null; $up = $true } catch { Start-Sleep 1 }
           }
-          throw '미리보기 서버가 30초 안에 켜지지 않음'
-
-      - name: 검사
-        shell: pwsh
-        run: ./검사.ps1 -Ci
+          if(-not $up){ Write-Host '::error title=검사 실패::미리보기 서버가 30초 안에 켜지지 않음'; exit 1 }
+          Write-Host '서버 켜짐'
+          ./검사.ps1 -Ci
+          $code = $LASTEXITCODE
+          if(Test-Path 서버기록.txt){ Write-Host '── 서버 기록 (마지막 20줄) ──'; Get-Content 서버기록.txt -Tail 20 }
+          exit $code
 
   deploy:
     name: 사이트 바꾸기

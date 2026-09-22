@@ -160,11 +160,12 @@ function localPhotoList(w){
     Object.keys(d).sort().forEach(function(code){ (d[code] || []).forEach(function(p, i){ list.push({code:code, i:i, n:p.n, cap:p.cap || null, u:p.u}); }); });
     return Promise.resolve(list);
   }
-  if(w.PHOTO_INDEX_URL) return w.fetch(w.PHOTO_INDEX_URL).then(function(r){ return r.json(); }).then(function(d){
-    var list = [];
-    Object.keys(d).sort().forEach(function(code){ (d[code] || []).forEach(function(p, i){ list.push({code:code, i:i, n:p.n, cap:p.cap || null, u:p.u}); }); });
-    return list;
-  });
+  /* site/ 구조 : data/photos.js 가 window.PHOTO_INDEX 에 목록을 넣고, 사진은 파일(상대 주소)이다 */
+  if(w.PHOTO_INDEX){
+    var d2 = w.PHOTO_INDEX, list2 = [];
+    Object.keys(d2).sort().forEach(function(code){ (d2[code] || []).forEach(function(p, i){ list2.push({code:code, i:i, n:p.n, cap:p.cap || null, u:p.u}); }); });
+    return Promise.resolve(list2);
+  }
   return Promise.resolve([]);
 }
 function capturePhotos(w){

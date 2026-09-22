@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>군산대학교 공대 3호관 · 실사 3D</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0b0e13;
+    font-family:Pretendard,-apple-system,"Malgun Gothic",sans-serif;color:#eef1f4}
+  #cv{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+  #cv:active{cursor:grabbing}
+  #hud{position:absolute;top:0;left:0;right:0;padding:14px 16px 26px;pointer-events:none;
+    background:linear-gradient(180deg,rgba(6,10,16,.6),rgba(6,10,16,0))}
+  #hud h1{font-size:16px;font-weight:600;letter-spacing:-.3px;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+  #hud p{font-size:11.5px;opacity:.72;margin-top:3px;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+  #bar{position:absolute;left:0;right:0;bottom:0;padding:10px 10px 14px;display:flex;
+    gap:6px;flex-wrap:wrap;justify-content:center;
+    background:linear-gradient(0deg,rgba(6,10,16,.78),rgba(6,10,16,0))}
+  .b{pointer-events:auto;border:1px solid rgba(255,255,255,.2);background:rgba(20,26,34,.5);
+    color:#eef1f4;font-size:12px;padding:7px 12px;border-radius:7px;cursor:pointer;
+    font-family:inherit;backdrop-filter:blur(10px);transition:.15s;white-space:nowrap}
+  .b:hover{background:rgba(255,255,255,.18)}
+  .b.on{background:#c96a3c;border-color:#c96a3c}
+  #tip{position:absolute;bottom:56px;left:0;right:0;text-align:center;font-size:10.5px;
+    opacity:.5;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+  #load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:#0b0e13;font-size:13px;opacity:.75;z-index:5}
+</style>
+<style id="embedFit">
+  /* 길안내 앱의 '여기가 맞나요?' 패널(작은 상자) 안에 들어갈 때의 크기 보정 */
+  #hud{padding:10px 12px 20px}
+  #hud h1{font-size:13.5px}
+  #hud p{font-size:10.5px}
+  #bar{padding:7px 6px 9px;gap:4px}
+  .b{font-size:10.5px;padding:5px 8px;border-radius:6px}
+  #tip{bottom:46px;font-size:9.5px}
+  #load{font-size:12px}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="load">모델 생성 중…</div>
+<div id="hud">
+  <h1>군산대학교 공과대학 3호관</h1>
+  <p id="sub">지상 5층 · 실측 사진 기반 재질</p>
+</div>
+<div id="tip">드래그 회전 · 휠/핀치 확대 · 우클릭(두 손가락) 이동</div>
+<div id="bar">
+  <button class="b on" id="v0">전체보기</button>
+  <button class="b" id="v1">정문</button>
+  <button class="b" id="v3">후문</button>
+  <button class="b" id="v4">서문</button>
+  <button class="b" id="v5">동문</button>
+  <button class="b" id="v6">옥상</button>
+  <button class="b" id="vs">자동회전</button>
+</div>
+
+<script src="../js/vendor/three.min.js"></script>
+<script>
+/* ==========================================================================
+   군산대 공대 3호관 — 고밀도 실사 모델
+   · 창 개구부를 실제로 뚫고 리빌(창 옆면)을 세운 뒤 유리를 안쪽에 앉힌다
+   · PBR(Standard) 재질 + 절차적 하늘 IBL + ACES 톤매핑
+   · 반복 부재는 지오메트리 병합 후 인스턴싱해 드로우콜을 억제
+   ========================================================================== */
+
+/* ── 기본 치수 (m) ─────────────────────────────────────────── */
+var FH=3.6, NF=5, TOP=NF*FH, BASE=1.0, PARA=1.15;
+var SILL=1.52, WH=1.46, REV=0.34;   // 창대높이·창높이·창폭·기둥간격·리빌깊이
+
+/* ── 렌더러 ───────────────────────────────────────────────── */
+var cv=document.getElementById('cv');
+var renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=0.86;
+renderer.shadowMap.enabled=false;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.physicallyCorrectLights=false;
+
+var scene=new THREE.Scene();
+var camera=new THREE.PerspectiveCamera(34,1,0.3,2000);
+
+/* ── 하늘 : 지평선 흐림 → 천정 청색 그라데이션 ─────────────── */
+var skyMat=new THREE.ShaderMaterial({
+  side:THREE.BackSide, depthWrite:false,
+  uniforms:{ top:{value:new THREE.Color(0x99a3ad)}, mid:{value:new THREE.Color(0xb6bec5)},
+             bot:{value:new THREE.Color(0xccd1d4)}, sun:{value:new THREE.Vector3(-0.45,0.62,0.64)} },
+  vertexShader:'varying vec3 vP; void main(){ vP=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} ',
+  fragmentShader:[
+   'uniform vec3 top,mid,bot,sun; varying vec3 vP;',
+   'void main(){',
+   ' float h=clamp(vP.y*1.05+0.05,0.0,1.0);',
+   ' vec3 c = h<0.32 ? mix(bot,mid,h/0.32) : mix(mid,top,(h-0.32)/0.68);',
+   ' float d=max(dot(normalize(vP),normalize(sun)),0.0);',
+   ' c += vec3(1.0,0.92,0.78)*pow(d,7.0)*0.35;',   // 태양 주변 광휘
+   ' c += vec3(1.0,0.96,0.90)*pow(d,220.0)*2.2;',  // 태양
+   ' gl_FragColor=vec4(c,1.0);}' ].join('\n')
+});
+var skyMesh=new THREE.Mesh(new THREE.SphereGeometry(900,32,20), skyMat);
+scene.add(skyMesh);
+
+/* 하늘로부터 환경맵(IBL) 생성 — 유리·금속 반사의 근거가 된다 */
+var pmrem=new THREE.PMREMGenerator(renderer);
+(function(){
+  var c=document.createElement('canvas'); c.width=1024; c.height=512;
+  var x=c.getContext('2d');
+  var g=x.createLinearGradient(0,0,0,512);
+  g.addColorStop(0.00,'#3f70ad'); g.addColorStop(0.34,'#7fa2c6');
+  g.addColorStop(0.48,'#cdd6d9'); g.addColorStop(0.52,'#8a8674');
+  g.addColorStop(1.00,'#4a4636');
+  x.fillStyle=g; x.fillRect(0,0,1024,512);
+  var rg=x.createRadialGradient(300,132,0,300,132,190);
+  rg.addColorStop(0.00,'rgba(255,252,240,1)');
+  rg.addColorStop(0.16,'rgba(255,240,208,.65)');
+  rg.addColorStop(1.00,'rgba(255,240,208,0)');
+  x.fillStyle=rg; x.fillRect(0,0,1024,300);
+  var t=new THREE.CanvasTexture(c);
+  t.mapping=THREE.EquirectangularReflectionMapping;
+  t.encoding=THREE.sRGBEncoding;
+  scene.environment=pmrem.fromEquirectangular(t).texture;
+  pmrem.dispose();
+})();
+scene.fog=null;
+
+/* ── 조명 ─────────────────────────────────────────────────── */
+/* 균일 조명 : 그림자 없이 재질이 그대로 보이도록 사방에서 고르게 */
+var sun=new THREE.DirectionalLight(0xffffff, 0.0); sun.castShadow=false; scene.add(sun);
+scene.add(new THREE.AmbientLight(0xffffff, 0.24));
+/* 주광 1개 — 벽돌·석재의 요철이 보이려면 방향광이 하나는 있어야 한다 */
+var key=new THREE.DirectionalLight(0xfff6e8, 0.78);
+key.position.set(-90,120,110); scene.add(key);
+[[1,0.55,0.8],[-1,0.5,-0.7],[0.7,0.4,-1],[-0.8,0.45,1],[0,1,0]].forEach(function(d){
+  var l=new THREE.DirectionalLight(0xffffff, 0.15);
+  l.position.set(d[0]*100,d[1]*100+40,d[2]*100); scene.add(l);
+});
+
+/* ── 텍스처 생성 ──────────────────────────────────────────── */
+function cvs(w,h){var c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+function T(c,rx,ry,srgb){
+  var t=new THREE.CanvasTexture(c);
+  t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(rx||1,ry||1); t.anisotropy=8;
+  if(srgb!==false) t.encoding=THREE.sRGBEncoding;
+  return t;
+}
+function gray(src){ // 컬러 캔버스를 높이맵(범프)으로
+  var w=src.width,h=src.height,o=cvs(w,h),x=o.getContext('2d');
+  x.drawImage(src,0,0); var d=x.getImageData(0,0,w,h);
+  for(var i=0;i<d.data.length;i+=4){
+    var v=(d.data[i]*0.3+d.data[i+1]*0.59+d.data[i+2]*0.11);
+    d.data[i]=d.data[i+1]=d.data[i+2]=v;
+  }
+  x.putImageData(d,0,0); return o;
+}
+
+
+
+/* 노출 콘크리트 (인방·창대·파라펫) */
+var concC=(function(){
+  var c=cvs(256,256),x=c.getContext('2d');
+  x.fillStyle='#c6c4bc'; x.fillRect(0,0,256,256);
+  for(var i=0;i<7000;i++){
+    x.fillStyle='rgba('+(150+Math.random()*90|0)+','+(150+Math.random()*90|0)+','+(146+Math.random()*90|0)+',.35)';
+    x.fillRect(Math.random()*256,Math.random()*256,2.5,2.5);
+  }
+  for(i=0;i<30;i++){ // 물때
+    x.fillStyle='rgba(120,120,112,'+(Math.random()*0.10)+')';
+    x.fillRect(Math.random()*256,0,2+Math.random()*5,256);
+  }
+  return c;
+})();
+
+
+
+/* 회색 인도블럭 */
+var walkC=(function(){
+  var c=cvs(256,256),x=c.getContext('2d');
+  x.fillStyle='#9d9c95'; x.fillRect(0,0,256,256);
+  for(var y=0;y<256;y+=32) for(var xx=0;xx<256;xx+=32){
+    var v=168+Math.random()*26;
+    x.fillStyle='rgb('+(v|0)+','+(v|0)+','+((v-6)|0)+')';
+    x.fillRect(xx+1.5,y+1.5,29,29);
+  }
+  return c;
+})();
+
+
+/* 아스팔트 */
+var asphC=(function(){
+  var c=cvs(256,256),x=c.getContext('2d');
+  x.fillStyle='#3e4144'; x.fillRect(0,0,256,256);
+  for(var i=0;i<22000;i++){
+    var v=Math.random()*70+20;
+    x.fillStyle='rgba('+(v|0)+','+(v|0)+','+((v+4)|0)+',.5)';
+    x.fillRect(Math.random()*256,Math.random()*256,2,2);
+  }
+  return c;
+})();
+
+/* ── 사진에서 추출한 실측 재질 (이음매 제거·조명 평탄화 완료) ── */
+var TX={
+  tuft:'tex/01.png',
+  bark:'tex/02.jpg',
+  bark_b:'tex/03.jpg',
+  needle:'tex/04.png',
+  leaf:'tex/05.png',
+  turf:'tex/06.jpg',
+  turf_b:'tex/07.jpg',
+  brick:'tex/08.jpg',
+  brick_b:'tex/09.jpg',
+  stone:'tex/10.jpg',
+  stone_b:'tex/11.jpg',
+  pave:'tex/12.jpg',
+  pave_b:'tex/13.jpg',
+  grass:'tex/14.jpg',
+  roof:'tex/15.jpg'
+};
+var _tl=new THREE.TextureLoader();
+function IMG(k, srgb){
+  var t=_tl.load(TX[k]);
+  t.wrapS=t.wrapT=THREE.RepeatWrapping; t.anisotropy=8;
+  if(srgb!==false) t.encoding=THREE.sRGBEncoding;
+  return t;
+}
+
+var SG={
+  sign_main:'tex/16.png',
+  sign_kanji:'tex/17.png',
+  sign_back:'tex/18.png',
+  sign_east:'tex/19.png',
+  sign_west:'tex/20.png',
+  sign_univ:'tex/21.png'
+};
+function SGN(k){
+  var t=new THREE.TextureLoader().load(SG[k]);
+  t.encoding=THREE.sRGBEncoding; t.anisotropy=8; return t;
+}
+
+/* ── 재질 ─────────────────────────────────────────────────── */
+function S(o){ return new THREE.MeshStandardMaterial(o); }
+var M={};
+M.brick   = S({map:IMG('brick'),  bumpMap:IMG('brick_b',false), bumpScale:0.14,
+               roughnessMap:IMG('brick_b',false), roughness:1.0});
+M.brickF  = S({color:0x9c6644, roughness:0.96});
+M.stone   = S({map:IMG('stone'),  bumpMap:IMG('stone_b',false), bumpScale:0.055,
+               roughnessMap:IMG('stone_b',false), roughness:0.82, metalness:0.04, envMapIntensity:0.6});
+M.conc    = S({map:T(concC,3,3),  roughness:0.82});
+M.concD   = S({color:0x8b8981, roughness:0.86});
+M.reveal  = S({color:0xb3b1a8, roughness:0.9});
+M.interior= S({color:0x14181e, roughness:1.0});
+M.glass   = S({color:0x8db0cb, roughness:0.07, metalness:0.15, envMapIntensity:1.15,
+               transparent:true, opacity:0.93});
+M.glass2  = S({color:0x7fa4c2, roughness:0.05, metalness:0.18, envMapIntensity:1.35,
+               transparent:true, opacity:0.93});
+M.glass3  = S({color:0x9bbcd2, roughness:0.10, metalness:0.10, envMapIntensity:0.95,
+               transparent:true, opacity:0.93});
+M.blind   = S({color:0xcfcabd, roughness:0.9});
+M.blindB  = S({color:0x8e9aa2, roughness:0.85});
+M.glassC  = S({color:0x466a8f, roughness:0.05, metalness:0.28, envMapIntensity:1.5,
+               transparent:true, opacity:0.95});
+M.frame   = S({color:0xe7e9e5, roughness:0.42, metalness:0.08});
+M.mullion = S({color:0x9fa5a8, roughness:0.35, metalness:0.55});
+M.dark    = S({color:0x25292e, roughness:0.5, metalness:0.35});
+M.black   = S({color:0x121417, roughness:0.42, metalness:0.25});
+M.gold    = S({color:0xcaa62f, roughness:0.28, metalness:0.85, envMapIntensity:1.6});
+M.metal   = S({color:0xa8adae, roughness:0.42, metalness:0.7});
+M.blueSt  = S({color:0x5a9ccd, roughness:0.45, metalness:0.35});
+M.glassD  = S({color:0x39434d, roughness:0.09, metalness:0.30, envMapIntensity:0.75, transparent:true, opacity:0.94});
+M.metalD  = S({color:0x707577, roughness:0.5, metalness:0.65});
+M.roofG   = S({map:IMG('roof'), roughness:0.90});
+M.rust    = S({color:0x8b5a3a, roughness:0.72, metalness:0.3});
+M.louver  = S({color:0xd2d5d3, roughness:0.4, metalness:0.4});
+M.solar   = S({color:0x16203a, roughness:0.14, metalness:0.55, envMapIntensity:1.8});
+M.blue    = S({color:0x2f7fcc, roughness:0.18, metalness:0.12, transparent:true, opacity:0.66, side:THREE.DoubleSide});
+M.green   = S({color:0x2f8a5e, roughness:0.22, transparent:true, opacity:0.55, side:THREE.DoubleSide});
+M.pave    = S({map:IMG('pave'),   bumpMap:IMG('pave_b',false), bumpScale:0.09,
+               roughnessMap:IMG('pave_b',false), roughness:1.0});
+M.walkway = S({map:T(walkC,1,1), roughness:0.92});
+M.grass   = S({map:IMG('grass'), roughness:1.0});
+M.asph    = S({map:T(asphC,1,1), roughness:0.95});
+M.line    = S({color:0xe8e6df, roughness:0.8});
+M.trunk   = S({color:0x554233, roughness:0.96});
+M.pine    = S({color:0x18301e, roughness:0.96});
+M.leaf    = S({color:0x2f5322, roughness:0.95});
+M.hedge   = S({color:0x27461d, roughness:0.96});
+M.soil    = S({color:0x5a4a36, roughness:1.0});
+M.carBody = S({color:0xffffff, roughness:0.25, metalness:0.6, envMapIntensity:1.5});
+M.carGlass= S({color:0x1c2833, roughness:0.08, metalness:0.4, envMapIntensity:1.6});
+M.tire    = S({color:0x17191b, roughness:0.95});
+M.neigh   = S({color:0x9fa19c, roughness:0.85});
+M.neighG  = S({color:0x33705a, roughness:0.85});
+M.sign    = S({color:0x1d4a90, roughness:0.5});
+M.sgMain  = S({map:SGN('sign_main'),  transparent:true, alphaTest:0.45, depthWrite:false, roughness:0.55});
+M.sgKanji = S({map:SGN('sign_kanji'), transparent:true, alphaTest:0.45, depthWrite:false, roughness:0.30, metalness:0.7, envMapIntensity:1.6});
+M.sgBack  = S({map:SGN('sign_back'),  roughness:0.5});
+M.sgEast  = S({map:SGN('sign_east'),  roughness:0.5});
+M.sgWest  = S({map:SGN('sign_west'),  roughness:0.5});
+M.sgUniv  = S({map:SGN('sign_univ'),  roughness:0.5});
+
+(function(){
+  var keep={tuft:1,glassD:1,blueSt:1,sgMain:1,sgKanji:1,sgBack:1,sgEast:1,sgWest:1,sgUniv:1,glass:1,glass2:1,glass3:1,glassC:1,carGlass:1,carBody:1,metal:1,metalD:1,gold:1,mullion:1,solar:1,frame:1,stone:1};
+  Object.keys(M).forEach(function(k){ if(!keep[k]) M[k].envMapIntensity=0.42; });
+})();
+
+/* ── 지오메트리 병합 유틸 (같은 재질끼리만) ────────────────── */
+function merge(items){
+  var pos=[],nor=[],uv=[];
+  for(var i=0;i<items.length;i++){
+    var g=items[i].g; g = g.index ? g.toNonIndexed() : g.clone();
+    if(items[i].m) g.applyMatrix4(items[i].m);
+    var p=g.attributes.position.array, n=g.attributes.normal.array, u=g.attributes.uv.array;
+    for(var a=0;a<p.length;a++) pos.push(p[a]);
+    for(a=0;a<n.length;a++) nor.push(n[a]);
+    for(a=0;a<u.length;a++) uv.push(u[a]);
+    g.dispose();
+  }
+  var o=new THREE.BufferGeometry();
+  o.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  o.setAttribute('normal',  new THREE.Float32BufferAttribute(nor,3));
+  o.setAttribute('uv',      new THREE.Float32BufferAttribute(uv,2));
+  return o;
+}
+function mtx(x,y,z,rx,ry,rz,sx,sy,sz){
+  var m=new THREE.Matrix4(), q=new THREE.Quaternion();
+  q.setFromEuler(new THREE.Euler(rx||0,ry||0,rz||0));
+  m.compose(new THREE.Vector3(x||0,y||0,z||0), q, new THREE.Vector3(sx||1,sy||1,sz||1));
+  return m;
+}
+var B=THREE.BoxGeometry, C=THREE.CylinderGeometry;
+function bx(w,h,d){ return new B(w,h,d); }
+
+var world=new THREE.Group(); scene.add(world);
+
+/* 병합 버퍼 : 재질별로 조각을 모았다가 마지막에 한 번에 메시로 만든다 */
+var POOL={};
+var XF=null;   // 설정되면 이후 push되는 모든 부재에 곱해진다
+function push(key, geo, m){
+  if(XF) m = m ? new THREE.Matrix4().multiplyMatrices(XF, m) : XF.clone();
+  (POOL[key]=POOL[key]||[]).push({g:geo,m:m});
+}
+function flush(){
+  for(var k in POOL){
+    if(!POOL[k].length) continue;
+    var mesh=new THREE.Mesh(merge(POOL[k]), M[k.split('|')[0]]);
+    mesh.castShadow=true; mesh.receiveShadow=true;
+    world.add(mesh);
+    POOL[k]=[];
+  }
+}
+
+/* ==========================================================================
+   블록 정의 — 위성 윤곽 기준
+   ========================================================================== */
+var BLK=[
+  {x0:-44,x1: 44,z0:  -8,z1:   8},   // 본동(중복도 막대)
+  {x0:-44,x1:-28,z0: -19,z1:  -8},   // 서쪽 큰 강의실 돌출 (13121 계열)
+  {x0: 26,x1: 44,z0: -19,z1:  -8},   // 동쪽 큰 실험실 돌출 (13114~5 계열)
+  {x0:-10,x1: 10,z0:-13.6,z1: -8, stone:true}   // 정문 화강석 블록 (두 날개 사이)
+];
+
+/* 면 좌표계 : dir 별로 (u, y) → 월드 */
+function W(dir,c,u,y,n){
+  n=n||0;
+  if(dir==='+z') return [u, y, c+n];
+  if(dir==='-z') return [u, y, c-n];
+  if(dir==='+x') return [c+n, y, u];
+  return [c-n, y, u];
+}
+function ROT(dir){ return dir==='+z'?0 : dir==='-z'?Math.PI : dir==='+x'?Math.PI/2 : -Math.PI/2; }
+
+/* 면 위의 사각 판 (벽돌 UV가 이어지도록 UV를 직접 계산) */
+function panel(key, dir, c, u0,u1, y0,y1, uvScale, off){
+  var w=Math.abs(u1-u0), h=y1-y0;
+  if(w<=0.02||h<=0.02) return;
+  /* uvScale : 숫자 하나 또는 [가로, 세로].
+     벽돌 타일은 정사각이 아니라 1.10 x 0.60m 라서 축마다 따로 나눠야
+     판이 나뉜 자리에서 켜가 어긋나지 않는다. */
+  var su = uvScale.length ? uvScale[0] : uvScale;
+  var sv = uvScale.length ? uvScale[1] : uvScale;
+  var g=new THREE.PlaneGeometry(w,h);
+  var uv=g.attributes.uv, um=(u0+u1)/2, ym=(y0+y1)/2;
+  for(var i=0;i<uv.count;i++){
+    var lu=(uv.getX(i)-0.5)*w+um, lv=(uv.getY(i)-0.5)*h+ym;
+    uv.setXY(i, lu/su, lv/sv);
+  }
+  uv.needsUpdate=true;
+  var p=W(dir,c,um,ym,off||0);
+  push(key, g, mtx(p[0],p[1],p[2], 0, ROT(dir),0));
+}
+
+/* 면 위의 박스 (인방·창대·돌림띠) */
+function trim(key, dir, c, u0,u1, y, h, proj, out){
+  var w=Math.abs(u1-u0), um=(u0+u1)/2;
+  if(w<=0.02) return;
+  var g = (dir==='+z'||dir==='-z') ? bx(w,h,proj) : bx(proj,h,w);
+  var sgn=(dir==='+z'||dir==='+x')?1:-1;
+  var p=W(dir,c,um,y, sgn*((out||0)+proj/2));
+  push(key, g, mtx(p[0],p[1],p[2]));
+}
+
+/* 출입구 : 벽 생성 전에 위치를 알아야 개구부를 뚫을 수 있다 */
+var DOOR_H=2.90;                 // 문 자체 높이
+/* 문턱이 계단 높이만큼 올라가므로 벽 구멍도 그만큼 위까지 뚫어야 한다.
+   이 값을 문 높이에만 맞춰두면 문 윗부분이 벽돌에 파묻힌다. */
+var DOOR_TOP=DOOR_H + 6*0.175 + 0.34;
+/* 창 모듈 계산 — 파사드와 동일. 문 위치를 정하는 데 먼저 필요하다. */
+function winCenters(lo,hi){
+  var L=hi-lo, n=Math.max(1,Math.round(L/MODL)), st=L/n, k=st/MODL, out=[];
+  for(var m=0;m<n;m++){
+    var b0=lo+st*m;
+    out.push([b0+(MOD_G*0.5+MOD_W/2)*k, MOD_W*k]);
+    out.push([b0+(MOD_G*0.5+MOD_W+MOD_G+MOD_N/2)*k, MOD_N*k]);
+  }
+  return out;
+}
+/* 문은 창 사이 빈 구간의 한가운데에 놓아야 좌우가 반듯하게 맞는다.
+   x=0 에 고정하면 한쪽 창만 잘려 어긋나 보인다. */
+function snapDoor(lo,hi,w){
+  var wins=winCenters(lo,hi), best=null, bestScore=1e9;
+  for(var i=0;i<wins.length-1;i++){
+    var g0=wins[i][0]+wins[i][1]/2, g1=wins[i+1][0]-wins[i+1][1]/2;
+    if(g1-g0 < w+0.5) continue;
+    var mid=(g0+g1)/2, score=Math.abs(mid-(lo+hi)/2);
+    if(score<bestScore){ bestScore=score; best=mid; }
+  }
+  return best===null ? (lo+hi)/2 : best;
+}
+var DOORS=[
+  {dir:'+z', c:  8,   u:snapDoor(-44,44,4.6), w:4.6},   // 후문
+  {dir:'-x', c:-44,   u:snapDoor(-8,8,4.0),   w:4.0},   // 서문
+  {dir:'+x', c: 44,   u:snapDoor(-8,8,3.4),   w:3.4}    // 동문
+];
+function doorU(dir,c){
+  for(var i=0;i<DOORS.length;i++)
+    if(DOORS[i].dir===dir && Math.abs(DOORS[i].c-c)<0.02) return DOORS[i].u;
+  return 0;
+}
+function holesOn(dir,c){
+  var r=[];
+  for(var i=0;i<DOORS.length;i++){
+    var d=DOORS[i];
+    if(d.dir===dir && Math.abs(d.c-c)<0.02) r.push([d.u-d.w/2-0.16, d.u+d.w/2+0.16]);
+  }
+  return r;
+}
+/* 개구부를 피해 벽판을 조각내어 그린다 */
+function panelH(key,dir,c,u0,u1,y0,y1,uvS,off,holes){
+  if(!holes.length || y0>=DOOR_TOP){ panel(key,dir,c,u0,u1,y0,y1,uvS,off); return; }
+  var yc=Math.min(y1,DOOR_TOP);
+  var segs=[[Math.min(u0,u1),Math.max(u0,u1)]];
+  holes.forEach(function(h){
+    var out=[];
+    segs.forEach(function(g){
+      if(h[1]<=g[0]||h[0]>=g[1]){ out.push(g); return; }
+      if(h[0]>g[0]) out.push([g[0],h[0]]);
+      if(h[1]<g[1]) out.push([h[1],g[1]]);
+    });
+    segs=out;
+  });
+  segs.forEach(function(g){ panel(key,dir,c,g[0],g[1],y0,yc,uvS,off); });
+  if(y1>DOOR_TOP) panel(key,dir,c,u0,u1,DOOR_TOP,y1,uvS,off);
+}
+function trimH(key,dir,c,u0,u1,y,h,proj,out,holes){
+  if(!holes.length || y-h/2>=DOOR_TOP){ trim(key,dir,c,u0,u1,y,h,proj,out); return; }
+  var segs=[[Math.min(u0,u1),Math.max(u0,u1)]];
+  holes.forEach(function(hh){
+    var o=[];
+    segs.forEach(function(g){
+      if(hh[1]<=g[0]||hh[0]>=g[1]){ o.push(g); return; }
+      if(hh[0]>g[0]) o.push([g[0],hh[0]]);
+      if(hh[1]<g[1]) o.push([hh[1],g[1]]);
+    });
+    segs=o;
+  });
+  segs.forEach(function(g){ trim(key,dir,c,g[0],g[1],y,h,proj,out); });
+}
+
+var wseed=987654321;
+function wrnd(){ wseed=(wseed*1103515245+12345)%2147483648; return wseed/2147483648; }
+
+/* ── 창 유닛 : 리빌 + 흰 창틀 + 연창 멀리언 + 유리 + 블라인드 ──
+   폭이 가변이라 넓은 리본창은 3~4연창, 좁은 창은 단창으로 나뉜다. */
+function windowUnit(dir,c,u,ybase,ww){
+  var sgn=(dir==='+z'||dir==='+x')?1:-1;
+  var ry=ROT(dir), yc=ybase+SILL+WH/2;
+
+  /* 깊이 4단 :  ① 외벽면(0)  ② 돌출 테두리(+0.07)
+                 ③ 창틀(-0.24)  ④ 유리(-0.30)
+     이 단차가 있어야 정면에서 봐도 창이 파여 보인다. */
+  var SUR=0.16, sd=0.07, fz=-(REV-0.10), gzz=-(REV-0.04);
+
+  // ② 개구부 둘레 돌출 테두리 (석재 인방·문설주)
+  function sur(du,dy,w2,h2){
+    var p=W(dir,c,u+du, yc+dy, sgn*sd);
+    push('conc|sur', bx(w2,h2,sd*2.1), mtx(p[0],p[1],p[2],0,ry,0));
+  }
+  sur(0,  WH/2+SUR/2, ww+SUR*2, SUR);
+  sur(0, -WH/2-SUR/2, ww+SUR*2, SUR);
+  sur(-ww/2-SUR/2, 0, SUR, WH);
+  sur( ww/2+SUR/2, 0, SUR, WH);
+
+  // 리빌 : 개구부 안쪽 네 면 (깊이 REV)
+  var rw=0.07;
+  var g1=bx(ww+rw*2, rw, REV), g2=bx(rw, WH, REV);
+  [[0,WH/2+rw/2,g1],[0,-WH/2-rw/2,g1],[ww/2+rw/2,0,g2],[-ww/2-rw/2,0,g2]].forEach(function(a){
+    var p=W(dir,c,u+a[0], yc+a[1], -sgn*REV/2);
+    push('reveal', a[2].clone(), mtx(p[0],p[1],p[2],0,ry,0));
+  });
+
+  // ③ 창틀 + 연창 멀리언
+  var fw=0.085, fd=0.11;
+  function fr(du,dy,w2,h2){
+    var p=W(dir,c,u+du, yc+dy, fz);
+    push('frame', bx(w2,h2,fd), mtx(p[0],p[1],p[2],0,ry,0));
+  }
+  fr(0,  WH/2-fw/2, ww, fw);
+  fr(0, -WH/2+fw/2, ww, fw);
+  fr(-ww/2+fw/2, 0, fw, WH);
+  fr( ww/2-fw/2, 0, fw, WH);
+  var panes=Math.max(1, Math.round(ww/1.30));
+  for(var q=1;q<panes;q++) fr(-ww/2+ww*q/panes, 0, 0.07, WH);
+  if(WH>1.2) fr(0, WH/2-0.42, ww, 0.06);
+
+  // ④ 유리 (창마다 반사 편차)
+  var gk=['glass','glass2','glass3'][Math.floor(wrnd()*3)];
+  var gp=W(dir,c,u, yc, gzz);
+  push(gk, new THREE.PlaneGeometry(ww-0.16, WH-0.16), mtx(gp[0],gp[1],gp[2],0,ry,0));
+
+  var rb=wrnd();
+  if(rb<0.45){
+    var bh=(rb<0.16)? WH*0.92 : WH*(0.26+wrnd()*0.34);
+    var bp=W(dir,c,u, yc+(WH-bh)/2-0.04, gzz-sgn*0.05);
+    push(rb<0.30?'blind':'blindB', new THREE.PlaneGeometry(ww-0.24, bh), mtx(bp[0],bp[1],bp[2],0,ry,0));
+  }
+
+  // 내민 창대 (물끊기 포함)
+  var sg=(dir==='+z'||dir==='-z') ? bx(ww+0.46,0.15,0.34) : bx(0.34,0.15,ww+0.46);
+  var sp=W(dir,c,u, ybase+SILL-SUR-0.07, sgn*0.13);
+  push('conc|sill', sg, mtx(sp[0],sp[1],sp[2]));
+
+  // 창 위 인방 — 창마다 끊긴다
+  trim('conc|lint', dir, c, u-ww/2-0.24, u+ww/2+0.24, ybase+SILL+WH+SUR+0.16, 0.28, 0.24, 0.0);
+}
+
+/* ── 한 면 : 넓은 리본창 + 좁은 창이 번갈아 반복 ───────────── */
+var MOD_W=5.40, MOD_N=1.50, MOD_G=2.70, MODL=MOD_W+MOD_N+MOD_G*2;
+function facade(dir, c, u0, u1, opt){
+  opt=opt||{};
+  var lo=Math.min(u0,u1), hi=Math.max(u0,u1), L=hi-lo;
+  var key=opt.stone?'stone':'brick', uvS=opt.stone?[1.80,1.80]:[2.00,1.072];
+  if(L<2.2){ // 너무 좁은 면은 벽만
+    trim('concD', dir, c, lo, hi, BASE/2, BASE, 0.22, 0);
+    panel(key, dir, c, lo, hi, 0, TOP, uvS, 0.001);
+    return;
+  }
+  var n=Math.max(1, Math.round(L/MODL)), step=L/n, k=step/MODL;
+  var HOLES=holesOn(dir,c);
+
+  // 개구부 목록 (중심, 폭)
+  var wins=[];
+  for(var m=0;m<n;m++){
+    var b0=lo+step*m;
+    wins.push({c:b0+(MOD_G*0.5+MOD_W/2)*k, w:MOD_W*k});
+    if(!opt.stone) wins.push({c:b0+(MOD_G*0.5+MOD_W+MOD_G+MOD_N/2)*k, w:MOD_N*k});
+    else           wins.push({c:b0+(MOD_G*0.5+MOD_W+MOD_G+MOD_N/2)*k, w:MOD_N*k*0.8});
+  }
+
+  trimH('concD', dir, c, lo, hi, BASE/2, BASE, 0.22, 0, HOLES);
+  panelH(key, dir, c, lo, hi, 0, BASE, uvS, 0.001, HOLES);
+
+  for(var f=0; f<NF; f++){
+    var yb=f*FH, y0=(f===0?BASE:yb), sy=yb+SILL, hy=yb+SILL+WH;
+    var HH = (yb < DOOR_TOP) ? HOLES : [];
+    panelH(key, dir, c, lo, hi, y0, sy, uvS, 0, HH);      // 창 아래 벽
+    panelH(key, dir, c, lo, hi, hy, yb+FH, uvS, 0, HH);   // 창 위 벽 (개구부를 피한다)
+
+    var cur=lo;
+    for(var i=0;i<wins.length;i++){
+      var inDoor=false;
+      HH.forEach(function(h){ if(wins[i].c>h[0]-1.2 && wins[i].c<h[1]+1.2) inDoor=true; });
+      if(inDoor) continue;                 // cur를 그대로 두어 다음 판이 이 구간까지 덮게 한다
+      panelH(key, dir, c, cur, wins[i].c-wins[i].w/2, sy, hy, uvS, 0, HH);   // 벽기둥
+      windowUnit(dir, c, wins[i].c, yb, wins[i].w);
+      cur=wins[i].c+wins[i].w/2;
+    }
+    panelH(key, dir, c, cur, hi, sy, hy, uvS, 0, HH);
+  }
+  // 창 사이 벽기둥에 세로 홈(수직 분절) — 사진의 벽돌 기둥 느낌
+  if(!opt.stone) for(var j=0;j<n;j++){
+    var pu=lo+step*j;
+    if(Math.abs(pu-lo)<0.6 || Math.abs(hi-pu)<0.6) continue;
+    var sgn=(dir==='+z'||dir==='+x')?1:-1;
+    var pg=(dir==='+z'||dir==='-z')? bx(0.95,TOP,0.09) : bx(0.09,TOP,0.95);
+    var pp=W(dir,c,pu,TOP/2, sgn*0.045);
+    push('brickF', pg, mtx(pp[0],pp[1],pp[2]));
+    panel(key, dir, c, pu-0.475, pu+0.475, 0, TOP, uvS, 0.091); // 전면은 UV 계산본
+  }
+}
+
+/* ── 블록 세우기 ─────────────────────────────────────────── */
+BLK.forEach(function(b){
+  var im=new THREE.Mesh(bx(b.x1-b.x0-0.9, TOP-0.4, b.z1-b.z0-0.9), M.interior);
+  im.position.set((b.x0+b.x1)/2, TOP/2, (b.z0+b.z1)/2);
+  im.castShadow=false; im.receiveShadow=false; world.add(im);
+});
+
+/* 본동 */
+facade('+z',   8, -44,  44);          // 남면 (후문 쪽, 개구부는 자동으로 뚫린다)
+facade('-z',  -8, -28, -11);          // 북면 : 정문 블록과 날개 사이
+facade('-z',  -8,   9,  26);
+facade('+x',  44,  -8,   8);          // 동측 단부 (동문)
+facade('-x', -44,  -8,   8);          // 서측 단부 (서문)
+/* 서쪽 날개 */
+facade('-z', -19, -44, -28);
+facade('-x', -44, -19,  -8);
+facade('+x', -28, -19,  -8);
+/* 동쪽 날개 */
+facade('-z', -19,  26,  44);
+facade('-x',  26, -19,  -8);
+facade('+x',  44, -19,  -8);
+/* 정문 화강석 블록 */
+facade('-z',-13.6, -10, -5.4, {stone:true});
+facade('-z',-13.6, 5.4,  10,  {stone:true});
+facade('+x',  10, -13.6,  -8, {stone:true});
+facade('-x', -10, -13.6,  -8, {stone:true});
+
+/* ==========================================================================
+   처마 · 파라펫 · 옥상
+   ========================================================================== */
+BLK.forEach(function(b){
+  var w=b.x1-b.x0, d=b.z1-b.z0, cx=(b.x0+b.x1)/2, cz=(b.z0+b.z1)/2;
+
+  push('conc|cor', bx(w+1.9,0.62,d+1.9), mtx(cx,TOP+0.10,cz));       // 처마
+  push('concD',    bx(w+1.5,0.16,d+1.5), mtx(cx,TOP-0.24,cz));       // 처마 하부 그림자선
+
+  var t=0.36, py=TOP+0.41+PARA/2;
+  push('conc|par', bx(w+0.9,PARA,t), mtx(cx,py,b.z1+0.24));
+  push('conc|par', bx(w+0.9,PARA,t), mtx(cx,py,b.z0-0.24));
+  push('conc|par', bx(t,PARA,d+0.9), mtx(b.x1+0.24,py,cz));
+  push('conc|par', bx(t,PARA,d+0.9), mtx(b.x0-0.24,py,cz));
+  // 파라펫 갓돌
+  var cy=TOP+0.41+PARA+0.05;
+  push('concD', bx(w+1.2,0.12,t+0.2), mtx(cx,cy,b.z1+0.24));
+  push('concD', bx(w+1.2,0.12,t+0.2), mtx(cx,cy,b.z0-0.24));
+  push('concD', bx(t+0.2,0.12,d+1.2), mtx(b.x1+0.24,cy,cz));
+  push('concD', bx(t+0.2,0.12,d+1.2), mtx(b.x0-0.24,cy,cz));
+
+  // 초록 방수 바닥
+  var rg=new THREE.PlaneGeometry(w-0.6,d-0.6);
+  var uvr=rg.attributes.uv;
+  for(var i=0;i<uvr.count;i++) uvr.setXY(i, uvr.getX(i)*w/3.0, uvr.getY(i)*d/3.0);
+  uvr.needsUpdate=true;
+  push('roofG', rg, mtx(cx,TOP+0.42,cz, -Math.PI/2,0,0));
+});
+
+/* ── 옥상 설비 ──────────────────────────────────────────────
+   사진을 보면 옥상은 대체로 비어 있고, 실외기·태양광이 군데군데
+   놓여 있을 뿐이다. 이전 버전은 설비를 과하게 채워 넣었다. */
+(function(){
+  var y=TOP+0.42;
+
+  // 실외기 : 짧은 열 3개만
+  function cond(x,z,r){
+    var m0=mtx(x,y,z,0,r||0,0), tmp=[];
+    tmp.push({g:bx(1.10,1.60,0.70), m:mtx(0,1.02,0)});
+    tmp.push({g:bx(1.18,0.12,0.78), m:mtx(0,1.86,0)});
+    tmp.push({g:bx(1.10,0.22,0.70), m:mtx(0,0.11,0)});
+    var g=merge(tmp); g.applyMatrix4(m0); push('metal', g);
+    for(var i=0;i<2;i++){
+      var f=new C(0.40,0.40,0.06,16).toNonIndexed();
+      f.applyMatrix4(mtx(0,1.48-i*0.62,0.37, Math.PI/2,0,0)); f.applyMatrix4(m0);
+      push('metalD', f);
+    }
+    // 콘크리트 기초 블록
+    push('concD', bx(1.3,0.22,0.9), mtx(x,y+0.11,z));
+  }
+  var i;
+  for(i=0;i<6;i++) cond(-34+i*1.35, -4.6, 0);
+  for(i=0;i<5;i++) cond( 16+i*1.35,  4.4, Math.PI);
+  for(i=0;i<4;i++) cond(-41.0, -14+i*1.35, Math.PI/2);
+
+  // 루버 스크린 1개만
+  (function(){
+    var tmp=[{g:bx(13,2.4,0.14), m:mtx(0,1.2,0)}];
+    for(var k=0;k<7;k++) tmp.push({g:bx(13,0.07,0.26), m:mtx(0,0.3+k*0.3,0.07)});
+    tmp.push({g:bx(0.12,2.5,0.24), m:mtx(-6.5,1.25,0)});
+    tmp.push({g:bx(0.12,2.5,0.24), m:mtx( 6.5,1.25,0)});
+    var g=merge(tmp); g.applyMatrix4(mtx(-30,y,5.6)); push('louver', g);
+  })();
+
+  // 옥탑 계단실 : 사진 비례에 맞춰 작게
+  (function(){
+    var PW=4.6, PD=3.6, PH=2.15, px=0, pz=-4.4;
+    function face(w,h,rot,dx,dz){
+      var pg=new THREE.PlaneGeometry(w,h), uv=pg.attributes.uv;
+      for(var i2=0;i2<uv.count;i2++) uv.setXY(i2, uv.getX(i2)*w/2.00, uv.getY(i2)*h/1.072);
+      uv.needsUpdate=true;
+      push('brick|ph', pg, mtx(px+dx, y+PH/2, pz+dz, 0, rot, 0));
+    }
+    face(PW,PH,0,        0, PD/2);
+    face(PW,PH,Math.PI,  0,-PD/2);
+    face(PD,PH,Math.PI/2, PW/2,0);
+    face(PD,PH,-Math.PI/2,-PW/2,0);
+    push('conc|ph',  bx(PW+0.9,0.38,PD+0.9), mtx(px, y+PH+0.19, pz));
+    push('concD',    bx(PW+0.5,0.12,PD+0.5), mtx(px, y+PH-0.02, pz));
+    push('dark',     bx(1.2,1.95,0.12), mtx(px-1.0, y+0.98, pz+PD/2+0.06));
+    push('metal',    bx(1.32,0.10,0.18), mtx(px-1.0, y+2.02, pz+PD/2+0.10));
+    push('glass',    new THREE.PlaneGeometry(0.9,0.7), mtx(px+1.3, y+1.5, pz+PD/2+0.06));
+  })();
+
+  // 격자 통신탑
+  (function(){
+    var tmp=[], H=10.2;      // 사진 대비 과하게 높아 3칸 줄였다
+    [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(L){
+      tmp.push({g:bx(0.16,H,0.16), m:mtx(L[0]*0.82,H/2,L[1]*0.82)});
+    });
+    for(var h=0.9;h<H;h+=1.5){
+      var sh=1.55*(1-h/H*0.4);
+      tmp.push({g:bx(sh*1.7,0.09,0.09), m:mtx(0,h,-sh*0.86)});
+      tmp.push({g:bx(sh*1.7,0.09,0.09), m:mtx(0,h, sh*0.86)});
+      tmp.push({g:bx(0.09,0.09,sh*1.7), m:mtx(-sh*0.86,h,0)});
+      tmp.push({g:bx(0.09,0.09,sh*1.7), m:mtx( sh*0.86,h,0)});
+      tmp.push({g:bx(sh*2.0,0.06,0.06), m:mtx(0,h+0.75,-sh*0.86,0,0,0.52)});
+      tmp.push({g:bx(sh*2.0,0.06,0.06), m:mtx(0,h+0.75, sh*0.86,0,0,-0.52)});
+    }
+    for(var t=0;t<3;t++){
+      var a=t/3*6.283;
+      tmp.push({g:bx(0.28,1.6,0.15), m:mtx(Math.cos(a)*1.3,H-1.7,Math.sin(a)*1.3,0,-a,0)});
+    }
+    tmp.push({g:bx(0.055,2.4,0.055), m:mtx(0,H+1.2,0)});
+    var g=merge(tmp); g.applyMatrix4(mtx(-30,y,-1.5)); push('metalD', g);
+  })();
+
+  // 태양광 : 2열 × 5장으로 축소, 강관 가대 + 콘크리트 기초
+  for(var r=0;r<2;r++) for(var cI=0;cI<5;cI++){
+    var sx=-16+cI*2.6, sz=-1+r*2.6;
+    push('solar',  bx(2.45,0.06,1.35), mtx(sx, y+1.05, sz, -0.44,0,0));
+    push('metalD', new C(0.05,0.05,1.05,8), mtx(sx-1.0, y+0.55, sz-0.5));
+    push('metalD', new C(0.05,0.05,1.05,8), mtx(sx+1.0, y+0.55, sz-0.5));
+    push('metalD', new C(0.05,0.05,0.55,8), mtx(sx-1.0, y+0.30, sz+0.5));
+    push('metalD', new C(0.05,0.05,0.55,8), mtx(sx+1.0, y+0.30, sz+0.5));
+    push('roofG',  bx(0.6,0.22,0.6), mtx(sx-1.0, y+0.11, sz-0.5));
+    push('roofG',  bx(0.6,0.22,0.6), mtx(sx+1.0, y+0.11, sz-0.5));
+  }
+
+  // 낮은 돔 (사진의 원형 커버)
+  push('concD', new THREE.SphereGeometry(1.6,20,8,0,6.283,0,Math.PI/2), mtx(-8,y,3.5,0,0,0,1,0.42,1));
+  push('metalD', new C(1.7,1.7,0.12,20), mtx(-8,y+0.06,3.5));
+})();
+
+/* ==========================================================================
+   정문 — 커튼월 · 캐노피 · 출입구 · 계단
+   ========================================================================== */
+(function(){
+  /* 정문은 원래 +z 기준으로 짜여 있다. 좌표를 다시 쓰는 대신
+     전역 변환으로 180° 돌려 북면(-z)에 그대로 옮긴다. */
+  XF = new THREE.Matrix4().makeTranslation(-1,0,0)
+         .multiply(new THREE.Matrix4().makeRotationY(Math.PI));
+  var zf=13.62, cw=9.8, y0=4.5, cwH=TOP-y0-2.6;
+
+  push('glassC', new THREE.PlaneGeometry(cw,cwH), mtx(-1, y0+cwH/2, zf-0.06));
+  // 멀리언 격자
+  var nx=6, ny=Math.round(cwH/1.55);
+  for(var i=0;i<=nx;i++) push('mullion', bx(0.1,cwH,0.16), mtx(-1-cw/2+cw*i/nx, y0+cwH/2, zf+0.03));
+  for(var j=0;j<=ny;j++) push('mullion', bx(cw,0.09,0.14), mtx(-1, y0+cwH*j/ny, zf+0.02));
+  push('frame', bx(cw+0.7,0.36,0.44), mtx(-1, y0+cwH+0.18, zf-0.02));
+  push('frame', bx(0.42,cwH+0.4,0.44), mtx(-1-cw/2-0.21, y0+cwH/2, zf-0.02));
+  push('frame', bx(0.42,cwH+0.4,0.44), mtx(-1+cw/2+0.21, y0+cwH/2, zf-0.02));
+
+  // 검정 캐노피 : 상판 + 전면 페이시아 + 하부 소핏 + 사재
+  push('black', bx(16.0,0.20,3.8), mtx(-1,5.06,zf+1.5));
+  push('black', bx(16.0,1.45,0.22), mtx(-1,4.28,zf+3.29));
+  push('dark',  bx(15.6,0.10,3.6), mtx(-1,3.50,zf+1.5));
+  push('sgKanji', new THREE.PlaneGeometry(11.6,2.90), mtx(-1, 4.30, zf+3.41));
+  /* 캐노피 사재 : 벽 정착점(높이 6.4)에서 캐노피 앞단(4.52, 앞으로 2.85m)까지
+     좌표에서 길이와 각도를 역산해 잇는다. 눈대중으로 두면 허공을 향한다. */
+  /* 캐노피 위 난간 : 사재 대신 캐노피 상부를 두르는 낮은 금속 난간.
+     사진에서도 비스듬한 막대가 아니라 난간처럼 보인다. */
+  (function(){
+    var ry2=5.26, zf2=zf+2.86, W2=15.6;
+    push('metal', bx(W2,0.06,0.06), mtx(-1, ry2+0.62, zf2));           // 상부 손잡이
+    push('metal', bx(W2,0.05,0.05), mtx(-1, ry2+0.34, zf2));           // 중간대
+    for(var i=0;i<=10;i++)
+      push('metal', new C(0.026,0.026,0.66,8), mtx(-1-W2/2+W2*i/10, ry2+0.33, zf2));
+    // 양 끝을 벽까지 접어 마감
+    [-1,1].forEach(function(sg){
+      push('metal', bx(0.06,0.06,2.9), mtx(-1+sg*W2/2, ry2+0.62, zf+1.4));
+      push('metal', new C(0.026,0.026,0.66,8), mtx(-1+sg*W2/2, ry2+0.33, zf+0.3));
+    });
+  })();
+
+  // 커튼월 위·아래 남는 개구부를 화강석으로 막는다
+  panel('stone','+z', zf, -6.4, 4.4, y0+cwH+0.36, TOP, [1.80,1.80]);
+  panel('stone','+z', zf, -6.4, 4.4, 3.62, y0, [1.80,1.80]);
+
+  // 상부 사인 : 실제 글자 (공대3호관 + 학과 나열)
+  push('sgMain', new THREE.PlaneGeometry(10.6,2.39), mtx(-1, TOP-1.30, zf+0.07));
+
+  /* 출입구 : 실내 바닥이 계단 꼭대기 높이에 있다.
+     문턱(FY)을 계단 높이에 맞춰야 문 아랫부분이 계단에 파묻히지 않는다. */
+  var FY=6*0.185;                       // 계단 6단 × 단높이
+  push('interior', bx(11.6,3.4,0.3), mtx(-1, FY+1.72, zf-0.16));
+  push('glassD', new THREE.PlaneGeometry(11.0,3.1), mtx(-1, FY+1.67, zf+0.03));
+  for(var d=0;d<5;d++) push('mullion', bx(0.13,3.3,0.2), mtx(-1+(d-2)*2.3, FY+1.67, zf+0.09));
+  push('mullion', bx(11.3,0.13,0.2), mtx(-1, FY+3.27, zf+0.09));
+  push('mullion', bx(11.3,0.13,0.2), mtx(-1, FY+0.10, zf+0.09));
+  /* 손잡이 : 세로 봉 + 문에 붙는 받침 2개. 문짝이 맞물리는 선 양옆에 둔다 */
+  function pull(px, py, pz){
+    push('metal', new C(0.030,0.030,1.20,12), mtx(px, py, pz+0.13));
+    push('metal', new C(0.018,0.018,0.13,8),  mtx(px, py+0.52, pz+0.065, Math.PI/2,0,0));
+    push('metal', new C(0.018,0.018,0.13,8),  mtx(px, py-0.52, pz+0.065, Math.PI/2,0,0));
+  }
+  [-3.3,1.3].forEach(function(mx){ pull(mx-0.34, FY+0.90, zf+0.10); pull(mx+0.34, FY+0.90, zf+0.10); });
+  // 캐노피 아래 다운라이트
+  for(var dl=0;dl<6;dl++) push('frame', new C(0.16,0.16,0.06,12), mtx(-1+(dl-2.5)*2.5, 3.44, zf+1.5));
+
+  /* 진입부 : 왼쪽 계단 6단, 오른쪽 오르막 램프, 사이 화단 옹벽
+     (사진 z_27 · z_36 참조) */
+  /* 계단 중심은 반드시 문 중심과 같아야 한다.
+     문은 로컬 x=-1 에 그려지므로 계단도 -1 이다. */
+  var st=6, sw=11.0, sx=-1;
+  for(var i2=0;i2<st;i2++)
+    push('concD', bx(sw,0.185,0.46), mtx(sx, FY-0.0925-i2*0.185, zf+1.55+i2*0.46));
+  push('concD', bx(sw+0.4,0.24,2.0), mtx(sx, FY-0.12, zf+0.60));   // 문 앞 참
+  // 계단 양옆 화강석 볼벽
+  push('stone', bx(0.5,1.35+FY,3.9), mtx(sx-sw/2-0.25, (1.35+FY)/2-0.55, zf+2.3));
+  push('stone', bx(0.5,1.35+FY,3.9), mtx(sx+sw/2+0.25, (1.35+FY)/2-0.55, zf+2.3));
+
+  /* 난간 공통 : 기둥 + 상부 손잡이 + 중간대 */
+  function railZ(px, z0, z1, y0v, y1v){          // z 방향으로 뻗는 난간
+    var n=Math.max(2, Math.round(Math.abs(z1-z0)/0.95));
+    for(var i=0;i<=n;i++){
+      var t=i/n, pz=z0+(z1-z0)*t, yy=y0v+(y1v-y0v)*t;
+      push('metal', new C(0.026,0.026,1.02,8), mtx(px, yy+0.51, pz));
+    }
+    var len=Math.hypot(z1-z0, y1v-y0v), ang=Math.atan2(y1v-y0v, z1-z0);
+    push('metal', new C(0.042,0.042,len,10), mtx(px,(y0v+y1v)/2+1.02,(z0+z1)/2, Math.PI/2-ang,0,0));
+    push('metal', new C(0.026,0.026,len,8),  mtx(px,(y0v+y1v)/2+0.56,(z0+z1)/2, Math.PI/2-ang,0,0));
+  }
+  function railX(pz, x0, x1, yy){                // x 방향(수평) 난간
+    var n=Math.max(2, Math.round(Math.abs(x1-x0)/0.95));
+    for(var i=0;i<=n;i++)
+      push('metal', new C(0.026,0.026,1.02,8), mtx(x0+(x1-x0)*i/n, yy+0.51, pz));
+    push('metal', new C(0.042,0.042,Math.abs(x1-x0),10), mtx((x0+x1)/2, yy+1.02, pz, 0,0,Math.PI/2));
+    push('metal', new C(0.026,0.026,Math.abs(x1-x0),8),  mtx((x0+x1)/2, yy+0.56, pz, 0,0,Math.PI/2));
+  }
+  // 계단 양옆 난간 (경사)
+  var zTop=zf+1.55, zBot=zf+1.55+(st-1)*0.46;
+  railZ(sx-sw/2+0.3, zTop, zBot, FY, 0.09);
+  railZ(sx+sw/2-0.3, zTop, zBot, FY, 0.09);
+  // 문 앞 참 난간 : 양옆만 두르고 통행 폭은 비운다
+  railZ(sx-sw/2+0.3, zf-0.35, zTop, FY, FY);
+  railZ(sx+sw/2-0.3, zf-0.35, zTop, FY, FY);
+  railX(zf-0.35, sx-sw/2+0.3, sx-3.1, FY);
+  railX(zf-0.35, sx+3.1, sx+sw/2-0.3, FY);
+
+  /* 오르막 램프 : 화면 오른쪽(로컬 -x)에서 진입해 벽과 나란히 올라
+     계단참으로 붙는다. 정면으로 마주 오르는 것보다 사진에 가깝다. */
+  (function(){
+    var RW=2.7, RL=10.5, RH=6*0.185;              // 폭 · 길이 · 오를 높이(문턱과 같게)
+    var rx0=sx+sw/2+0.6, rcx=rx0+RL/2, rz=zf+2.0;
+    var slope=Math.atan(RH/RL);
+    push('concD', bx(RL+0.6,0.26,RW), mtx(rcx, RH/2, rz, 0,0, -slope));
+    // 양옆 화강석 옹벽 (오르막을 따라 높이가 변한다)
+    for(var k=0;k<9;k++){
+      var t=(k+0.5)/9, hx=rcx+RL/2-RL*t, hh=0.55+RH*t;
+      push('stone', bx(RL/9+0.02, hh, 0.34), mtx(hx, hh/2, rz-RW/2-0.17));
+      push('stone', bx(RL/9+0.02, hh, 0.34), mtx(hx, hh/2, rz+RW/2+0.17));
+    }
+    // 난간 : 손잡이 + 동자
+    [-1,1].forEach(function(sg){
+      var hz=rz+sg*(RW/2+0.17);
+      push('metal', new C(0.042,0.042,RL+0.4,10), mtx(rcx, RH/2+0.95, hz, 0,0, Math.PI/2-slope));
+      for(var b2=0;b2<7;b2++){
+        var t2=b2/6, bxp=rcx+RL/2-RL*t2;
+        push('metal', new C(0.026,0.026,0.92,8), mtx(bxp, 0.55+RH*t2+0.46, hz));
+      }
+    });
+    // 진입부 연석
+    push('concD', bx(1.2,0.22,RW+0.9), mtx(rcx+RL/2+0.6, 0.11, rz));
+  })();
+
+  /* 정문 왼쪽 초록 아치 자전거 보관소 — 길이를 벽과 나란히 (사진 z_27) */
+  (function(){
+    var bcx=sx-sw/2-9.0, bz=zf+3.2, BL=12.0, BR=2.0, bays=8;
+    for(var b1=0;b1<bays;b1++){
+      var t=(b1+0.5)/bays, px2=bcx-BL/2+BL*t;
+      for(var k=0;k<7;k++){
+        var am=Math.PI*(k+0.5)/7;
+        var du=BR*Math.cos(am), dy=2.05+BR*Math.sin(am);
+        push('green', bx(BL/bays, 0.05, BR*Math.PI/7*1.06),
+             mtx(px2, dy, bz+du, Math.PI/2-am, 0, 0));
+      }
+    }
+    for(var b2=0;b2<=bays;b2++){
+      var rib=new THREE.TorusGeometry(BR,0.055,6,18,Math.PI).toNonIndexed();
+      rib.applyMatrix4(mtx(bcx-BL/2+BL*b2/bays, 2.05, bz, 0, Math.PI/2, 0));
+      push('metalD', rib);
+    }
+    for(var c1=0;c1<=3;c1++){
+      var cx2=bcx-BL/2+0.6+(BL-1.2)*c1/3;
+      [-1,1].forEach(function(sg){
+        push('metalD', new C(0.07,0.08,2.1,10), mtx(cx2, 1.03, bz+sg*BR*0.97));
+        push('concD',  bx(0.42,0.16,0.42), mtx(cx2, 0.08, bz+sg*BR*0.97));
+      });
+    }
+    for(var rk=0;rk<9;rk++){
+      var g3=new THREE.TorusGeometry(0.3,0.032,6,12,Math.PI).toNonIndexed();
+      g3.applyMatrix4(mtx(bcx-BL/2+1.0+rk*1.25, 0.3, bz, 0, Math.PI/2, 0));
+      push('metalD', g3);
+    }
+  })();
+
+  XF = null;
+})();
+
+/* ==========================================================================
+   부출입구 3개소 (후문 · 동문 · 서문)
+   각각 : 개구부 암부 · 유리 자동문 2짝 · 문틀 · 캐노피 · 계단 · 안내판
+   ========================================================================== */
+function sideEntrance(dir, c, u, opt){
+  opt=opt||{};
+  var ry=ROT(dir);
+  var w=opt.w||5.4, h=opt.h||DOOR_H, sk=opt.sign||'sgBack';
+  /* 실내 바닥은 지면보다 높다. 문턱을 계단 높이(YB)만큼 올리지 않으면
+     문 아랫부분이 계단에 파묻힌다. */
+  var RS2=0.175;
+  var NST=opt.bare?0:(opt.recess?6:(opt.steps===undefined?3:opt.steps));
+  var YB=NST*RS2;
+  /* dn : + 는 벽 바깥, - 는 벽 안쪽 (W가 면 방향을 이미 처리한다)
+     dy 는 문턱(YB) 기준. 지면 기준 부재는 raw / rawC 를 쓴다. */
+  function put(key, geo, du, dy, dn, extraRot){
+    var pp=W(dir,c,u+du, dy+YB, dn);
+    push(key, geo, mtx(pp[0],pp[1],pp[2], extraRot||0, ry, 0));
+  }
+  function putD(key, geo, du, dy, dn){      // 축을 벽에서 나오는 방향으로 눕힌다
+    var pp=W(dir,c,u+du, dy+YB, dn);
+    var zAx=(dir==='+z'||dir==='-z');
+    push(key, geo, zAx ? mtx(pp[0],pp[1],pp[2], Math.PI/2,0,0)
+                       : mtx(pp[0],pp[1],pp[2], 0,0,-Math.PI/2));
+  }
+  function boxAt(key, bw,bh,bd, du,dy,dn){
+    var g=(dir==='+z'||dir==='-z')? bx(bw,bh,bd) : bx(bd,bh,bw);
+    var pp=W(dir,c,u+du, dy+YB, dn);
+    push(key, g, mtx(pp[0],pp[1],pp[2]));
+  }
+  function raw(key, bw,bh,bd, du,dy,dn){          // 지면 기준
+    var g=(dir==='+z'||dir==='-z')? bx(bw,bh,bd) : bx(bd,bh,bw);
+    var pp=W(dir,c,u+du, dy, dn);
+    push(key, g, mtx(pp[0],pp[1],pp[2]));
+  }
+  function rawC(key, geo, du, dy, dn, extraRot){
+    var pp=W(dir,c,u+du, dy, dn);
+    push(key, geo, mtx(pp[0],pp[1],pp[2], extraRot||0, ry, 0));
+  }
+  /* 경사 손잡이 : 바깥 방향으로 뻗으며 내려간다.
+     회전축이 면마다 달라 한 축으로만 돌리면 엉뚱한 방향을 향한다. */
+  function rawTilt(key, th, len, du, dy, dn, sl){
+    var zAx=(dir==='+z'||dir==='-z');
+    var g = zAx ? bx(th, th, len) : bx(len, th, th);
+    var sgn=(dir==='+z'||dir==='+x')?1:-1;
+    var pp=W(dir,c,u+du, dy, dn);
+    push(key, g, zAx ? mtx(pp[0],pp[1],pp[2], sgn*sl, 0, 0)
+                     : mtx(pp[0],pp[1],pp[2], 0, 0, -sgn*sl));
+  }
+
+  /* 리세스를 2m 로 깊게 파면 밖에서 문이 안 보이고 검은 구멍만 남는다.
+     사진에서도 문은 벽면에서 1m 안쪽 정도다. */
+  var DP = opt.recess ? 0.95 : 0.5;
+  /* 유리문이 놓이는 깊이. 실내 암부는 반드시 이보다 더 안쪽에 두어야 한다.
+     암부 박스가 문 앞까지 차지하면 문이 그 안에 파묻혀 겹쳐 보인다. */
+  var DZ = opt.recess ? -(DP-0.30) : -0.05;
+  boxAt('interior', w+0.1, h, 1.6, 0, h/2, DZ-0.10-0.8);
+
+  if(opt.recess){
+    /* 벽 안으로 파인 현관 (사진의 동문)
+       벽돌 옆벽 2면 + 벽돌 천장 + 화강석 계단 + 스테인리스 문틀 */
+    boxAt('brickF', 0.30, h+0.6, DP, -(w/2+0.52), h/2+0.20, -DP/2);   // 좌 옆벽
+    boxAt('brickF', 0.30, h+0.6, DP,  (w/2+0.52), h/2+0.20, -DP/2);   // 우 옆벽
+    boxAt('brickF', w+1.0, 0.24, DP, 0, h+0.62, -DP/2);               // 천장(벽돌 소핏)
+    boxAt('concD',  w+1.0, 0.24, DP, 0, -0.10, -DP/2);                // 바닥 화강석
+    /* 계단 : 문턱(YB)에서 지면(0)으로 내려간다. 지면 기준 좌표를 쓴다. */
+    var NS=NST, TR=0.48;
+    raw('concD', w+2.8, 0.20, 1.0, 0, YB-0.10, 0.30);            // 문 앞 참
+    for(var st2=0; st2<NS; st2++)
+      raw('concD', w+2.8, RS2, TR, 0, YB-RS2/2-st2*RS2, 0.80+st2*TR);
+    raw('concD', 0.55, 1.25+YB, NS*TR+1.0, -(w+2.8)/2, (1.25+YB)/2-0.6, 0.30+NS*TR/2);
+    raw('concD', 0.55, 1.25+YB, NS*TR+1.0,  (w+2.8)/2, (1.25+YB)/2-0.6, 0.30+NS*TR/2);
+    var slE=Math.atan(RS2/TR);
+    [-1,1].forEach(function(sg){
+      var du2=sg*((w+2.8)/2-0.78);
+      for(var q2=0;q2<=NS;q2++)
+        rawC('metal', new C(0.024,0.024,0.92,8), du2, YB-RS2*q2+0.46, 0.55+q2*TR);
+      rawTilt('metal', 0.05, Math.hypot(NS*TR, NS*RS2)+0.3, du2,
+              YB-RS2*NS/2+0.92, 0.55+NS*TR/2, slE);
+    });
+  }
+  /* 개구부 둘레 마감 : 구멍(±(w/2+0.16))과 문(±w/2) 사이를 빈틈없이 채운다.
+     여기를 비워두면 벽돌 단면이 유리에 바로 닿아 겹쳐 보인다. */
+  boxAt('reveal', 0.34, h+0.40, 0.42, -(w/2+0.17), h/2+0.08, -0.16);
+  boxAt('reveal', 0.34, h+0.40, 0.42,  (w/2+0.17), h/2+0.08, -0.16);
+  boxAt('reveal', w+0.68, 0.30, 0.42, 0, h+0.13, -0.16);
+  boxAt('conc',   w+1.30, 0.26, 0.26, 0, h+0.34, 0.13);        // 상부 인방
+  boxAt('stone',  0.42, h+0.50, 0.30, -(w/2+0.21), h/2+0.10, 0.06);   // 문설주
+  boxAt('stone',  0.42, h+0.50, 0.30,  (w/2+0.21), h/2+0.10, 0.06);
+
+  // 유리문 + 문틀 + 손잡이
+  /* 문짝 : 어두운 유리 한 장만 두면 검은 구멍처럼 보인다.
+     밝은 스테인리스 프레임과 상부 고정창으로 형태를 만든다. */
+  put('glassD', new THREE.PlaneGeometry(w-0.24, h-0.55), 0, (h-0.55)/2+0.10, DZ);
+  put('glassD', new THREE.PlaneGeometry(w-0.24, 0.52),   0, h-0.34, DZ);   // 상부 고정창
+  /* 벽 구멍은 DOOR_TOP 까지 뚫려 있다. 문 높이(h)와 차이만큼
+     상부를 막지 않으면 그 틈으로 안쪽이 그대로 보인다. */
+  /* 문턱 아래(지면~YB)도 벽 구멍이 뚫린 채였다. 여기를 막지 않으면
+     계단 옆으로 실내가 들여다보인다. */
+  if(YB>0.02){
+    var baseZ = opt.recess ? -0.30 : -0.06;
+    boxAt('concD', w+0.34, YB+0.08, 0.30, 0, -YB/2-0.02, baseZ);
+    boxAt('stone', w+0.40, 0.14, 0.34, 0, -0.05, baseZ+0.02);
+  }
+  var gapH=(DOOR_TOP-YB)-h;
+  if(gapH>0.02){
+    var fillZ = -0.08;                            // 벽면에서 마감해 뚫린 느낌을 없앤다
+    boxAt('dark', w+0.42, gapH+0.20, 0.30, 0, h+gapH/2+0.04, fillZ);
+    boxAt('mullion', w+0.38, 0.10, 0.28, 0, h+0.03, fillZ+0.02);
+  }
+  var FZ = DZ + 0.11;
+  boxAt('frame', 0.15, h-0.16, 0.20, 0, (h-0.16)/2+0.08, FZ);          // 중앙 문선
+  boxAt('frame', 0.13, h-0.16, 0.20, -w/2+0.10, (h-0.16)/2+0.08, FZ);
+  boxAt('frame', 0.13, h-0.16, 0.20,  w/2-0.10, (h-0.16)/2+0.08, FZ);
+  boxAt('frame', w-0.10, 0.15, 0.20, 0, h-0.10, FZ);                   // 문 머리
+  boxAt('frame', w-0.10, 0.13, 0.20, 0, h-0.62, FZ);                   // 상부 고정창 분할
+  boxAt('frame', w-0.10, 0.12, 0.20, 0, 1.02, FZ);                     // 중간 가로살
+  boxAt('frame', w-0.10, 0.14, 0.20, 0, 0.10, FZ);                     // 문 하부
+  // 손잡이 : 문짝이 맞물리는 선 양옆에 세로 봉 + 받침 2개씩
+  /* 손잡이 : 세로 봉은 그대로, 받침은 벽에서 나오는 방향으로 눕혀야 한다.
+     put()의 extraRot 은 면에 따라 축이 달라 그대로 쓰면 어긋난다. */
+  [-0.30, 0.30].forEach(function(hx){
+    put('metal', new C(0.028,0.028,1.05,12), hx, 1.32, FZ+0.15);
+    putD('metal', new C(0.016,0.016,0.16,8), hx, 1.80, FZ+0.08);
+    putD('metal', new C(0.016,0.016,0.16,8), hx, 0.84, FZ+0.08);
+  });
+  if(opt.recess){                                              // 개구부 테두리 스테인리스
+    boxAt('metal', w+0.5, 0.14, 0.2, 0, h+0.05, DZ+0.14);
+    boxAt('metal', 0.14, h+0.2, 0.2, -w/2-0.07, h/2, DZ+0.14);
+    boxAt('metal', 0.14, h+0.2, 0.2,  w/2+0.07, h/2, DZ+0.14);
+  }
+
+  // 캐노피
+  if(opt.recess || opt.bare){ /* 리세스형·후문은 캐노피가 없다 */ }
+  else if(opt.arch){
+    /* 파란 아치 볼트 통로 (사진의 서문)
+       면마다 통로가 뻗는 축이 달라 회전을 명시적으로 계산한다.
+       볼트는 각도별 평판을 이어 붙여 만든다 — 실린더 회전보다 제어가 쉽다. */
+    var AR=w/2+1.5, L=opt.archLen||12, bays=8, seg=11, yb=h+0.55;
+    var axisX=(dir==='+x'||dir==='-x');
+    var os=(dir==='+z'||dir==='+x')?1:-1;
+    function wp(du,dn){ return axisX ? [c+os*dn, 0, u+du] : [u+du, 0, c+os*dn]; }
+    var bI,k;
+    for(bI=0;bI<bays;bI++){
+      var dz=1.0+L*(bI+0.5)/bays;
+      for(k=0;k<seg;k++){
+        var am=Math.PI*(k+0.5)/seg;
+        var du=AR*Math.cos(am), dy=yb+AR*Math.sin(am), arc=AR*Math.PI/seg*1.03;
+        var P=wp(du,dz);
+        if(axisX) push('blue', bx(L/bays,0.05,arc), mtx(P[0],dy,P[2], Math.PI/2-am,0,0));
+        else      push('blue', bx(arc,0.05,L/bays), mtx(P[0],dy,P[2], 0,0, am-Math.PI/2));
+      }
+    }
+    for(bI=0;bI<=bays;bI++){                       // 방사형 리브
+      var dz2=1.0+L*bI/bays;
+      var rib=new THREE.TorusGeometry(AR,0.075,7,22,Math.PI).toNonIndexed();
+      var Q=wp(0,dz2);
+      rib.applyMatrix4(mtx(Q[0],yb,Q[2], 0, axisX?Math.PI/2:0, 0));
+      push('blueSt', rib);
+    }
+    [0.15,0.34,0.5,0.66,0.85].forEach(function(t){ // 종방향 도리
+      var am2=Math.PI*t, du2=AR*Math.cos(am2), dy2=yb+AR*Math.sin(am2);
+      var P2=wp(du2, 1.0+L/2);
+      push('blueSt', axisX? bx(L,0.06,0.06) : bx(0.06,0.06,L), mtx(P2[0],dy2,P2[2]));
+    });
+    for(k=0;k<=2;k++){                             // 원형 기둥 쌍
+      var dz3=1.7+(L-1.4)*k/2;
+      [-1,1].forEach(function(g5){
+        var P3=wp(g5*AR*0.97, dz3);
+        push('blueSt', new C(0.13,0.15,yb+0.15,12), mtx(P3[0],(yb+0.15)/2,P3[2]));
+        push('concD',  bx(0.72,0.26,0.72), mtx(P3[0],0.13,P3[2]));
+        push('metalD', new C(0.19,0.19,0.10,12), mtx(P3[0],0.31,P3[2]));
+      });
+    }
+  } else {
+    boxAt(opt.canopy||'blue', w+2.6, 0.10, 2.8, 0, h+0.80, 1.40);
+    boxAt('metal', w+2.8, 0.14, 0.14, 0, h+0.76, 2.78);
+    boxAt('metal', 0.14, 0.14, 2.8, -(w+2.6)/2, h+0.78, 1.40);
+    boxAt('metal', 0.14, 0.14, 2.8,  (w+2.6)/2, h+0.78, 1.40);
+    put('metal', bx(0.09,0.09,2.3), -(w+2.2)/2, h+1.35, 1.10, -0.60);
+    put('metal', bx(0.09,0.09,2.3),  (w+2.2)/2, h+1.35, 1.10, -0.60);
+  }
+
+  /* 계단 : 문턱에서 지면으로 내려간다 (리세스형은 위에서 처리) */
+  if(!opt.recess && !opt.bare){
+    var TR2=0.44;
+    raw('concD', w+2.2, 0.20, 0.9, 0, YB-0.10, 0.30);
+    for(var i=0;i<NST;i++)
+      raw('concD', w+2.2, RS2, TR2, 0, YB-RS2/2-i*RS2, 0.75+i*TR2);
+    var slW=Math.atan(RS2/TR2);
+    [-1,1].forEach(function(sg){
+      var dx2=sg*((w+2.2)/2-0.34);
+      for(var q=0;q<=NST;q++)
+        rawC('metal', new C(0.024,0.024,0.92,8), dx2, YB-RS2*q+0.46, 0.50+q*TR2);
+      rawTilt('metal', 0.05, Math.hypot(NST*TR2, NST*RS2)+0.3, dx2,
+              YB-RS2*NST/2+0.92, 0.50+NST*TR2/2, slW);
+    });
+  }
+
+  // 안내판
+  /* 안내판은 문 인방 위와 2층 창대 아래 사이의 빈 띠에 넣는다.
+     문턱(YB)이 올라간 만큼 이 띠도 좁아지므로 판을 작게 만든다. */
+  var lintelTop = h+0.38, upperSill = (FH+SILL) - YB - 0.10;
+  var SY = (lintelTop + upperSill)/2;
+  var SH = Math.max(0.52, Math.min(0.80, upperSill-lintelTop-0.16));
+  put(sk, new THREE.PlaneGeometry(SH*3.55, SH), 0, SY, 0.085);
+  boxAt('metalD', SH*3.7, SH+0.12, 0.09, 0, SY, 0.03);
+}
+
+/* 후문 — 남면 중앙. 벽 아래로 초록 유리 복도가 길게 지난다 */
+sideEntrance('+z',   8, doorU('+z',8),  {sign:'sgBack', w:4.6, h:DOOR_H, bare:true});
+/* 서문 — 서측 단부. 파란 아치 볼트 통로 */
+sideEntrance('-x', -44, doorU('-x',-44), {sign:'sgWest', w:4.0, h:DOOR_H, arch:true, archLen:12, steps:6});
+/* 동문 — 동측 단부. 벽 안으로 파인 리세스 현관 */
+sideEntrance('+x',  44, doorU('+x',44),  {sign:'sgEast', w:3.4, h:DOOR_H, recess:true});
+
+/* ==========================================================================
+   지상 부속 — 파란 캐노피 · 자전거 보관소 · 배관 · 벽면 실외기
+   ========================================================================== */
+(function(){
+  /* ── 초록 유리 복도 : 벽 아래를 따라 길게 (사진의 후문 주변) ──
+     콘크리트 파라펫 + 초록 유리 격자 + 얕은 곡면 반투명 지붕 */
+  function corridor(dir, c, u0, u1, dep, opt){
+    opt=opt||{};
+    /* 총 높이는 1층 창대(SILL=1.52)보다 낮아야 한다. 사진에서도
+       초록 플라스틱 지붕 위로 방범창이 그대로 보인다. */
+    var lo=Math.min(u0,u1), hi=Math.max(u0,u1), L=hi-lo, H=opt.h||1.30, PW2=opt.par||0.55;
+    var ry=ROT(dir), zAx=(dir==='+z'||dir==='-z');
+    /* 박스는 치수로 방향을 이미 맞췄으므로 ry를 걸면 축이 꼬인다.
+       경사(rr)만 면에 맞는 축으로 준다. 판(Plane)은 atP로 따로 처리. */
+    function at(key, geo, du, dy, dn, rr){
+      var p=W(dir,c,du,dy,dn);
+      push(key, geo, mtx(p[0],p[1],p[2], zAx?(rr||0):0, 0, zAx?0:(rr||0)));
+    }
+    function atP(key, geo, du, dy, dn){
+      var p=W(dir,c,du,dy,dn);
+      push(key, geo, mtx(p[0],p[1],p[2], 0, ry, 0));
+    }
+    // 하부 콘크리트 옹벽 + 갓돌
+    at('concD', zAx? bx(L,PW2,dep) : bx(dep,PW2,L), (lo+hi)/2, PW2/2, dep/2);
+    at('concD', zAx? bx(L+0.1,0.10,dep+0.16) : bx(dep+0.16,0.10,L+0.1), (lo+hi)/2, PW2+0.05, dep/2);
+    // 수직 멀리언 (짙은 브론즈) + 유리 + 가로살
+    var n=Math.round(L/1.45);
+    for(var i=0;i<=n;i++) at('dark', bx(0.10,H-PW2,0.10), lo+L*i/n, PW2+(H-PW2)/2, dep-0.06);
+    atP('green', new THREE.PlaneGeometry(L,H-PW2-0.06), (lo+hi)/2, PW2+(H-PW2)/2, dep-0.02);
+    at('dark', zAx? bx(L,0.08,0.10) : bx(0.10,0.08,L), (lo+hi)/2, PW2+0.34, dep-0.06);
+    at('dark', zAx? bx(L,0.08,0.10) : bx(0.10,0.08,L), (lo+hi)/2, H-0.07,    dep-0.06);
+    /* 지붕 : 벽에서 바깥으로 완만히 내려가는 편경사 (사진의 형태).
+       깊은 반원 볼트가 아니다. */
+    var rise=0.30, sg2=(dir==='+z'||dir==='+x')?1:-1, slope=sg2*Math.atan(rise/dep);
+    at('green', zAx? bx(L,0.05,dep*1.10) : bx(dep*1.10,0.05,L), (lo+hi)/2, H+0.22-rise/2, dep*0.52, zAx? -slope : slope);
+    var nr=Math.max(1,Math.round(L/2.2));
+    for(var k=0;k<=nr;k++)
+      at('dark', zAx? bx(0.07,0.07,dep*1.10) : bx(dep*1.10,0.07,0.07), lo+L*k/nr, H+0.25-rise/2, dep*0.52, zAx? -slope : slope);
+    at('dark', zAx? bx(L,0.11,0.13) : bx(0.13,0.11,L), (lo+hi)/2, H+0.22-rise, dep*1.06);   // 처마 홈통
+    // 마구리 유리 (양 끝)
+    if(opt.ends!==false) [lo,hi].forEach(function(ue){
+      var pe=W(dir,c,ue,PW2+(H-PW2)/2, dep/2);
+      push('green', new THREE.PlaneGeometry(dep-0.16,H-PW2-0.06), mtx(pe[0],pe[1],pe[2],0, ry+Math.PI/2, 0));
+      var pd=W(dir,c,ue,H-0.09, dep/2);
+      push('dark', zAx? bx(0.10,0.10,dep) : bx(dep,0.10,0.10), mtx(pd[0],pd[1],pd[2]));
+    });
+  }
+  (function(){
+    var du=doorU('+z',8), hw=2.45;                 // 문 반폭 + 여유
+    corridor('+z', 8, -32, du-hw, 2.6);            // 후문 좌측
+    corridor('+z', 8, du+hw, 32,  2.6);            // 후문 우측
+  })();
+  /* 서문 지하 진입 선룸 : 문 왼쪽으로 길게 (사진 w5_17 · w5_19) */
+  (function(){
+    var du=doorU('-x',-44);
+    corridor('-x', -44, -19.0, du-3.6, 2.45, {h:2.86, par:1.05});
+  })();
+
+  /* ── 수직 배관 : 벽기둥마다 (사진에 촘촘하다) ─────────── */
+  /* 배관 : 파사드와 같은 모듈 계산으로 창 위치를 구한 뒤,
+     창이 없는 빈 벽 구간의 한가운데에만 세운다.
+     좌표를 손으로 찍으면 창 배치가 바뀔 때마다 겹친다. */
+  function winSpans(lo,hi){
+    var L=hi-lo, n=Math.max(1,Math.round(L/MODL)), st=L/n, k=st/MODL, out=[];
+    for(var m=0;m<n;m++){
+      var b0=lo+st*m;
+      var c1=b0+(MOD_G*0.5+MOD_W/2)*k, w1=MOD_W*k;
+      var c2=b0+(MOD_G*0.5+MOD_W+MOD_G+MOD_N/2)*k, w2=MOD_N*k;
+      out.push([c1-w1/2-0.35, c1+w1/2+0.35]);
+      out.push([c2-w2/2-0.35, c2+w2/2+0.35]);
+    }
+    return out;
+  }
+  function pipeSpots(lo,hi,extra,maxN){
+    var occ=winSpans(lo,hi).concat(extra||[]);
+    occ.sort(function(a,b){ return a[0]-b[0]; });
+    var gaps=[], cur=lo;
+    occ.forEach(function(o){ if(o[0]-cur>0.85) gaps.push([cur,o[0]]); cur=Math.max(cur,o[1]); });
+    if(hi-cur>0.85) gaps.push([cur,hi]);
+    gaps.sort(function(a,b){ return (b[1]-b[0])-(a[1]-a[0]); });
+    var out=[];
+    for(var i=0;i<gaps.length && out.length<maxN;i++) out.push((gaps[i][0]+gaps[i][1])/2);
+    return out;
+  }
+  var pipes=[];
+  pipeSpots(-44,44,[[-3.4,3.4]],4).forEach(function(x){ pipes.push([x, 8.24]); });
+  pipeSpots(-28,-11,null,1).forEach(function(x){ pipes.push([x, -8.24]); });
+  pipeSpots(  9, 26,null,1).forEach(function(x){ pipes.push([x, -8.24]); });
+  // 동문·서문이 있는 단부 : 문 개구부까지 피해서
+  pipeSpots(-8,8,[[-3.0,3.0]],2).forEach(function(z){ pipes.push([ 44.24, z]); });
+  pipeSpots(-8,8,[[-3.4,3.4]],2).forEach(function(z){ pipes.push([-44.24, z]); });
+  pipes.forEach(function(P){
+    push('metalD', new C(0.115,0.115,TOP-0.4,10), mtx(P[0],(TOP-0.4)/2,P[1]));
+    for(var b2=0;b2<8;b2++) push('metalD', bx(0.26,0.07,0.26), mtx(P[0],1.6+b2*2.1,P[1]));
+    push('metalD', new C(0.16,0.20,0.35,10), mtx(P[0],0.2,P[1]));
+  });
+
+  /* ── 1층 벽면 실외기 ─────────────────────────────────── */
+  for(var g3=0;g3<6;g3++){
+    var ux=-30+g3*12.0;
+    push('metal',  bx(0.92,0.70,0.40), mtx(ux,0.55,8.32));
+    push('metalD', bx(0.30,0.06,0.44), mtx(ux-0.28,0.19,8.34));
+    push('metalD', bx(0.30,0.06,0.44), mtx(ux+0.28,0.19,8.34));
+    push('metalD', new C(0.24,0.24,0.05,14), mtx(ux,0.62,8.53, Math.PI/2,0,0));
+  }
+
+  /* ── 1층 방범창 : 넓은창 리듬에 맞춰 세로살 ────────────── */
+  /* 방범창은 파사드와 똑같은 구간·모듈로 계산해야 창에 정확히 얹힌다.
+     구간을 손으로 적어두면 창 위치와 어긋난다. */
+  [['+z', 8, -44, 44,  8.21],
+   ['-z',-8, -28,-11, -8.21],
+   ['-z',-8,   9, 26, -8.21]].forEach(function(R){
+    var dir=R[0], lo=R[2], hi=R[3], cc=R[4];
+    var du=doorU(dir,R[1]), dw=6.4;
+    winCenters(lo,hi).forEach(function(wn){
+      if(Math.abs(wn[0]-du) < dw) return;          // 출입구 자리는 건너뛴다
+      if(wn[1] < 2.0) return;                       // 좁은 창은 방범창이 없다
+      var wu=wn[0], ww2=wn[1], nb=Math.max(6, Math.round(ww2/0.24));
+      for(var bs=0;bs<=nb;bs++)
+        push('frame', bx(0.038,WH-0.16,0.038), mtx(wu-ww2/2+0.08+(ww2-0.16)*bs/nb, SILL+WH/2, cc));
+      push('frame', bx(ww2-0.14,0.05,0.05), mtx(wu, SILL+0.12, cc));
+      push('frame', bx(ww2-0.14,0.05,0.05), mtx(wu, SILL+WH-0.12, cc));
+      push('frame', bx(ww2-0.14,0.05,0.05), mtx(wu, SILL+WH*0.5, cc));
+    });
+  });
+})();
+
+flush();   // 건물 부재 확정
+
+/* ── 조경 재질 : 사진의 잔디 텍스처 + 두 가지 녹음 ────────── */
+M.grassT = S({map:IMG('grass'), roughness:1.0, envMapIntensity:0.22});
+M.turf   = S({map:IMG('turf'), bumpMap:IMG('turf_b',false), bumpScale:0.06,
+              roughnessMap:IMG('turf_b',false), roughness:1.0, envMapIntensity:0.20});
+M.barkD  = (function(){
+  var t=IMG('bark'), b=IMG('bark_b',false);
+  t.repeat.set(2.2,2.2); b.repeat.set(2.2,2.2);
+  return S({map:t, bumpMap:b, bumpScale:0.10, roughness:1.0, envMapIntensity:0.20});
+})();
+/* 솔잎·잎 : 알파 컷아웃 판을 십자로 세워 부피를 만든다 */
+M.needle = S({map:IMG('needle'), transparent:true, alphaTest:0.42, side:THREE.DoubleSide,
+              color:0x9fbf86, roughness:0.96, envMapIntensity:0.16});
+M.leafC  = S({map:IMG('leaf'), transparent:true, alphaTest:0.40, side:THREE.DoubleSide,
+              color:0xb6ce9a, roughness:0.96, envMapIntensity:0.16});
+M.tuft   = S({map:IMG('tuft'), transparent:true, alphaTest:0.35, side:THREE.DoubleSide,
+              color:0xb4d494, roughness:0.98, envMapIntensity:0.14});
+M.shrub  = S({map:IMG('needle'), transparent:true, alphaTest:0.42, side:THREE.DoubleSide,
+              color:0x86a86e, roughness:0.97, envMapIntensity:0.14});
+
+/* ==========================================================================
+   바닥판 — 건물이 떠 보이지 않을 정도의 최소한만
+   ========================================================================== */
+var env=new THREE.Group(); world.add(env);
+(function(){
+  var g=new THREE.PlaneGeometry(128,96), uv=g.attributes.uv;
+  for(var i=0;i<uv.count;i++) uv.setXY(i, uv.getX(i)*128/1.05, uv.getY(i)*96/1.05);
+  uv.needsUpdate=true;
+  var m=new THREE.Mesh(g, M.pave); m.rotation.x=-Math.PI/2;
+  m.position.set(0,0,-4); env.add(m);
+  var e=new THREE.Mesh(bx(128.6,0.5,96.6), M.concD);
+  e.position.set(0,-0.26,-4); env.add(e);
+})();
+
+/* ── 정문 앞 조경 ─────────────────────────────────────────
+   잎은 알파 컷아웃 판을 십자로 세워 만든다. 덩어리(구)로 만들면
+   아무리 색을 맞춰도 플라스틱처럼 보이기 때문이다.
+   줄기는 마디마다 조금씩 기울여 굴곡을 준다. */
+(function(){
+  var seed=773311;
+  function rnd(){ seed=(seed*1664525+1013904223)%4294967296; return seed/4294967296; }
+  var trunkM=[], needleM=[], leafM=[], shrubM=[];
+  var _v=new THREE.Vector3(), _q=new THREE.Quaternion(), _e=new THREE.Euler(), _s=new THREE.Vector3();
+  function put(arr,x,y,z,rx,ry,rz,sx,sy,sz){
+    _e.set(rx,ry,rz); _q.setFromEuler(_e);
+    _v.set(x,y,z); _s.set(sx,sy,sz);
+    arr.push(new THREE.Matrix4().compose(_v,_q,_s));
+  }
+  /* 십자 판 한 다발 — 판을 수직으로 세우고 60°씩 벌린다 */
+  function cluster(arr,x,y,z,size){
+    var base=rnd()*Math.PI;
+    for(var k=0;k<4;k++)                       // 판 4장을 45°씩 벌려 빈틈을 줄인다
+      put(arr, x+(rnd()-0.5)*size*0.14, y+(rnd()-0.5)*size*0.12, z+(rnd()-0.5)*size*0.14,
+          0, base + k*Math.PI/4, 0,
+          size*(0.92+rnd()*0.2), size*(0.92+rnd()*0.2), 1);
+  }
+
+  /* ── 줄기 : 곡선을 따라 연속된 관으로 만든다 ──────────────
+     마디를 따로 놓으면 관절이 어긋나 보이므로, 링 정점을 이어
+     하나의 껍질로 생성한다. 위로 갈수록 가늘어진다. */
+  var barkGeos=[];
+  function tube(pts, r0, r1, radial){
+    radial = radial || 9;
+    var N=pts.length, pos=[], uv=[], idx=[];
+    var up=new THREE.Vector3(0,0,1), tmpA=new THREE.Vector3(), tmpB=new THREE.Vector3();
+    for(var i=0;i<N;i++){
+      var pPrev=pts[Math.max(0,i-1)], pNext=pts[Math.min(N-1,i+1)];
+      var dir=new THREE.Vector3().subVectors(pNext,pPrev).normalize();
+      if(Math.abs(dir.z)>0.9) up.set(1,0,0); else up.set(0,0,1);
+      tmpA.crossVectors(dir,up).normalize();
+      tmpB.crossVectors(dir,tmpA).normalize();
+      var t=i/(N-1), r=r0+(r1-r0)*t;
+      r *= 1 + 0.10*Math.sin(t*11.0);            // 굵기에 미세한 요철
+      for(var j=0;j<=radial;j++){
+        var a=j/radial*Math.PI*2;
+        var ca=Math.cos(a)*r, sa=Math.sin(a)*r;
+        pos.push(pts[i].x+tmpA.x*ca+tmpB.x*sa,
+                 pts[i].y+tmpA.y*ca+tmpB.y*sa,
+                 pts[i].z+tmpA.z*ca+tmpB.z*sa);
+        uv.push(j/radial*1.6, t*3.2);
+      }
+    }
+    for(i=0;i<N-1;i++) for(var j2=0;j2<radial;j2++){
+      var a1=i*(radial+1)+j2, b1=a1+1, c1=a1+radial+1, d1=c1+1;
+      idx.push(a1,c1,b1, b1,c1,d1);
+    }
+    var g=new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv,2));
+    g.setIndex(idx); g.computeVertexNormals();
+    barkGeos.push({g:g.toNonIndexed()});
+  }
+
+  /* 굽은 줄기 : 곡선 좌표를 만들어 관으로 뽑는다 */
+  function trunk(x,z,h,r0,lean){
+    var pts=[], ax=0, az=0, cx=x, cz=z;
+    var N=9;
+    for(var i=0;i<N;i++){
+      var t=i/(N-1);
+      ax += (rnd()-0.5)*lean; az += (rnd()-0.5)*lean;
+      cx += ax*h/N; cz += az*h/N;
+      pts.push(new THREE.Vector3(cx, h*t, cz));
+    }
+    tube(pts, r0, r0*0.30, 9);
+    return pts[N-1];
+  }
+  /* 가지 : 살짝 휘어 오르는 곡선. 끝점을 돌려주어 2차 분기에 쓴다 */
+  function branch(from, ang, len, up0, r, droop){
+    var pts=[], dr=(droop===undefined?0.18:droop);
+    for(var i=0;i<6;i++){
+      var t=i/5;
+      pts.push(new THREE.Vector3(
+        from.x+Math.cos(ang)*len*t,
+        from.y+up0*t + len*t*t*dr,
+        from.z+Math.sin(ang)*len*t));
+    }
+    tube(pts, r, r*0.34, 6);
+    return pts[5];
+  }
+  /* 2차 분기 : 1차 가지 끝에서 두세 갈래로 갈라진다 */
+  function subBranches(tip, ang, len, r, arr, size){
+    var k=3+Math.floor(rnd()*2);
+    for(var i=0;i<k;i++){
+      var a2=ang + (i-(k-1)/2)*0.55 + (rnd()-0.5)*0.26;
+      var l2=len*(0.40+rnd()*0.28);
+      var t2=branch(tip, a2, l2, 0.24*l2, r*0.55, 0.22);
+      cluster(arr, t2.x, t2.y+size*0.20, t2.z, size*(0.80+rnd()*0.26));
+      cluster(arr, (t2.x+tip.x)/2, (t2.y+tip.y)/2+size*0.18, (t2.z+tip.z)/2, size*0.72);
+    }
+  }
+
+  /* 소나무 : 가지 끝마다 솔잎 다발 */
+  function pine(x,z,sc){
+    var h=8.0*sc; trunk(x,z,h,0.20*sc,0.075);
+    for(var i=0;i<20;i++){
+      var t=0.42+0.58*(i/19), by=h*t;
+      var ang=(i*2.399)+rnd()*0.4, len=(3.1-1.7*t)*sc*(0.75+rnd()*0.5);
+      var r0=0.062*sc*(1-t*0.45);
+      var tip=branch(new THREE.Vector3(x,by,z), ang, len, 0.55*sc, r0, 0.16);
+      var fs=(2.1-0.6*t)*sc;
+      cluster(needleM, tip.x, tip.y+0.26*sc, tip.z, fs);
+      subBranches(tip, ang, len, r0, needleM, fs);
+    }
+    cluster(needleM, x, h*1.02, z, 2.0*sc);
+    cluster(needleM, x, h*0.91, z, 2.5*sc);
+    cluster(needleM, x, h*0.80, z, 2.8*sc);
+  }
+  /* 활엽수 : 둥근 수관을 잎 다발로 빈틈없이 채운다 */
+  function leafy(x,z,sc){
+    var h=6.8*sc; trunk(x,z,h,0.19*sc,0.095);
+    // 1차 가지 6개 → 각각 2차로 갈라지고 그 끝에 잎 다발
+    for(var b=0;b<6;b++){
+      var a=b*1.047+rnd()*0.5, L1=2.1*sc;
+      var t1=branch(new THREE.Vector3(x,h*0.62,z), a, L1, 1.7*sc, 0.075*sc, 0.10);
+      var k=2+Math.floor(rnd()*2);
+      for(var j=0;j<k;j++){
+        var a2=a+(j-(k-1)/2)*0.70+(rnd()-0.5)*0.3;
+        var t2=branch(t1, a2, L1*0.62, 0.85*sc, 0.042*sc, 0.14);
+        cluster(leafM, t2.x, t2.y+0.3*sc, t2.z, (2.0+rnd()*0.6)*sc);
+      }
+      cluster(leafM, t1.x, t1.y+0.5*sc, t1.z, (2.1+rnd()*0.5)*sc);
+    }
+    var R=2.9*sc, cy=h*0.96;
+    for(var i=0;i<34;i++){
+      var a3=i*2.399, rr=R*Math.sqrt(rnd())*0.95;
+      cluster(leafM, x+Math.cos(a3)*rr, cy+(rnd()-0.5)*R*1.0, z+Math.sin(a3)*rr, (1.9+rnd()*0.7)*sc);
+    }
+    cluster(leafM, x, cy, z, 2.6*sc);
+  }
+
+  // 사진에 보이는 만큼만 — 소나무 위주로 성기게
+  pine(-20,-37,1.10); pine( 19,-38,1.00);
+
+  /* 화단 : 정문 벽에 붙여서. 바닥은 흙 → 지피 → 잔디 포기 세 겹으로
+     빈 곳 없이 초록으로 채운다. */
+  var tuftM=[];
+  function bed(cx,cz,w,d){
+    var kerb=new THREE.Mesh(bx(w+0.42,0.40,d+0.42), M.concD);
+    kerb.position.set(cx,0.20,cz); env.add(kerb);
+    var soil=new THREE.Mesh(bx(w,0.36,d), M.soil);
+    soil.position.set(cx,0.18,cz); env.add(soil);
+    var g=new THREE.PlaneGeometry(w,d), uv=g.attributes.uv;
+    for(var i=0;i<uv.count;i++) uv.setXY(i, uv.getX(i)*w/1.3, uv.getY(i)*d/1.3);
+    uv.needsUpdate=true;
+    var m=new THREE.Mesh(g, M.turf); m.rotation.x=-Math.PI/2;
+    m.position.set(cx,0.44,cz); env.add(m);
+    // 잔디 포기를 격자로 촘촘히 심어 부피를 만든다
+    var nx=Math.max(4,Math.round(w/0.62)), nz=Math.max(3,Math.round(d/0.62));
+    for(var a=0;a<nx;a++) for(var b2=0;b2<nz;b2++){
+      var px2=cx-w/2+0.32+a*(w-0.64)/(nx-1);
+      var pz2=cz-d/2+0.30+b2*(d-0.60)/Math.max(1,nz-1);
+      px2+=(rnd()-0.5)*0.24; pz2+=(rnd()-0.5)*0.24;
+      var sz=0.46+rnd()*0.26;
+      var base=rnd()*Math.PI;
+      for(var k=0;k<2;k++)
+        put(tuftM, px2, 0.44+sz*0.5, pz2, 0, base+k*Math.PI/2, 0, sz*1.5, sz, 1);
+    }
+    var n=Math.max(4, Math.round(w*d/4.5));
+    for(var k2=0;k2<n;k2++)
+      cluster(shrubM, cx+(rnd()-0.5)*(w-1.4), 0.82+rnd()*0.18, cz+(rnd()-0.5)*(d-1.2), 0.9+rnd()*0.4);
+  }
+  /* 화단 : 정문 화강석 블록(-10~10, z=-13.6)과 좌우 벽(z=-8)에 딱 붙인다 */
+  /* 정문 정면 전체에 화단을 두른다.
+     왼쪽 날개 벽(z=-8) · 오른쪽 날개 벽 · 정문 블록 양 옆구리(x=±10).
+     계단(z -13.6 ~ -17)에는 닿지 않게 띄운다. */
+  /* 정문 쪽 벽면을 따라 빠짐없이 두른다.
+     중정(주동 정면) · 날개 안쪽면 · 날개 앞면 · 날개 바깥 측면 */
+  bed(-19.0, -9.9, 16.0, 3.4);      // 중정 왼쪽 (주동 정면 z=-8)
+  bed( 19.0, -9.9, 16.0, 3.4);      // 중정 오른쪽
+  bed(-11.9,-10.9,  3.4, 5.0);      // 정문 블록 왼쪽 옆구리
+  bed( 11.9,-10.9,  3.4, 5.0);      // 정문 블록 오른쪽 옆구리
+  bed(-29.9,-13.5,  3.4,10.0);      // 왼쪽 날개 안쪽면 (x=-28)
+  bed( 29.9,-13.5,  3.4,10.0);      // 오른쪽 날개 안쪽면 (x=26)
+  bed(-36.0,-20.9, 16.0, 3.4);      // 왼쪽 날개 앞면 (z=-19)
+  bed( 35.0,-20.9, 16.0, 3.4);      // 오른쪽 날개 앞면
+  bed( 45.9,-13.5,  3.4,11.0);      // 오른쪽 날개 바깥 측면
+
+  /* 보도블럭 사이 원형 수목보호구 : 흙 + 지피 + 그 안에 나무
+     (사진의 광장에 동그랗게 뚫린 자리) */
+  /* 보도블럭 사이 원형 수목보호구 : 넓게 뚫고 그 안에 나무 3~4그루.
+     크기를 섞어 심어야 자연스럽다. */
+  function treePit(px,pz,r,trees){
+    var ring=new THREE.Mesh(new THREE.RingGeometry(r, r+0.26, 36), M.concD);
+    ring.rotation.x=-Math.PI/2; ring.position.set(px,0.055,pz); env.add(ring);
+    var soil=new THREE.Mesh(new C(r,r,0.24,36), M.soil);
+    soil.position.set(px,0.07,pz); env.add(soil);
+    var gr=new THREE.Mesh(new THREE.CircleGeometry(r-0.05,36), M.turf);
+    gr.rotation.x=-Math.PI/2; gr.position.set(px,0.19,pz); env.add(gr);
+    var nn=Math.round(r*r*9);
+    for(var q=0;q<nn;q++){
+      var a=rnd()*6.2832, rr2=(r-0.4)*Math.sqrt(rnd());
+      var sz=0.42+rnd()*0.24, base2=rnd()*Math.PI;
+      for(var k2=0;k2<2;k2++)
+        put(tuftM, px+Math.cos(a)*rr2, 0.19+sz*0.5, pz+Math.sin(a)*rr2,
+            0, base2+k2*Math.PI/2, 0, sz*1.5, sz, 1);
+    }
+    trees.forEach(function(t){        // [각도, 반경비, 종류, 크기]
+      var tx=px+Math.cos(t[0])*r*t[1], tz=pz+Math.sin(t[0])*r*t[1];
+      if(t[2]==='pine') pine(tx,tz,t[3]); else leafy(tx,tz,t[3]);
+    });
+  }
+  treePit(-31,-26.0, 3.6, [[0.4,0.52,'pine',1.25],[2.5,0.55,'leafy',0.92],
+                           [4.4,0.50,'pine',0.80],[5.9,0.30,'leafy',1.05]]);
+  treePit( 31,-26.0, 3.6, [[0.9,0.50,'leafy',1.15],[2.9,0.52,'pine',1.30],
+                           [4.9,0.48,'leafy',0.85],[0.2,0.22,'pine',0.95]]);
+  treePit(-44,-23.5, 2.9, [[1.1,0.50,'pine',1.05],[3.4,0.48,'leafy',0.80],[5.4,0.45,'pine',0.90]]);
+  treePit( 44,-23.5, 2.9, [[0.6,0.48,'leafy',1.00],[2.8,0.50,'pine',1.15],[4.8,0.45,'leafy',0.78]]);
+
+  function inst(geo, mat, list){
+    if(!list.length) return;
+    var im=new THREE.InstancedMesh(geo, mat, list.length);
+    for(var i=0;i<list.length;i++) im.setMatrixAt(i, list[i]);
+    im.instanceMatrix.needsUpdate=true; env.add(im);
+  }
+  if(barkGeos.length){
+    var bm=new THREE.Mesh(merge(barkGeos), M.barkD);
+    bm.castShadow=false; env.add(bm);
+  }
+  inst(new THREE.PlaneGeometry(1,1),            M.tuft,   tuftM);
+  inst(new THREE.PlaneGeometry(1,1),            M.needle, needleM);
+  inst(new THREE.PlaneGeometry(1,1),            M.leafC,  leafM);
+  inst(new THREE.PlaneGeometry(1,1),            M.shrub,  shrubM);
+})();
+
+/* ── 정문 앞 광장 부속 (위성·사진 참조) ────────────────────
+   보도 경계, 볼라드, 주차 안내 표지, 소화전, 맨홀 */
+(function(){
+  var seed=515151; function rnd(){ seed=(seed*1103515245+12345)%2147483648; return seed/2147483648; }
+  // 맨홀 2개
+  [[-6,-30],[18,-33]].forEach(function(m){
+    var d=new THREE.Mesh(new C(0.36,0.36,0.05,18), M.metalD);
+    d.position.set(m[0],0.03,m[1]); env.add(d);
+  });
+})();
+
+/* ==========================================================================
+   카메라 · 시점 프리셋
+   ========================================================================== */
+var CURV='v0';
+var target=new THREE.Vector3(0,9,2);
+var sph={r:150,th:0.62,ph:1.14};
+var VIEWS={
+  v0:{r:132,th:3.1416,ph:1.34,t:[0,10,-6], n:'전체보기 — 정면', fit:true},
+  v1:{r:48, th:3.1416,ph:1.46,t:[1,9,-14], n:'정문 — 화강석 블록과 커튼월'},
+  v3:{r:44, th:0.0,   ph:1.45,t:[0,6,10],  n:'후문 — 초록 유리 복도'},
+  v4:{r:40, th:-1.5708,ph:1.45,t:[-46,6,0], n:'서문 — 파란 아치 통로'},
+  v5:{r:38, th: 1.5708,ph:1.45,t:[ 46,6,0], n:'동문 — 리세스 현관'},
+  v6:{r:44, th:0.9,ph:0.60,t:[0,20,-2],  n:'옥상'}
+};
+var spin=true;   /* '여기가 맞나요?' 화면에 들어오면 바로 자동회전 */
+/* 건물 전체가 화면에 꽉 차게 담기는 거리를 계산한다.
+   세로로 긴 폰 화면에서는 가로 화각이 좁아 자동으로 더 물러난다. */
+function fitR(){
+  /* 정면에서 건물 전체(가로 90m, 높이 22m)가 담기는 거리.
+     화면이 좁을수록 자동으로 더 물러난다. */
+  var halfW=47, halfH=12.5;
+  var vf=camera.fov*Math.PI/180;
+  var hf=2*Math.atan(Math.tan(vf/2)*camera.aspect);
+  return Math.max(halfW/Math.tan(hf/2), halfH/Math.tan(vf/2))*1.10+12;
+}
+function applyCam(){
+  sph.ph=Math.max(0.06,Math.min(1.54,sph.ph));
+  sph.r =Math.max(12,Math.min(420,sph.r));
+  camera.position.set(
+    target.x+sph.r*Math.sin(sph.ph)*Math.sin(sph.th),
+    Math.max(1.2, target.y+sph.r*Math.cos(sph.ph)),
+    target.z+sph.r*Math.sin(sph.ph)*Math.cos(sph.th));
+  camera.lookAt(target);
+}
+function goView(k){
+  var v=VIEWS[k]; if(!v) return;
+  CURV=k;
+  sph.r=v.fit? fitR() : v.r; sph.th=v.th; sph.ph=v.ph;
+  target.set(v.t[0],v.t[1],v.t[2]);
+  document.getElementById('sub').textContent='지상 5층 · '+v.n;
+  Object.keys(VIEWS).forEach(function(id){ document.getElementById(id).classList.toggle('on', id===k); });
+  applyCam();
+}
+Object.keys(VIEWS).forEach(function(id){
+  document.getElementById(id).onclick=function(){ goView(id); };
+});
+document.getElementById('vs').onclick=function(){
+  spin=!spin; this.classList.toggle('on', spin);
+};
+document.getElementById('vs').classList.toggle('on', spin);
+
+/* 사용자가 3D를 아직 직접 만지지 않았다면, 화면에 들어올 때마다 '전체보기 + 자동회전'으로
+   되돌린다. 한 번이라도 직접 돌리거나 버튼을 눌렀다면 그 상태를 그대로 둔다. */
+var userTouched=false;
+function markTouched(){ userTouched=true; }
+cv.addEventListener('pointerdown', markTouched);
+cv.addEventListener('wheel', markTouched, {passive:true});
+Array.prototype.forEach.call(document.querySelectorAll('#bar .b'), function(b){
+  b.addEventListener('click', markTouched);
+});
+window.enterView=function(){
+  if(userTouched) return;
+  goView('v0');
+  spin=true;
+  document.getElementById('vs').classList.add('on');
+};
+
+/* 조작 */
+var drag=null,last={x:0,y:0},pinch=0;
+cv.addEventListener('pointerdown',function(e){
+  cv.setPointerCapture(e.pointerId);
+  drag=(e.button===2||e.shiftKey)?'pan':'rot';
+  last.x=e.clientX; last.y=e.clientY;
+});
+cv.addEventListener('pointermove',function(e){
+  if(!drag) return;
+  var dx=e.clientX-last.x, dy=e.clientY-last.y;
+  last.x=e.clientX; last.y=e.clientY;
+  if(drag==='rot'){ sph.th-=dx*0.005; sph.ph-=dy*0.005; }
+  else{
+    var f=sph.r*0.0015;
+    target.addScaledVector(new THREE.Vector3(Math.cos(sph.th),0,-Math.sin(sph.th)), -dx*f);
+    target.y+=dy*f;
+  }
+  applyCam();
+});
+function endDrag(){ drag=null; }
+cv.addEventListener('pointerup',endDrag);
+cv.addEventListener('pointercancel',endDrag);
+cv.addEventListener('contextmenu',function(e){e.preventDefault();});
+cv.addEventListener('wheel',function(e){
+  e.preventDefault(); sph.r*=(1+Math.sign(e.deltaY)*0.085); applyCam();
+},{passive:false});
+cv.addEventListener('touchmove',function(e){
+  if(e.touches.length!==2) return;
+  e.preventDefault();
+  var a=e.touches[0],b=e.touches[1];
+  var d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+  if(pinch) sph.r*=pinch/d;
+  pinch=d; drag=null; applyCam();
+},{passive:false});
+cv.addEventListener('touchend',function(){ pinch=0; });
+
+function resize(){
+  var w=cv.clientWidth,h=cv.clientHeight;
+  if(!w||!h) return;
+  renderer.setSize(w,h,false);
+  camera.aspect=w/h; camera.updateProjectionMatrix();
+  if(CURV==='v0'){ sph.r=fitR(); applyCam(); }
+}
+window.addEventListener('resize',resize);
+
+function loop(){
+  requestAnimationFrame(loop);
+  if(spin){ sph.th+=0.0018; applyCam(); }
+  renderer.render(scene,camera);
+}
+resize(); goView('v0'); loop();
+setTimeout(function(){ document.getElementById('load').style.display='none'; },500);
+</script>
+</body>
+</html>

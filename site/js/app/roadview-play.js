@@ -44,7 +44,7 @@ function fpBuildScript(){
      예전에는 엘리베이터 앞에서 툭 시작해서, 처음 오는 사람은 "그 엘리베이터가
      어디 있는 건지"를 알 수 없었다 → 현재 위치가 1층이면 실제로 찾아오는 순서
      그대로 '문 앞'에서 출발해 문 → 복도 → 엘리베이터로 걸어 들어간다.
-     v142(요청 반영): 예전엔 무조건 정문에서만 출발했다 — QR을 찍거나 직접 고른
+     v142: 예전엔 무조건 정문에서만 출발했다 — QR을 찍거나 직접 고른
      문(정문·후문·동문·서문)에서 출발하도록 문마다 진입 구간을 따로 만든다. */
   var fromGate = (startFloor === 1);
   var corrZ = evzW;                                 // 복도에 들어섰을 때의 Z
@@ -66,7 +66,7 @@ function fpBuildScript(){
             label: ko ? ('공대 3호관 '+GATE_KO[gateKey]+' 안쪽') : ('Inside '+GATE_EN[gateKey])});
     S.push({to:{x:0, z: gs.z + gdir*2.6},
             label: ko ? (GATE_KO[gateKey]+'으로 들어갑니다') : ('Entering through '+GATE_EN[gateKey])});
-    /* v146(요청 반영): 예전엔 목적지와 상관없이 무조건 엘리베이터 앞(evzW)까지
+    /* v146: 예전엔 목적지와 상관없이 무조건 엘리베이터 앞(evzW)까지
        걸어갔다 → 동문 바로 옆 비상계단처럼 문 근처가 목적지일 때도 복도를 끝까지
        갔다가 되돌아오는 이상한 길이 됐다. 엘리베이터를 실제로 탈 때(ride)만 그리로
        가고, 아니면 문 안쪽에서 곧바로 목적지 쪽으로 향한다. */
@@ -77,7 +77,7 @@ function fpBuildScript(){
       corrZ = evzW;
     }
   }else if(fromGate && gateKey==='BACK'){
-    /* v144(요청 반영): 후문 문 앞(1층 중앙계단실 = 후문 로비의 유리문 안쪽)에서
+    /* v144: 후문 문 앞(1층 중앙계단실 = 후문 로비의 유리문 안쪽)에서
        출발해 → 계단홀을 가로질러 → 복도로 나간다. 좌표는 직접 걸어보기와 같은
        fpGateStart1F()에서 가져온다. */
     var gsB = fpGateStart1F(), stZW = gsB.z;
@@ -167,7 +167,7 @@ function fpBuildScript(){
     S.push({dur:1.4, yaw: Math.atan2(rx, rz-stopZ),
             label: ko ? '목적지 앞에 도착' : 'At the destination'});
   }
-  /* v148(요청 반영): 마지막에 '여기가 목적지'라는 느낌이 약했다 →
+  /* v148: 마지막에 '여기가 목적지'라는 느낌이 약했다 →
      목적지 바닥에 초록 고리를 띄워 두근두근 커졌다 작아지게 한다.
      비상계단처럼 문패가 없는 목적지에서 특히 효과가 크다. */
   S.push({dur:2.6, arrive:{x:rx, z:rz, y:yT},
@@ -363,7 +363,7 @@ function fpTick(dt){
      도착하면(구간 시작·끝) 다시 수평(0)으로 자연스럽게 풀린다. */
   if(st.stairs){
     var bobK = Math.sin(stepLift*Math.PI);              // 0→1→0, 발을 딛는 한 걸음의 굴곡
-    /* 요청 반영: B1↔1F 한 도막 계단처럼 단 높이(rise)가 평소의 2배로 지어진
+    /* B1↔1F 한 도막 계단처럼 단 높이(rise)가 평소의 2배로 지어진
        구간은, 실제 오르내리는 높이(fpPos.y)만으로도 이미 출렁임이 2배가 되므로
        여기 장식용 bob까지 평소 크기로 얹으면 한 칸마다 훨씬 크게 붕 뜨는
        것처럼 보인다 — st.bobScale로 그 구간만 장식용 bob 크기를 줄인다
@@ -387,7 +387,7 @@ function fpCommit(wantYaw, dt, bob){
   var step = FP_TURN*dt;
   fpYaw = (!dt || Math.abs(diff)<=step) ? wantYaw : fpYaw + (diff>0?1:-1)*step;
   var yaw = fpYaw + fpLookYaw, pit = fpLookPitch + (fpStairTilt||0), ch = Math.cos(pit);
-  /* 실사형 개선(2차) : 걷는 동안 아주 미세한 좌우 흔들림도 더한다(요청 반영).
+  /* 실사형 개선(2차) : 걷는 동안 아주 미세한 좌우 흔들림도 더한다.
      기존 상하 bob과 같은 값에서 파생시켜(진폭만 더 작게) 정지·일시정지 시엔
      bob이 항상 0으로 넘어오므로 흔들림도 자동으로 0이 된다 — 호출부는 그대로 둔다. */
   var sway=(bob||0)*0.4;
@@ -396,7 +396,7 @@ function fpCommit(wantYaw, dt, bob){
   fpLastAim = {x: ex + Math.sin(yaw)*6*ch, y: ey + Math.sin(pit)*6, z: ez + Math.cos(yaw)*6*ch};
   if(fpCeil) fpCeil.position.set(0, fpPos.y + FP_CEIL_H,
       ((GLOBAL_TOP_Z+GLOBAL_BOT_Z)/2)*BUILDING_Z_STRETCH);
-  /* 요청 반영: 옥상 철문은 이제 fpRegisterAutoDoor(자동문)가 매 프레임
+  /* 옥상 철문은 이제 fpRegisterAutoDoor(자동문)가 매 프레임
      스스로 회전을 갱신하므로, 여기서 fpRoofDoorK로 강제로 덮어쓰지 않는다
      (예전엔 이 줄이 자동문 회전을 매 프레임 0으로 되돌려 버렸다). */
   if(fpCab){

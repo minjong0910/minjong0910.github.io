@@ -31,7 +31,7 @@ function fpMakeEvLanding(g, lv, evZ, evW, evH, H, ko){
   var cpT=fpMkTex(0.22, 0.36, fpEvCallTex(), 1);
   cpT.rotation.y=-Math.PI/2; cpT.position.set(EVX-0.02, 1.18, callZ); g.add(cpT);
   [-1,1].forEach(function(s2){                      // 개구부 테두리
-    /* 요청 반영: 이 사이버펑크풍 시안 네온 트림이 복도에서 보면 정체불명의
+    /* 이 사이버펑크풍 시안 네온 트림이 복도에서 보면 정체불명의
        파란 줄무늬(특히 안쪽 깊숙이 볼 때 천장 쪽으로 길게 번져 보임)로
        보였다 — 실제 엘리베이터 문틀처럼 무광 금속 트림으로 자연스럽게
        바꾼다(발광 없음). */
@@ -45,12 +45,12 @@ function fpMakeEvLanding(g, lv, evZ, evW, evH, H, ko){
    따라다녔을 뿐, 고정된 천장 메시가 없었다) — 실제 사진처럼 밝은 회색
    천장판을 복도 길이에 맞춰 고정 배치하고, 그 중앙을 따라 일정 간격으로
    매립등 기구(자발광 플레이트) + 연한 아이보리빛 PointLight를 두어
-   따뜻한 실내 조명을 낸다(요청 반영). 파라미터는 각 상수 옆 주석 참고. */
+   따뜻한 실내 조명을 낸다. 파라미터는 각 상수 옆 주석 참고. */
 function fpMakeCorrCeiling(z0, z1, holes){
   var g=new THREE.Group();
   var ceilY=FP_CEIL_H-0.02;                      // 천장 마감면 높이 — 벽 상단과 거의 맞닿게
   var cw=CORR_HALF*2+0.24, len=z1-z0, cz=(z0+z1)/2;
-  /* 요청 반영: 계단(중앙·비상) 개구부 자리는 천장판을 비워 둔다 — 계단을
+  /* 계단(중앙·비상) 개구부 자리는 천장판을 비워 둔다 — 계단을
      오르내릴 때 카메라가 이 판을 그대로 뚫고 지나가는 것처럼 보이던 문제. */
   holes = holes || [];
   (function(){
@@ -71,7 +71,7 @@ function fpMakeCorrCeiling(z0, z1, holes){
 
   var FIX_GAP=3.6;                                // ← 매립등 기구(시각적 플레이트) 간격(m)
   var FIX_W=0.9, FIX_D=0.28;                      // ← 매립등 기구 크기(m)
-  var FIX_INTENSITY=0.24, FIX_DIST=4.2;           // ← PointLight 세기/도달거리(요청 반영: 눈부심 추가로 낮춤)
+  var FIX_INTENSITY=0.24, FIX_DIST=4.2;           // ← PointLight 세기/도달거리(눈부심 추가로 낮춤)
   var LIGHT_MAX=8;                                // ← 복도 하나당 실제 PointLight 최대 개수
   var n=Math.max(1, Math.round(len/FIX_GAP));
   var lightEvery=Math.max(1, Math.ceil(n/LIGHT_MAX));  // 기구는 촘촘히, 실제 광원은 성능을 위해 듬성듬성
@@ -80,7 +80,7 @@ function fpMakeCorrCeiling(z0, z1, holes){
     var fz=z0 + (i+0.5)*(len/n);
     var inHole = holes.some(function(h){ return Math.abs(fz-h.z) < h.w/2; });
     if(inHole) continue;               // 뚫린 자리 위에는 매립등을 두지 않는다
-    var fix=fpMkPlane(FIX_W, FIX_D, 0xE8D9AE, 1, 0xE8D9AE);  // 자발광(emissive) 매립등 플레이트(요청 반영: 색 자체도 낮춤)
+    var fix=fpMkPlane(FIX_W, FIX_D, 0xE8D9AE, 1, 0xE8D9AE);  // 자발광(emissive) 매립등 플레이트(색 자체도 낮춤)
     fix.rotation.x=Math.PI/2; fix.position.set(0, ceilY-0.02, fz); g.add(fix);
     if(placed%lightEvery===0){
       var pl=new THREE.PointLight(0xFFF8E7, FIX_INTENSITY, FIX_DIST, 2);  // 아이보리빛, 아래로 은은하게
@@ -105,8 +105,8 @@ function fpMakeCorr(lv){
   function seg(side, zc, w, y0, h, bright){
     if(w<=0.02 || h<=0.02) return;
     var rot=(side>0) ? -Math.PI/2 : Math.PI/2;
-    var wall=fpMkPlane(w,h,0xE8DFC8,1,0x9C8F6E);   // 크림색 벽지(요청 반영)
-    /* 요청 반영(버그 수정): 화장실 알코브 옆에 덧댄 보강 패널(13119 등)이
+    var wall=fpMkPlane(w,h,0xE8DFC8,1,0x9C8F6E);   // 크림색 벽지
+    /* 버그 수정: 화장실 알코브 옆에 덧댄 보강 패널(13119 등)이
        알코브 입구 그늘에 가려 다른 복도 벽보다 훨씬 어둡게(짙은 남색에
        가깝게) 렌더링돼, 문 위가 뻥 뚫린 것처럼 보였다 — 이 패널만 발광
        강도를 높여, 주변 조명 상황과 상관없이 다른 복도 벽과 똑같이 밝은
@@ -155,7 +155,7 @@ function fpMakeCorr(lv){
   var stZ0=stZOf(lv)*ST;
   /* 비상계단도 중앙계단처럼 벽을 뚫어 개방한다(예전엔 닫힌 문만 있었다) */
   var esP0=EMSTAIR_POS[lv], esZW=(esP0 && esP0.xWhole>0) ? esP0.z*ST : null;
-  /* 요청 반영(버그 수정): 중앙계단 개구부 폭은 fpMakeStairwell의 owAuto가
+  /* 버그 수정: 중앙계단 개구부 폭은 fpMakeStairwell의 owAuto가
      "1층이거나, 위/아래층이 1층이면 1.4배"로 정한다 — 즉 B1·1층·2층 세 층이
      넓은 개구부를 쓴다. 그런데 여기 복도 벽 구멍(holesR)은 lv===1 일 때만
      1.4배를 적용하고 있어서, B1·2층은 실제 계단실보다 벽 구멍이 0.88m씩
@@ -165,7 +165,7 @@ function fpMakeCorr(lv){
   var _stIdx = lvIndex(lv);
   var stOWreal = FP_ST_OW *
     ((lv===1 || LEVELS[_stIdx+1]===1 || LEVELS[_stIdx-1]===1) ? 1.4 : 1);
-  /* 요청 반영(원복 + 재수정): 한 번은 중앙계단 개구부를 복도 천장(H)까지
+  /* 원복 + 재수정: 한 번은 중앙계단 개구부를 복도 천장(H)까지
      뚫어 인방(개구부 위 통짜 벽)을 없애 봤는데, 계단실 위로 한 층 층고가
      통째로 드러나 오히려 어색했고 1층은 위가 뻥 뚫려 보였다 — 개구부
      높이는 원래대로 되돌리고, 대신 그 인방을 실제 사진(1층 후문 통로)처럼
@@ -175,7 +175,7 @@ function fpMakeCorr(lv){
   if(esZW!==null) holesR.push({z:esZW, w:FP_EM_OW, h:FP_ST_OH});
   wall( 1, holesR);
   (function(){
-    /* 요청 반영: 여기에 '중앙계단 CENTRAL STAIRS' 검은 사인 밴드를 달아 봤는데
+    /* 여기에 '중앙계단 CENTRAL STAIRS' 검은 사인 밴드를 달아 봤는데
        글씨가 너무 커서 오히려 눈에 걸렸다 — 밴드·글씨·몰딩은 없애고, 비상계단
        개구부처럼 개구부 윗선의 얇은 리빌(그림자 홈) 하나만 남겨 깔끔하게 둔다. */
     var revH=0.055;
@@ -183,7 +183,7 @@ function fpMakeCorr(lv){
       var rev=fpMkPlane(stOWreal+0.10, revH, 0x14181D, 1);      // 개구부 윗선 그림자 홈
       rev.rotation.y=f[2]; rev.position.set(f[1], FP_ST_OH+revH/2, stZ0); g.add(rev);
     });
-    /* 요청 반영: 계단실 안에서 복도 쪽을 돌아보면, 이 인방(개구부 위 벽)만
+    /* 계단실 안에서 복도 쪽을 돌아보면, 이 인방(개구부 위 벽)만
        복도 벽지(밝은 크림 0xE8DFC8)라 그 위로 이어지는 계단실 벽(0xC9C0AE)과
        색이 뚝 끊겨, 밝은 띠 하나가 덧대어진 것처럼 보였다 — 계단실 쪽 면만
        계단실 벽과 같은 톤의 판으로 덮어 위아래가 한 장의 벽으로 읽히게 한다.
@@ -195,7 +195,7 @@ function fpMakeCorr(lv){
       cov.position.set(FP_WALL_X+0.025, FP_ST_OH+revH+covH/2, stZ0); g.add(cov);
     }
   })();
-  /* 요청 반영(버그 수정): 이 계단 개구부 프레임(차콜 테두리)이 여러 층이
+  /* 버그 수정: 이 계단 개구부 프레임(차콜 테두리)이 여러 층이
      동시에 그려지는 걷기 연출 중에 다른 층의 프레임과 비스듬한 각도에서
      겹쳐 보여, 벽 사이에 떠 있는 가느다란 기둥처럼 보이는 문제가 있었다
      — 장식용 요소이므로 문제를 없애기 위해 아예 없앤다. */
@@ -216,7 +216,7 @@ function fpMakeCorr(lv){
   wall(-1, holesL);
   /* 복도 바닥 : 건물 3D의 바닥/상자가 복도 밑으로 비쳐 노란 덩어리가 보였다
      → 재생 중에만 복도 폭만큼 불투명한 바닥을 한 겹 덮는다.
-     요청 반영(원상복구): 복도 바닥·천장에 계단 개구부 구멍을 뚫었더니 복도
+     원상복구: 복도 바닥·천장에 계단 개구부 구멍을 뚫었더니 복도
      쪽에서 계단실이 창문처럼 뚫려 보이는 부작용이 생겼다 — 복도 바닥·천장은
      다시 통짜 판으로 되돌린다(계단 헤드룸 문제는 계단실 쪽에서 따로 고친다). */
   var cfl=fpMkFloorGloss(CORR_HALF*2+0.24, z1-z0, fpTerrazzoTex());
@@ -246,9 +246,9 @@ function fpMakeCorr(lv){
 
   // ── 중앙계단 : 문이 아니라 뚫린 계단실 ──
   /* 1층 중앙계단만 실사 사진처럼 넓게 — owMul(원래 옥상 전용 파라미터)을 재사용해
-     개구부·단 폭을 1.4배로 키운다(요청 반영: 1.3~1.5배 범위). 2~5층은 owMul 생략(=1)
+     개구부·단 폭을 1.4배로 키운다(1.3~1.5배 범위). 2~5층은 owMul 생략(=1)
      이라 기존 폭 그대로다. */
-  /* 요청 반영(버그 수정): 여기서 owMul을 항상 넘기고 있어서(1층이 아니면 1),
+  /* 버그 수정: 여기서 owMul을 항상 넘기고 있어서(1층이 아니면 1),
      fpMakeStairwell 안의 owAuto("1층과 맞닿는 층은 1.4배")가 아예 동작하지
      못했다 — 정작 복도 벽 구멍(holesR)은 위에서 stOWreal로 owAuto와 같은
      규칙(2층도 1.4배)을 쓰고 있었기 때문에, 2층만 "벽 구멍은 6.16m인데
@@ -257,7 +257,7 @@ function fpMakeCorr(lv){
      2층의 내려가는 단이 1층의 올라가는 단과 폭·중심이 어긋나 있었다.
      1층만 명시적으로 1.4배를 주고, 나머지 층은 owAuto가 판단하게 둔다. */
   g.add(fpMakeStairwell(lv, stZ0, ko, false, undefined, (lv===1?1.4:undefined)));
-  /* 요청 반영(최종): "1층에 서 있어도 지하 계단이 보이게" 하려고 B1의 계단
+  /* 최종: "1층에 서 있어도 지하 계단이 보이게" 하려고 B1의 계단
      매스를 1층 씬에 함께 끼워 넣었었는데, 1층 바닥을 다시 통짜로 막은
      뒤로는 이 B1 매스의 윗부분(1층 바닥보다 0.45m 위까지 올라온 부분)이
      바닥을 뚫고 튀어나온 상자처럼 보이는 새 버그가 생겼다(사진 반영).
@@ -295,7 +295,7 @@ function fpMakeCorr(lv){
          이 패널이 개구부(7.23~10.53) 한가운데를 1m나 가로막아 화장실 앞에서
          복도가 벽으로 막힌 것처럼 보였다(다른 층은 0.13m만 걸쳐 티가 안 났다).
          이제 알코브 개구부 '바깥'으로 삐져나온 부분만 남기고 잘라낸다. */
-      /* 요청 반영(버그 수정): 여기서 이 호실들(13119·13224·13324·13419·13522)
+      /* 버그 수정: 여기서 이 호실들(13119·13224·13324·13419·13522)
          자리에 '보강 패널'을 한 겹 더 세우고 있었는데, 그 패널이 복도 벽과
          정확히 같은 평면(x=±FP_WALL_X)에 놓여 있어 두 면이 서로 앞다투어
          그려졌다(z-fighting) — 문 위쪽이 흰색으로 번쩍이며 깨져 보이던 정체다.
@@ -333,9 +333,9 @@ function fpMakeCorr(lv){
     // 복도에서도 보이도록 입구 상인방에 화장실 표시
     /* 천장판이 새로 생기면서(H와 같은 높이) 기존 계산식((FP_ALC_H+H)/2)이
        천장 바로 그 높이(=천장판과 겹침)에 표지판을 놓아, 낮은 각도에서 보면
-       천장을 뚫고 글자가 깨져 보이는 문제가 있었다(요청 반영: 확실히 천장
+       천장을 뚫고 글자가 깨져 보이는 문제가 있었다(확실히 천장
        아래로 내린다). */
-    /* 요청 반영(삭제): 통로 입구 상인방에 붙여 두었던 남/여 픽토그램을 없앤다 —
+    /* 삭제: 통로 입구 상인방에 붙여 두었던 남/여 픽토그램을 없앤다 —
        그 자리가 복도 천장판이 끝나는 어두운 구간이라, 벽에 붙은 표지가 아니라
        허공에 떠 있는 파란 사람 두 명처럼 보였다. 화장실 표시는 통로 안쪽
        두 문에 붙은 표지판으로 충분하다. */
@@ -347,7 +347,7 @@ function fpMakeCorr(lv){
       d.position.set(tsd*(FP_WALL_X+FP_ALC_DX), 0, zWall);
       g.add(d);
     }
-    /* 요청 반영: 남자화장실은 지금 쓰던 색(시안)을 그대로 두고, 여자화장실만
+    /* 남자화장실은 지금 쓰던 색(시안)을 그대로 두고, 여자화장실만
        분홍으로 구분한다. 목적지일 때도 색으로 남/여를 구분해야 하므로 색은
        바꾸지 않고, 목적지 표시는 문 둘레의 맥동 발광(o.target)으로만 준다. */
     putFacing(tz-FP_ALC_HW+0.035, 1, {w:1.24, window:false, sign:'wcM', accent:'#00B4E6',
@@ -358,7 +358,7 @@ function fpMakeCorr(lv){
     if(esZW!==null){
       g.add(fpMakeStairwell(lv, esZW, ko, true));
       /* 입구 철제 쌍여닫이문(살구색) — 사진처럼 활짝 열려 복도 벽에 붙어 있다
-         (요청 반영: 닫힌 모습으로 바꿨더니 화면을 꽉 채워 오히려 답답해 보여서
+         (닫힌 모습으로 바꿨더니 화면을 꽉 채워 오히려 답답해 보여서
          다시 열린 모습으로 되돌린다). */
       var emFrCol=0x7E93A6, emDrCol=0xE4B18C, emLfW=FP_EM_OW/2-0.06;
       [-1,1].forEach(function(dsn){
@@ -371,7 +371,7 @@ function fpMakeCorr(lv){
       });
       var emHd=fpMkBox(0.12, 0.14, FP_EM_OW+0.36, emFrCol, 1);
       emHd.position.set(FP_WALL_X-0.02, 2.31, esZW); g.add(emHd);
-      /* v149(요청 반영): 목적지일 때 개구부 위에 얹던 분홍 표시선(0xFF2E88)은 없앤다 —
+      /* v149: 목적지일 때 개구부 위에 얹던 분홍 표시선(0xFF2E88)은 없앤다 —
          초록 비상구 표지판 바로 위에 형광 띠가 하나 더 걸려 있어 지저분했고,
          '여기가 목적지'라는 신호는 v148에서 넣은 바닥 초록 고리가 대신한다. */
     }
@@ -395,14 +395,14 @@ function fpMakeCorr(lv){
       // 문 바깥쪽(건물 밖) 어둡게 막고 문턱 라인
       var bk=fpMkPlane(CORR_HALF*2,H,0x0A1018,1);
       bk.position.set(0,H/2,zc-dir*0.06); g.add(bk);
-      var ed=fpMkPlane(CORR_HALF*2,0.16,0xB0B6BC,1);        // 문턱 금속 라인(복도와 통일 — 요청 반영)
+      var ed=fpMkPlane(CORR_HALF*2,0.16,0xB0B6BC,1);        // 문턱 금속 라인(복도와 통일 —)
       ed.rotation.x=-Math.PI/2; ed.position.set(0,0.07,zc+dir*0.30); g.add(ed);
     });
   }else{
     var cA=fpMkPlane(CORR_HALF*2,H,0xE8DFC8,1); cA.position.set(0,H/2,z0); g.add(cA);
     var cB=fpMkPlane(CORR_HALF*2,H,0xE8DFC8,1); cB.position.set(0,H/2,z1); g.add(cB);
     [[z0,1],[z1,-1]].forEach(function(a){
-      var ln=fpMkPlane(CORR_HALF*2,0.05,0x5B4F3D,1);        // 크라운 몰딩(복도와 통일 — 요청 반영)
+      var ln=fpMkPlane(CORR_HALF*2,0.05,0x5B4F3D,1);        // 크라운 몰딩(복도와 통일 —)
       ln.position.set(0,H-0.03,a[0]+a[1]*0.01); g.add(ln);
     });
   }
@@ -413,20 +413,20 @@ function fpMakeCorr(lv){
   if(isG){
     var hw=FP_HALL_HW, gx=FP_GATE_X, inX=-FP_WALL_X;
     var hallLen=inX-gx;                                   // 정문 → 복도까지 거리
-    // 현관 바닥(복도와 같은 톤) + 천장(복도와 같은 톤으로 통일 — 요청 반영)
+    // 현관 바닥(복도와 같은 톤) + 천장(복도와 같은 톤으로 통일 —)
     var hfl=fpMkPlane(hallLen, hw*2, 0x39465A, 1);
     hfl.rotation.x=-Math.PI/2; hfl.position.set(gx+hallLen/2, 0.055, 0); g.add(hfl);
     var hce=fpMkPlane(hallLen, hw*2, 0xF2F0EA, 1);        // 복도 천장과 같은 밝은 회색/흰색
     hce.rotation.x=Math.PI/2; hce.position.set(gx+hallLen/2, H-0.02, 0); g.add(hce);
     // 현관 양옆 벽(+ 걸레받이 + 크라운 몰딩)
     [-1,1].forEach(function(sn){
-      var sw=fpMkPlane(hallLen,H,0xE8DFC8,1,0x9C8F6E);   // 크림색 벽지로 변경(요청 반영)
+      var sw=fpMkPlane(hallLen,H,0xE8DFC8,1,0x9C8F6E);   // 크림색 벽지로 변경
       sw.rotation.y=(sn<0)?0:Math.PI;
       sw.position.set(gx+hallLen/2, H/2, sn*hw); g.add(sw);
       var sk=fpMkPlane(hallLen,0.19,0x080C13,1);
       sk.rotation.y=(sn<0)?0:Math.PI;
       sk.position.set(gx+hallLen/2, 0.095, sn*(hw-0.012)); g.add(sk);
-      var sl=fpMkPlane(hallLen,0.05,0x5B4F3D,1);          // 크라운 몰딩(복도와 통일 — 요청 반영)
+      var sl=fpMkPlane(hallLen,0.05,0x5B4F3D,1);          // 크라운 몰딩(복도와 통일 —)
       sl.rotation.y=(sn<0)?0:Math.PI;
       sl.position.set(gx+hallLen/2, H-0.03, sn*(hw-0.012)); g.add(sl);
     });
@@ -514,7 +514,7 @@ function fpMakeCorr(lv){
          경로 미리보기·직접 걸어보기 둘 다 같은 fpPos를 보므로 동일하게 동작한다. */
       fpRegisterAutoSlideDoor(vjLf, sn*(mdW/4), sn*vjW*0.94, 2.6, 0);
     });
-    /* 요청 반영: 1층 로비 오른쪽(게시판 쪽) 벽에 붙어 있던 영문 레터링
+    /* 1층 로비 오른쪽(게시판 쪽) 벽에 붙어 있던 영문 레터링
        (KUNSAN NATIONAL UNIVERSITY)을 삭제한다 — 실제 사진에는 이 자리에
        그런 글씨가 없다. */
     /* 자판기는 방풍실 왼쪽(-Z) 벽 — 정문으로 들어오면 왼손 쪽이다 */
@@ -537,9 +537,9 @@ function fpMakeCorr(lv){
       putR(fpMakeNotice(1.42, bdNames[bi], ko), bdX0+bi*1.48);
     });
     putR(fpMakeCardboardBox(), bdX0+2.55);
-    putR(fpMakeCooler(), bdX0+3.15);   // 브로슈어 거치대 자리와 맞바꾼 위치(요청 반영)
+    putR(fpMakeCooler(), bdX0+3.15);   // 브로슈어 거치대 자리와 맞바꾼 위치
     putR(fpMakeBins(), bdX0+3.85);
-    // 브로슈어 거치대(fpMakeRack)는 삭제(요청 반영) — 함수 정의는 남겨 둔다.
+    // 브로슈어 거치대(fpMakeRack)는 삭제 — 함수 정의는 남겨 둔다.
     // 정문 외벽(문 좌우 벽 + 문 위 상인방) — 문 폭 3.3 만 비워 둔다
     /* 사진처럼 정문은 한 덩어리가 아니라 가운데 기둥을 두고 두 개로 나눠져 있다 */
     var gw=2.55, pierW=1.10;
@@ -569,13 +569,13 @@ function fpMakeCorr(lv){
          위에서 기둥·옆벽도 문 쪽으로 겹치게 넓혔으니 어느 각도에서 봐도 틈이 없다. */
       gt.rotation.y=-Math.PI/2; gt.position.set(gx-0.012, 0, sn*gzc); g.add(gt);
     });
-    /* 요청 반영(버그 수정): 정문 앞 광장에는 바닥판 하나뿐이고 하늘·먼 배경이
+    /* 버그 수정: 정문 앞 광장에는 바닥판 하나뿐이고 하늘·먼 배경이
        전혀 없어서, 재생을 멈추고 위를 올려다보면 새까만 허공만 보였다(게다가
        거기에 목적지 층 복도 조각까지 떠 보였다 — 그쪽은 animate에서 따로
        가렸다). 옥상에서 쓰는 것과 같은 하늘 배경판으로 광장 둘레와 위를
        덮어, 실제 야외처럼 하늘·먼 산·나무가 보이게 한다.
        (건물 바깥쪽 x<gx 구간에만 세우므로 실내에서는 정문 유리 너머로만 보인다) */
-    /* 요청 반영: 광장에서 위를 올려다보면 건물이 있어야 할 자리가 새까맣게
+    /* 광장에서 위를 올려다보면 건물이 있어야 할 자리가 새까맣게
        비어 있었다 — 걷기용 1층 구조에는 위층 외벽이 없기 때문이다. 광장에서
        보이는 범위만큼만 간단한 콘크리트 외벽 한 장을 세워 건물처럼 읽히게 한다. */
     (function(){
@@ -702,7 +702,7 @@ function fpBuildCorr(levels){
        홀로그램/층상세 전용 표시인데, 걷기 중에도 그대로 남아 있어서 존 안에서
        허공에 큰 반투명 판이 떠 있는 것처럼 보였다 → 함께 감춘다. */
     if(o.userData && (o.userData.zone || o.userData.b1door)) fpHiddenSt.push(o);
-    /* 요청 반영(버그 수정): 건물 3D의 층 바닥 슬래브(짙은 남회색 0x222B36)는
+    /* 버그 수정: 건물 3D의 층 바닥 슬래브(짙은 남회색 0x222B36)는
        계단실 위까지 통째로 덮는 두꺼운 판이라, 걷기 중 계단 중간 계단참에서
        위를 올려다보면 실제 위층 바닥(26.66)보다 26cm 아래(26.40)에 이 판의
        밑면이 걸쳐, 계단실 한가운데 천장만 한 단 내려앉은 것처럼 보였다

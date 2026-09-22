@@ -18,7 +18,7 @@ var PH_SKIP   = [];        // 호실번호를 못 찾은 파일 이름
   if(window.PHOTO_INDEX){ try{ ROOM_PHOTOS = JSON.parse(JSON.stringify(window.PHOTO_INDEX)) || {}; }catch(e){ ROOM_PHOTOS = {}; } }
 })();
 
-/* v147(요청 반영): 길안내 1단계에서 쓸 '문별 사진'.
+/* v147: 길안내 1단계에서 쓸 '문별 사진'.
    확인 화면(여기가 맞나요?)이 쓰는 바로 그 사진 한 장만 골라 따로 등록한다 —
    code를 'BLD'로 주면 건물 사진 8장이 전부 딸려 와 눌러 넘기게 되기 때문이다.
    사진 객체를 그대로 참조하므로 용량은 늘지 않는다. */

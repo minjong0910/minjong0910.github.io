@@ -24,7 +24,7 @@ function fpMakeGate(o){
     pivot.add(leafGrp);
     var gp=fpMkPlane(pw, h-fw*2, GL, 0.55);      // 발광 없음 — 문에서 빛이 새지 않게
     gp.position.set(sn*(pw/2+fw/2), h/2, 0.012); leafGrp.add(gp);
-    /* 요청 반영: 왼쪽 문만 안쪽이 안 보이는 문제 — 원인은 문 유리(gp)가
+    /* 왼쪽 문만 안쪽이 안 보이는 문제 — 원인은 문 유리(gp)가
        depthWrite:true(fpMkPlane 기본값)라서, 문 주변에 겹겹이 쌓인 다른 반투명
        유리·필름(코너 리턴, 흰 필름 띠, 트랜섬 등)과의 앞뒤 정렬이 카메라 각도에
        따라 뒤집혀 한쪽 문짝만 불투명하게 보이는 순서로 그려지곤 했다.
@@ -40,10 +40,10 @@ function fpMakeGate(o){
     g.add(pivot);
     /* 문짝(leafGrp)을 바깥에서도 찾을 수 있게 남겨 둔다 — 문 유리에 붙는
        레터링·로고 같은 장식을 문짝에 같이 붙여야 문이 열릴 때 함께 움직인다
-       (요청 반영: 예전엔 장식이 벽 쪽 그룹에 붙어 있어서, 문이 열리면 글씨만
+       (예전엔 장식이 벽 쪽 그룹에 붙어 있어서, 문이 열리면 글씨만
        허공에 남아 있었다). 닫힌 상태의 leafGrp 좌표계는 문 전체 좌표계와
        같으므로, 문 기준 좌표를 그대로 써서 붙이면 된다. */
-    /* 요청 반영 : 가운데 세로 검은 바는 고정 기둥이 아니라 문짝에 붙은
+    /* 가운데 세로 검은 바는 고정 기둥이 아니라 문짝에 붙은
        '맞댐 선대(meeting stile)'다 — 예전엔 벽 쪽 그룹(g)에 통짜로 붙어 있어서
        문이 열려도 가운데 바만 허공에 그대로 남아 있었다. 이제 문짝(leafGrp)에
        반쪽씩 붙여, 닫히면 하나로 맞물리고 열리면 문과 함께 갈라진다. */
@@ -53,20 +53,20 @@ function fpMakeGate(o){
     }
     if(!g.userData.gateLeaves) g.userData.gateLeaves=[];
     g.userData.gateLeaves.push({sign:(sn||1), leaf:leafGrp, pivot:pivot, paneW:pw});
-    // 요청 반영: 모든 문에 자동 등록하지 않고, 호출 쪽에서 o.autoOpen을 켠 경우에만
+    // 모든 문에 자동 등록하지 않고, 호출 쪽에서 o.autoOpen을 켠 경우에만
     // (지하1층 크리에이티브 존 문) — 밖(복도)에서 들어올 때만 열리도록 한 방향으로 제한.
     if(o.autoOpen) fpRegisterAutoDoor(g, pivot, w, sn||1, 1.05, o.trigDist, (o.oneWay!==undefined?o.oneWay:-1), o.push);
   });
   /* o.noMullion : 양짝 자동문(여닫이)에서는 가운데 고정 멀리언을 두지 않는다 —
      문짝이 열려도 가운데 세로 기둥이 그대로 남아 있으면 "문이 두 개 겹쳐 있는"
-     것처럼 보이고, 열린 문 사이로 지나가는 느낌도 나지 않는다(요청 반영). */
+     것처럼 보이고, 열린 문 사이로 지나가는 느낌도 나지 않는다. */
   /* 고정 기둥은 좌우 문틀 두 개뿐이다 — 가운데 바는 위에서 문짝에 붙였다. */
   [-w/2+fw/2, w/2-fw/2].forEach(function(px){
     var p=fpMkPlane(fw, h, AL, 1); p.position.set(px, h/2, 0.036); g.add(p);
   });
   var top=fpMkPlane(w, fw*1.5, AL, 1); top.position.set(0, h-fw*0.75, 0.036); g.add(top);
   var trH = Math.max(0, FP_CEIL_H - h - 0.05);              // 문 위 채광창
-  /* 요청 반영: 이 자동 채광창(어두운 유리, 반투명)이 지하1층 크리에이티브 존
+  /* 이 자동 채광창(어두운 유리, 반투명)이 지하1층 크리에이티브 존
      문처럼 문 위에 이미 벽 글씨(레터링)가 따로 붙는 문에서는, 그 글씨 자리에
      작은 사각형 그림자처럼 겹쳐 보였다 — o.noTransom을 준 문은 생략한다. */
   if(trH > 0.14 && !o.noTransom){
@@ -184,7 +184,7 @@ function fpBDTactile(g, x, y, zc){
   strip.rotation.x=-Math.PI/2; strip.position.set(x-0.25, y+0.02, zc); g.add(strip);
 }
 /* 조립 : 위 조각들을 한 자리에서 순서대로 세운다.
-   (요청 반영: 입구 쪽에 있던 가짜 엘리베이터 틀 장식(fpBDAlcove)은 실제 사진에
+   (입구 쪽에 있던 가짜 엘리베이터 틀 장식(fpBDAlcove)은 실제 사진에
    없는 요소였고, 안쪽이 짙은 빈 면이라 "벽에 뚫린 이상한 구멍"처럼 보여서 뺀다.) */
 /* 좌측 벽에 붙은 검은 문 하나 — 실사진(SW중심대학사업 간판 통로)에서
    계단 쪽(입구, zNear)에 가까운 자리에 있는 문. 벽을 뚫지 않고 벽면 위에
@@ -271,11 +271,11 @@ function fpMake1FStairHall(g, p){
   /* ── ⓪ 전체 바닥 참(Landing) : 문턱(LAND)부터 정면 출입문까지 이어지는 넓은
      테라조 타일 바닥. 기존 'fl'(문턱 폭 LAND만)은 계단 진입부만 덮어서, 계단
      양옆(문 오른쪽 벽 앞쪽 등) 빈 공간이 바닥 없이 뚫려 보이는 문제가 있었다
-     (요청 반영: "정면 출입문까지 이어지는 넓은 평면 타일 바닥"). 계단 매스
+     ("정면 출입문까지 이어지는 넓은 평면 타일 바닥"). 계단 매스
      자체는 그 위에 얹히는 별도 지오메트리라 겹쳐도 문제없다. */
-  /* [지하 계단 개구부] 요청 반영 — 실사진(계단 내려다본 사진)처럼, 후문 로비
+  /* [지하 계단 개구부] 실사진(계단 내려다본 사진)처럼, 후문 로비
      바닥에 지하로 내려가는 계단이 그대로 내려다보이는 사각 개구부를 만든다.
-     요청 반영(구조 정정): 예전에는 이 구멍을 zDn 열에 뚫었는데, 실제 B1행
+     구조 정정: 예전에는 이 구멍을 zDn 열에 뚫었는데, 실제 B1행
      계단은 zUp 열(1층 자신의 2층행 상행 계단과 같은 열 — 내려가는 계단 바로
      위에 올라가는 계단이 얹혀 있는 실제 구조)에 있다. 아래 난간·안전선도
      이미 zUp 기준으로 세워져 있어 구멍만 반대쪽에 나 있던 상태였다.
@@ -308,16 +308,16 @@ function fpMake1FStairHall(g, p){
     var sk2=fpMkPlane(hz1-hz0, skH, skC, 1);
     sk2.rotation.y=Math.PI/2; sk2.position.set(hx0, 0.008-skH/2, (hz0+hz1)/2); g.add(sk2);
   })();
-  /* 요청 반영(버그 수정): 이 로비 전용 천장이 1층→2층으로 올라가는 계단
+  /* 버그 수정: 이 로비 전용 천장이 1층→2층으로 올라가는 계단
      바로 위 공간(x0~x0+WD 전체)을 통짜로 덮고 있었다 — 1층은 위층(2층)이
      항상 있으므로, 계단을 오를 때 이 판을 그대로 뚫고 지나가는 것처럼
-     보였다(요청 반영: 다른 층 계단실 천장과 마찬가지로 위층으로 이어지는
+     보였다(다른 층 계단실 천장과 마찬가지로 위층으로 이어지는
      자리는 막지 않는다 — 그냥 이 로비 전용 천장 자체를 없앤다).
      대신 조명(포인트라이트)만은 남겨서 로비가 어두워지지 않게 한다. */
   (function(){
     var ceilY=FP_CEIL_H-0.02;
     var len=WD, cz=zc;
-    /* 요청 반영(성능 개선): 실제 PointLight 개수를 최대 4개로 제한한다
+    /* 성능 개선: 실제 PointLight 개수를 최대 4개로 제한한다
        (다른 복도 조명 루프에 이미 적용된 것과 같은 방식) — 휴대폰에서
        조명 개수가 많을수록 프레임마다 계산량이 늘어 렉의 큰 원인이 된다.
        빛이 드문드문해 보이지 않도록 세기·도달거리를 함께 늘려 보완한다. */
@@ -339,7 +339,7 @@ function fpMake1FStairHall(g, p){
   g.add(fpMkTilePanel(WD-0.05, (yT-yB)-0.05, x0+WD/2, (yT+yB)/2, zL+0.006, 0, 0xFFFFFF));
   g.add(fpMkContactAO(WD-0.05, 0.5, x0+WD/2, zL, 'x'));   // 벽-바닥 접점 AO
   /* ── ①-b 계단실 입구 쪽(-X) 아랫벽 : 1층 바닥 밑 ~ 지하 천장 사이 막음 ──
-     요청 반영: 1층에서 지하로 내려가는 연출 중에 앞(-X)을 보면, 지하 복도
+     1층에서 지하로 내려가는 연출 중에 앞(-X)을 보면, 지하 복도
      천장(월드 y=B1바닥+FP_CEIL_H)과 1층 바닥(월드 y=1층슬래브) 사이가 아무것도
      없이 뻥 뚫려 있어서 그 틈으로 바깥(홀로그램·검은 배경)이 그대로 보였다.
      게다가 그 틈 아래로 지하 복도 벽 윗부분만 삐죽 남아 '역 기역자' 모양의
@@ -352,10 +352,10 @@ function fpMake1FStairHall(g, p){
     var vw=fpMkWallLit(hw*2+1.2, voidH, cWall, x0+0.02, 0.02-voidH/2, zc, Math.PI/2);
     g.add(vw);
   })();
-  /* 요청 반영: 이 좌측 벽에 붙여 두었던 공지사항 포스터 4장을 없앤다 —
+  /* 이 좌측 벽에 붙여 두었던 공지사항 포스터 4장을 없앤다 —
      실사진(3번 사진)의 같은 벽에는 아무것도 붙어 있지 않고 석재 패널 마감만
      있다. 패널(위 fpMkTilePanel)은 실사진과 일치하므로 그대로 남긴다. */
-  /* 요청 반영: 소화전함을 없앤다. */
+  /* 소화전함을 없앤다. */
   /* ── ② 천장걸이 대형 검은 간판 'SW중심대학사업'(흰 필기체) ──
      주의: 1인칭 모드에는 건물 전체를 덮는 어두운 천장판(fpCeil, 바닥+2.55m)이
      따로 있어서, 그보다 높이 달면 윗부분이 천장에 잘려 얇은 띠로만 보인다
@@ -363,11 +363,11 @@ function fpMake1FStairHall(g, p){
      ① 관람 시선이 천장판에 막히기 전(교차점 x=4.50)에 판에 닿고
      ② 계단 오르내리기 연출의 눈높이가 이 x를 지날 땐 항상 판 위(≥2.90)라
      몸이 판을 뚫지 않는다(좌표 검증 완료). */
-  /* 요청 반영: 간판을 더 위로. 천장(FP_CEIL_H)이 3.3으로 상향되어 여유가
+  /* 간판을 더 위로. 천장(FP_CEIL_H)이 3.3으로 상향되어 여유가
      생겼으므로, 사람 눈높이(≥2.90) 위 불변식을 유지하는 선에서 살짝만
      더 올린다(2.225→2.50, 판 상단 2.50→2.775, 여전히 2.90 미만). */
   var sgX=x0+2.50, sgW=2.30, sgH=0.55, sgD=0.14, sgYc=2.50;
-  /* 요청 반영: 간판이 우측 상행 계단 쪽까지 넘어가면 안 되고, 왼쪽 벽~계단
+  /* 간판이 우측 상행 계단 쪽까지 넘어가면 안 되고, 왼쪽 벽~계단
      시작 전(좌측 계단 공간) 사이에만 들어와야 한다. 상행 계단의 안쪽(중심 쪽)
      가장자리는 zUp-fw/2 = (OW/4+0.02)-(OW/2-0.10)/2 인데, OW 항이 서로
      상쇄되어 hw(폭)와 무관하게 항상 zc+0.07로 고정된다 — 그보다 0.3m 여유를
@@ -400,7 +400,7 @@ function fpMake1FStairHall(g, p){
     rod.position.set(sgX, (yT+(sgYc+sgH/2))/2, zc+sgZOff+sn*(sgW/2-0.35)); g.add(rod);
   });
   /* ── ③ 뒷벽 재구성 : 가운데 프레임형 유리 출입문 + 문 너머 바깥 풍경 ──
-     요청 반영(원상복구): 예전에 "문 좌측 벽을 절반으로 줄이고 문을 왼쪽으로
+     원상복구: 예전에 "문 좌측 벽을 절반으로 줄이고 문을 왼쪽으로
      당겨 붙여 달라"는 요청으로 문 중심을 zc에서 shiftAmt만큼 옮겨 두었는데,
      그 결과 후문이 계단홀 한가운데가 아니라 한쪽으로 치우쳐 보였다(4번 사진의
      "밀려 있다"). 문 중심을 다시 홀 중심(zc)에 맞추고 좌우 벽 폭도 같게 한다. */
@@ -421,7 +421,7 @@ function fpMake1FStairHall(g, p){
   });
   var ovr=fpMkPlane(dw, yT-(dh+0.42), cWall, 1, eWall);         // 문+채광창 위 벽
   ovr.rotation.y=-Math.PI/2; ovr.position.set(bx, (dh+0.42+yT)/2, dcz); g.add(ovr);
-  /* 요청 반영: '금연구역' 표지는 아래에서 후문 왼쪽으로 옮겨 새로 붙인다. */
+  /* '금연구역' 표지는 아래에서 후문 왼쪽으로 옮겨 새로 붙인다. */
   /* 실사진 반영(4차) : 정면 유리 출입문을 입체적으로 다시 짓는다 —
      ① 벽체가 안쪽으로 오목하게 들어가는 두꺼운 문틀(리빌) 추가
      ② 문 상단 중앙에 도어클로저 메탈박스
@@ -469,7 +469,7 @@ function fpMake1FStairHall(g, p){
     });
     var seam=fpMkPlane(0.03, dh-0.05, 0x2E332F, 0.9);       // 양문 가운데 갭
     seam.rotation.y=-Math.PI/2; seam.position.set(dX+0.005, dh/2, dcz); g.add(seam);
-    /* 요청 반영(버그 수정): 바닥에 눕히는 판(rotation.x=-π/2)은 PlaneGeometry의
+    /* 버그 수정: 바닥에 눕히는 판(rotation.x=-π/2)은 PlaneGeometry의
        첫 인자가 X(문에 수직) 방향, 둘째 인자가 Z(문과 나란한) 방향이 된다.
        문턱 금속판과 점자블록 모두 인자가 뒤바뀌어 있어서, 문과 나란히 깔려야 할
        띠가 문을 뚫고 바깥으로 뻗어 나가 있었다(4번 사진에서 노란 블록이 옆으로
@@ -477,7 +477,7 @@ function fpMake1FStairHall(g, p){
     var thresh=fpMkPlane(0.16, dw+0.10, 0xB7BCBE, 1);       // 바닥 문턱 금속판
     thresh.rotation.x=-Math.PI/2; thresh.position.set(dX-0.02, 0.006, dcz); g.add(thresh);
     g.add(fpMkContactAO(dw+0.10, 0.4, dX, dcz, 'z'));       // 문틀 밑 AO
-    /* 요청 반영: 문 앞 바닥에 노란 점자블록(경고용 타일) 띠를 얇게 깐다.
+    /* 문 앞 바닥에 노란 점자블록(경고용 타일) 띠를 얇게 깐다.
        기존 로비 바닥(landFl, y=0.008)과 겹치지 않도록 y를 살짝 더 띄운다. */
     var tacT=fpTactileTex().clone(); tacT.needsUpdate=true;
     tacT.wrapS=tacT.wrapT=THREE.RepeatWrapping;
@@ -486,7 +486,7 @@ function fpMake1FStairHall(g, p){
       new THREE.MeshStandardMaterial({map:tacT, roughness:0.92, metalness:0.02}));
     tactile.rotation.x=-Math.PI/2; tactile.position.set(dX-0.60, 0.013, dcz); g.add(tactile);
   })();
-  /* 후문 수정에 맞춰(요청 반영) 문 왼쪽(sideWL 벽)에 '금연구역' 표지를 새로 붙인다. */
+  /* 후문 수정에 맞춰 문 왼쪽(sideWL 벽)에 '금연구역' 표지를 새로 붙인다. */
   (function(){
     var nsZ=dcz-(dw/2+sideWL/2), nsY=1.55;
     var pap=fpMkPlane(0.34, 0.26, 0xF4F3EE, 1);
@@ -504,11 +504,11 @@ function fpMake1FStairHall(g, p){
     var nsTx=fpMkTex(0.29, 0.22, tn, 1);
     nsTx.rotation.y=-Math.PI/2; nsTx.position.set(bx-0.012, nsY, nsZ); g.add(nsTx);
   })();
-  var out=fpMkTex(4.7, 2.65, fpBackDoorOutsideTex(), 0.82);             // 바깥 풍경 살짝 톤 낮춤(요청 반영: 역광 눈부심 완화)
+  var out=fpMkTex(4.7, 2.65, fpBackDoorOutsideTex(), 0.82);             // 바깥 풍경 살짝 톤 낮춤(역광 눈부심 완화)
   out.rotation.y=-Math.PI/2; out.position.set(bx+0.85, 1.30, dcz); g.add(out);
   var outFl=fpMkPlane(0.9, hw*2, 0x9AA4AA, 1);                  // 문턱 밖 짧은 외부 바닥
   outFl.rotation.x=-Math.PI/2; outFl.position.set(bx+0.45, 0.005, zc); g.add(outFl);
-  var day=new THREE.PointLight(0xFFF6E0, 0.10, 6);              // 문으로 들이치는 주광(요청 반영: 여전히 밝다는 피드백으로 추가 하향)
+  var day=new THREE.PointLight(0xFFF6E0, 0.10, 6);              // 문으로 들이치는 주광(여전히 밝다는 피드백으로 추가 하향)
   day.position.set(bx-0.85, 1.75, dcz); g.add(day);
   /* ── 정면 우측(계단 쪽, +Z) 벽 : 사각 창문 + 하단 비상구 안내판 (사진 반영) ──
      문 오른쪽 벽(sideW 폭, sn=1)에 붙인다. 창 안쪽에 바깥 풍경을 한 번 더 넣어
@@ -516,14 +516,14 @@ function fpMake1FStairHall(g, p){
   (function(){
     var winZ=dcz+dw/2+sideWR/2;                                  // 문 오른쪽(넓어진) 벽 중심 z
     var winW=Math.min(1.10, sideWR-0.14), winH=1.30, winYc=1.42;
-    /* 요청 반영: 초록(민트) 프레임·세로 방범창살·바깥 풍경 톤을 걷어내고,
+    /* 초록(민트) 프레임·세로 방범창살·바깥 풍경 톤을 걷어내고,
        실사진(2번째 사진)처럼 회색 알루미늄 틀의 2연동 미닫이창으로 다시 만든다. */
     var alumOuter=0x9CA0A0, alumInner=0xB8BBBB, alumDark=0x707475;
     var frm=fpMkPlane(winW+0.14, winH+0.14, alumDark, 1);          // 바깥 몰딩(짙은 회색)
     frm.rotation.y=-Math.PI/2; frm.position.set(bx-0.005, winYc, winZ); g.add(frm);
     var frmIn=fpMkPlane(winW+0.05, winH+0.05, alumOuter, 1);       // 창틀 본체(밝은 회색)
     frmIn.rotation.y=-Math.PI/2; frmIn.position.set(bx-0.008, winYc, winZ); g.add(frmIn);
-    /* 요청 반영: 유리가 반짝여 보였다 — 조명 반사(specular)가 생기는
+    /* 유리가 반짝여 보였다 — 조명 반사(specular)가 생기는
        MeshStandardMaterial 대신, 빛을 받지 않는 무광 재질(MeshBasicMaterial)로
        직접 만들어 하이라이트가 전혀 생기지 않게 한다. */
     var wglassMat=new THREE.MeshBasicMaterial({color:0xEFF4F4, transparent:true, opacity:0.55, side:THREE.DoubleSide});
@@ -554,7 +554,7 @@ function fpMake1FStairHall(g, p){
       var pln=fpMkPlane(0.22, 0.012, 0x9AA0A6, 0.9);
       pln.rotation.y=-Math.PI/2; pln.position.set(bx-0.014, 1.60-pl*0.055, poZ); g.add(pln);
     }
-    /* 요청 반영: 창 아래 "비상구" 유도등 표지를 삭제한다. */
+    /* 창 아래 "비상구" 유도등 표지를 삭제한다. */
   })();
   /* 실사진 반영 : 정면 유리 출입문 좌측, 계단 쪽에 가까운 타일벽 위에 붙은
      검은 문. 타일벽(fpMkTilePanel)이 구멍 없는 통짜 평면이라 안쪽으로 오목하게
@@ -585,7 +585,7 @@ function fpMake1FStairHall(g, p){
   if(fw!==undefined && xs!==undefined && N!==undefined && run!==undefined){
     (function(){
       var vx0=xs, vx1=xs+N*run+0.6, vz0=zUp-fw/2, vz1=zUp+fw/2;   // 개구부 확장(0.6)에 맞춰 난간 먼 쪽도 같이 늘린다
-      /* 요청 반영(v95): 실사진(후문 안쪽에서 본 지하 계단 개구부)처럼 검정 각파이프
+      /* v95: 실사진(후문 안쪽에서 본 지하 계단 개구부)처럼 검정 각파이프
          난간 — 굵은 상단 가로대 + 가는 가로대 3줄 + 약 0.9m 간격 세로 기둥.
          X축 방향(개구부 긴 변)으로만 쓴다. */
       var railH=0.95, frameCol=0x1D2023;
@@ -602,7 +602,7 @@ function fpMake1FStairHall(g, p){
           post.position.set(cx-len/2+len*pi/nPost, railH/2, cz); g.add(post);
         }
       }
-      /* 요청 반영(v95): 개구부 우측 긴 변(vz0, 로비 타일 바닥과 맞닿는 쪽)에만 난간을
+      /* v95: 개구부 우측 긴 변(vz0, 로비 타일 바닥과 맞닿는 쪽)에만 난간을
          세운다 — 실사진에서 난간이 있는 자리. 계단 쪽(vz1)은 계속 열어 둔다. */
       var rx0=xs-0.10, rx1=xs+FP_B1F_RUN_LEN+0.10;   // 위 바닥 개구부(hx0~hx1)와 같은 X 구간
       railRun(rx1-rx0, (rx0+rx1)/2, vz0);
@@ -610,13 +610,12 @@ function fpMake1FStairHall(g, p){
          실제 상행 계단을 따라 이미 같은 자리에 난간을 세우고 있다 — 여기서
          또 세우면 겹쳐서(Z-fighting) 두꺼운 울타리처럼 보인다. 그쪽은 빼고
          나머지 2면(반대편 긴 변 + 먼 쪽 가로대)만 세운다. */
-      /* 요청 반영: 울타리(난간)가 오히려 계단을 가려 안 보이게 만든다는
+      /* 울타리(난간)가 오히려 계단을 가려 안 보이게 만든다는
          피드백 — 난간 2면을 없애고, 아래로 뚫린 계단 자체가 그대로 보이게
          한다(빨간 안전선만 개구부 가장자리 표시로 남긴다). */
       /* 실사진(2번째 첨부)에서 직접 확인되는 요소만 반영 : 개구부 가장자리의
-         빨간 안전선(다른 층 계단에도 이미 쓰는 색 0xC0342B, 요청 반영 —
-         사진에 없는 노란 점자블록은 임의로 추정해 넣지 않는다). */
-      /* 요청 반영(삭제): 개구부 가장자리에 둘러 둔 빨간 안전선 3줄(양 긴 변 +
+         빨간 안전선(다른 층 계단에도 이미 쓰는 색 0xC0342B, 사진에 없는 노란 점자블록은 임의로 추정해 넣지 않는다). */
+      /* 삭제: 개구부 가장자리에 둘러 둔 빨간 안전선 3줄(양 긴 변 +
          먼 쪽)을 없앤다 — 지하로 내려가는 연출 중 아래·옆에서 보면 벽 위에
          붉은 가느다란 실선이 떠 있는 것처럼 보인다는 지적. */
       /* [slab/soffit] 1층 자신의 2층행 상행 계단 밑면 — 실사진처럼 위층으로
@@ -638,17 +637,17 @@ var FP_ST_OW = 4.40;    // 중앙계단 개구부 폭(복도 Z 방향) — 실�
 var FP_EM_OW = 2.70;    // 비상계단 개구부 폭 — 중앙계단보다 좁다(사진 반영)
 var FP_ST_OH = 2.18;
 var FP_ST_WD   = 6.20;   // 계단실 깊이(X) — 단 한 바퀴 + 중간 계단참(기존 대비 약 1.4배 깊게)
-var FP_ST_WD_B1F = FP_ST_WD*1.35;  // B1↔1F 전용: 실사진처럼 문·창 앞 로비가 여유 있도록 더 깊게(요청 반영)
+var FP_ST_WD_B1F = FP_ST_WD*1.35;  // B1↔1F 전용: 실사진처럼 문·창 앞 로비가 여유 있도록 더 깊게
 var FP_ST_LAND = 1.15;   // 문턱에서 첫 단까지 — 문을 열고 들어섰을 때의 초입 계단참(약 1.4배 확장)
 var FP_ST_N    = 14;     // 반 층당 단 수
 var FP_ST_RUN  = 0.245;  // 단 하나 깊이    // 개구부 높이
-/* v109(요청 반영): 5층→옥상 두 번째 도막(계단참→옥상 바닥)만 단 수를 14→10으로 줄여 짧게 만든다.
+/* v109: 5층→옥상 두 번째 도막(계단참→옥상 바닥)만 단 수를 14→10으로 줄여 짧게 만든다.
    같은 반 층 높이를 10단으로 오르므로 단이 조금 높아지지만, 옥상 바닥 개구부가 그만큼(4단×0.245≈1m)
    안쪽에서 시작해 실사진처럼 철문에서 개구부까지 평평한 바닥이 넓어지고, 데크로 오르는 계단도
    더 안쪽에서 시작한다. 걷기 연출·바닥 개구부·데크 계단이 모두 이 값을 함께 쓴다. */
-var FP_ST_N_R = FP_ST_N;   // v111(요청 반영): 옥상 도막 단축(10단)을 되돌려 다른 층과 같은 14단·같은 시작점으로. (관련 코드는 그대로 두고 값만 되돌림 — FP_R_XSHIFT=0)
+var FP_ST_N_R = FP_ST_N;   // v111: 옥상 도막 단축(10단)을 되돌려 다른 층과 같은 14단·같은 시작점으로. (관련 코드는 그대로 두고 값만 되돌림 — FP_R_XSHIFT=0)
 var FP_R_XSHIFT = (FP_ST_N - FP_ST_N_R) * FP_ST_RUN;   // 옥상 도막의 첫 단이 +X로 밀리는 양(≈0.98m)
-/* v122(요청 반영): 자유 탐색에서 옥탑방 데크 계단을 밟고 데크 위까지 올라갈 수 있게 —
+/* v122: 자유 탐색에서 옥탑방 데크 계단을 밟고 데크 위까지 올라갈 수 있게 —
    fpMakeRoofSkipFloor가 지은 계단·데크의 실제 치수를 여기에 적어 두고(옥탑방 로컬 좌표,
    y는 옥상 바닥 기준), fpFreeTick이 매 프레임 서 있는 자리의 높이를 이 값으로 계산한다. */
 var fpRoofDeckGeo=null;

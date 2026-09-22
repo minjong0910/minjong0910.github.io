@@ -14,7 +14,7 @@
    재생 중에는 화면을 손가락으로 끌어 로드뷰처럼 고개를 돌려볼 수 있다.
    =================================================================== */
 var FP_EYE   = 1.55;   // 바닥(슬래브 윗면)에서 눈높이
-var fpEyeOffset = 0;   // 요청 반영(화각 정밀 교정): 특정 지점에서만 눈높이를 살짝 낮추기 위한 보정값(기본 0)
+var fpEyeOffset = 0;   // 화각 정밀 교정: 특정 지점에서만 눈높이를 살짝 낮추기 위한 보정값(기본 0)
 /* 옥상 철문 앞(fpShowRoofChoice)에서만 쓰는 카메라 절대 위치 보정값 —
    요청대로 "조금 더 높고 전진된" 위치를 눈높이(FP_EYE)에 더해서 만든다.
    0이면 다른 층·장면에는 전혀 영향이 없다(fpCommit에서 fpFloorNow==='R'일 때만 더함). */
@@ -143,7 +143,7 @@ function fpMakeCab(){
     return new THREE.Mesh(new THREE.PlaneGeometry(w,h),
       new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:(op===undefined?0.9:op)}));
   }
-  /* 요청 반영(실사진 대조): 실제 캐빈 내부는 '검은 거울(흑경) 벽 + 스테인리스
+  /* 실사진 대조: 실제 캐빈 내부는 '검은 거울(흑경) 벽 + 스테인리스
      기둥 + 가느다란 선형 조명'이고, 바닥은 얼룩덜룩한 화강석이다 —
      기존의 남색 벽 + 청록 네온 라인은 실제와 전혀 달라서 톤을 맞춘다. */
   var fl=panel(D,W,0x9A958C,0x3A3833); fl.rotation.x=-Math.PI/2; fl.position.y=0.02; g.add(fl);
@@ -181,10 +181,10 @@ function fpMakeCab(){
   // 맞닿는 쪽 세로 네온선을 넣어 '엘리베이터 문'으로 읽히게 한다.
   var DW=FP_EV_DW, HW=DW/2;
   function door(sgn){
-    /* 요청 반영(재조정): 밝은 은색(0xB9C2C9)에 발광까지 얹었더니 화면이 하얗게
+    /* 재조정: 밝은 은색(0xB9C2C9)에 발광까지 얹었더니 화면이 하얗게
        날아가 로고가 아예 안 보였다 — 발광을 없애고 중간 톤 스테인리스로 낮춘다.
        (실제 사진의 문도 반사는 강하지만 밝기 자체는 중간 회색에 가깝다.) */
-    /* 요청 반영(버그 수정 — 흰 원의 정체): 문 재질에 밝은 스페큘러(0xB8C4CC)와
+    /* 버그 수정 — 흰 원의 정체: 문 재질에 밝은 스페큘러(0xB8C4CC)와
        높은 광택(shininess 110)을 줬는데, 캐빈 안 PointLight가 이 문 바로 뒤에
        있어서 문 한가운데에 둥근 스페큘러 하이라이트가 크게 생겼다 — 로고를
        덮어버리던 '흰 원'이 바로 이것. 반사광을 거의 없애 하이라이트를 지운다.
@@ -223,14 +223,14 @@ function fpMakeCab(){
       lx.save(); lx.translate(256+Math.sin(an)*190, 256-Math.cos(an)*190);
       lx.rotate(an); lx.fillText(rt[ci],0,0); lx.restore();
     }
-    /* 요청 반영: 복도 쪽에서 봤을 때 로고 좌우(어느 문짝에 KS/NU가 붙는지)가
+    /* 복도 쪽에서 봤을 때 로고 좌우(어느 문짝에 KS/NU가 붙는지)가
        반대로 보인다는 확인이 있어, 두 문짝에 배정하는 텍스처 절반을 서로
        맞바꾼다(문 순서 자체는 그대로 두고 a[1] 값만 교환). */
-    var LGW=0.40, LGH=0.80;   // 요청 반영: 크기를 조금 키움(0.34x0.68 → 0.40x0.80)
+    var LGW=0.40, LGH=0.80;   // 크기를 조금 키움(0.34x0.68 → 0.40x0.80)
     [[fpDoorL,0.0,1],[fpDoorR,0.5,-1]].forEach(function(a){
       [0.016,-0.016].forEach(function(zo){         // 안쪽 면 + 바깥쪽(복도) 면 모두에 로고를 붙인다
         var t2=new THREE.CanvasTexture(lc); t2.minFilter=THREE.LinearFilter;
-        /* 요청 반영: 바깥(복도) 쪽은 지금 상태가 맞다고 확인받았으니 그대로
+        /* 바깥(복도) 쪽은 지금 상태가 맞다고 확인받았으니 그대로
            두고, 안쪽(캐빈) 쪽만 좌우를 스왑한다 — 지금까지는 두 면이 같은
            a[1] 값을 공유해서 한쪽을 바꾸면 반대쪽도 같이 바뀌었다(이전 요청
            때 바깥도 같이 뒤집혔던 원인). 안쪽 전용 오프셋을 따로 계산해
@@ -240,9 +240,9 @@ function fpMakeCab(){
         else    { t2.repeat.set(0.5,1);  t2.offset.x=insideOff; }
         var hm=new THREE.Mesh(new THREE.PlaneGeometry(LGW,LGH),
           new THREE.MeshBasicMaterial({map:t2, transparent:true, opacity:1.0, side:THREE.DoubleSide}));
-        /* 요청 반영: 로고를 문 세로 가운데에 맞춘다 — 기존 y=0.30은 문
+        /* 로고를 문 세로 가운데에 맞춘다 — 기존 y=0.30은 문
            아래쪽에 치우쳐 있었다(dh는 문 높이). 문 높이의 절반으로 올린다. */
-        /* 요청 반영(버그 수정): 로고는 문(m)의 '자식'이라 위치가 문의 로컬
+        /* 버그 수정: 로고는 문(m)의 '자식'이라 위치가 문의 로컬
            좌표계 기준이다 — 문 자신은 이미 m.position.y=dh/2로 위로 이동해
            있으므로(문 평면은 로컬 -dh/2~+dh/2에 걸쳐 있음), 자식에 다시
            dh/2를 더하면 로컬 상단(=문 꼭대기)에 붙어버린다("로고가 위로
@@ -289,7 +289,7 @@ function fpMakeCab(){
       br.position.set(0.06+e*(D-0.55)/2*0.86, 0.86, sgn*(W/2-0.05)); g.add(br);
     });
   });
-  // 뒤벽 거울(흑경) + 빛 반사 — 요청 반영: 실사진은 청록빛이 아니라 검은 거울이다
+  // 뒤벽 거울(흑경) + 빛 반사 — 실사진은 청록빛이 아니라 검은 거울이다
   var mir=panel(W-0.44, H-1.30, 0x1A1D22, 0x000000, 0.85);
   mir.rotation.y=-Math.PI/2; mir.position.set(D/2-0.012, 1.62, 0); g.add(mir);
   [-1,1].forEach(function(sgn){
@@ -327,7 +327,7 @@ function fpMakeCeil(){
   var g=new THREE.Group();
   var ST=BUILDING_Z_STRETCH;
   var w=GLOBAL_HALF_X*2+2, d=(GLOBAL_TOP_Z-GLOBAL_BOT_Z)*ST+6;
-  /* 요청 반영(버그 수정): 이 공용 천장판은 "바닥+3.3m"에 건물 전체(24×105m)를
+  /* 버그 수정: 이 공용 천장판은 "바닥+3.3m"에 건물 전체(24×105m)를
      덮는 짙은 남색 판이라, 천장이 3.3m보다 훨씬 높은 계단실(위·아래 반 층이
      한 통으로 뚫려 있다) 위를 그대로 가로막고 있었다 — 복도에서 계단실을
      들여다보거나 계단을 오르내리면, 계단 위쪽 절반이 늘 검은 띠로 잘려
@@ -366,7 +366,7 @@ function fpMakeCeil(){
     new THREE.MeshPhongMaterial({color:0x141D2A, emissive:0x0C2534, emissiveIntensity:0.6,
       side:THREE.DoubleSide, transparent:true}));
   m.rotation.x=Math.PI/2; m.userData.baseOp=1; m.renderOrder=-2; g.add(m);
-  /* v121(요청 반영): 이 큰 천장판 한가운데를 따라 길게 깔던 옅은 하늘색 띠(0.34m × 건물 전체
+  /* v121: 이 큰 천장판 한가운데를 따라 길게 깔던 옅은 하늘색 띠(0.34m × 건물 전체
      길이, 조명선 흉내)를 없앤다 — 복도 천장은 fpMakeCorr가 형광등까지 따로 그리므로, 이 띠는
      복도 천장 위에 파란 줄이 겹쳐 보이는 원인이었다. 천장판 자체는 그대로 둔다. */
   return g;
@@ -377,7 +377,7 @@ function fpSetPanel(txt){
   fpPanelTxt=txt;
   var w=fpPanelCv.width, h=fpPanelCv.height, x=fpPanelCv.getContext('2d');
   x.clearRect(0,0,w,h);
-  /* 요청 반영(실사진 대조): 기존엔 청록 테두리 사각 박스 + 큰 시안 숫자였는데,
+  /* 실사진 대조: 기존엔 청록 테두리 사각 박스 + 큰 시안 숫자였는데,
      실제 표시기는 '아래로 볼록한 검은 아치형 판'에 작은 도트매트릭스 화살표와
      숫자만 옅은 보랏빛 흰색으로 떠 있다 — 모양과 색을 그쪽으로 맞춘다. */
   // 아치형 검은 판(윗변 직선, 아랫변이 완만한 곡선)
@@ -431,7 +431,7 @@ var FP_DOOR_H  = 2.10;               // 문 높이
 var FP_OPEN_D  = 6.60;               // 엘리베이터 정면 열린 공간의 깊이
 var FP_ALC_D   = 5.60;               // 통로 깊이(복도 벽에서 안쪽 끝까지) — 사진처럼 더 깊게
 var FP_ALC_HW  = 1.65;               // 통로 폭(Z)의 절반 — 넓히되 같은 벽의 옆방(KTC 등)과 안 겹치는 한도
-/* 요청 반영(버그 수정 — 되돌림): 2.20으로 넓혔더니, 화장실 통로 입구가
+/* 버그 수정 — 되돌림: 2.20으로 넓혔더니, 화장실 통로 입구가
    바로 옆방(13119·13224·13324·13419·13522 — WC_ADJ_FLIP에 등록된, 원래도
    "겹치지 않는 한도"로 빠듯하게 붙어 있던 방들)의 벽 폭까지 파고들어,
    그 방 문 위로 천장 대신 배경(짙은 남색 허공)이 그대로 드러나 보이는
@@ -452,7 +452,7 @@ var FP_ALC_DX  = 3.00;               // 복도 벽에서 두 문 중심까지의
    13119: 1층만 중앙계단이 1.4배 넓어(fpToiletZ) 화장실 통로가 +0.88m 밀리는 바람에
    이 방 문이 통로 개구부(z 7.23~10.53) 안에 들어가 버려, 문 옆에 있어야 할 벽이
    0.3m밖에 남지 않았다 — 개구부 밖 벽면으로 문을 내보낸다. */
-/* 요청 반영: 13119·13224·13324·13419·13522는 모두 화장실 통로(알코브) 바로
+/* 13119·13224·13324·13419·13522는 모두 화장실 통로(알코브) 바로
    옆방이라, 문짝(폭 1.14m)의 가장자리가 알코브 개구부 가장자리에 딱 붙어
    있었다 — 문 앞에 설 자리가 없어 눌러도 화장실 쪽으로 끌려가고, 안내
    문구도 원하는 쪽으로 안 떴다. 문과 명찰, 길찾기 문 지점(fpDoorZ를 쓰는
@@ -471,7 +471,7 @@ function fpToiletZ(lv){
      항상 최소 간격을 띄운다 — 안 그러면 두 구조물이 서로 파고들어
      카메라가 벽 속에 끼는(화면이 두꺼운 판으로 덮이는) 버그가 생긴다. */
   var stZ = stZOf(lv)*BUILDING_Z_STRETCH;
-  /* 1층은 계단실을 1.4배 넓혔으므로(요청 반영), 화장실과의 최소 간격도 그 넓어진
+  /* 1층은 계단실을 1.4배 넓혔으므로, 화장실과의 최소 간격도 그 넓어진
      폭 기준으로 계산해야 두 구조물이 겹치지 않는다. */
   var owForGap = (lv===1) ? FP_ST_OW*1.4 : FP_ST_OW;
   var minGap = owForGap/2 + FP_ALC_HW + 0.45;
@@ -500,7 +500,7 @@ function fpPlateTex(main, sub, ac, wide){
   var x=cv.getContext('2d');
   x.textAlign='center'; x.textBaseline='middle';
   if(sub){
-    /* 요청 반영(디자인 정리): 예전엔 판 아래쪽 절반 가까이를 형광 시안/주황
+    /* 디자인 정리: 예전엔 판 아래쪽 절반 가까이를 형광 시안/주황
        띠가 차지하고 그 위에 작은 글씨가 얹혀 있어, 문패라기보다 표지 스티커에
        가까웠다 — 실제 대학 강의동 문패처럼 '흰 아크릴판 + 얇은 회색 테두리 +
        왼쪽 색 인덱스 띠 + 진한 남색 호실번호 + 회색 방 이름'으로 정리한다.
@@ -542,7 +542,7 @@ function fpWallTextTex(txt, col){
 
 /* 옥상 옥탑방 벽에 붙는 '금연구역' 안내문 한 장 — 예전엔 원·사선·글씨를
    각각 따로 된 판으로 겹쳐 만들었는데, 판을 키울 때마다 글씨판만 비율이
-   어긋나 글자가 세로로 늘어나거나 잘려 보였다(요청 반영). 종이 한 장을
+   어긋나 글자가 세로로 늘어나거나 잘려 보였다. 종이 한 장을
    통째로 그린 텍스처 하나로 바꾼다. 캔버스 비율(540:700)은 붙이는 판
    비율(0.27:0.35)과 정확히 같다. */
 function fpNoSmokeTex(ko){
@@ -666,7 +666,7 @@ function fpSignTex(kind, ac){
   FP_TEX[key]=t; return t;
 }
 /* 목적지 표지 — 문 위에 다는 진분홍 배지(흰 테두리 + 위치 핀 + 글씨).
-   요청 반영: 예전엔 일반 문패(fpPlateTex)를 분홍색으로만 칠해 쓴 거라
+   예전엔 일반 문패(fpPlateTex)를 분홍색으로만 칠해 쓴 거라
    '표지판'이라기보다 색만 다른 문패로 보였다 — 전용 디자인으로 분리한다. */
 function fpDestTex(txt){
   var key='dest|'+txt;
@@ -697,7 +697,7 @@ function fpDestTex(txt){
   FP_TEX[key]=t; return t;
 }
 /* ── 화장실 전용 표지 ────────────────────────────────────────────
-   요청 반영: 화장실 문과 문패를 '화장실답게' — 컬러 바탕 + 흰 픽토그램의
+   화장실 문과 문패를 '화장실답게' — 컬러 바탕 + 흰 픽토그램의
    실제 화장실 표지판 모양으로 만든다. 색은 호출부에서 남자=파랑,
    여자=분홍으로 나눠 넘긴다. */
 function fpWcFigure(x, kind, col, cx, top, sc){
@@ -773,7 +773,7 @@ function fpWcPlateTex(kind, ac, label, sub){
   FP_TEX[key]=t; return t;
 }
 /* 초록 비상구(피난) 표지등 — 문 위에 다는 표준 픽토그램.
-   요청 반영: 캔버스로 직접 그리지 않고, 보내주신 실제 유도등 사진에서
+   캔버스로 직접 그리지 않고, 보내주신 실제 유도등 사진에서
    초록 표지면만 잘라 투시 보정(네 모서리를 직사각형으로 펴기)한 이미지를
    그대로 붙인다(img/exit-sign.png, 512x256). */
 var FP_EXIT_SIGN_SRC='img/exit-sign.png';
@@ -783,7 +783,7 @@ function fpExitSignTex(){
   var img=new Image();
   var t=new THREE.Texture(img);
   t.minFilter=THREE.LinearFilter; t.magFilter=THREE.LinearFilter;
-  /* 요청 반영: 사진 속 표지는 화살표가 왼쪽을 가리키는데, 우리 문에서는
+  /* 사진 속 표지는 화살표가 왼쪽을 가리키는데, 우리 문에서는
      오른쪽을 가리켜야 한다 — 이미지를 다시 만들지 않고 텍스처 좌표만
      좌우로 뒤집는다(repeat.x=-1, offset.x=1). 사람·문짝도 함께 뒤집혀
      실제 우향 표지와 같은 그림이 된다. */
@@ -974,7 +974,7 @@ function fpOutsideTex(){
   x.fillStyle='#8D98A0'; x.fillRect(0,172,W,H-172);           // 바깥 바닥
   x.fillStyle='#7C878F'; x.fillRect(0,186,W,4);
   x.fillStyle='rgba(186,214,228,0.14)'; x.fillRect(0,0,W,H);  // 유리 색
-  /* 요청 반영(삭제): 예전엔 여기에 '유리 반사' 빗금 두 줄을 그렸는데, 실제
+  /* 삭제: 예전엔 여기에 '유리 반사' 빗금 두 줄을 그렸는데, 실제
      창(폭 6.5m)에 입히면 하늘·나무를 가로지르는 커다란 흰 대각선 줄무늬로
      보여서 창문에 이물질이 낀 것처럼 읽혔다 — 반사 빗금을 없앤다. */
   var t=new THREE.CanvasTexture(cv); t.minFilter=THREE.LinearFilter;
@@ -1081,10 +1081,10 @@ function fpMkFloorPlane(w,h,col,op){
    기존 복도 바닥은 무광 단색(fpMkPlane)이라 반사가 전혀 없었다 — 실제
    사진처럼 천장 조명이 바닥에 은은하고 길게 반사되도록, 테라조 텍스처 +
    MeshStandardMaterial(roughness 0.28 / metalness 0.05)로 별도 마감한다
-   (요청 반영: 수치는 여기서만 조정하면 됨). */
+   (수치는 여기서만 조정하면 됨). */
 function fpMkFloorGloss(w,h,tex){
   var mat=new THREE.MeshStandardMaterial({map:tex, color:0xE2DFD6,
-    roughness:0.62, metalness:0.02,             // ← 광택 정도(요청 반영: 빛반사 하이라이트가 너무 강해서 더 낮춤. 0.42→0.62)
+    roughness:0.62, metalness:0.02,             // ← 광택 정도(빛반사 하이라이트가 너무 강해서 더 낮춤. 0.42→0.62)
     transparent:true, opacity:1, side:THREE.DoubleSide});
   fpCorrMats.push({m:mat, op:1});
   var ms=new THREE.Mesh(new THREE.PlaneGeometry(w,h), mat);
@@ -1109,7 +1109,7 @@ function fpMkRailBox(w,h,d,col,op){
    재사용하고, 평면 크기에 맞춰 repeat만 조절해 타일링한다(성능 영향 최소화).
    emissive(네온 사인류)는 기존 MeshPhongMaterial 그대로 유지한다. */
 var FP_NOISE_TEX=null;
-/* 요청 반영(실사진 3번째 사진처럼) : 나가는 문 너머 바깥 벽돌 텍스처는
+/* 실사진 3번째 사진처럼: 나가는 문 너머 바깥 벽돌 텍스처는
    아래쪽(fpBrickTex, fpBrickTexFor)에서 한 번에 관리한다. 여기 있던 같은 이름의
    중복 함수 선언은 자바스크립트 호이스팅 규칙상 뒤에 있는 선언에 항상 가려져
    실제로는 한 번도 실행되지 않는 죽은 코드였다 — 혼동을 막기 위해 정리한다. */
@@ -1505,7 +1505,7 @@ function fpRoofSkyTex(){
 /* 노란 점자블록 : 이전엔 그냥 노란 사각형 한 장이라 밋밋했다 → 실제처럼 돌기(도트) 격자를 그린다 */
 function fpTerrazzoTex(){
   if(FP_TEX['terrazzo']) return FP_TEX['terrazzo'];
-  /* 요청 반영: 실사진처럼 타일 사이 줄눈이 뚜렷하게 보이도록 대비를 높이고,
+  /* 실사진처럼 타일 사이 줄눈이 뚜렷하게 보이도록 대비를 높이고,
      화강석/테라조 특유의 반점도 더 선명하게 다시 그린다(기존은 밝은 조명
      아래서 거의 무늬가 안 보일 만큼 대비가 약했다). */
   var W=512, H=512;
@@ -1604,7 +1604,7 @@ function fpEnsureFloorTileTex(){
     x.fillStyle='rgba(196,192,178,'+(0.06+Math.random()*0.09)+')';
     x.beginPath(); x.arc(px,py,r,0,Math.PI*2); x.fill();
   }
-  /* 화강석/도끼다시(테라조) 특유의 짙고 옅은 골재 알갱이 점박이(요청 반영) —
+  /* 화강석/도끼다시(테라조) 특유의 짙고 옅은 골재 알갱이 점박이 —
      단색 타일로 보이지 않도록 작고 진한 점과 밝은 점을 섞어 흩뿌린다. */
   for(var si=0; si<420; si++){
     var sx=Math.random()*W, sy=Math.random()*H, sr=0.6+Math.random()*1.8;
@@ -1690,7 +1690,7 @@ function fpBrickExteriorTex(){
    plaster보다 훨씬 또렷한 줄눈이 있는 넓은 직사각 타일 패턴. */
 function fpTilePanelTex(){
   if(FP_TEX['tilepanel']) return FP_TEX['tilepanel'];
-  /* 요청 반영: 자잘한 2x2 정사각 타일 대신, 실사진처럼 폭이 넓은 가로형
+  /* 자잘한 2x2 정사각 타일 대신, 실사진처럼 폭이 넓은 가로형
      직사각 석재 패널(1행 3단) + 뚜렷한 어두운 메지(줄눈)로 다시 그린다. */
   var W=256, H=384;
   var cv=document.createElement('canvas'); cv.width=W; cv.height=H;
@@ -1719,7 +1719,7 @@ function fpTilePanelTex(){
 }
 function fpMkTilePanel(w,h,px,py,pz,roty,col){
   var tex=fpTilePanelTex().clone(); tex.needsUpdate=true;
-  /* 요청 반영: 반복 단위를 0.62m→1.4m로 늘려, 벽 전체에 큼직한 석재
+  /* 반복 단위를 0.62m→1.4m로 늘려, 벽 전체에 큼직한 석재
      패널 몇 장만 이어붙인 것처럼 보이게 한다(자잘한 타일 느낌 제거). */
   tex.repeat.set(Math.max(1,w/1.4), Math.max(1,h/1.4));
   var mat=new THREE.MeshStandardMaterial({color:(col!==undefined?col:0xFFFFFF), map:tex, roughness:0.8, metalness:0.03,
@@ -1792,7 +1792,7 @@ function fpStackPanelTex(base, txt){
 }
 function fpBrickTex(){
   if(FP_TEX['brick']) return FP_TEX['brick'];
-  /* 요청 반영(실사진 벽돌처럼): 배경을 벽돌색이 아니라 밝은 회갈색(줄눈/모르타르)으로
+  /* 실사진 벽돌처럼: 배경을 벽돌색이 아니라 밝은 회갈색(줄눈/모르타르)으로
      깔고, 벽돌마다 진짜 틈(gap)을 둬서 그 줄눈이 비쳐 보이게 한다 — 이전에는
      배경 자체가 벽돌색이라 줄눈이 거의 안 보여서 가까이서 보면 밋밋한 단색
      얼룩처럼 보였다. 색상도 5가지 톤을 더 뚜렷하게 갈라 개체차를 살린다. */
@@ -1814,11 +1814,11 @@ function fpBrickTex(){
   var t=new THREE.CanvasTexture(cv); t.minFilter=THREE.LinearMipMapLinearFilter;
   FP_TEX['brick']=t; return t;
 }
-/* 요청 반영(시야 비율 정밀 교정 + 이음매 불일치 버그 수정): fpBrickTex()를 그대로
+/* 시야 비율 정밀 교정 + 이음매 불일치 버그 수정: fpBrickTex()를 그대로
    fpMkTex(w,h,...)에 넘기면 텍스처 한 장이 벽 크기에 맞춰 그대로 늘어나서, 벽이
    클수록 벽돌 한 장 한 장이 실제보다 훨씬 크게(뭉개져) 보인다 — 벽의 실제
    크기(w,h)에 비례해 반복(repeat) 횟수를 정한다.
-   요청 반영(버그 수정 이력): 예전엔 폭이 좁은(1~2m) 면에서 벽돌이 흐릿해 보이는
+   버그 수정 이력: 예전엔 폭이 좁은(1~2m) 면에서 벽돌이 흐릿해 보이는
    걸 고치려고 "최소 반복 횟수"를 따로 두었는데, 그 최소값이 비례식보다 커지는
    면에서는 옆 큰 벽돌벽보다 벽돌이 더 작게(빽빽하게) 나와 두 벽이 만나는
    모서리에서 벽돌 크기가 안 맞는 이음매(seam)처럼 보였다. 최소값 대신 비례
@@ -1832,14 +1832,14 @@ function fpBrickTexFor(w,h){
   t.repeat.set(rx, ry);
   return t;
 }
-/* 요청 반영: 2구간 맨 위 유리문 밖으로 보이는 야외 수목 배경 — 로우폴리 나무
+/* 2구간 맨 위 유리문 밖으로 보이는 야외 수목 배경 — 로우폴리 나무
    대신, 실제 사진처럼 살짝 흐릿하게 우거진 초록 숲처럼 보이도록 캔버스에
    구름 같은 초록 블롭을 여러 겹 그린 텍스처 한 장으로 대체한다(모바일 최적화
    유지, 저작권 걱정 없는 절차적 생성). */
 var FP_FOREST_TEX=null;
 function fpForestBackdropTex(){
   if(FP_FOREST_TEX) return FP_FOREST_TEX;
-  /* 요청 반영: 기존엔 옅은 하늘띠 + 초록 얼룩뿐이라 '평평한 초록 판'처럼 보여
+  /* 기존엔 옅은 하늘띠 + 초록 얼룩뿐이라 '평평한 초록 판'처럼 보여
      바깥 느낌이 거의 없었다 — 하늘 그라디언트 → 안개 낀 원경 산(2겹) →
      나무선 → 잔디 → 포장길 순으로 층을 쌓아 원근감이 생기게 다시 그린다.
      캔버스 한 장이라 모바일 성능 부담은 그대로(광원·지오메트리 추가 없음). */
@@ -1917,7 +1917,7 @@ function fpForestBackdropTex(){
   var t=new THREE.CanvasTexture(cv); t.minFilter=THREE.LinearFilter;
   FP_FOREST_TEX=t; return t;
 }
-/* 요청 반영: 맨 위 유리문 가운데 가로 엠보 띠(사진 속 흰 글자 프린트 라인) +
+/* 맨 위 유리문 가운데 가로 엠보 띠(사진 속 흰 글자 프린트 라인) +
    KSNU 로고 — 절차적 캔버스 텍스처 한 장으로 만든다. */
 var FP_DOORBAND_TEX=null;
 function fpDoorBandTex(){
@@ -2119,7 +2119,7 @@ function fpUpdateAutoDoors(dt){
     }
     var sideOk = !d.oneWay || (d.oneWay<0 ? fpPos.z<d.wp.z : fpPos.z>d.wp.z);
     var target=(dist<d.trig && sideOk)?1:0;
-    /* 요청 반영: 한 번에 문 앞까지 걸어가는 동안 문이 다 열리지 못하고
+    /* 한 번에 문 앞까지 걸어가는 동안 문이 다 열리지 못하고
        도착해 버리는 일이 없도록 여닫히는 속도를 조금 올린다. */
     var sp=Math.min(1, dt*5.6);            // 문이 여닫히는 속도
     d.k += (target-d.k)*sp;
@@ -2135,10 +2135,10 @@ function fpMakeDoor(o){
   var acN=parseInt(ac.slice(1),16);
   /* 사진과 같은 실제 강의실 문 : 짙은 회색 문틀 + 갈색 문짝 +
      문 위 란마(작은 유리창) + 도어클로저 + 황동빛 둥근 손잡이. */
-  /* 요청 반영(디자인): 화장실 문은 나무가 아니라 실제처럼 밝은 회백색 도장
+  /* 디자인: 화장실 문은 나무가 아니라 실제처럼 밝은 회백색 도장
      문으로 구분하고, 강의실 문은 조금 더 밝은 오크 톤으로 정리한다. */
   var isWc=(o.sign==='wcM'||o.sign==='wcW');
-  var FRM=0x39434E, LEAF=0xA5866A, LEAF2=0xBB9B7C;  // 문짝 색상 살짝 밝게(요청 반영: 1인칭에서 더 잘 보이도록)
+  var FRM=0x39434E, LEAF=0xA5866A, LEAF2=0xBB9B7C;  // 문짝 색상 살짝 밝게(1인칭에서 더 잘 보이도록)
   if(isWc){ FRM=0x7F8992; LEAF=0xE2E7EA; LEAF2=0xF3F6F8; }
   var glass=(o.window!==false);                    // 강의실 문에만 문 위 란마를 둔다
   var lh=glass ? h-0.36 : h;                       // 문짝 높이
@@ -2177,7 +2177,7 @@ function fpMakeDoor(o){
     tg2.position.set(0,(lh+h)/2,0.032); g.add(tg2);
     var tgl=fpMkPlane(w-0.34,0.045,0xE7F4FF,0.55);     tgl.position.set(0,(lh+h)/2+0.05,0.036); g.add(tgl);
     /* 도어클로저 — 예전엔 넓적한 은색 판 두 장이 문 한가운데쯤에 겹쳐 있어서
-       문에 정체불명의 회색 사각형이 붙어 있는 것처럼 보였다(요청 반영: 정리).
+       문에 정체불명의 회색 사각형이 붙어 있는 것처럼 보였다(정리).
        실제처럼 문짝 맨 윗단에 얇은 본체 하나만 붙인다. */
     var dcb=fpMkPlane(0.19,0.052,0xAEB7BE,1); dcb.position.set(w*0.26,lh-0.062,0.046); leafGrp.add(dcb);
   }
@@ -2190,7 +2190,7 @@ function fpMakeDoor(o){
     });
   }else{
     var kx=-(w/2-0.16), ky=lh*0.46;
-    /* 요청 반영: 둥근 황동 손잡이 대신, 요즘 강의동에 실제로 달려 있는
+    /* 둥근 황동 손잡이 대신, 요즘 강의동에 실제로 달려 있는
        스테인리스 레버 손잡이(둥근 좌판 + 가로 레버)로 바꾼다. */
     var kn=fpMkDisc(0.050, 0xB4BCC3, 1);  kn.position.set(kx,ky,0.048); leafGrp.add(kn);
     var kn2=fpMkDisc(0.030, 0xD8DEE3, 1); kn2.position.set(kx,ky,0.050); leafGrp.add(kn2);
@@ -2206,7 +2206,7 @@ function fpMakeDoor(o){
     }
   }
   g.add(pivot);
-  // 요청 반영: 문 자동 열림 효과는 이제 지하1층 크리에이티브 존 문 하나에만 적용 —
+  // 문 자동 열림 효과는 이제 지하1층 크리에이티브 존 문 하나에만 적용 —
   // 일반 강의실/연구실 문(이 함수)에서는 자동 등록하지 않는다.
   // 문틀 3면(짙은 회색) + 어느 쪽 복도인지 알려 주는 색 라인
   var fw=0.085;
@@ -2228,7 +2228,7 @@ function fpMakeDoor(o){
   }
   /* 문 옆 명찰(호실번호 + 방 이름). 목적지일 때는
      '목적지' 팫말과 자리를 맞바꿔 번호판이 문 위로 크게 올라온다. */
-  /* 요청 반영(버그 수정): 화장실 문(sign 있는 문)의 안내판이 도착 지점에서
+  /* 버그 수정: 화장실 문(sign 있는 문)의 안내판이 도착 지점에서
      보면 화면을 크게 차지해 문을 가렸다 — 화장실 팻말만 한 단계 더
      작게(0.56→0.40) 줄인다. 다른 문(교수실 등) 명찰 크기는 그대로 둔다. */
   var pw=o.sign?(isWc?0.52:0.40):0.80, labelDir=o.labelFlip?-1:1, sideX=labelDir*(w/2+0.06+pw/2), sideY=Math.min(1.54, h-0.18);
@@ -2238,7 +2238,7 @@ function fpMakeDoor(o){
   var gapB=h+0.12, gapT=ceilH;
   var tpH=Math.max(0.20, Math.min(0.34, (gapT-gapB)-0.04)), tpW=tpH*3;
   var topY=(gapB+gapT)/2;
-  /* 요청 반영: 예전엔 목적지 문에서 '호실 문패'를 문 위로 올리고 '목적지'
+  /* 예전엔 목적지 문에서 '호실 문패'를 문 위로 올리고 '목적지'
      표지를 옆으로 내렸는데, 정작 눈에 먼저 들어와야 할 목적지 표지가 옆으로
      밀려나 있었다 — 자리를 서로 맞바꾼다(문패는 늘 옆, 목적지는 문 위 가운데).
      아래 swap 관련 계산은 그대로 두되 항상 false로 둔다. */

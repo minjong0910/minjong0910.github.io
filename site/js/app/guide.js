@@ -9,7 +9,7 @@ function buildSteps(){
   var sf = startFloor;                        // 지금 계신 층
   var sameFloor = (sf===lv);                  // 목적지와 같은 층이면 엘리베이터 불필요
 
-  /* v147(요청 반영): QR·직접선택으로 문이 정해져 있고 지금 1층이면,
+  /* v147: QR·직접선택으로 문이 정해져 있고 지금 1층이면,
      '그 문으로 들어와 복도로 나온다'를 맨 앞 단계로 하나 더 넣는다(4단계 → 5단계).
      처음 온 사람은 문을 지나 복도까지 나오는 이 첫 구간이 제일 막막하기 때문. */
   var gk = (typeof currentGateKey==='function') ? currentGateKey() : null;
@@ -60,7 +60,7 @@ function buildSteps(){
   var dz    = (p.z >= evp.z) ? 1 : -1;                // 복도에서 걸어갈 방향
   var turnLeft = ((dz === -faceX) !== GUIDE_FLIP);            // 내려서 도는 방향
 
-  /* v150(요청 반영): 문으로 들어와 같은 층(1층)을 찾아갈 때는 엘리베이터를 아예
+  /* v150: 문으로 들어와 같은 층(1층)을 찾아갈 때는 엘리베이터를 아예
      거치지 않는다 → '엘리베이터 앞에서 왼쪽으로' 같은 안내가 맞지 않았다.
      기준점을 '들어온 문'으로 바꾸고, 방향·차례·거리 표현을 전부 다시 잡는다.
        · 동문(복도 남쪽 끝) : 들어서면 이미 복도 정면(+Z) → 돌 필요 없음
@@ -92,7 +92,7 @@ function buildSteps(){
   var lead = fromGateHere ? '복도로 나와 ' : (sameFloor ? '엘리베이터 앞에서 ' : '내려서 ');
   var leadEn = fromGateHere ? 'Step into the hallway and turn '
                             : (sameFloor ? 'At the elevator, turn ' : 'Get off and turn ');
-  /* v151(요청 반영): 돌기 단계 사진.
+  /* v151: 돌기 단계 사진.
      예전엔 문에서 출발하면 1단계와 똑같은 문 사진을 그대로 다시 썼다 —
      "복도로 나와 왼쪽으로 도세요"인데 화면은 아직 문 앞이라 어긋났다.
      이 단계에서 실제로 보게 되는 건 '돌아선 쪽 복도'이므로 그 사진을 쓴다.

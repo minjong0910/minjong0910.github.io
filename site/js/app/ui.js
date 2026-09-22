@@ -166,7 +166,7 @@ function exitFullscreen3D(){
 }
 function pickToilet(){ openTarget({kind:'toilet', floor:1}, 1, '화장실 위치'); }
 function pickZone(){ openTarget({kind:'zone', floor:'B1'}, 'B1', '크리에이티브 존 위치'); }
-/* v146(요청 반영): 예전엔 어느 층에 있든 1층 비상계단으로 안내했다 →
+/* v146: 예전엔 어느 층에 있든 1층 비상계단으로 안내했다 →
    지금 서 있는 층의 비상계단(= 가장 가까운 비상계단)으로 안내한다. */
 function pickEmstair(){
   var sf = (typeof startFloor!=='undefined' && startFloor) ? startFloor : 1;

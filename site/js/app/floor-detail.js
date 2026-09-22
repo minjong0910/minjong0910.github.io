@@ -8,7 +8,7 @@ var camTargetB=new THREE.Vector3(0,0,0), pinchB=null;
 
 function initB(){
   var cv=document.getElementById('cfd');
-  /* 요청 반영(성능 개선): 이 렌더러는 메인 3D(옥탑/걷기)와 달리 모바일
+  /* 성능 개선: 이 렌더러는 메인 3D(옥탑/걷기)와 달리 모바일
      여부를 전혀 확인하지 않고 항상 antialias:true, 픽셀비 2까지 써서
      휴대폰에서 불필요하게 무거웠다 — 메인 렌더러와 같은 기준으로 맞춘다. */
   var __isMobB = ('ontouchstart' in window) || navigator.maxTouchPoints>0 || /Mobi|Android|iPhone|iPad/.test(navigator.userAgent);

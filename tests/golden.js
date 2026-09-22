@@ -385,12 +385,24 @@ function run(){
         log((d.length ? '✗ ' : '✓ ') + name + (d.length ? ' — ' + d.length + '곳 다름' : ''));
         d.slice(0, 8).forEach(function(x){ log('    ' + x); });
       }
+      /* 목록은 순서대로 견주면 하나만 빠져도 뒤가 전부 밀려 보인다 → 빠진 것 / 생긴 것으로 알린다.
+         (CSS 는 순서가 뜻을 가지므로 목록 비교에 더해 순서도 본다) */
+      function partList(name, a, b, keepOrder){
+        var ca = {}, cb = {}, d = [];
+        a.forEach(function(x){ ca[x] = (ca[x] || 0) + 1; }); b.forEach(function(x){ cb[x] = (cb[x] || 0) + 1; });
+        Object.keys(ca).forEach(function(x){ if((cb[x] || 0) < ca[x]) d.push('빠짐 : ' + short(x)); });
+        Object.keys(cb).forEach(function(x){ if((ca[x] || 0) < cb[x]) d.push('생김 : ' + short(x)); });
+        if(!d.length && keepOrder && JSON.stringify(a) !== JSON.stringify(b)) d.push('같은 규칙인데 순서가 바뀜');
+        res.detail[name] = d; if(d.length){ res.ok = false; res.fails.push(name + ' ' + d.length + '곳'); }
+        log((d.length ? '✗ ' : '✓ ') + name + (d.length ? ' — ' + d.length + '곳 다름' : ''));
+        d.slice(0, 10).forEach(function(x){ log('    ' + x); });
+      }
       part('logic', ref.logic, rec.logic, 60);
       part('photos', ref.photos, rec.photos);
-      part('dom.ids', ref.dom.ids, rec.dom.ids);
+      partList('dom.ids', ref.dom.ids, rec.dom.ids);
       part('dom.text', ref.dom.text, rec.dom.text);
-      part('dom.style', ref.dom.style, rec.dom.style);
-      part('dom.css', ref.dom.css, rec.dom.css);
+      partList('dom.style', ref.dom.style, rec.dom.style);
+      partList('dom.css', ref.dom.css, rec.dom.css, true);
       part('dyn', ref.dyn, rec.dyn);
       var names = ref.shots, k = 0; res.detail.shots = {};
       function next(){

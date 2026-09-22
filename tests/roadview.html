@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>로드뷰 점검</title>
+<style>
+  body{background:#0E1420;color:#E6EDF5;font:13px/1.6 system-ui,"Malgun Gothic",sans-serif;margin:0;padding:12px}
+  pre{white-space:pre-wrap;background:#131C2B;padding:10px;border-radius:8px}
+  iframe{width:390px;height:844px;border:1px solid #2A3852}
+</style>
+</head>
+<body>
+<h3>1인칭 로드뷰 점검 — '경로 미리보기'를 끝까지 재생하고 '직접 걸어보기'를 움직여 오류를 모은다</h3>
+<pre id="R"></pre>
+<pre id="OUT"></pre>
+<iframe id="F"></iframe>
+<script>
+/* 왜 : 로드뷰는 코드의 3분의 2(약 1만 1천 줄)인데 안전망(golden)은 건물 전체 3D 와 층 상세만 그린다.
+   파일을 나누거나 코드를 정리하다 로드뷰만 깨지면 눈으로 들어가 보기 전에는 모른다.
+   어떻게 : 시계를 0.1초씩 직접 넘기며 animate() 를 한 장면씩 부른다(화면이 숨어 있어도 같은 결과).
+   재생이 스스로 끝나거나(fpActive 가 꺼짐) 2,400장면(4분)이 지나면 멈춘다. 오류는 전부 모은다.
+   눈높이(fpPos.y)가 움직인 폭도 적는다 — 층 사이를 실제로 오갔는지(한 층 6.6m).
+   주소 : roadview.html?app=../site/index.html  → #OUT 에 {"ok":…, "runs":[…], "errors":[…]} */
+(function(){
+'use strict';
+var Q = new URLSearchParams(location.search);
+var APP = Q.get('app') || '../site/index.html';
+var R = document.getElementById('R'), F = document.getElementById('F');
+function log(t){ R.textContent += t + '\n'; }
+function out(o){ document.getElementById('OUT').textContent = JSON.stringify(o); document.title = o.ok ? 'ROADVIEW-OK' : 'ROADVIEW-FAIL'; log(o.ok ? '■ 통과' : '■ 실패'); }
+
+var SCEN = [
+  ['13310 (3층) · 1층에서',   {kind:'room', floor:3, code:'13310'}, 1],
+  ['13524 (5층 끝) · 1층에서', {kind:'room', floor:5, code:'13524'}, 1],
+  ['13101 (1층) · 3층에서',   {kind:'room', floor:1, code:'13101'}, 3],
+  ['KTC (4층) · 1층에서',     {kind:'room', floor:4, code:'KTC'}, 1],
+  ['13121 (1층) · 2층에서',   {kind:'room', floor:1, code:'13121'}, 2],
+  ['화장실 · 2층',            {kind:'toilet', floor:2}, 2],
+  ['비상계단 · 4층',          {kind:'emstair', floor:4}, 4],
+  ['크리에이티브 존 · 3층에서', {kind:'zone', floor:'B1'}, 3],
+  ['13205 (2층) · 지하에서',  {kind:'room', floor:2, code:'13205'}, 'B1']
+];
+var errors = [];
+
+function ready(w){ return w && w.scene && w.renderer && typeof w.openTarget === 'function' && typeof w.fpStart === 'function' && w.FLOOR_LAYOUT && w.FLOOR_LAYOUT[1]; }
+F.addEventListener('load', function(){
+  var t0 = Date.now();
+  (function poll(){
+    var w = F.contentWindow;
+    if(ready(w)) return setTimeout(function(){ run(w); }, 1500);
+    if(Date.now() - t0 > 120000) return out({ok:false, error:'앱이 준비되지 않음'});
+    setTimeout(poll, 300);
+  })();
+}, {once:true});
+F.src = APP;
+
+function run(w){
+  w.addEventListener('error', function(e){ errors.push('[window] ' + (e.message || e.error)); });
+  w.addEventListener('unhandledrejection', function(e){ errors.push('[promise] ' + (e.reason && e.reason.message || e.reason)); });
+  /* 시계를 우리가 넘긴다 */
+  var T = 100000;
+  w.performance.now = function(){ return T; };
+  var realDateNow = w.Date.now.bind(w.Date), D0 = realDateNow();
+  w.Date.now = function(){ return D0 + (T - 100000); };
+  w.requestAnimationFrame = function(){ return 0; };   // 우리가 부를 때만 그린다
+  function frame(){
+    T += 100;   /* 앱이 한 장면에 받아들이는 최대 간격(0.1초) — 가장 빨리 돌린다 */
+    try { w.animateRunning = true; w.animate(); } catch(e){ errors.push('[animate] ' + e.message); }
+    w.animateRunning = false;
+  }
+  var runs = [];
+  SCEN.forEach(function(s){
+    var before = errors.length, frames = 0, yMin = 1e9, yMax = -1e9, rec = {name:s[0]};
+    try {
+      w.openTarget(JSON.parse(JSON.stringify(s[1])), s[1].floor);
+      if(s[2] !== w.startFloor){
+        var want = w.lvLabel(s[2]), btn = null;
+        w.document.querySelectorAll('#sfp button').forEach(function(b){ if(b.textContent === want) btn = b; });
+        if(btn) btn.click(); else errors.push(s[0] + ' : 출발층 버튼 없음');
+      }
+      w.toggleTrip();                       // 경로 미리보기 = 1인칭 재생 시작
+      rec.started = !!w.fpActive;
+      while(frames < 2400){
+        frame(); frames++;
+        if(w.fpPos && w.fpActive){ yMin = Math.min(yMin, w.fpPos.y); yMax = Math.max(yMax, w.fpPos.y); }
+        if(frames > 20 && !w.fpActive) break;
+      }
+      rec.frames = frames; rec.climb = yMax > yMin ? Math.round((yMax - yMin) * 10) / 10 : 0;
+      rec.finished = !w.fpActive;
+      if(w.fpActive) w.toggleTrip();         // 아직 재생 중이면 멈춘다
+      for(var k = 0; k < 40; k++) frame();   // 원래 시점으로 돌아오는 전환
+    } catch(e){ errors.push(s[0] + ' : ' + e.message); }
+    rec.errors = errors.length - before;
+    runs.push(rec);
+    log((rec.errors ? '✗ ' : '✓ ') + s[0] + ' — 장면 ' + rec.frames + ' · 오르내린 높이 ' + rec.climb + 'm' + (rec.finished ? ' · 끝까지 재생' : ' · 2분 안에 안 끝남') + (rec.errors ? ' · 오류 ' + rec.errors : ''));
+  });
+  /* 직접 걸어보기 */
+  var fr = {name:'직접 걸어보기 (13310)'}, b2 = errors.length;
+  try {
+    w.openTarget({kind:'room', floor:3, code:'13310'}, 3);
+    w.toggleFree(); fr.started = !!w.fpFree;
+    for(var i = 0; i < 120; i++) frame();
+    if(typeof w.fpStepMove === 'function'){ for(i = 0; i < 6; i++){ w.fpStepMove(1); for(var j = 0; j < 30; j++) frame(); } }
+    if(typeof w.fpTurnAround === 'function'){ w.fpTurnAround(); for(i = 0; i < 40; i++) frame(); }
+    w.toggleFree(); for(i = 0; i < 40; i++) frame();
+    fr.ended = !w.fpFree;
+  } catch(e){ errors.push('직접 걸어보기 : ' + e.message); }
+  fr.errors = errors.length - b2; runs.push(fr);
+  log((fr.errors ? '✗ ' : '✓ ') + fr.name + (fr.started ? ' — 시작됨' : ' — 시작 안 됨') + (fr.ended ? ' · 끝냄' : '') + (fr.errors ? ' · 오류 ' + fr.errors : ''));
+  errors.slice(0, 10).forEach(function(e){ log('    ' + e); });
+  var ok = !errors.length && runs.every(function(r){ return r.started !== false; });
+  out({ok:ok, runs:runs, errors:errors.slice(0, 30)});
+}
+})();
+</script>
+</body>
+</html>

@@ -206,14 +206,10 @@ var SUGAI = (function(){
       })
       .then(function(){ return tf.ready(); })
       .then(function(){
-        var local = null;
-        if(location.protocol === 'http:' || location.protocol === 'https:'){
-          try{ local = new URL('model/model.json', location.href).href; }catch(e){}
-        }
-        var opt = {version:2, alpha:0.5};
-        if(!local) return mobilenet.load(opt);
-        return mobilenet.load({version:2, alpha:0.5, modelUrl:local})
-          ['catch'](function(){ return mobilenet.load(opt); });
+        /* 모델은 늘 tfhub 의 원래 모델(mobilenet_v2_050_224)을 쓴다. 기준 자료가 이 모델로 만들어졌다.
+           예전에는 같은 서버의 model/ 을 먼저 찾았는데, 로컬 모델은 값이 달라 판별이 전부 틀어졌고
+           (2026-09-18) 두지 않기로 해서 매번 404 만 남겼다. 앱으로 포장할 때는 tfhub 모델 파일을 그대로 받아 넣는다. */
+        return mobilenet.load({version:2, alpha:0.5});
       })
       .then(function(m){
         net = m;

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>안전망</title>
+<style>
+  body{background:#0E1420;color:#E6EDF5;font:13px/1.6 system-ui,"Malgun Gothic",sans-serif;margin:0;padding:12px}
+  pre{white-space:pre-wrap;word-break:break-all;background:#131C2B;padding:10px;border-radius:8px;max-height:60vh;overflow:auto}
+  iframe{width:390px;height:844px;border:1px solid #2A3852}
+</style>
+</head>
+<body>
+<h3>안전망 — 지금 앱이 내는 결과를 기록하고, 고친 앱을 기록과 비교한다</h3>
+<div>주소 예 : <code>golden.html?mode=capture&amp;tag=v83</code> (기록) ·
+  <code>golden.html?mode=compare&amp;tag=v83&amp;app=../site/index.html</code> (비교)</div>
+<pre id="R"></pre>
+<pre id="OUT"></pre>
+<iframe id="F"></iframe>
+<script src="golden.js"></script>
+</body>
+</html>

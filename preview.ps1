@@ -74,13 +74,20 @@ $worker = {
             Note "REQ $($req.HttpMethod) /$rel"
 
             if ($rel -eq 'api/save' -and $req.HttpMethod -eq 'POST') {
+                # dir=golden 이면 tests\golden 에 (안전망 기록), 아니면 생성물 에 저장한다.
+                # .png 는 본문이 data:image/png;base64,... 글자이고, 풀어서 그림 파일로 쓴다.
                 $name = $req.QueryString['name']
-                if (-not $name -or $name -notmatch '^[A-Za-z0-9_\-]{1,60}\.json$') { $name = 'out.json' }
-                $dir = Join-Path $ROOT '생성물'
+                if (-not $name -or $name -notmatch '^[A-Za-z0-9_\-]{1,80}\.(json|png)$') { $name = 'out.json' }
+                $dir = if ($req.QueryString['dir'] -eq 'golden') { Join-Path $ROOT 'tests\golden' } else { Join-Path $ROOT '생성물' }
                 if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
                 $sr = New-Object System.IO.StreamReader($req.InputStream, [System.Text.Encoding]::UTF8)
                 $payload = $sr.ReadToEnd(); $sr.Close()
-                [System.IO.File]::WriteAllText((Join-Path $dir $name), $payload, (New-Object System.Text.UTF8Encoding($false)))
+                if ($name -like '*.png') {
+                    $b64 = $payload.Substring($payload.IndexOf(',') + 1)
+                    [System.IO.File]::WriteAllBytes((Join-Path $dir $name), [Convert]::FromBase64String($b64))
+                } else {
+                    [System.IO.File]::WriteAllText((Join-Path $dir $name), $payload, (New-Object System.Text.UTF8Encoding($false)))
+                }
                 $body = [System.Text.Encoding]::UTF8.GetBytes('{"ok":true,"bytes":' + $payload.Length + '}')
                 $res.ContentType = 'application/json; charset=utf-8'
                 $res.ContentLength64 = $body.Length
@@ -112,7 +119,8 @@ $worker = {
             }
             else {
                 $allowed = ($rel -match '^(index|index_new|eval\w*|gen|sheet|ocrtest)\.html$' -or $rel -match '^발표_.+\.html$') -or
-                           ($rel -eq 'aivec.js') -or ($rel -eq 'batches.json') -or ($rel -like 'lib/*') -or ($rel -like 'model/*') -or ($rel -like '사진원본/*') -or ($rel -like '_검토_*')
+                           ($rel -eq 'aivec.js') -or ($rel -eq 'batches.json') -or ($rel -like 'lib/*') -or ($rel -like 'model/*') -or ($rel -like '사진원본/*') -or ($rel -like '_검토_*') -or
+                           ($rel -like 'tests/*') -or ($rel -like 'site/*')
                 $full = [System.IO.Path]::GetFullPath((Join-Path $ROOT ($rel -replace '/','\')))
                 $ok = $allowed -and $full.StartsWith($ROOT,[StringComparison]::OrdinalIgnoreCase) -and (Test-Path $full -PathType Leaf)
 

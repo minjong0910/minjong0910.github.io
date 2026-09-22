@@ -37,9 +37,15 @@ function done(res){
 function probe(){
   var w;
   try { w = F.contentWindow; } catch(e){ return done({ok:false, error:'iframe 접근 실패 : ' + e.message}); }
-  var ready = w && w.SUGAI && w.SUGAI.SCOPE && w.AIVEC_DATA && w.AIVEC_DATA.codes
+  var ready = w && w.SUGAI && w.SUGAI.SCOPE
               && typeof w.aidKnownCodes === 'function' && typeof w.aidFloorOf === 'function'
               && w.FLOOR_LAYOUT && w.FLOOR_LAYOUT[1];
+  /* site/ 부터 AI 자료는 필요할 때 받는다 — 검사는 모든 장소를 봐야 하므로 직접 받게 한다 */
+  if(ready && !w.AIVEC_DATA && w.SUGAI.ensureData){
+    if(!probe.asked){ probe.asked = true; w.SUGAI.ensureData().then(function(){}, function(e){ done({ok:false, error:'AI 자료를 받지 못함 : ' + e.message}); }); }
+    ready = false;
+  }
+  if(ready && !(w.AIVEC_DATA && w.AIVEC_DATA.codes)) ready = false;
   if(!ready){
     if(Date.now() - t0 > LIMIT) return done({ok:false, error:'앱이 ' + (LIMIT/1000) + '초 안에 준비되지 않음',
       have:{SUGAI:!!(w&&w.SUGAI), AIVEC:!!(w&&w.AIVEC_DATA), aid:!!(w&&w.aidKnownCodes)}});
@@ -53,11 +59,18 @@ function run(w){
   var codes = [], seen = {};
   A.codes.forEach(function(c){ c = String(c).toUpperCase(); if(!seen[c]){ seen[c] = 1; codes.push(c); } });
   codes.sort();
+  /* data/places.js(늘 받는 작은 장소 목록)가 AI 자료의 장소와 같은가 — aivec.js 만 새로 만들고 잊으면 어긋난다 */
+  var placesBad = [];
+  if(w.PLACE_CODES){
+    var ps = {}; w.PLACE_CODES.forEach(function(c){ ps[String(c).toUpperCase()] = 1; });
+    codes.forEach(function(c){ if(!ps[c]) placesBad.push(c + ' 빠짐'); });
+    Object.keys(ps).forEach(function(c){ if(!seen[c]) placesBad.push(c + ' 남음'); });
+  }
 
   var known = w.aidKnownCodes(), knownSet = {};
   known.forEach(function(c){ knownSet[c] = 1; });
 
-  var bad = { scope:[], label:[], floor:[], adminFloor:[], adminPick:[] };
+  var bad = { scope:[], label:[], floor:[], adminFloor:[], adminPick:[], places:placesBad };
   codes.forEach(function(c){
     if(!S.SCOPE.allow(c)) bad.scope.push(c);
     var lb = S.codeLabel(c);

@@ -117,17 +117,14 @@ function scanReveal(boot, cb){
   })();
   say(ko ? ('> 장소 사진 ··· ' + pk + '곳 · ' + num(pc) + '장') : ('> Photos ··· ' + pk + ' places · ' + num(pc)));
   var AI_KO = '> AI 사진 판별 자료 ··· ', AI_EN = '> Photo-AI data ··· ';
-  say(ko ? AI_KO + '받는 중…' : AI_EN + 'loading…');
+  /* AI 자료(10MB)는 여기서 받지 않는다 — 사진으로 찾을 때 SUGAI.ensureData() 가 받는다 */
+  var nPlace = (window.PLACE_CODES || []).length;
+  say(ko ? AI_KO + '장소 ' + nPlace + '곳 · 자료는 사진으로 찾을 때 받습니다'
+         : AI_EN + nPlace + ' places · data loads when you search by photo');
 
-  /* ② 문서를 다 읽으면(AI 자료 aivec.js 까지 받으면) 나머지를 적고 닫는다 */
+  /* ② 문서를 다 읽으면 나머지를 적고 닫는다 */
   function afterLoad(){
     loadedAt = Date.now();
-    var d = window.AIVEC_DATA, p = ko ? AI_KO : AI_EN;
-    var places = 0;
-    if(d && d.codes){ var seen = {}; d.codes.forEach(function(c){ seen[String(c).toUpperCase()] = 1; }); places = Object.keys(seen).length; }
-    fix(p, d && d.codes
-      ? p + (ko ? ('장소 ' + places + '곳 · 기준 ' + num(d.n || d.codes.length) + '개') : (places + ' places · ' + num(d.n || d.codes.length) + ' refs'))
-      : p + (ko ? '사진으로 위치를 찾을 때 받습니다' : 'loaded when you search by photo'));
     var g = (typeof QRNAV !== 'undefined' && QRNAV.gate) ? QRNAV.gate() : null;
     var GN = {MAIN:['정문', 'main gate'], BACK:['후문', 'back gate'], EAST:['동문', 'east gate'], WEST:['서문', 'west gate']};
     say(ko ? ('> 출발 위치 ··· ' + (g && GN[g] ? GN[g][0] + ' (QR로 확인)' : '정하지 않음 — 1층에서 출발'))

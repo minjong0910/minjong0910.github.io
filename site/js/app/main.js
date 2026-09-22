@@ -768,10 +768,8 @@ function openFavorite(f){
    흐름 : 사용자 제출 → localStorage 대기열(SUG_QUEUE) 저장
          → 관리자가 #sph(사진 등록, 개발자 전용)에서 이어지는 #sadmin 화면에서 사진·메모를 보고
            적용할 위치 코드(호실번호 또는 BLD·B1·EV1~5·HALL1~5L/R)를 입력해 승인
-         → 승인 즉시 ROOM_PHOTOS[코드] 맨 앞에 추가되어 그 위치의 대표 사진이 되고
-           (앱을 쓰는 모든 사용자 화면 = 이 파일을 보는 모든 사람에게 반영하려면,
-           관리자가 #sph의 '사진 담아서 저장'으로 사진이 포함된 새 HTML을 받아 재배포한다 —
-           이 앱은 서버 없는 단일 파일이라 실시간 전체 동기화는 재배포를 통해 이루어진다). ========== */
+         → 승인 즉시 ROOM_PHOTOS[코드] 맨 앞에 추가되어 그 위치의 대표 사진이 되고,
+           서버(Firestore photos)에 올라가 다른 사용자의 앱도 다음에 열 때 받는다. ========== */
 var sugPickedFile = null;
 function sugLoadQueue(){
   try{ return JSON.parse(localStorage.getItem('sugQueue')||'[]'); }catch(e){ return []; }
@@ -16054,48 +16052,55 @@ function phClear(){
   ROOM_PHOTOS = {}; PH_SKIP = []; phRender();
 }
 
-/* 사진을 통째로 담은 HTML 파일 내려받기
-   — 3D·목록 등이 그려지기 전의 깨끗한 원본을 미리 떠 두었다가 거기에 사진만 끼워 넣습니다. */
-/* v51 : 원본 HTML 사본은 '사진 담아서 저장'(개발용)에만 필요하다. 예전에는 앱을 켤 때마다
-   16MB 문서를 통째로 문자열로 복사해 두었다(시간 + 메모리). 파일로 연 개발 모드에서만
-   즉시 복사하고, 웹에서는 필요할 때 서버에서 원본을 받아 쓴다. */
-var PRISTINE_HTML = (location.protocol === 'file:') ? ('<!DOCTYPE html>\n' + document.documentElement.outerHTML) : null;
-function phPristine(cb){
-  if(PRISTINE_HTML){ cb(PRISTINE_HTML); return; }
-  fetch(location.href.split('#')[0], {cache:'no-store'}).then(function(r){ if(!r.ok) throw 'http'+r.status; return r.text(); }).then(function(t){
-    PRISTINE_HTML = t; cb(t);
-  })['catch'](function(){
-    PRISTINE_HTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML; cb(PRISTINE_HTML);
-  });
-}
-
-function phExport(){
-  if(!phCount()){ alert('먼저 사진을 넣어주세요.'); return; }
-  phPristine(phExportWith);
-}
-function phExportWith(PRISTINE_HTML){
-  var json = JSON.stringify(ROOM_PHOTOS).replace(/</g, '\\u003c');
-  var tag  = '<scr' + 'ipt id="EMBEDDED_PHOTOS" type="application/json">' + json + '</scr' + 'ipt>';
-  var rx   = new RegExp('<scr' + 'ipt id="EMBEDDED_PHOTOS"[\\s\\S]*?<\\/scr' + 'ipt>', 'i');
-  var html = PRISTINE_HTML.replace(rx, '');
-  /* v45 : AI가 배운 내용도 함께 담는다.
-     이렇게 해야 내보낸 파일을 다른 사람이 열어도 AI가 새 위치를 그대로 안다. */
-  try{
-    var lj = localStorage.getItem('aiLearned');
-    if(lj && lj !== '[]'){
-      var ltag = '<scr' + 'ipt id="EMBEDDED_AILEARN" type="application/json">' +
-                 lj.replace(/</g, '\\u003c') + '</scr' + 'ipt>';
-      var lrx = new RegExp('<scr' + 'ipt id="EMBEDDED_AILEARN"[\\s\\S]*?<\\/scr' + 'ipt>', 'i');
-      html = html.replace(lrx, '');
-      tag = tag + '\n' + ltag;
-    }
-  }catch(e){}
-  html = html.replace(/<body[^>]*>/i, function(m){ return m + '\n' + tag; });
+/* 파일 하나를 내려받게 한다 */
+function saveBlob(blob, name){
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([html], {type:'text/html;charset=utf-8'}));
-  a.download = '공대3호관_길안내_사진포함.html';
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 6000);
+}
+
+/* 사진 자료 묶음(zip) 내려받기 — 지금 앱의 사진 목록을 site/ 폴더 모양 그대로 담는다.
+     data/photos.js            사진 목록 (장소 → [{n, u, cap}])
+     data/photos/<장소>/…      이 기기에서 새로 넣은 사진 (이미 파일인 사진은 목록에만 적는다)
+   압축을 site/ 에 그대로 풀고 올리면 모든 사용자에게 적용된다.
+   서버에서 온 사진(관리자 승인)은 서버에 있으므로 담지 않는다.
+   (예전에는 사진을 글자로 바꿔 박은 index.html 한 파일을 내려받게 했다 — 그래서 앱이 18MB 였다) */
+function phExport(){
+  if(!phCount()){ alert('먼저 사진을 넣어주세요.'); return; }
+  if(typeof JSZip === 'undefined'){ alert('묶음 도구(JSZip)를 불러오지 못했습니다.'); return; }
+  var zip = new JSZip(), idx = {}, nNew = 0, nAll = 0;
+  var t = new Date(), p2 = function(v){ return (v < 10 ? '0' : '') + v; };
+  var stamp = '' + t.getFullYear() + p2(t.getMonth() + 1) + p2(t.getDate()) + p2(t.getHours()) + p2(t.getMinutes());
+  /* 출입문 목록(GATE_*)은 켤 때마다 phBuildGateLists 가 BLD 사진을 가리켜 다시 만든다 — 담지 않는다 */
+  var owned = [];
+  Object.keys(ROOM_PHOTOS).forEach(function(code){ if(!/^GATE_/.test(code)) owned = owned.concat(ROOM_PHOTOS[code] || []); });
+  Object.keys(ROOM_PHOTOS).sort().forEach(function(code){
+    var safe = code.replace(/[^A-Za-z0-9_\-]/g, '_');
+    var list = (ROOM_PHOTOS[code] || []).filter(function(p){
+      return p && p.u && !p.pid && !(/^GATE_/.test(code) && owned.indexOf(p) >= 0);
+    });
+    if(!list.length) return;
+    idx[code] = list.map(function(p, i){
+      var e = {n:p.n}, m = /^data:image\/([a-z+.-]+);base64,(.*)$/.exec(p.u);
+      if(m){
+        e.u = 'data/photos/' + safe + '/' + stamp + '_' + (i < 9 ? '0' : '') + (i + 1) + '.' + (m[1] === 'png' ? 'png' : 'jpg');
+        zip.file(e.u, m[2], {base64:true}); nNew++;
+      } else e.u = p.u;
+      if(p.cap) e.cap = p.cap;
+      nAll++;
+      return e;
+    });
+  });
+  zip.file('data/photos.js', '/* 장소 사진 목록 — 사진 파일은 data/photos/<장소>/ 에 있다.\n' +
+    '   관리자 화면의 \'사진 자료 묶음 내려받기\'가 이 파일과 사진을 함께 만든다. */\n' +
+    'window.PHOTO_INDEX = ' + JSON.stringify(idx) + ';\n');
+  zip.generateAsync({type:'blob'}).then(function(b){
+    saveBlob(b, '사진자료_' + stamp + '.zip');
+    alert('사진 ' + nAll + '장(새 사진 ' + nNew + '장)의 목록을 내려받았습니다.\n\n' +
+          '압축을 site 폴더에 그대로 풀고(덮어쓰기) GitHub 에 올리면 모든 사용자에게 적용됩니다.');
+  })['catch'](function(e){ alert('묶음을 만들지 못했습니다. (' + (e && e.message || e) + ')'); });
 }
 
 /* 사진 상자 채우기 (여러 장이면 눌러서 넘김) */
@@ -16200,7 +16205,7 @@ function phFill(el, code, placeholder){
     if(sphMgrPickCode) sphMgrAddFiles(sphMgrPickCode, this.files);
     this.value = '';
   });
-  /* 사진을 빈 공간에 잘못 떨어뜨리면 브라우저가 그 파일을 열어 버려서, 아직 저장(사진 담아서 저장)
+  /* 사진을 빈 공간에 잘못 떨어뜨리면 브라우저가 그 파일을 열어 버려서, 아직 저장(사진 자료 묶음 내려받기)
      하지 않은 작업 내용이 통째로 날아간다. 문서 전체에서 기본 동작을 막아 실수를 방지한다. */
   document.addEventListener('dragover', function(e){ e.preventDefault(); });
   document.addEventListener('drop', function(e){ e.preventDefault(); });

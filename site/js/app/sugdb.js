@@ -66,6 +66,12 @@ var SUGDB = (function(){
 
   /* ── 사진 크기 맞추기 (문서 1MB 한도) ── */
   function fit(dataUrl){
+    /* 앱에 들어 있는 사진은 이제 파일(data/photos/…)이다 — 서버에 올리려면 사진 글자(data URL)로 바꾼다 */
+    if(dataUrl && !/^data:/.test(dataUrl)){
+      return fetch(dataUrl).then(function(r){ if(!r.ok) throw new Error('사진 파일 ' + r.status); return r.blob(); })
+        .then(function(b){ return new Promise(function(res, rej){ var fr = new FileReader(); fr.onload = function(){ res(fr.result); }; fr.onerror = rej; fr.readAsDataURL(b); }); })
+        .then(fit);
+    }
     return new Promise(function(res){
       if(!dataUrl || dataUrl.length <= MAX_BYTES){ res(dataUrl); return; }
       var im = new Image();

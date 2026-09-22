@@ -60,6 +60,37 @@ var SUGAI = (function(){
   var REF = null, CODES = null, NAMES = null, DIM = 0;
   var net = null, loading = null, failed = false;
 
+  /* ── AI 자료는 쓸 때 받는다 ──
+     data/aivec.js(기준 자료 8.5MB)와 data/ailib.js(자료집 2MB)는 사진으로 위치를 찾거나
+     관리자 화면을 열 때만 필요하다. 예전에는 앱을 열 때마다 모든 사람이 받았다.
+     자료가 필요한 입구(판별 · 준비 · 분류 · 배우기 · 자료집 · 모델)는 먼저 ensureData() 를 거친다.
+     받기에 실패하면(인터넷 끊김 등) DATA_FAILED 로 두고, 예전처럼 자료 없이(사람 검토로) 진행한다. */
+  var DATA_READY = !!(window.AIVEC_DATA && window.AILIB_DATA), DATA_FAILED = false, DATA_LOADING = null;
+  function loadScript(src, key){
+    return new Promise(function(res, rej){
+      if(window[key]) return res();
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = function(){ if(window[key]) res(); else rej(new Error(src + ' 에 ' + key + ' 없음')); };
+      s.onerror = function(){ rej(new Error(src + ' 받기 실패')); };
+      document.head.appendChild(s);
+    });
+  }
+  function ensureData(){
+    if(DATA_READY) return Promise.resolve(true);
+    if(DATA_LOADING) return DATA_LOADING;
+    DATA_LOADING = Promise.all([loadScript('data/aivec.js', 'AIVEC_DATA'), loadScript('data/ailib.js', 'AILIB_DATA')])
+      .then(function(){
+        DATA_READY = true; DATA_FAILED = false;
+        /* 자료 없이 먼저 만들어진 값은 버린다 — 다음에 쓸 때 자료를 넣어 다시 만든다 */
+        REF = null; CODES = null; loadedLearn = false; EMB = null;
+        if(!libLoading){ libLoaded = false; LIB = []; }
+        return true;
+      }, function(e){ DATA_FAILED = true; DATA_LOADING = null; throw e; });
+    return DATA_LOADING;
+  }
+  function dataPending(){ return !DATA_READY && !DATA_FAILED; }
+
   function ko(){ return (typeof LANG==='undefined' || LANG==='ko'); }
   function $(id){ return document.getElementById(id); }
 
@@ -150,7 +181,8 @@ var SUGAI = (function(){
     if(failed) return Promise.reject('failed');
     if(loading) return loading;
 
-    loading = scriptAny(TFJS, function(){ return !!window.tf; })
+    loading = ensureData()['catch'](function(){})   /* 자료를 못 받아도 모델은 받는다 (배우기에는 모델만 있으면 된다) */
+      .then(function(){ return scriptAny(TFJS, function(){ return !!window.tf; }); })
       .then(function(){ return scriptAny(MNET, function(){ return !!window.mobilenet; }); })
       .then(function(){
         return tf.setBackend('webgl')['catch'](function(){ return tf.setBackend('cpu'); });
@@ -1166,6 +1198,7 @@ var SUGAI = (function(){
 
   /* ── 판정 ── */
   function judge(dataUrl, cb, note, ocrUrl, extraUrls){
+    if(dataPending()){ var args = arguments; ensureData().then(function(){ judge.apply(null, args); }, function(){ judge.apply(null, args); }); return; }
     /* v69 : 판별에 걸린 시간을 재서 res.ms 에 담는다 (폰 속도 확인용) */
     var t0 = Date.now(), cb0 = cb;
     cb = function(r){ if(r && r.ms === undefined) r.ms = Date.now() - t0; cb0(r); };
@@ -1466,6 +1499,12 @@ var SUGAI = (function(){
     var box = $('sugAiPrep'), txt = $('sugAiPrepTxt');
     var card = $('sugAiCard'); if(card) card.classList.remove('on');
     if(!box) return;
+    if(dataPending()){
+      box.className = 'aiPrep load';
+      if(txt) txt.textContent = ko() ? 'AI 사진 자료 받는 중… (처음 한 번)' : 'Downloading AI data… (first time only)';
+      ensureData().then(warmup, warmup);
+      return;
+    }
     if(!loadVectors()){
       box.className = 'aiPrep off';
       if(txt) txt.textContent = ko()?'AI 준비 안 됨 — 사람이 직접 확인해요':'AI unavailable — manual review';
@@ -1795,6 +1834,7 @@ var SUGAI = (function(){
      결과는 브라우저에 저장되어 다음에 앱을 열어도 유지된다. */
   function learn(code, dataUrl, name){
     if(!code || !dataUrl) return Promise.resolve(false);
+    if(dataPending()) return ensureData().then(function(){ return learn(code, dataUrl, name); }, function(){ return learn(code, dataUrl, name); });
     loadLearned();
     /* v52 : 배우는 사진도 두 시점(원본·가운데0.82)으로 기억한다 — 내장 기준벡터와 같은 방식 */
     return embedUrlViews(dataUrl, REF_VIEWS).then(function(vs){
@@ -1935,6 +1975,7 @@ var SUGAI = (function(){
   }
   /* 자료집을 한 번만 읽어 메모리에 올린다. IndexedDB를 못 쓰면 기본 자료집만으로 동작한다. */
   function libEnsure(){
+    if(dataPending()) return ensureData().then(libEnsure, libEnsure);
     if(libLoaded) return Promise.resolve(LIB);
     if(libLoading) return libLoading;
     function merge(rows){
@@ -2059,6 +2100,7 @@ var SUGAI = (function(){
 
   /* ── 분류 : 등록용 (판정 문구 없이 순위만) ── */
   function classify(dataUrl){
+    if(dataPending()) return ensureData().then(function(){ return classify(dataUrl); }, function(){ return classify(dataUrl); });
     loadLearned();
     /* v52 : 판정과 같은 2시점 비교. 묶기(cluster)에 쓰는 vec은 원본 시점 것을 준다.
        v55 : 자료집까지 후보에 넣는다. */
@@ -2201,7 +2243,8 @@ var SUGAI = (function(){
     i.click();
   }
 
-  return { judge:judge, warmup:warmup, showCard:showCard, rejectMsg:rejectMsg,
+  return { ensureData:ensureData, get dataReady(){ return DATA_READY; },
+           judge:judge, warmup:warmup, showCard:showCard, rejectMsg:rejectMsg,
            adminBadge:adminBadge, autoCode:autoCode, pick:pick, tune:tune,
            codeLabel:codeLabel, whereText:whereText, floorGuess:floorGuess, TH:TH, SCOPE:SCOPE,
            learn:learn, learnStats:learnStats, forgetAll:forgetAll,

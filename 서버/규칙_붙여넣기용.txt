@@ -1,0 +1,60 @@
+rules_version = '2';
+
+// 공대 3호관 길안내 — Firestore 보안 규칙 (2026-09-22, v84)
+//
+// 원칙
+//   · 관리자는 "로그인한 사람"이 아니라 "admins 명단에 UID 가 있는 사람"이다.
+//     (예전 규칙은 request.auth != null 이라, 계정만 만들면 누구나 관리자였다)
+//   · admins 명단은 앱에서 아무도 못 바꾼다. Firebase 콘솔에서만 추가·삭제한다.
+//   · 제보는 로그인 없이 올릴 수 있지만, 정해진 칸·형식·크기만 받는다.
+//   · 승인된 사진은 누구나 읽고(앱이 내려받아야 하므로), 관리자만 쓴다.
+//
+// 콘솔 : Firestore Database → 규칙 → 이 파일 내용을 통째로 붙여넣고 [게시]
+// 시험 : 같은 화면의 [규칙 플레이그라운드] — 서버/보안_설정_안내.txt 5번
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // 제보 한 건의 모양 — 앱(pushOne)이 보내는 8칸만 받는다
+    function validSuggestion(d) {
+      return d.keys().hasOnly(['u', 'note', 'ts', 'status', 'ai', 'qr', 'ua', 'cid'])
+        && d.keys().hasAll(['u', 'status'])
+        && d.status == 'pending'
+        && d.u is string && d.u.size() < 950000
+        && d.u.matches('data:image/[a-zA-Z0-9.+-]+;base64,.*')
+        && (!('note' in d) || (d.note is string && d.note.size() <= 500))
+        && (!('ts' in d)   || d.ts is number)
+        && (!('ai' in d)   || d.ai == null || d.ai is map)
+        && (!('qr' in d)   || d.qr == null || (d.qr is string && d.qr.size() <= 20))
+        && (!('ua' in d)   || (d.ua is string && d.ua.size() <= 120))
+        && (!('cid' in d)  || (d.cid is string && d.cid.size() <= 60));
+    }
+
+    // 관리자 명단 : 자기 칸만 읽을 수 있다 (앱이 "나는 관리자인가"를 확인할 때). 쓰기는 콘솔에서만.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // 제보 : 누구나 올릴 수 있지만 모양이 맞아야 한다. 읽기·승인·삭제는 관리자만.
+    match /suggestions/{id} {
+      allow create: if validSuggestion(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 승인된 사진 : 누구나 읽고, 관리자만 올리기·고치기·지우기
+    match /photos/{id} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // 그 밖의 모든 곳은 막는다
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

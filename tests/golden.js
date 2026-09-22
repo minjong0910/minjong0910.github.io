@@ -70,9 +70,11 @@ function waitApp(){
     F.addEventListener('load', function tick(){
       (function poll(){
         var w = F.contentWindow;
-        var ok = w && w.SUGAI && w.SUGAI.SCOPE && w.AIVEC_DATA && w.AIVEC_DATA.codes && w.FLOOR_LAYOUT && w.FLOOR_LAYOUT[1]
+        var ok = w && w.SUGAI && w.SUGAI.SCOPE && w.FLOOR_LAYOUT && w.FLOOR_LAYOUT[1]
                  && w.scene && w.renderer && typeof w.buildSteps === 'function' && typeof w.openTarget === 'function';
-        if(ok) return resolve(w);
+        /* AI 자료는 앱이 필요할 때만 받는다(site/ 부터) — 검사는 모든 장소를 봐야 하므로 직접 받게 한다 */
+        if(ok && !w.AIVEC_DATA && w.SUGAI.ensureData) return w.SUGAI.ensureData().then(function(){ resolve(w); }, reject);
+        if(ok && w.AIVEC_DATA && w.AIVEC_DATA.codes) return resolve(w);
         if(Date.now() - t0 > 120000) return reject(new Error('앱이 120초 안에 준비되지 않음'));
         setTimeout(poll, 300);
       })();

@@ -22,10 +22,9 @@ function aidKnownCodes(){
   /* v75 : AI 기준벡터가 '앱이 아는 장소'의 정답지다.
      libAll() 은 기준 데이터를 아직 안 읽었으면 0개를 돌려줘서,
      창밖(WIN)·지하 엘리베이터(EVB1)·동문/서문이 목록에서 빠져 있었다. */
-  if(typeof window !== 'undefined' && window.AIVEC_DATA && window.AIVEC_DATA.codes){
-    var ac = window.AIVEC_DATA.codes;
-    for(i=0;i<ac.length;i++) set[String(ac[i]).toUpperCase()] = 1;
-  }
+  /* AI 자료(8.5MB)는 필요할 때만 받으므로, 장소 이름은 늘 있는 data/places.js 의 목록을 쓴다 */
+  var ac = window.PLACE_CODES || (window.AIVEC_DATA && window.AIVEC_DATA.codes) || [];
+  for(i=0;i<ac.length;i++) set[String(ac[i]).toUpperCase()] = 1;
   return Object.keys(set).sort();
 }
 function aidFillList(){
@@ -619,33 +618,23 @@ function aidUnhide(){
   SUGAI.libUnhideAll().then(function(){ aidProg('숨겼던 기본 자료를 되돌렸습니다.'); aidRender(); })
     ['catch'](function(){ aidProg('되돌리지 못했습니다.'); });
 }
-/* v56 : 지금 자료집을 담은 index.html 내려받기
-   내려받은 파일을 GitHub 의 index.html 에 덮어쓰면 모든 사용자의 AI가 같은 자료집을 쓴다.
-   (사진 등록의 '사진 담아서 저장'과 같은 방식 — 파일 원본에서 자료집 부분만 바꿔 끼운다) */
-function aidExportHtml(){
+/* 지금 자료집을 data/ailib.js 파일로 내려받기
+   내려받은 파일로 site/data/ailib.js 를 바꿔 올리면 모든 사용자의 AI가 같은 자료집을 쓴다.
+   (예전에는 자료집을 박은 index.html 을 통째로 내려받게 했다) */
+function aidExportFile(){
   if(typeof SUGAI === 'undefined') return;
   var st = SUGAI.libStats();
   if(!st.n){ alert('자료집이 비어 있습니다.'); return; }
-  var msg = '자료집 ' + st.n + '장을 담은 index.html 을 내려받습니다.' +
+  var msg = '자료집 ' + st.n + '장을 담은 ailib.js 를 내려받습니다.' +
             (st.nMine ? '\n(이 기기에서 넣은 ' + st.nMine + '장이 새로 담깁니다)' : '') +
             (st.nHidden ? '\n(숨긴 ' + st.nHidden + '장은 빠집니다)' : '') +
-            '\n\n내려받은 파일을 GitHub 의 index.html 에 덮어쓰면\n모든 사용자의 AI가 이 자료집을 씁니다.';
+            '\n\n내려받은 파일로 site/data/ailib.js 를 바꿔 올리면\n모든 사용자의 AI가 이 자료집을 씁니다.';
   if(!confirm(msg)) return;
-  aidProg('파일을 만드는 중…');
-  phPristine(function(src){
-    try{
-      var json = SUGAI.libExport().replace(/</g, '\\u003c');
-      var tag  = '<scr' + 'ipt id="EMBEDDED_AILIB" type="application/json">' + json + '</scr' + 'ipt>';
-      var rx   = new RegExp('<scr' + 'ipt id="EMBEDDED_AILIB"[\\s\\S]*?<\\/scr' + 'ipt>', 'i');
-      var html = rx.test(src) ? src.replace(rx, function(){ return tag; })
-                              : src.replace(/<body[^>]*>/i, function(m){ return m + '\n' + tag; });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([html], {type:'text/html;charset=utf-8'}));
-      a.download = 'index.html';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 6000);
-      aidProg('✓ index.html 을 내려받았습니다 (자료집 ' + st.n + '장, 약 ' + (html.length/1048576).toFixed(1) + 'MB). ' +
-              'GitHub 저장소의 index.html 에 덮어쓰면 모든 사용자에게 적용됩니다.');
-    }catch(e){ aidProg('파일을 만들지 못했습니다. (' + (e && e.message || e) + ')'); }
-  });
+  try{
+    var js = '/* AI 사진 자료집 — 관리자 화면 \'AI 사진 자료집\'에서 내려받은 파일 */\n' +
+             'window.AILIB_DATA = ' + SUGAI.libExport() + ';\n';
+    saveBlob(new Blob([js], {type:'text/javascript;charset=utf-8'}), 'ailib.js');
+    aidProg('✓ ailib.js 를 내려받았습니다 (자료집 ' + st.n + '장, 약 ' + (js.length/1048576).toFixed(1) + 'MB). ' +
+            'site/data/ailib.js 를 이 파일로 바꿔 올리면 모든 사용자에게 적용됩니다.');
+  }catch(e){ aidProg('파일을 만들지 못했습니다. (' + (e && e.message || e) + ')'); }
 }

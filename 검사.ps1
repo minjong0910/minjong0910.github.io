@@ -15,10 +15,14 @@
 #     가짜 진행 문구 없음         부팅 화면의 KERNEL LOADED · 보안 프로토콜 PASS (v85 에서 없앰)
 #     그림을 글자로 박지 않음      사진·그림을 base64 로 박아 앱이 18MB 가 됐다
 #     첫 화면 1MB 이하(압축)       예전 16MB
+#     앱 설치 정보                앱 이름·아이콘 크기·아이폰 아이콘, 첫 화면 앱 다운로드 문구, 설정의 앱 다운로드 버튼
+#     인터넷 없이 열기 목록        site\ 를 고치고 도구\오프라인목록.ps1 을 안 돌리면 폰이 옛 파일을 쓴다
+#     출입문 QR 주소              인쇄한 QR 이 이 저장소의 사이트를 여는가, QR인쇄\ 그림 4장이 있는가
 #     앱 검사(tests/check.html)   152곳 접수·이름·층·관리자 목록·3D·길찾기·실사 3D·후보 지도 (v65·v72·v75·v79)
+#     설치·오프라인(tests/pwa.html) QR 주소로 열기·기기별 설치 안내 13가지·12MB 저장·끊김 흉내·AI 는 인터넷 될 때만·QR 4장 다시 읽기
 #     안전망(tests/golden)        길안내 754가지·사진·화면·CSS·3D 그림 15장이 기록과 같은가
 #   pwsh -File 검사.ps1 -Ci      GitHub 자동 검사용 — 다른 컴퓨터라 글꼴·그래픽이 달라, 안전망에서 글자 폭·3D 그림 비교를 뺀다
-param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v87', [int]$Port = 8080)
+param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v88', [int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ROOT = $PSScriptRoot
@@ -52,7 +56,8 @@ if($miss.Count){ Bad ("index.html 이 부르는 파일이 없습니다 : " + ($m
 # 읽는 순서 — 앞 파일이 여는 순간 쓰는 자료는 그보다 먼저 읽혀야 한다
 #   (places.js 가 boot.js 뒤에 있어 부팅 화면이 "장소 0곳"이라고 한 적이 있다 — 2026-09-22)
 $order = @([regex]::Matches($html, '<script src="([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
-$mustBefore = @(@('data/places.js', 'js/app/boot.js'), @('data/photos.js', 'js/app/boot.js'), @('js/vendor/three.min.js', 'js/app/view3d.js'), @('data/photos.js', 'js/app/photos.js'))
+#   pwa.js 는 shell.js(뒤로가기 장치)보다 먼저 — 출입문 QR 주소의 ?gate= 를 먼저 떼어야 새로고침 때 다시 안 뜬다
+$mustBefore = @(@('data/places.js', 'js/app/boot.js'), @('data/photos.js', 'js/app/boot.js'), @('js/vendor/three.min.js', 'js/app/view3d.js'), @('data/photos.js', 'js/app/photos.js'), @('js/app/pwa.js', 'js/app/shell.js'))
 $badOrder = @($mustBefore | Where-Object { [Array]::IndexOf($order, $_[0]) -lt 0 -or [Array]::IndexOf($order, $_[0]) -gt [Array]::IndexOf($order, $_[1]) } | ForEach-Object { $_[0] + ' 가 ' + $_[1] + ' 보다 뒤' })
 if($badOrder.Count){ Bad ("읽는 순서가 틀림 : " + ($badOrder -join ' · ')) } else { Ok '읽는 순서 (자료 → 그것을 쓰는 코드)' }
 
@@ -108,6 +113,41 @@ if($gz -gt 1000KB){ Bad $msg } else { Ok $msg }
 $big = @(Get-ChildItem $SITE -Recurse -File | Where-Object { $_.Length -gt 50MB })
 if($big.Count){ Bad ("50MB 가 넘는 파일 (GitHub 한도 100MB) : " + (($big | ForEach-Object { Rel $_.FullName }) -join ', ')) }
 
+# 앱 설치 · 인터넷 없이 열기 · 출입문 QR (2026-09-22) — 브라우저로 실제 동작은 tests/pwa.html 이 본다
+function PngSize([string]$p){ $b = [IO.File]::ReadAllBytes($p); if($b.Length -lt 24){ return 0, 0 }; return ((([int]$b[16] -shl 24) -bor ([int]$b[17] -shl 16) -bor ([int]$b[18] -shl 8) -bor $b[19])), ((([int]$b[20] -shl 24) -bor ([int]$b[21] -shl 16) -bor ([int]$b[22] -shl 8) -bor $b[23])) }
+$man = $null; try { $man = [IO.File]::ReadAllText((Join-Path $SITE 'manifest.webmanifest'), $UTF) | ConvertFrom-Json } catch {}
+if(-not $man){ Bad 'site\manifest.webmanifest 이 없거나 JSON 이 깨졌습니다 (앱 이름·아이콘)' }
+else {
+  $why = @()
+  if($man.display -ne 'standalone' -or -not $man.start_url -or -not $man.short_name){ $why += '이름·시작 주소·standalone 중 빠진 것' }
+  foreach($ic in @($man.icons)){
+    $p = Join-Path $SITE ($ic.src -replace '/', '\'); $want = [int]($ic.sizes -split 'x')[0]
+    if(-not (Test-Path $p)){ $why += "$($ic.src) 없음"; continue }
+    $wh = PngSize $p; if($wh[0] -ne $want -or $wh[1] -ne $want){ $why += "$($ic.src) 크기 $($wh[0])x$($wh[1]) (적힌 값 $($ic.sizes))" }
+  }
+  $at = [regex]::Match($html, '<link rel="apple-touch-icon" href="([^"]+)"').Groups[1].Value
+  if(-not $at){ $why += '아이폰 아이콘(apple-touch-icon) 연결 없음' } else { $wh = PngSize (Join-Path $SITE ($at -replace '/', '\')); if($wh[0] -ne 180){ $why += "$at 이 180px 이 아님" } }
+  if($html -notmatch '<link rel="manifest" href="manifest.webmanifest">'){ $why += 'index.html 에 manifest 연결 없음' }
+  $tt = [regex]::Match($html, '<meta name="apple-mobile-web-app-title" content="([^"]+)"').Groups[1].Value
+  if($tt -ne $man.short_name){ $why += "아이폰 홈 화면 이름($tt)이 manifest($($man.short_name))와 다름" }
+  if($why.Count){ Bad ('앱 설치 정보 : ' + ($why -join ' · ')) } else { Ok ("앱 이름 '{0}' · 아이콘 {1}개 크기 맞음 · 아이폰 아이콘·이름" -f $man.short_name, @($man.icons).Count) }
+}
+$ui = @()
+if($html -notmatch 'class="appHint"[^>]*>[^<]*앱을 다운로드 하시려면 설정에 들어가주세요'){ $ui += '첫 화면 "앱을 다운로드 하시려면 설정에 들어가주세요" 문구' }
+if($html -notmatch 'onclick="PWA\.install\(\)"'){ $ui += '설정의 「앱 다운로드」 버튼' }
+if($ui.Count){ Bad ('빠짐 : ' + ($ui -join ' · ')) } else { Ok '첫 화면 앱 다운로드 문구 · 설정의 앱 다운로드 버튼' }
+$ol = & pwsh -NoProfile -File (Join-Path $ROOT '도구\오프라인목록.ps1') -Check 2>&1 | Out-String
+if($LASTEXITCODE -eq 0){ Ok ('인터넷 없이 열기(sw.js) ' + $ol.Trim()) } else { Bad ('인터넷 없이 열기(sw.js) ' + $ol.Trim()) }
+$qrUrl = [regex]::Match($src['js/app/qrnav.js'], "var SITE_URL = '([^']+)'").Groups[1].Value
+$remote = ''; try { $remote = (& git -C $ROOT remote get-url origin 2>$null) } catch {}
+$rm = [regex]::Match([string]$remote, 'github\.com[/:]([^/]+)/([^/.]+(?:\.github\.io)?)')
+$pages = if($rm.Success -and $rm.Groups[2].Value -ieq ($rm.Groups[1].Value + '.github.io')){ 'https://' + $rm.Groups[1].Value.ToLower() + '.github.io/' } else { '' }
+$qrMiss = @('정문_MAIN.png', '후문_BACK.png', '동문_EAST.png', '서문_WEST.png') | Where-Object { -not (Test-Path (Join-Path $ROOT "QR인쇄\$_")) }
+if(-not $qrUrl){ Bad 'qrnav.js 에서 QR 주소(SITE_URL)를 찾지 못했습니다' }
+elseif($pages -and $qrUrl -ne $pages){ Bad "출입문 QR 주소($qrUrl)가 이 저장소의 사이트 주소($pages)와 다릅니다 — 인쇄한 QR 이 엉뚱한 곳을 연다" }
+elseif($qrMiss.Count){ Bad ('인쇄용 QR 그림이 없습니다 : QR인쇄\' + ($qrMiss -join ', ') + ' — pwsh -File 도구\QR_만들기.ps1') }
+else { Ok ("출입문 QR 주소 {0}?gate=… · 인쇄 그림 4장 있음" -f $qrUrl) }
+
 # ═══ 2. 브라우저 검사 ═══════════════════════════════════════════
 if(-not $Quick){
   Step '2 브라우저 검사 (Edge 헤드리스)'
@@ -117,6 +157,7 @@ if(-not $Quick){
   else {
     $tests = @(
       [pscustomobject]@{ name = '앱 검사'; file = 'tests\run_check.ps1'; args = @() },
+      [pscustomobject]@{ name = '앱 설치·인터넷 없이 열기·출입문 QR'; file = 'tests\run_pwa.ps1'; args = @() },
       [pscustomobject]@{ name = ('안전망 비교 (' + $Tag + $(if($Ci){ ' · 글자 폭·그림 제외' } else { '' }) + ')'); file = 'tests\run_golden.ps1'; args = @('-Mode', 'compare', '-Tag', $Tag) + $(if($Ci){ @('-Parts', 'ci') } else { @() }) }
     )
     if($Full){ $tests += [pscustomobject]@{ name = '로드뷰 9가지 끝까지 재생'; file = 'tests\run_roadview.ps1'; args = @() } }

@@ -14,7 +14,10 @@ var QRNAV = (function(){
     WEST: {ko:'서문', en:'West Gate',  floor:1, sub:'서문내부'}
   };
 
-  var PREFIX  = 'B3NAV1:BLD:';      // 순수 텍스트 QR
+  /* 예전 인쇄본은 순수 글자(B3NAV1:BLD:MAIN)라 앱 안 스캐너에서만 읽혔다 — parse() 는 지금도 읽는다.
+     지금 인쇄하는 QR 은 주소다 — 휴대폰 기본 카메라로 찍어도 바로 앱이 열리고, 앱이 ?gate= 를 읽어 문을 정한다.
+     이 주소가 바뀌면 인쇄한 QR 4장을 다시 붙여야 한다 (도구/QR_만들기.html 이 같은 주소로 만든다 — 검사가 둘이 같은지 본다) */
+  var SITE_URL = 'https://minjong0910.github.io/';
   var KEEP_MS = 3*60*60*1000;       // 스캔 결과 유지 시간(3시간)
 
   var stream=null, rafId=null, detector=null, loopOn=false;
@@ -47,14 +50,17 @@ var QRNAV = (function(){
 
   /* ── QR 문자열 해석 ───────────────────────────────────────────
      받아들이는 형식
-       B3NAV1:BLD:MAIN                       ← 지금 인쇄하는 형식
+       https://minjong0910.github.io/?gate=MAIN   ← 지금 인쇄하는 형식 (기본 카메라로 찍으면 앱이 열린다)
+       B3NAV1:BLD:MAIN                       ← 예전 인쇄본
        https://…/q/BLD.MAIN                  ← 서버 도입 후 형식
        B3NAV1:BLD:MAIN:a7f3c1                ← 서명이 붙어도 무시하고 인식
-     서버가 없어도 문자열만으로 위치가 나오므로 오프라인에서 그대로 동작한다. */
+     앱 안 스캐너로 찍으면 주소를 열지 않고 글자만 읽으므로, 인터넷이 없어도 동작한다. */
   function parse(text){
     if(!text) return null;
     var t = String(text).trim().toUpperCase();
-    var m = t.match(/B3NAV\d*\s*:\s*BLD\s*:\s*([A-Z]+)/);
+    var m = t.match(/[?&]GATE=([A-Z]+)/);
+    if(m && GATES[m[1]]) return m[1];
+    m = t.match(/B3NAV\d*\s*:\s*BLD\s*:\s*([A-Z]+)/);
     if(m && GATES[m[1]]) return m[1];
     m = t.match(/\/Q\/BLD[.\-]([A-Z]+)/);          // URL 형식
     if(m && GATES[m[1]]) return m[1];
@@ -401,15 +407,27 @@ var QRNAV = (function(){
   function gateName(){ return entry ? (ko()? GATES[entry.key].ko : GATES[entry.key].en) : ''; }
   function clear(){ entry=null; save(); paintChip(); }
 
-  /* ── QR 원문 생성 (인쇄용 스크립트와 반드시 같은 문자열) ── */
-  function payload(key){ return PREFIX + key; }
+  /* ── QR 원문 생성 (인쇄용 도구와 반드시 같은 문자열) ── */
+  function payload(key){ return SITE_URL + '?gate=' + key; }
+
+  /* ── 휴대폰 카메라로 출입문 QR 을 찍고 들어온 경우 (?gate=MAIN) ──
+     주소는 pwa.js 가 미리 떼어 두었다. 앱 안 스캐너로 찍은 것과 똑같이 "정문에 계신가요?" 확인 화면으로 간다.
+     start.js 의 bootApp() 이 첫 화면을 연 직후에 부른다. */
+  function fromUrl(){
+    var key = (typeof PWA !== 'undefined') ? PWA.takeGate() : null;
+    if(!key || !GATES[key]) return false;
+    showConfirm(key);
+    return true;
+  }
 
   document.addEventListener('DOMContentLoaded', paintChip);
+  /* 앱이 이 파일보다 먼저 시작했으면(start.js 의 appBooted) 여기서 부른다 — 첫 화면(go(1))이 확인 화면을 덮지 않게 그 뒤에 */
+  if(typeof appBooted!=='undefined' && appBooted) setTimeout(fromUrl, 0);
 
   return {
     open:open, close:close, retry:retry, stopCam:stopCam,
     pickFile:pickFile, onFile:onFile, manual:manual,
     confirm:confirm_, floor:floor, gate:gate, gateName:gateName,
-    clear:clear, payload:payload, parse:parse, GATES:GATES
+    clear:clear, payload:payload, parse:parse, fromUrl:fromUrl, GATES:GATES
   };
 })();

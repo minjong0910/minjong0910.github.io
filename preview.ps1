@@ -59,6 +59,7 @@ $worker = {
         '.gz'='application/octet-stream'
         '.png'='image/png'; '.jpg'='image/jpeg'; '.jpeg'='image/jpeg'
         '.svg'='image/svg+xml'; '.ico'='image/x-icon'; '.txt'='text/plain; charset=utf-8'
+        '.webmanifest'='application/manifest+json; charset=utf-8'
     }
     function Note([string]$m){
         try { Add-Content -Path $LOG -Value ((Get-Date -Format 'HH:mm:ss.fff') + "  [$id] " + $m) -Encoding UTF8 } catch {}
@@ -126,7 +127,8 @@ $worker = {
             else {
                 $allowed = ($rel -match '^(eval\w*|gen|sheet|ocrtest)\.html$') -or ($rel -eq 'batches.json') -or
                            ($rel -like 'site/*') -or ($rel -like 'tests/*') -or ($rel -like '문서/*') -or
-                           ($rel -like '사진원본/*') -or ($rel -like '_검토_*')
+                           ($rel -like '사진원본/*') -or ($rel -like '_검토_*') -or
+                           ($rel -like '도구/QR_*') -or ($rel -like 'QR인쇄/*')
                 $full = [System.IO.Path]::GetFullPath((Join-Path $ROOT ($rel -replace '/','\')))
                 $ok = $allowed -and $full.StartsWith($ROOT,[StringComparison]::OrdinalIgnoreCase) -and (Test-Path $full -PathType Leaf)
 

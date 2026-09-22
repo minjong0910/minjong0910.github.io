@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>앱 설치 검사</title>
+<style>
+  body{background:#0E1420;color:#E6EDF5;font:13px/1.6 system-ui,"Malgun Gothic",sans-serif;margin:0;padding:16px}
+  pre{white-space:pre-wrap;word-break:break-all;background:#131C2B;padding:10px;border-radius:8px}
+  iframe{width:400px;height:760px;border:1px solid #2A3852}
+</style>
+</head>
+<body>
+<h3>앱 설치 · 인터넷 없이 열기 · 출입문 QR 검사</h3>
+<div>tests\run_pwa.ps1 이 Edge 헤드리스로 이 페이지를 열고, 아래 결과 칸을 읽어 갑니다. 사람이 열어 봐도 됩니다 (1분쯤).</div>
+<pre id="R">검사 중…</pre>
+<iframe id="F"></iframe>
+
+<script src="../site/js/vendor/jsqr.min.js"></script>
+<script>
+/* 무엇을 확인하나 (사용자가 2026-09-22 에 요청한 다섯 가지)
+     gate     출입문 QR 주소(?gate=)로 열면 "○문에 계신가요?" 확인 화면 → 확정하면 그 문에서 출발
+     hint     첫 화면 "지금 계신 위치가 자동으로 설정돼요." 바로 아래에 눈에 띄는 색의 "앱을 다운로드 하시려면 설정에 들어가주세요"
+              — 누르면 설정이 열린다. 앱이 먼저 설치를 조르지 않는다 (브라우저 설치 알림도 막는다)
+     install  설정의 「앱 다운로드」 — 안드로이드는 버튼 한 번에 브라우저 설치 창, 아이폰은 그림 안내(아이콘·이름),
+              카카오톡 같은 앱 안이면 크롬/사파리로 열기 안내. 기기 흉내 13가지로 어느 안내가 나오는지 본다
+     manifest 앱 이름·아이콘 (홈 화면에 보일 것) — 아이콘 크기가 적힌 대로인가
+     offline  sw.js 가 약 12MB 를 저장하고, 인터넷이 끊겨도(흉내) 앱·사진·3D 가 열리는가.
+              AI 자료는 저장하지 않고, 끊겼을 때 "AI 는 쉬어요"라고 말하며, 다시 연결되면 다시 받을 수 있게 되는가
+     qr       QR인쇄\ 그림 4장을 앱의 QR 읽기(jsQR)로 읽으면 각자 맞는 문 주소가 나오는가 (작게 찍힌 것도) */
+(function(){
+'use strict';
+var R = document.getElementById('R'), F = document.getElementById('F');
+var t0 = Date.now(), bad = {}, info = {}, step = '';
+function fail(g, m){ (bad[g] = bad[g] || []).push(m); }
+function check(g, cond, m){ if(!cond) fail(g, m); return !!cond; }
+function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+/* ※ 이 검사는 헤드리스 Edge 를 --virtual-time-budget(가상 시계) 없이 돌린다 (run_pwa.ps1).
+   가상 시계는 서비스 워커가 12MB 를 받는 동안에도 앞으로 달려, "150초 기다렸는데 안 끝남"이 6초 만에 나왔다 (2026-09-22). */
+function waitFor(fn, ms, what){
+  var end = Date.now() + ms;
+  return new Promise(function(res, rej){
+    (function poll(){
+      var v; try{ v = fn(); }catch(e){ v = null; }
+      if(v) return res(v);
+      if(Date.now() > end) return rej(new Error(what + ' (' + Math.round(ms / 1000) + '초 기다림)'));
+      R.textContent = '검사 중… ' + step + ' · ' + what;
+      setTimeout(poll, 200);
+    })();
+  });
+}
+function loadApp(q){
+  return new Promise(function(res){ F.onload = function(){ res(F.contentWindow); }; F.src = '../site/index.html' + (q || ''); });
+}
+function booted(w){ return w && w.appBooted && w.QRNAV && w.PWA && w.document.querySelector('.screen.on'); }
+function screenOf(w){ var s = w.document.querySelector('.screen.on'); return s ? s.id : ''; }
+function txt(w, id){ var e = w.document.getElementById(id); return e ? e.textContent : ''; }
+function loadImg(src){
+  return new Promise(function(res, rej){ var im = new Image(); im.onload = function(){ res(im); }; im.onerror = function(){ rej(new Error(src + ' 없음')); }; im.src = src; });
+}
+function readQR(im, scale){
+  var cv = document.createElement('canvas');
+  cv.width = Math.round(im.naturalWidth * scale); cv.height = Math.round(im.naturalHeight * scale);
+  var c = cv.getContext('2d'); c.drawImage(im, 0, 0, cv.width, cv.height);
+  var d = c.getImageData(0, 0, cv.width, cv.height), r = window.jsQR(d.data, d.width, d.height);
+  return r ? r.data : null;
+}
+
+/* ── gate : 출입문 QR 주소로 열기 ── */
+function testGate(){
+  step = 'gate';
+  return loadApp('?gate=WEST').then(function(w){
+    return waitFor(function(){ return booted(w) && screenOf(w) === 'sqrok'; }, 30000, '?gate=WEST 로 열었는데 확인 화면(sqrok)이 안 뜸')
+      .then(function(){
+        check('gate', w.location.search.indexOf('gate') < 0, '주소에 ?gate= 가 남아 있음 : ' + w.location.search);
+        check('gate', txt(w, 'qrOkName') === '서문', '확인 화면의 문 이름이 서문이 아님 : ' + txt(w, 'qrOkName'));
+        w.QRNAV.confirm();
+        check('gate', screenOf(w) === 'scat', '확정한 뒤 장소 고르기(scat)로 안 감 : ' + screenOf(w));
+        check('gate', w.QRNAV.gate() === 'WEST' && w.QRNAV.floor() === 1, '출발 문이 서문(1층)으로 안 정해짐');
+        var Q = w.QRNAV;
+        Object.keys(Q.GATES).forEach(function(k){
+          var p = Q.payload(k);
+          check('gate', p === 'https://minjong0910.github.io/?gate=' + k, k + ' 의 QR 주소가 다름 : ' + p);
+          check('gate', Q.parse(p) === k, k + ' 주소를 앱 스캐너가 못 읽음');
+        });
+        check('gate', Q.parse('B3NAV1:BLD:MAIN') === 'MAIN', '예전 인쇄본(B3NAV1:BLD:MAIN)을 못 읽음');
+        check('gate', Q.parse('https://example.com/?gate=ZZZ') === null && Q.parse('hello') === null, '엉뚱한 QR 을 문으로 읽음');
+        Q.clear();
+        return loadApp('?gate=NOPE');
+      }).then(function(w2){
+        return waitFor(function(){ return booted(w2); }, 30000, '앱이 안 켜짐').then(function(){
+          return sleep(300).then(function(){ check('gate', screenOf(w2) === 's1', '없는 문(?gate=NOPE)인데 첫 화면이 아님 : ' + screenOf(w2)); });
+        });
+      });
+  });
+}
+
+/* ── hint · settings · install · manifest : 보통으로 연 앱에서 ── */
+function testUi(){
+  step = 'ui';
+  return loadApp('').then(function(w){
+    return waitFor(function(){ return booted(w) && screenOf(w) === 's1'; }, 30000, '앱이 첫 화면으로 안 켜짐').then(function(){ return w; });
+  }).then(function(w){
+    var d = w.document;
+    /* hint */
+    var q = d.querySelector('#s1 .qrHint'), h = d.querySelector('#s1 .appHint');
+    if(check('hint', h, '첫 화면에 앱 다운로드 문구(.appHint)가 없음')){
+      check('hint', q && q.textContent.indexOf('지금 계신 위치가 자동으로 설정돼요.') >= 0, '"지금 계신 위치가 자동으로 설정돼요." 설명이 없음');
+      check('hint', q && q.nextElementSibling === h, '문구가 "지금 계신 위치…" 설명 바로 아래가 아님');
+      check('hint', h.textContent.indexOf('앱을 다운로드 하시려면 설정에 들어가주세요') >= 0, '문구가 요청과 다름 : ' + h.textContent);
+      var hc = w.getComputedStyle(h).color, qc = q ? w.getComputedStyle(q).color : '';
+      info.hintColor = hc;
+      check('hint', hc === 'rgb(255, 213, 74)' && hc !== qc, '문구 색이 눈에 띄는 노랑(#FFD54A)이 아님 : ' + hc);
+      check('hint', parseFloat(w.getComputedStyle(h).fontWeight) >= 600, '문구가 굵지 않음');
+      var rq = q.getBoundingClientRect(), rh = h.getBoundingClientRect();
+      check('hint', rh.height > 0 && rh.top >= rq.bottom - 1, '문구가 화면에 안 보이거나 설명 위에 있음');
+      w.setLang('en'); check('hint', /install/i.test(h.textContent), '영어로 바꿨는데 문구가 그대로'); w.setLang('ko');
+      check('hint', !d.getElementById('pwaSheet'), '앱을 열자마자 설치 안내가 떴음 (조르면 안 됨)');
+      h.click();
+      check('hint', screenOf(w) === 'sset', '문구를 눌렀는데 설정이 안 열림 : ' + screenOf(w));
+    }
+    /* 브라우저가 스스로 띄우는 설치 알림을 막는가 */
+    var ev = new w.Event('beforeinstallprompt', {cancelable:true});
+    var prompted = 0;
+    ev.prompt = function(){ prompted++; }; ev.userChoice = Promise.resolve({outcome:'accepted'});
+    w.dispatchEvent(ev);
+    check('install', ev.defaultPrevented, '브라우저의 설치 알림을 막지 않음 (설치는 설정에서만)');
+    check('install', prompted === 0, '버튼을 안 눌렀는데 설치 창을 띄움');
+
+    /* settings */
+    var btn = d.getElementById('pwaBtn');
+    if(check('settings', btn && d.getElementById('sset').contains(btn), '설정에 「앱 다운로드」 버튼이 없음')){
+      check('settings', btn.parentNode.textContent.indexOf('앱 다운로드') >= 0, '버튼 옆 이름이 "앱 다운로드"가 아님');
+      check('settings', /PWA\.install\(\)/.test(btn.getAttribute('onclick') || ''), '버튼이 PWA.install() 을 부르지 않음');
+    }
+    check('settings', txt(w, 'offStat').trim().length > 0, '"인터넷 없이 열기" 상태 글자가 비었음');
+
+    /* install : 위에서 받은 가짜 설치 신호로 버튼을 누르면 → 설치 창 → 설치함 */
+    var r = w.PWA.install();
+    check('install', r === 'prompt' && prompted === 1, '설치 신호가 있는데 버튼이 설치 창을 안 띄움 : ' + r);
+    return sleep(100).then(function(){
+      var sh = d.getElementById('pwaSheet');
+      check('install', sh && sh.getAttribute('data-kind') === 'done', '설치한 뒤 "설치했어요" 안내가 없음');
+      check('install', /설치됨/.test(txt(w, 'pwaBtn')), '설치한 뒤 버튼이 "설치됨"으로 안 바뀜 : ' + txt(w, 'pwaBtn'));
+      w.PWA.close();
+      check('install', !d.getElementById('pwaSheet'), '닫기가 안 됨');
+
+      /* 기기 흉내 — 어떤 안내가 나오나 */
+      var IOS = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1';
+      var MAC = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15';
+      var AND = 'Mozilla/5.0 (Linux; Android 14; SM-S918N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36';
+      var WV  = 'Mozilla/5.0 (Linux; Android 14; SM-S918N Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/140.0.0.0 Mobile Safari/537.36';
+      var CASES = [
+        ['아이폰 사파리', IOS, 'iPhone', 5, {}, 'ios'],
+        ['아이폰 크롬', IOS.replace('Version/18.5', 'CriOS/140.0.0.0'), 'iPhone', 5, {}, 'ios'],
+        ['아이패드 (PC 인 척)', MAC, 'MacIntel', 5, {}, 'ios'],
+        ['맥 사파리', MAC, 'MacIntel', 0, {}, 'desktop'],
+        ['아이폰 카카오톡', IOS + ' KAKAOTALK 25.6.0', 'iPhone', 5, {}, 'inapp'],
+        ['아이폰 인스타그램', IOS + ' Instagram 350.0.0.0.0', 'iPhone', 5, {}, 'inapp'],
+        ['안드로이드 크롬 (신호 전)', AND, 'Linux armv8l', 5, {}, 'android'],
+        ['안드로이드 크롬 (신호 옴)', AND, 'Linux armv8l', 5, {prompt:true}, 'prompt'],
+        ['삼성 인터넷', AND.replace('Chrome/140.0.0.0 Mobile', 'SamsungBrowser/28.0 Chrome/130.0.0.0 Mobile'), 'Linux armv8l', 5, {prompt:true}, 'prompt'],
+        ['안드로이드 카카오톡', WV + ';KAKAOTALK 2511050', 'Linux armv8l', 5, {prompt:true}, 'inapp'],
+        ['안드로이드 네이버 앱', WV + ' NAVER(inapp; search; 2000; 12.10.1)', 'Linux armv8l', 5, {}, 'inapp'],
+        ['윈도우 엣지', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Win32', 0, {}, 'desktop'],
+        ['설치한 앱으로 엶', AND, 'Linux armv8l', 5, {standalone:true, prompt:true}, 'already']
+      ];
+      info.devices = {};
+      CASES.forEach(function(c){
+        var env = w.PWA._envOf(c[1], c[2], c[3]);
+        for(var k in c[4]) env[k] = c[4][k];
+        var kind = w.PWA._pick(env);
+        info.devices[c[0]] = kind;
+        check('install', kind === c[5], c[0] + ' → ' + kind + ' (기대 ' + c[5] + ')');
+      });
+      check('install', w.PWA._envOf(WV + ';KAKAOTALK 2511050', 'Linux armv8l', 5).inapp === '카카오톡', '카카오톡 이름을 못 알아봄');
+
+      /* 안내 창 내용 */
+      w.PWA._sheet('ios');
+      var s = d.getElementById('pwaSheet'), st = s ? s.textContent : '';
+      var ic = s && s.querySelector('img[src$="icon-180.png"]');
+      check('install', ic, '아이폰 안내에 앱 아이콘이 없음');
+      ['3호관 길안내', '공유', '홈 화면에 추가', '추가'].forEach(function(t){ check('install', st.indexOf(t) >= 0, '아이폰 안내에 "' + t + '" 가 없음'); });
+      check('install', s && s.querySelectorAll('.pwaSteps li').length === 3 && s.querySelectorAll('.pwaSteps svg').length >= 2, '아이폰 안내가 그림 3단계가 아님');
+      var iconOk = ic ? waitFor(function(){ return ic.complete && ic.naturalWidth; }, 5000, '아이콘 그림').then(function(){ return ic.naturalWidth === 180; }, function(){ return false; }) : Promise.resolve(false);
+      return iconOk.then(function(okIcon){
+        check('install', okIcon, '아이폰 안내의 아이콘 그림이 안 열림');
+        w.PWA._sheet('inapp', '카카오톡');
+        var s2 = d.getElementById('pwaSheet');
+        check('install', s2 && s2.textContent.indexOf('카카오톡') >= 0 && /주소 복사/.test(s2.textContent), '카카오톡 안 브라우저 안내가 없음');
+        w.PWA._sheet('android');
+        var s3 = d.getElementById('pwaSheet');
+        check('install', s3 && /앱 설치|홈 화면에 추가/.test(s3.textContent), '안드로이드(신호 전) 안내가 없음');
+        w.PWA.close();
+        return testManifest(w);
+      });
+    });
+  });
+}
+
+function testManifest(w){
+  step = 'manifest';
+  var d = w.document, link = d.querySelector('link[rel=manifest]');
+  if(!check('manifest', link, 'index.html 에 manifest 연결이 없음')) return Promise.resolve();
+  return fetch(link.href).then(function(r){ return r.json(); }).then(function(m){
+    info.app = {name:m.name, short_name:m.short_name};
+    check('manifest', m.short_name === '3호관 길안내' && m.name === '공대 3호관 길안내', '앱 이름이 다름 : ' + m.name + ' / ' + m.short_name);
+    check('manifest', m.display === 'standalone' && m.start_url && m.scope, '앱 화면 방식(standalone)·시작 주소가 없음');
+    var tm = d.querySelector('meta[name=apple-mobile-web-app-title]');
+    check('manifest', tm && tm.content === m.short_name, '아이폰 홈 화면 이름이 manifest 와 다름');
+    var want = [];
+    (m.icons || []).forEach(function(ic){ want.push([new URL(ic.src, link.href).href, parseInt(ic.sizes, 10), ic.purpose]); });
+    check('manifest', want.some(function(x){ return x[1] === 192; }) && want.some(function(x){ return x[1] === 512; }), '192·512 아이콘이 다 있지 않음');
+    check('manifest', want.some(function(x){ return /maskable/.test(x[2] || ''); }), '안드로이드용(maskable) 아이콘이 없음');
+    var at = d.querySelector('link[rel=apple-touch-icon]');
+    if(check('manifest', at, '아이폰 아이콘(apple-touch-icon)이 없음')) want.push([at.href, 180, 'apple']);
+    return Promise.all(want.map(function(x){
+      return loadImg(x[0]).then(function(im){
+        check('manifest', im.naturalWidth === x[1] && im.naturalHeight === x[1], x[0].split('/').pop() + ' 크기가 ' + im.naturalWidth + ' (적힌 값 ' + x[1] + ')');
+      }, function(){ fail('manifest', x[0] + ' 이 안 열림'); });
+    }));
+  });
+}
+
+/* ── offline : sw.js ── */
+function testOffline(){
+  step = 'offline';
+  if(!('serviceWorker' in navigator) || !window.caches){ fail('offline', '이 브라우저는 서비스 워커가 없음'); return Promise.resolve(); }
+  var msgs = [];
+  navigator.serviceWorker.addEventListener('message', function(e){ msgs.push(e.data || {}); });
+  function ask(sw, msg, type){
+    var n = msgs.length; sw.postMessage(msg);
+    return waitFor(function(){ for(var i = n; i < msgs.length; i++) if(msgs[i].type === type) return msgs[i]; return null; }, 15000, 'sw.js 가 ' + type + ' 에 답하지 않음');
+  }
+  var reg, stat, w, appScripts = [];
+  /* 온라인 상태의 앱이 부르는 우리 파일 목록 (저장 목록에 다 있어야 한다) */
+  return loadApp('?list=1').then(function(w0){
+    return waitFor(function(){ return booted(w0); }, 30000, '앱이 안 켜짐').then(function(){
+      [].forEach.call(w0.document.querySelectorAll('script[src],link[rel=stylesheet][href],link[rel=manifest],link[rel=apple-touch-icon]'), function(e){
+        var u = new URL(e.src || e.href, w0.location.href);
+        if(u.origin === location.origin) appScripts.push(u.pathname);
+      });
+      var PI = w0.PHOTO_INDEX || {};
+      Object.keys(PI).forEach(function(k){ (PI[k] || []).forEach(function(p){ appScripts.push(new URL(p.u, w0.location.href).pathname); }); });
+      appScripts.push('/site/3d/realistic.html');
+    });
+  }).then(function(){
+    F.src = 'about:blank';
+    return navigator.serviceWorker.register('../site/sw.js', {scope:'../site/'});
+  }).then(function(r){
+    reg = r;
+    return waitFor(function(){ return msgs.some(function(m){ return m.type === 'ready' || m.type === 'fail'; }) || (reg.active && !reg.installing); }, 150000, '12MB 저장이 끝나지 않음');
+  }).then(function(){
+    var f = msgs.filter(function(m){ return m.type === 'fail'; })[0];
+    check('offline', !f, '저장 실패 : ' + (f && f.why));
+    return waitFor(function(){ return reg.active; }, 20000, 'sw.js 가 켜지지 않음');
+  }).then(function(){
+    return ask(reg.active, {type:'status'}, 'status');
+  }).then(function(s){
+    stat = s;
+    info.offline = {version:s.version, files:s.total, saved:s.cached, MB:Math.round(s.bytes / 1048576 * 10) / 10,
+                    progressMsgs:msgs.filter(function(m){ return m.type === 'progress'; }).length};
+    check('offline', s.total > 150 && s.cached === s.total, '저장한 파일 ' + s.cached + ' / ' + s.total);
+    check('offline', s.bytes > 8 * 1048576 && s.bytes < 16 * 1048576, '저장 크기가 약 12MB 가 아님 : ' + info.offline.MB + 'MB');
+    return caches.open('b3nav-' + s.version).then(function(c){ return c.keys(); });
+  }).then(function(keys){
+    var have = {};
+    keys.forEach(function(k){ have[new URL(k.url).pathname] = 1; });
+    var ai = Object.keys(have).filter(function(p){ return /aivec\.js|ailib\.js|\/site\/lib\//.test(p); });
+    check('offline', !ai.length, 'AI 자료를 저장함 (인터넷 될 때만 쓰기로 함) : ' + ai.join(', '));
+    var miss = appScripts.filter(function(p){ return !have[p]; });
+    check('offline', !miss.length, '앱이 쓰는데 저장 안 된 파일 ' + miss.length + '개 : ' + miss.slice(0, 5).join(', '));
+    info.offline.appFilesChecked = appScripts.length;
+    return ask(reg.active, {type:'simOffline', on:true}, 'simOffline');
+  }).then(function(){
+    return loadApp('?offline=1');
+  }).then(function(w1){
+    w = w1;
+    return waitFor(function(){ return booted(w); }, 30000, '인터넷이 끊긴 상태에서 앱이 안 켜짐');
+  }).then(function(){
+    check('offline', w.navigator.serviceWorker && w.navigator.serviceWorker.controller, '앱이 sw.js 로 열리지 않음');
+    check('offline', w.PLACE_CODES && w.PLACE_CODES.length === 152, '끊긴 상태에서 장소 목록이 안 읽힘');
+    var PI = w.PHOTO_INDEX, k0 = Object.keys(PI)[0], ph = PI[k0][0].u;
+    return Promise.all([
+      w.fetch(ph).then(function(r){ return r.ok; }, function(){ return false; }),
+      w.fetch('3d/realistic.html').then(function(r){ return r.ok; }, function(){ return false; }),
+      w.fetch('data/aivec.js').then(function(){ return 'got'; }, function(){ return 'blocked'; }),
+      w.fetch('index.html?gate=MAIN').then(function(r){ return r.ok; }, function(){ return false; })
+    ]);
+  }).then(function(r){
+    check('offline', r[0], '끊긴 상태에서 장소 사진이 안 열림');
+    check('offline', r[1], '끊긴 상태에서 실사 3D 가 안 열림');
+    check('offline', r[2] === 'blocked', '인터넷 끊김 흉내가 안 됨 (AI 자료가 받아짐)');
+    check('offline', r[3], '끊긴 상태에서 QR 주소(?gate=)로 앱이 안 열림');
+    return w.SUGAI.ensureData().then(function(){ fail('offline', '끊겼는데 AI 자료를 받았다고 함'); }, function(){});
+  }).then(function(){
+    check('offline', w.SUGAI.dataFailed === true, 'AI 자료 받기 실패가 표시되지 않음');
+    w.go('ssug');
+    return sleep(200);
+  }).then(function(){
+    var t1 = txt(w, 'sugAiPrepTxt');
+    check('offline', /받지 못했어요/.test(t1), '끊겼을 때 건의함 AI 안내가 다름 : ' + t1);
+    Object.defineProperty(w.navigator, 'onLine', {configurable:true, get:function(){ return false; }});
+    w.dispatchEvent(new w.Event('offline'));
+    var t2 = txt(w, 'sugAiPrepTxt');
+    info.offline.aiMessage = t2;
+    check('offline', /인터넷이 없어/.test(t2), '폰이 인터넷 없음일 때 "AI 는 쉬어요" 안내가 없음 : ' + t2);
+    Object.defineProperty(w.navigator, 'onLine', {configurable:true, get:function(){ return true; }});
+    w.dispatchEvent(new w.Event('online'));
+    check('offline', w.SUGAI.dataFailed === false, '인터넷이 돌아왔는데 AI 자료를 다시 받을 수 없음 (실패 표시가 안 풀림)');
+    return ask(reg.active, {type:'simOffline', on:false}, 'simOffline');
+  }).then(function(){
+    F.src = 'about:blank';
+    return reg.unregister();
+  }).then(function(){
+    return caches.keys().then(function(ns){ return Promise.all(ns.filter(function(n){ return n.indexOf('b3nav-') === 0; }).map(function(n){ return caches.delete(n); })); });
+  });
+}
+
+/* ── qr : 인쇄 그림 4장 ── */
+function testQR(){
+  step = 'qr';
+  return loadApp('?qr=1').then(function(w){
+    return waitFor(function(){ return booted(w); }, 30000, '앱이 안 켜짐').then(function(){ return w; });
+  }).then(function(w){
+    var Q = w.QRNAV, list = [['정문_MAIN.png', 'MAIN'], ['후문_BACK.png', 'BACK'], ['동문_EAST.png', 'EAST'], ['서문_WEST.png', 'WEST']];
+    info.qr = {};
+    return Promise.all(list.map(function(x){
+      return loadImg('../QR인쇄/' + encodeURIComponent(x[0])).then(function(im){
+        var big = readQR(im, 1), small = readQR(im, 0.25);
+        info.qr[x[0]] = big;
+        check('qr', Q.GATES[x[1]].ko === x[0].split('_')[0], x[0] + ' 파일 이름의 문 이름이 앱과 다름');
+        check('qr', big === Q.payload(x[1]), x[0] + ' 을 읽으면 ' + big + ' (기대 ' + Q.payload(x[1]) + ')');
+        check('qr', small === Q.payload(x[1]), x[0] + ' 을 작게(1/4) 찍으면 못 읽음');
+        check('qr', Q.parse(big) === x[1], x[0] + ' 을 앱 스캐너가 ' + Q.parse(big) + ' 로 읽음');
+      }, function(e){ fail('qr', e.message); });
+    }));
+  });
+}
+
+function done(err){
+  var ok = !err && !Object.keys(bad).length;
+  var res = {ok:ok, secs:Math.round((Date.now() - t0) / 1000), bad:bad, info:info};
+  if(err) res.error = step + ' : ' + (err && err.message || err);
+  R.textContent = JSON.stringify(res, null, 1);
+  /* run_pwa.ps1 은 탭 제목으로 결과를 받는다 (디버깅 포트의 /json/list) */
+  document.title = 'PWA-RESULT ' + JSON.stringify(res);
+}
+
+testGate().then(testUi).then(testOffline).then(testQR).then(function(){ done(); }, done);
+})();
+</script>
+</body>
+</html>

@@ -8,6 +8,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0B0E13">
 <title>공대 3호관 길안내</title>
+<!-- 앱으로 설치(홈 화면) — 이름·아이콘은 manifest, 아이폰은 apple-touch-icon · apple-mobile-web-app-title 을 쓴다 -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/icon-180.png">
+<meta name="apple-mobile-web-app-title" content="3호관 길안내">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/boot.css">
@@ -17,6 +22,8 @@
 <script src="data/photos.js"></script>
 <!-- 장소 이름 152곳 — 부팅 화면(boot.js)과 관리자 목록이 쓴다. boot.js 보다 먼저 읽혀야 한다 (검사.ps1 이 확인) -->
 <script src="data/places.js"></script>
+<!-- 앱 설치 · 인터넷 없이 열기 · 출입문 QR 주소(?gate=) — 설치 신호와 주소를 놓치지 않게 일찍 읽는다 -->
+<script src="js/app/pwa.js"></script>
 
 <div class="phone">
   <div class="notch"><i></i></div>
@@ -35,6 +42,8 @@
     <button class="big" style="margin-top:10px;" onclick="plainStart()" data-ko="시작하기" data-en="Start">시작하기</button>
     <button class="qrStart" onclick="QRNAV.open()"><span>⛶</span><span data-ko="출입문 QR 스캔하고 시작" data-en="Scan door QR to start">출입문 QR 스캔하고 시작</span></button>
     <p class="qrHint" data-ko="정문·후문·동문·서문에 붙은 QR을 찍으면<br>지금 계신 위치가 자동으로 설정돼요." data-en="Scan the QR at the front, back, east or west gate<br>and your location is set automatically.">정문·후문·동문·서문에 붙은 QR을 찍으면<br>지금 계신 위치가 자동으로 설정돼요.</p>
+    <!-- 앱 설치는 설정에서만 — 처음 온 사람을 설치로 붙잡지 않고, 알려만 준다 (누르면 설정이 열린다) -->
+    <p class="appHint" onclick="openOverlay('sset')" data-ko="📲 앱을 다운로드 하시려면 설정에 들어가주세요" data-en="📲 To install the app, open Settings">📲 앱을 다운로드 하시려면 설정에 들어가주세요</p>
   </section>
 
   <!-- 설정 -->
@@ -54,6 +63,16 @@
     <div class="row">
       <b data-ko="건의함" data-en="Suggestion Box">건의함</b>
       <button class="ghost" style="padding:6px 14px;border-radius:8px;" onclick="go('ssug')" data-ko="열기 →" data-en="Open →">열기 →</button>
+    </div>
+    <!-- 앱 다운로드 (홈 화면에 설치) — 안드로이드는 버튼 한 번, 아이폰은 그림 안내 (js/app/pwa.js) -->
+    <div class="row" id="pwaRow">
+      <b data-ko="앱 다운로드" data-en="Install App">앱 다운로드</b>
+      <button class="ghost" id="pwaBtn" style="padding:6px 14px;border-radius:8px;" onclick="PWA.install()" data-ko="받기 →" data-en="Get →">받기 →</button>
+    </div>
+    <!-- 인터넷 없이 열기 — 처음 열 때 약 12MB 를 폰에 저장한다 (sw.js). AI 사진 판별 자료는 저장하지 않는다 -->
+    <div class="row">
+      <b data-ko="인터넷 없이 열기" data-en="Offline use">인터넷 없이 열기</b>
+      <span class="offStat" id="offStat">준비하는 중…</span>
     </div>
     <!-- 관리자 버튼은 설정 화면에서 숨김 — 다른 사람이 설정을 열어보다가 눌러서 악용할 수 있으므로,
          첫 화면 로고를 5번 연속 탭해야만 비밀번호 입력창이 뜨도록 숨겨진 진입 방식으로 변경함. -->
@@ -600,8 +619,10 @@
      정문·후문·동문·서문 4곳에 붙인 QR을 스캔하면 "지금 어느 문으로
      들어왔는지"가 확정되고, 그 값이 경로 안내의 출발점이 된다.
 
-     · QR 내용 : B3NAV1:BLD:MAIN   (순수 텍스트 — 서버·인터넷 불필요)
-                 나중에 서버가 생기면 URL 형식도 함께 인식한다.
+     · QR 내용 : https://minjong0910.github.io/?gate=MAIN   (MAIN 정문 · BACK 후문 · EAST 동문 · WEST 서문)
+                 휴대폰 기본 카메라로 찍으면 앱이 열리고 바로 "정문에 계신가요?" 확인 화면이 뜬다.
+                 앱 안 스캐너로 찍으면 주소를 열지 않고 글자만 읽는다 (인터넷 불필요).
+                 예전 인쇄본(B3NAV1:BLD:MAIN)도 그대로 읽는다. 인쇄용 그림 : QR인쇄\ (도구\QR_만들기.html)
      · 인식 방법 : ① BarcodeDetector(안드로이드 크롬 기본 탑재, 빠름)
                    ② jsQR(그 외 브라우저 — 아이폰 사파리 등)
                    ③ 사진 파일로 인식 (카메라 권한이 막힌 환경 대비)

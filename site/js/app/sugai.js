@@ -108,6 +108,21 @@ var SUGAI = (function(){
   }
   function dataPending(){ return !DATA_READY && !DATA_FAILED; }
 
+  /* ── 인터넷이 없을 때 ──
+     앱은 폰에 저장해 둔 것으로 열리지만(sw.js), AI 자료·모델은 저장하지 않는다 — AI 는 인터넷이 될 때만.
+     끊긴 동안 받기에 실패했으면, 인터넷이 돌아왔을 때 다시 받을 수 있게 실패 표시를 푼다. */
+  function isOffline(){ return navigator.onLine === false; }
+  function onNetChange(){
+    if(!isOffline()){
+      if(!DATA_READY){ DATA_FAILED = false; DATA_LOADING = null; }
+      if(!net){ failed = false; loading = null; }
+    }
+    var cur = document.querySelector('.screen.on');
+    if(cur && cur.id === 'ssug') warmup();
+  }
+  window.addEventListener('online', onNetChange);
+  window.addEventListener('offline', onNetChange);
+
   function ko(){ return (typeof LANG==='undefined' || LANG==='ko'); }
   function $(id){ return document.getElementById(id); }
 
@@ -1547,6 +1562,12 @@ var SUGAI = (function(){
     var box = $('sugAiPrep'), txt = $('sugAiPrepTxt');
     var card = $('sugAiCard'); if(card) card.classList.remove('on');
     if(!box) return;
+    if(isOffline() && !(DATA_READY && net)){
+      box.className = 'aiPrep off';
+      if(txt) txt.textContent = ko() ? '📶 인터넷이 없어 AI 사진 판별은 쉬어요 — 제보는 그대로 되고, 사람이 확인해요'
+                                     : 'Offline — AI photo check is paused; reports still work (manual review)';
+      return;
+    }
     if(dataPending()){
       box.className = 'aiPrep load';
       if(txt) txt.textContent = ko() ? 'AI 사진 자료 받는 중… (처음 한 번)' : 'Downloading AI data… (first time only)';
@@ -1555,7 +1576,9 @@ var SUGAI = (function(){
     }
     if(!loadVectors()){
       box.className = 'aiPrep off';
-      if(txt) txt.textContent = ko()?'AI 준비 안 됨 — 사람이 직접 확인해요':'AI unavailable — manual review';
+      if(txt) txt.textContent = DATA_FAILED
+        ? (ko()?'AI 자료를 받지 못했어요 (인터넷 확인) — 사람이 직접 확인해요':'Could not download AI data (check internet) — manual review')
+        : (ko()?'AI 준비 안 됨 — 사람이 직접 확인해요':'AI unavailable — manual review');
       return;
     }
     if(net){ box.className='aiPrep on'; if(txt) txt.textContent = ko()?'AI 준비 완료':'AI ready'; return; }
@@ -2291,7 +2314,7 @@ var SUGAI = (function(){
     i.click();
   }
 
-  return { ensureData:ensureData, get dataReady(){ return DATA_READY; },
+  return { ensureData:ensureData, get dataReady(){ return DATA_READY; }, get dataFailed(){ return DATA_FAILED; },
            judge:judge, warmup:warmup, showCard:showCard, rejectMsg:rejectMsg,
            adminBadge:adminBadge, autoCode:autoCode, pick:pick, tune:tune,
            codeLabel:codeLabel, whereText:whereText, floorGuess:floorGuess, TH:TH, SCOPE:SCOPE,

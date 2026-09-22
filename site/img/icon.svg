@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 앱 아이콘 — 공대 3호관 길안내. 바탕을 꽉 채운 정사각형이고, 그림은 가운데 원(반지름 40%) 안에만 둔다
+       (안드로이드가 원·둥근 사각형으로 잘라도, 아이폰이 모서리를 둥글게 깎아도 그림이 잘리지 않게). -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#15213B"/>
+      <stop offset="1" stop-color="#0B0E13"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- 땅 -->
+  <rect x="104" y="372" width="304" height="10" rx="5" fill="#00E5FF" opacity="0.55"/>
+  <!-- 건물 몸통과 가운데 탑 -->
+  <rect x="132" y="214" width="248" height="158" rx="10" fill="#E7F6FF"/>
+  <rect x="216" y="164" width="80" height="80" rx="8" fill="#E7F6FF"/>
+  <path d="M204 172 L256 126 L308 172 Z" fill="#E7F6FF"/>
+  <circle cx="256" cy="200" r="17" fill="#00B8D4"/>
+  <!-- 창문 3층 -->
+  <g fill="#00B8D4">
+    <rect x="152" y="234" width="28" height="22" rx="4"/><rect x="190" y="234" width="28" height="22" rx="4"/>
+    <rect x="294" y="234" width="28" height="22" rx="4"/><rect x="332" y="234" width="28" height="22" rx="4"/>
+    <rect x="152" y="274" width="28" height="22" rx="4"/><rect x="190" y="274" width="28" height="22" rx="4"/>
+    <rect x="294" y="274" width="28" height="22" rx="4"/><rect x="332" y="274" width="28" height="22" rx="4"/>
+    <rect x="152" y="314" width="28" height="22" rx="4"/><rect x="190" y="314" width="28" height="22" rx="4"/>
+    <rect x="294" y="314" width="28" height="22" rx="4"/><rect x="332" y="314" width="28" height="22" rx="4"/>
+  </g>
+  <!-- 출입문 -->
+  <rect x="234" y="318" width="44" height="54" rx="6" fill="#00E5FF"/>
+  <!-- 위치 핀 -->
+  <path d="M356 92 c-26 0 -46 20 -46 45 c0 34 46 79 46 79 s46 -45 46 -79 c0 -25 -20 -45 -46 -45 z" fill="#FF2E88"/>
+  <circle cx="356" cy="137" r="16" fill="#0B0E13"/>
+</svg>

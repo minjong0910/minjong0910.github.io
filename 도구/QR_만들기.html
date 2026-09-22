@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>출입문 QR 만들기</title>
+<!-- 출입문 QR 인쇄용 그림 4장 (정문·후문·동문·서문) + A4 한 장에 모은 인쇄본
+     QR 내용은 앱의 QRNAV.payload() 를 그대로 쓴다 — 앱과 인쇄물이 어긋날 수 없게.
+     만든 뒤 앱이 쓰는 QR 읽기(jsQR)로 다시 읽어, 주소와 문이 맞는지 확인한다.
+     파일로 저장은 도구\QR_만들기.ps1 이 한다 (이 페이지를 Edge 헤드리스로 열어 결과를 받아 씀).
+     ?pdf=1 : A4 인쇄용 배치 (90×120mm 실제 크기) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<style>
+  body{font-family:Pretendard,'Malgun Gothic',sans-serif;background:#eef0f3;margin:20px;color:#141820;}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;}
+  .grid figure{margin:0;background:#fff;padding:8px;border-radius:8px;}
+  .grid img{width:270px;display:block;}
+  .grid figcaption{font-size:13px;margin-top:6px;}
+  pre#R{white-space:pre-wrap;word-break:break-all;font-size:11px;max-height:160px;overflow:auto;background:#fff;padding:8px;}
+  body.pdf{margin:0;background:#fff;}
+  body.pdf .grid, body.pdf pre, body.pdf h1{display:none;}
+  @page{size:A4;margin:0;}
+  .sheet{display:none;width:210mm;height:297mm;box-sizing:border-box;padding:12mm 0 0 0;position:relative;}
+  body.pdf .sheet{display:block;}
+  .sheet h2{font-size:6mm;margin:0 0 1.5mm 13mm;}
+  .sheet p{font-size:3.4mm;color:#6E7887;margin:0 0 5mm 13mm;}
+  .sheet .cells{display:grid;grid-template-columns:90mm 90mm;gap:8mm 10mm;justify-content:center;}
+  .sheet .cells img{width:90mm;height:120mm;display:block;outline:0.3mm dashed #C8CDD4;outline-offset:2mm;}
+  .sheet .foot{position:absolute;left:13mm;right:13mm;bottom:10mm;font-size:3mm;color:#969EAA;}
+</style>
+</head>
+<body>
+<h1>출입문 QR 만들기</h1>
+<div class="grid" id="grid"></div>
+<pre id="R">만드는 중…</pre>
+<div class="sheet" id="sheet">
+  <h2>공대 3호관 출입문 QR — 인쇄용</h2>
+  <p>점선을 따라 자른 뒤 코팅해서, 각 출입문 안쪽 눈높이(약 150cm)에 붙이세요. 이름이 적힌 문에 붙여야 합니다.</p>
+  <div class="cells" id="cells"></div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<script src="../site/js/vendor/jsqr.min.js"></script>
+<script src="../site/js/app/qrnav.js"></script>
+<script src="QR_encode.js"></script>
+<script>
+(function(){
+  'use strict';
+  var PDF = /[?&]pdf=1/.test(location.search);
+  if(PDF) document.body.classList.add('pdf');
+  var DPI = 300;
+  function mm(v){ return Math.round(v * DPI / 25.4); }
+  var SW = mm(90), SH = mm(120);
+  /* 문마다 띠 색 (예전 인쇄본과 같은 색 — 멀리서도 문을 헷갈리지 않게) */
+  var ORDER = [['MAIN','#00B4DC'], ['BACK','#FF468C'], ['EAST','#785CFF'], ['WEST','#28C882']];
+  var out = {ok:false, files:[], checks:[]};
+
+  function rr(ctx, x, y, w, h, r){
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function center(ctx, text, y, font, color){
+    ctx.font = font; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText(text, SW / 2, y);
+  }
+
+  function sticker(key, color, icon){
+    var g = QRNAV.GATES[key], url = QRNAV.payload(key);
+    var cv = document.createElement('canvas'); cv.width = SW; cv.height = SH;
+    var c = cv.getContext('2d'), pad = mm(4);
+    c.fillStyle = '#FFFFFF'; c.fillRect(0, 0, SW, SH);
+    c.lineWidth = mm(1.2); c.strokeStyle = color; rr(c, pad, pad, SW - 2 * pad, SH - 2 * pad, mm(4)); c.stroke();
+    /* 위 색 띠 + 앱 아이콘 + 이름 */
+    c.save(); rr(c, pad, pad, SW - 2 * pad, mm(15), mm(4)); c.fillStyle = color; c.fill(); c.restore();
+    c.fillStyle = color; c.fillRect(pad, pad + mm(11), SW - 2 * pad, mm(4));
+    var iz = mm(10), title = '공대 3호관 길안내';
+    c.font = '700 ' + mm(5.2) + 'px Pretendard, "Malgun Gothic"';
+    var tw = c.measureText(title).width, gap = mm(2.5), x0 = (SW - (iz + gap + tw)) / 2;
+    if(icon){ c.save(); rr(c, x0, pad + mm(2.5), iz, iz, mm(2.2)); c.clip(); c.drawImage(icon, x0, pad + mm(2.5), iz, iz); c.restore(); }
+    c.fillStyle = '#FFFFFF'; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(title, x0 + iz + gap, pad + mm(7.7));
+    /* QR — 오류정정 H(30% 가 가려져도 읽힘), 둘레 흰 칸 4 */
+    var qr = QRENC.encode(url, 'H');
+    var cells = qr.size + 8, px = Math.floor(mm(56) / cells), full = cells * px;
+    QRENC.draw(c, qr, Math.round((SW - full) / 2), pad + mm(17), px, 4);
+    var y = pad + mm(17) + full;
+    /* 문 이름 (크게) */
+    center(c, g.ko, y + mm(12.5), '800 ' + mm(12) + 'px Pretendard, "Malgun Gothic"', '#141820');
+    center(c, g.en, y + mm(19), '500 ' + mm(4) + 'px Pretendard, "Malgun Gothic"', '#828C9B');
+    /* 아래 안내 */
+    center(c, '휴대폰 카메라로 찍으면 길안내 앱이 열려요', SH - pad - mm(9), '600 ' + mm(3.5) + 'px Pretendard, "Malgun Gothic"', '#4B5566');
+    center(c, url, SH - pad - mm(4), '400 ' + mm(2.6) + 'px Pretendard, "Malgun Gothic"', '#AAB2BE');
+    return {canvas:cv, qr:qr, url:url, name:g.ko + '_' + key + '.png', ko:g.ko};
+  }
+
+  /* 만든 그림을 앱과 같은 방법(jsQR)으로 다시 읽는다 — 주소와 문이 맞아야 통과 */
+  function verify(st, key){
+    var c = st.canvas.getContext('2d'), d = c.getImageData(0, 0, SW, SH);
+    var res = window.jsQR(d.data, d.width, d.height);
+    /* 폰 카메라처럼 작게 찍힌 경우도 — 1/4 크기로 줄여서 한 번 더 */
+    var sm = document.createElement('canvas'); sm.width = Math.round(SW / 4); sm.height = Math.round(SH / 4);
+    var sc = sm.getContext('2d'); sc.drawImage(st.canvas, 0, 0, sm.width, sm.height);
+    var d2 = sc.getImageData(0, 0, sm.width, sm.height), res2 = window.jsQR(d2.data, d2.width, d2.height);
+    var got = res && res.data, got2 = res2 && res2.data;
+    return {key:key, url:st.url, read:got || null, readSmall:got2 || null, parsed:got ? QRNAV.parse(got) : null,
+            version:st.qr.version, level:st.qr.level, mask:st.qr.mask,
+            ok:got === st.url && got2 === st.url && QRNAV.parse(got) === key};
+  }
+
+  function run(icon){
+    var grid = document.getElementById('grid'), cellsEl = document.getElementById('cells');
+    ORDER.forEach(function(o){
+      var st = sticker(o[0], o[1], icon), ck = verify(st, o[0]);
+      out.checks.push(ck);
+      var data = st.canvas.toDataURL('image/png');
+      out.files.push({name:st.name, data:data});
+      var f = document.createElement('figure');
+      f.innerHTML = '<img src="' + data + '"><figcaption>' + st.name + ' — ' + (ck.ok ? '다시 읽기 통과 ✓' : '다시 읽기 실패 ✗') + '</figcaption>';
+      grid.appendChild(f);
+      var im = document.createElement('img'); im.src = data; cellsEl.appendChild(im);
+    });
+    document.getElementById('foot').textContent = 'QR 내용 : ' + QRNAV.payload('MAIN').replace('MAIN', 'MAIN / BACK / EAST / WEST') +
+      '   ·   오류정정 H (30% 가 가려져도 읽힘)   ·   스티커 90 × 120 mm';
+    out.ok = out.checks.every(function(c){ return c.ok; });
+    var show = PDF ? {ok:out.ok} : out;
+    document.getElementById('R').textContent = JSON.stringify(show);
+    document.title = out.ok ? 'QR 완료' : 'QR 실패';
+  }
+
+  var icon = new Image();
+  /* 글꼴은 글자 조각별로 받으니, 그릴 글자를 알려 줘야 그 조각을 받는다 */
+  var TXT = '공대 3호관 길안내 정문후문동문서문 FrontBackEastWestGate 휴대폰 카메라로 찍으면 길안내 앱이 열려요 ' + QRNAV.payload('MAIN');
+  var fontReady = (document.fonts && document.fonts.load)
+    ? Promise.all(['800', '700', '600', '500', '400'].map(function(w){ return document.fonts.load(w + ' 40px Pretendard', TXT); }))
+    : Promise.resolve();
+  var timeout = new Promise(function(r){ setTimeout(r, 4000); });
+  icon.onload = function(){ Promise.race([fontReady, timeout]).then(function(){ run(icon); }, function(){ run(icon); }); };
+  icon.onerror = function(){ run(null); };
+  icon.src = '../site/img/icon-192.png';
+})();
+</script>
+</body>
+</html>

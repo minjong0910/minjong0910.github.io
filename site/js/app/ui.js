@@ -31,6 +31,7 @@ function applyLang(){
     document.getElementById('t4').textContent = t4TitleFor(target);
   }
   if(typeof syncTripBtn==='function') syncTripBtn();
+  if(typeof PWA!=='undefined') PWA.sync();
   if(typeof rebuildAllFloors==='function') rebuildAllFloors();
   if(typeof curFloor!=='undefined' && curFloor!==undefined && typeof groupB!=='undefined' && groupB && typeof showFloorDetail==='function') showFloorDetail(curFloor);
   if(typeof refreshGuideTitles==='function') refreshGuideTitles();

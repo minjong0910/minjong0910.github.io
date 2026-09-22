@@ -49,6 +49,13 @@ $refs = [regex]::Matches($html, '(?:src|href)="([^"#?]+)"') | ForEach-Object { $
 $miss = @($refs | Where-Object { -not (Test-Path (Join-Path $SITE ($_ -replace '/', '\'))) })
 if($miss.Count){ Bad ("index.html 이 부르는 파일이 없습니다 : " + ($miss -join ', ')) } else { Ok ("index.html 이 부르는 파일 {0}개 모두 있음" -f $refs.Count) }
 
+# 읽는 순서 — 앞 파일이 여는 순간 쓰는 자료는 그보다 먼저 읽혀야 한다
+#   (places.js 가 boot.js 뒤에 있어 부팅 화면이 "장소 0곳"이라고 한 적이 있다 — 2026-09-22)
+$order = @([regex]::Matches($html, '<script src="([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
+$mustBefore = @(@('data/places.js', 'js/app/boot.js'), @('data/photos.js', 'js/app/boot.js'), @('js/vendor/three.min.js', 'js/app/view3d.js'), @('data/photos.js', 'js/app/photos.js'))
+$badOrder = @($mustBefore | Where-Object { [Array]::IndexOf($order, $_[0]) -lt 0 -or [Array]::IndexOf($order, $_[0]) -gt [Array]::IndexOf($order, $_[1]) } | ForEach-Object { $_[0] + ' 가 ' + $_[1] + ' 보다 뒤' })
+if($badOrder.Count){ Bad ("읽는 순서가 틀림 : " + ($badOrder -join ' · ')) } else { Ok '읽는 순서 (자료 → 그것을 쓰는 코드)' }
+
 # 사진 목록 ↔ 사진 파일
 $pj = [IO.File]::ReadAllText((Join-Path $SITE 'data\photos.js'), $UTF)
 $idx = $pj.Substring($pj.IndexOf('=') + 1).Trim().TrimEnd(';') | ConvertFrom-Json

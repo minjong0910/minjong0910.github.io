@@ -218,10 +218,24 @@ var PWA = (function(){
     if(!('serviceWorker' in navigator)) off.state = 'nosupport';
     else if(swWanted()){
       navigator.serviceWorker.addEventListener('message', onMsg);
+      /* 새 판이 나오면 화면을 한 번만 새로 고친다.
+         sw.js 는 skipWaiting 으로 곧바로 새것이 되지만, 이미 열려 있는 화면은
+         조금 전에 받아 둔 옛 파일을 그대로 쓰고 있다. 그래서 앱을 껐다 켜도
+         한 번은 옛 화면이 보이고 두 번째에야 새 화면이 나왔다 (2026-09-24 사용자 제보).
+         처음 설치될 때(원래 맡은 워커가 없던 때)는 새로 고치지 않는다 — 괜히 한 번 깜빡인다. */
+      var hadSW = !!navigator.serviceWorker.controller;
+      var reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function(){
+        if(!hadSW || reloaded) return;
+        reloaded = true;
+        location.reload();
+      });
       window.addEventListener('load', function(){
-        navigator.serviceWorker.register('sw.js').then(function(reg){
+        /* updateViaCache:'none' — sw.js 자체는 브라우저 캐시를 거치지 않고 늘 새로 확인한다 */
+        navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(function(reg){
           askStatus();
           reg.addEventListener('updatefound', function(){ off.state = 'saving'; syncOff(); });
+          try{ reg.update(); }catch(err){}          // 앱을 열 때마다 새 판이 있는지 물어본다
         })['catch'](function(){ off.state = 'fail'; syncOff(); });
       });
     } else {

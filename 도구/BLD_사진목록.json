@@ -1,0 +1,19 @@
+{
+  "_설명": [
+    "건물 전경·출입문 사진 목록(BLD). 장소 152곳과 달리 AI 기준 자료(사진원본/)에 없는 별도 사진이라,",
+    "사진을 다시 고를 때(scratchpad/pick/build.ps1) 이 파일을 그대로 합쳐 넣는다.",
+    "site/js/app/photos.js 의 phBuildGateLists() 가 이름의 '(정문내부)' 같은 표시를 보고",
+    "GATE_MAIN·GATE_BACK·GATE_EAST·GATE_WEST 사진을 뽑아 쓴다 — 이름을 바꾸면 문 안내 사진이 사라진다.",
+    "실제 사진 파일은 site/data/photos/BLD/01.jpg ~ 08.jpg."
+  ],
+  "BLD": [
+    { "n": "BLD_공대3호관(정문).jpg", "u": "data/photos/BLD/01.jpg", "cap": "공대3호관(정문)" },
+    { "n": "BLD_공대3호관(정문내부).jpg", "u": "data/photos/BLD/02.jpg", "cap": "공대3호관(정문내부)" },
+    { "n": "BLD_공대3호관(후문).jpg", "u": "data/photos/BLD/03.jpg", "cap": "공대3호관(후문)" },
+    { "n": "BLD_공대3호관(후문내부).jpg", "u": "data/photos/BLD/04.jpg", "cap": "공대3호관(후문내부)" },
+    { "n": "BLD_공대3호관(동문).jpg", "u": "data/photos/BLD/05.jpg", "cap": "공대3호관(동문)" },
+    { "n": "BLD_공대3호관(동문내부).jpg", "u": "data/photos/BLD/06.jpg", "cap": "공대3호관(동문내부)" },
+    { "n": "BLD_공대3호관(서문).jpg", "u": "data/photos/BLD/07.jpg", "cap": "공대3호관(서문)" },
+    { "n": "BLD_공대3호관(서문내부).jpg", "u": "data/photos/BLD/08.jpg", "cap": "공대3호관(서문내부)" }
+  ]
+}

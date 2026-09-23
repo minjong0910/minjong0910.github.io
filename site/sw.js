@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = 'c7bda83d1c15';   // 파일 358개 · 22.6MB
+var VERSION = 'f8f3814e16b4';   // 파일 366개 · 23.6MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -38,7 +38,7 @@ var FILES = [
   ['3d/tex/21.png','5185337f5f27',7799],
   ['css/app.css','3059d73aa0d9',77011],
   ['css/boot.css','b3a18297534a',1353],
-  ['data/photos.js','47b39f8ff378',27075],
+  ['data/photos.js','3b3c61ab8c2a',27907],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
   ['data/photos/13101/02.jpg','d804ae5cab01',78714],
   ['data/photos/13102/01.jpg','523c6f068a4c',76075],
@@ -237,6 +237,14 @@ var FILES = [
   ['data/photos/13524/02.jpg','acdeb4aa1b44',74733],
   ['data/photos/B1/01.jpg','5353a79e196a',65982],
   ['data/photos/B1/02.jpg','1319d776ac22',73212],
+  ['data/photos/BLD/01.jpg','ba7d93b5e0c4',138193],
+  ['data/photos/BLD/02.jpg','0be76ded8b3e',112249],
+  ['data/photos/BLD/03.jpg','9748826a6b07',129215],
+  ['data/photos/BLD/04.jpg','4510adafe16d',84982],
+  ['data/photos/BLD/05.jpg','f8c13fd9d4c9',165450],
+  ['data/photos/BLD/06.jpg','ed239b142210',162153],
+  ['data/photos/BLD/07.jpg','4bf68b6750bb',136345],
+  ['data/photos/BLD/08.jpg','bba71dd0bd6c',160669],
   ['data/photos/EMS1/01.jpg','e7f2477f4120',80853],
   ['data/photos/EMS1/02.jpg','4575a6d2db80',91602],
   ['data/photos/EMS2/01.jpg','ec679e47f6f7',57824],
@@ -347,10 +355,10 @@ var FILES = [
   ['js/app/boot.js','3871e692681d',7524],
   ['js/app/building.js','647a70cb183a',23274],
   ['js/app/floor-detail.js','ca4e4ca62472',17637],
-  ['js/app/guide.js','eeb7b47e7c72',19742],
+  ['js/app/guide.js','9e3d40c2b5bd',20327],
   ['js/app/overview3d.js','47c06c2bd86f',87519],
   ['js/app/photos.js','09e1a97dba6e',51098],
-  ['js/app/pwa.js','b1f52bf08bdc',15919],
+  ['js/app/pwa.js','29ff7c8f029b',16959],
   ['js/app/qrnav.js','1ab04e81bfc1',20800],
   ['js/app/roadview-1f.js','14696e0f4c2a',46207],
   ['js/app/roadview-b1.js','7d5ac6c79e08',157916],

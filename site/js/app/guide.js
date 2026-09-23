@@ -60,6 +60,13 @@ function buildSteps(){
   var dz    = (p.z >= evp.z) ? 1 : -1;                // 복도에서 걸어갈 방향
   var turnLeft = ((dz === -faceX) !== GUIDE_FLIP);            // 내려서 도는 방향
 
+  /* 복도 사진은 '어느 쪽으로 도는가'가 아니라 '목적지가 어느 복도에 있는가'로 골라야 한다.
+     +Z(층 자료의 Top) = 왼쪽 복도(HALL..L) — README 「좌표 기준」.
+     문으로 들어오면 몸이 향한 방향이 엘리베이터에서와 달라 아래에서 turnLeft 를 다시 계산하는데,
+     예전에는 그 turnLeft 로 복도 사진까지 골랐다. 그래서 1층에서 사진이 어긋났다 —
+     정문은 늘 반대, 동문·서문은 목적지와 상관없이 늘 오른쪽 복도 (2026-09-24 사용자 제보). */
+  var hallCode = 'HALL' + lv + ((p.z >= evp.z) ? 'L' : 'R');
+
   /* v150: 문으로 들어와 같은 층(1층)을 찾아갈 때는 엘리베이터를 아예
      거치지 않는다 → '엘리베이터 앞에서 왼쪽으로' 같은 안내가 맞지 않았다.
      기준점을 '들어온 문'으로 바꾸고, 방향·차례·거리 표현을 전부 다시 잡는다.
@@ -97,7 +104,7 @@ function buildSteps(){
      "복도로 나와 왼쪽으로 도세요"인데 화면은 아직 문 앞이라 어긋났다.
      이 단계에서 실제로 보게 되는 건 '돌아선 쪽 복도'이므로 그 사진을 쓴다.
      (엘리베이터에서 출발할 때는 예전대로 엘리베이터 앞 사진) */
-  var turnPhCode = fromGateHere ? ('HALL'+lv+(turnLeft?'L':'R')) : ('EV'+lv);
+  var turnPhCode = fromGateHere ? hallCode : ('EV'+lv);
   var turnPhTxt  = fromGateHere ? ('['+lvName(lv)+' 복도 사진 ]')
                                 : ('['+lvName(lv)+' 엘리베이터 앞 사진 ]');
 
@@ -113,7 +120,7 @@ function buildSteps(){
     if(!noTurn)   // v150: 동문·서문으로 들어오면 이미 복도 정면이라 돌 필요가 없다
       out.push({a:arw, type:'turn', tko:lead+turnWord+'으로 도세요', ten:leadEn+turnWordEn, ph:turnPhTxt, code:turnPhCode});
     out.push({a:'↑', type:'straight', tko:'복도 끝까지 쭉 가세요', ten:'Go straight to the end of the hallway', ph:'['+lvName(lv)+' 복도 사진 ]',
-              code:'HALL'+lv+(turnLeft?'L':'R')});
+              code:hallCode});
     out.push({a:'✓', type:'arrive', tko:'비상계단에 도착했습니다', ten:'You have arrived at the emergency stairs', ph:'[ 비상계단 사진 ]', code:'EMS'+lv});   /* v79 : ES 는 중앙계단 */
     return out;
   }
@@ -142,7 +149,7 @@ function buildSteps(){
   var justInside = !!(fromGateHere && ord && ord.n === 1);
   if(!justInside)
     out.push({a:'↑', type:'straight', tko:'복도를 따라 쭉 가세요', ten:'Go straight down the hallway', ph:'['+lvName(lv)+' 복도 사진 ]',
-              code:'HALL'+lv+(turnLeft?'L':'R')});
+              code:hallCode});
   // '복도 중간쯤'처럼 두루뭉술한 표현 대신, 엘리베이터에서 몇 번째 문인지 세어서 알려준다.
   // 호실번호·이름은 화면 맨 위 제목("13524호 · PC실 가는 길")에 이미 있으므로 여기서는 뺀다.
   // 그 줄의 마지막 방이면 몇 번째인지 세는 것보다 '맨 끝'이 훨씬 잘 와닿는다.

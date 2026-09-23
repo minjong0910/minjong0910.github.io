@@ -24,7 +24,7 @@
      install  설정의 「앱 다운로드」 — 안드로이드는 버튼 한 번에 브라우저 설치 창, 아이폰은 그림 안내(아이콘·이름),
               카카오톡 같은 앱 안이면 크롬/사파리로 열기 안내. 기기 흉내 13가지로 어느 안내가 나오는지 본다
      manifest 앱 이름·아이콘 (홈 화면에 보일 것) — 아이콘 크기가 적힌 대로인가
-     offline  sw.js 가 약 12MB 를 저장하고, 인터넷이 끊겨도(흉내) 앱·사진·3D 가 열리는가.
+     offline  sw.js 가 약 23MB 를 저장하고, 인터넷이 끊겨도(흉내) 앱·사진·3D 가 열리는가.
               AI 자료는 저장하지 않고, 끊겼을 때 "AI 는 쉬어요"라고 말하며, 다시 연결되면 다시 받을 수 있게 되는가
      qr       QR인쇄\ 그림 4장을 앱의 QR 읽기(jsQR)로 읽으면 각자 맞는 문 주소가 나오는가 (작게 찍힌 것도) */
 (function(){
@@ -35,7 +35,7 @@ function fail(g, m){ (bad[g] = bad[g] || []).push(m); }
 function check(g, cond, m){ if(!cond) fail(g, m); return !!cond; }
 function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
 /* ※ 이 검사는 헤드리스 Edge 를 --virtual-time-budget(가상 시계) 없이 돌린다 (run_pwa.ps1).
-   가상 시계는 서비스 워커가 12MB 를 받는 동안에도 앞으로 달려, "150초 기다렸는데 안 끝남"이 6초 만에 나왔다 (2026-09-22). */
+   가상 시계는 서비스 워커가 오프라인 파일을 받는 동안에도 앞으로 달려, "150초 기다렸는데 안 끝남"이 6초 만에 나왔다 (2026-09-22). */
 function waitFor(fn, ms, what){
   var end = Date.now() + ms;
   return new Promise(function(res, rej){
@@ -248,7 +248,7 @@ function testOffline(){
     return navigator.serviceWorker.register('../site/sw.js', {scope:'../site/'});
   }).then(function(r){
     reg = r;
-    return waitFor(function(){ return msgs.some(function(m){ return m.type === 'ready' || m.type === 'fail'; }) || (reg.active && !reg.installing); }, 150000, '12MB 저장이 끝나지 않음');
+    return waitFor(function(){ return msgs.some(function(m){ return m.type === 'ready' || m.type === 'fail'; }) || (reg.active && !reg.installing); }, 150000, '오프라인 저장이 끝나지 않음');
   }).then(function(){
     var f = msgs.filter(function(m){ return m.type === 'fail'; })[0];
     check('offline', !f, '저장 실패 : ' + (f && f.why));
@@ -260,7 +260,9 @@ function testOffline(){
     info.offline = {version:s.version, files:s.total, saved:s.cached, MB:Math.round(s.bytes / 1048576 * 10) / 10,
                     progressMsgs:msgs.filter(function(m){ return m.type === 'progress'; }).length};
     check('offline', s.total > 150 && s.cached === s.total, '저장한 파일 ' + s.cached + ' / ' + s.total);
-    check('offline', s.bytes > 8 * 1048576 && s.bytes < 16 * 1048576, '저장 크기가 약 12MB 가 아님 : ' + info.offline.MB + 'MB');
+    /* 2026-09-24 : 장소 사진을 152곳 297장으로 늘려 저장량이 12MB → 약 23MB 가 됐다.
+       숫자를 딱 맞추면 사진을 한 장 더할 때마다 검사가 깨지므로, "비어 있지도 폭주하지도 않았나"만 본다. */
+    check('offline', s.bytes > 16 * 1048576 && s.bytes < 32 * 1048576, '저장 크기가 약 23MB 가 아님 : ' + info.offline.MB + 'MB');
     return caches.open('b3nav-' + s.version).then(function(c){ return c.keys(); });
   }).then(function(keys){
     var have = {};

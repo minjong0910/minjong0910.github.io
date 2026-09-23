@@ -147,7 +147,10 @@ function run(w){
         var list = Object.keys(L.lookup).map(function(k){ return {kind:'room', code:k}; });
         list.push({kind:'emstair', code:'EMS' + lv}, {kind:'toilet', code:'WC' + lv});
         list.forEach(function(t){
-          /* 다른 층에서 엘리베이터로 올라온 경우 — 1층은 2층에서 내려온 경우 (출입문 안내가 끼지 않게) */
+          /* 다른 층에서 엘리베이터로 올라온 경우 — 1층은 2층에서 내려온 경우 (출입문 안내가 끼지 않게).
+             ※ 여기서 재는 좌우는 '엘리베이터에서 내렸을 때' 기준이다. 아래 그래프 방향(nTurn)도 같은 기준.
+                1층에 이미 서 있는 경우(startFloor === 1)는 엘리베이터를 마주 보고 서므로 좌우가 정반대이고,
+                그 경우는 안전망(tests/golden)이 잡는다 — 여기서 startFloor 를 1로 바꾸면 이 검사가 어긋난다. */
           w.target = {kind:t.kind, floor:lv, code:t.kind === 'room' ? t.code : null};
           w.startFloor = (lv === 1) ? 2 : 1;
           var st = w.buildSteps();

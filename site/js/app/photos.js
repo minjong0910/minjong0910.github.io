@@ -964,6 +964,13 @@ var CAPTION_EN = {
   '공대3호관(서문내부)':'Engineering Bldg.3 (West Gate, inside)'
 };
 function capFor(cap){ if(!cap) return cap; return (LANG==='en' && CAPTION_EN[cap]) ? CAPTION_EN[cap] : cap; }
+/* 사진 아래 설명 한 줄. 부르는 쪽이 {ko,en} 을 주면 그것을 먼저 쓴다 —
+   복도 이름('1층 왼쪽 복도')이 안내 문장과 엇갈려 보일 때 길안내가 '1층 복도'로 바꿔 쓴다. */
+function phCapLine(el, list, idx, code){
+  var ov = el && el._phCap;
+  if(ov) return (LANG === 'en' && ov.en) ? ov.en : ov.ko;
+  return capFor(list[idx].cap) || phCap(code);
+}
 function phCntTxt(k, total){
   return (LANG==='ko') ? ((k+1) + ' / ' + total + ' · 눌러서 다음') : ((k+1) + ' / ' + total + ' · Tap for next');
 }
@@ -975,11 +982,11 @@ function refreshAllPhotoLang(){
     if(!list || !list.length) return;
     var idx = el._phIndex || 0;
     var capEl = el.querySelector('.cap'), cntEl = el.querySelector('.cnt');
-    if(capEl) capEl.textContent = capFor(list[idx].cap) || phCap(code);
+    if(capEl) capEl.textContent = phCapLine(el, list, idx, code);
     if(cntEl) cntEl.textContent = phCntTxt(idx, list.length);
   });
 }
-function phFill(el, code, placeholder){
+function phFill(el, code, placeholder, capOverride){
   code = phResolve(code);
   if(!el) return;
   var list = (code && ROOM_PHOTOS[code]) || [];
@@ -993,7 +1000,7 @@ function phFill(el, code, placeholder){
     list = list.concat(lng.map(function(p){ return {n:p.n, u:p.u, cap:p.cap || lnName}; }));
   }
   el.innerHTML = ''; el.onclick = null;
-  el._phList = null; el._phCode = null;
+  el._phList = null; el._phCode = null; el._phCap = capOverride || null;
   if(!list.length){ el.classList.remove('has'); el.textContent = placeholder || ((LANG==='ko')?'[ 사진 없음 ]':'[ No photo ]'); return; }
   el.classList.add('has');
   var i = 0;
@@ -1008,14 +1015,14 @@ function phFill(el, code, placeholder){
   img.style.width = '100%';
   img.style.height = '100%';
   img.src = list[0].u; el.appendChild(img);
-  var cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = capFor(list[0].cap) || phCap(code); el.appendChild(cap);
+  var cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = phCapLine(el, list, 0, code); el.appendChild(cap);
   if(list.length > 1){
     var cnt = document.createElement('div'); cnt.className = 'cnt';
     // 사진이 여러 장일 때 '눌러서 넘긴다'는 걸 알 수 있게 카운터에 같이 적어준다
     cnt.textContent = phCntTxt(0, list.length); el.appendChild(cnt);
     el.onclick = function(){
       i = (i+1) % list.length; el._phIndex = i;
-      img.src = list[i].u; cap.textContent = capFor(list[i].cap) || phCap(code); cnt.textContent = phCntTxt(i, list.length);
+      img.src = list[i].u; cap.textContent = phCapLine(el, list, i, code); cnt.textContent = phCntTxt(i, list.length);
     };
   }
 }

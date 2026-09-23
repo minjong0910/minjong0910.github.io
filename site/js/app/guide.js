@@ -56,9 +56,16 @@ function buildSteps(){
      혹시 현장에서 전부 반대로 느껴지면 GUIDE_FLIP만 true로 바꾸면 된다. */
   var GUIDE_FLIP = false;
   var evp   = evXZ(lv);
-  var faceX = (evp.x >= 0) ? -1 : 1;                  // 엘리베이터에서 복도로 나오는 방향
+  /* 보는 방향 — 2·3·4·5층은 엘리베이터에서 '내려서' 복도로 나오므로 −X 를 보고 선다.
+     1층은 다르다. 1층은 엘리베이터를 타고 내리는 층이 아니라 밖에서 걸어 들어오는 층이라,
+     이미 1층에 있는 사람은 엘리베이터 쪽으로 걸어가 **엘리베이터를 마주 보고** 선다(+X).
+     보는 방향이 정반대이므로 좌우도 정반대다 — 예전에는 1층도 '내렸을 때' 기준으로 말해
+     왼쪽·오른쪽이 뒤집혀 있었다 (2026-09-24 사용자 제보).
+     ※ 문(QR)으로 들어온 경우는 아래에서 문 기준으로 따로 다시 계산한다. */
+  var facingEV = (lv === 1 && sameFloor);             // 1층에서 엘리베이터를 마주 보고 선 자세
+  var faceX = ((evp.x >= 0) ? -1 : 1) * (facingEV ? -1 : 1);
   var dz    = (p.z >= evp.z) ? 1 : -1;                // 복도에서 걸어갈 방향
-  var turnLeft = ((dz === -faceX) !== GUIDE_FLIP);            // 내려서 도는 방향
+  var turnLeft = ((dz === -faceX) !== GUIDE_FLIP);            // 그 자세에서 도는 방향
 
   /* 복도 사진은 '어느 쪽으로 도는가'가 아니라 '목적지가 어느 복도에 있는가'로 골라야 한다.
      +Z(층 자료의 Top) = 왼쪽 복도(HALL..L) — README 「좌표 기준」.
@@ -90,15 +97,24 @@ function buildSteps(){
     if(GUIDE_FLIP) turnLeft = !turnLeft;
   }
   var noTurn = !!(fromGateHere && (gateFace==='Z+' || gateFace==='Z-'));
+  /* 복도 이름('1층 왼쪽 복도')은 엘리베이터에서 **내렸을 때**를 기준으로 붙은 이름이다.
+     1층처럼 다른 자세(엘리베이터를 마주 봄 · 문으로 들어옴)를 기준으로 말하면
+     "오른쪽으로 도세요" 밑에 "왼쪽 복도"가 적혀 한 화면에서 엇갈려 보인다.
+     그래서 그때는 사진 설명에서 좌우를 빼고 '○층 복도'로만 적는다. */
+  var hallCap = (facingEV || fromGateHere) ? {ko: lv+'층 복도', en:'Floor '+lv+' hallway'} : null;
   var roomLeft = ((((p.x > 0) ? 1 : -1) === dz) !== GUIDE_FLIP);  // 걷는 동안 방이 있는 쪽
   var turnWord = turnLeft ? '왼쪽' : '오른쪽';
   var turnWordEn = turnLeft ? 'left' : 'right';
   var arw      = turnLeft ? '←' : '→';
   var side     = roomLeft ? '왼쪽' : '오른쪽';
   var sideEn   = roomLeft ? 'left' : 'right';
-  var lead = fromGateHere ? '복도로 나와 ' : (sameFloor ? '엘리베이터 앞에서 ' : '내려서 ');
+  /* 어느 자세에서 도는지 말로도 분명히 한다 — 1층은 '엘리베이터를 마주 보고'가 기준이다 */
+  var lead = fromGateHere ? '복도로 나와 '
+           : (facingEV ? '엘리베이터를 마주 보고 '
+           : (sameFloor ? '엘리베이터 앞에서 ' : '내려서 '));
   var leadEn = fromGateHere ? 'Step into the hallway and turn '
-                            : (sameFloor ? 'At the elevator, turn ' : 'Get off and turn ');
+             : (facingEV ? 'Facing the elevator, turn '
+             : (sameFloor ? 'At the elevator, turn ' : 'Get off and turn '));
   /* v151: 돌기 단계 사진.
      예전엔 문에서 출발하면 1단계와 똑같은 문 사진을 그대로 다시 썼다 —
      "복도로 나와 왼쪽으로 도세요"인데 화면은 아직 문 앞이라 어긋났다.
@@ -109,7 +125,10 @@ function buildSteps(){
                                 : ('['+lvName(lv)+' 엘리베이터 앞 사진 ]');
 
   if(target.kind==='toilet'){
-    out.push({a:arw, type:'turn', tko:'복도 건너 '+turnWord+'으로 가세요', ten:'Cross the hallway to the '+turnWordEn, ph:turnPhTxt, code:turnPhCode});
+    out.push({a:arw, type:'turn',
+              tko:(facingEV ? '엘리베이터를 마주 보고 ' : '복도 건너 ')+turnWord+'으로 가세요',
+              ten:(facingEV ? 'Facing the elevator, go ' : 'Cross the hallway to the ')+turnWordEn,
+              ph:turnPhTxt, code:turnPhCode, cap:(turnPhCode===hallCode ? hallCap : null)});
     out.push({a:'✓', type:'arrive', tko:'화장실에 도착했습니다', ten:'You have arrived at the restroom', ph:'[ 화장실 앞 사진 ]', code:'WC'+lv});
     return out;
   }
@@ -118,9 +137,9 @@ function buildSteps(){
     // 비상계단은 복도 맨 끝(강의실보다 더 바깥쪽)에 있으므로, 화장실처럼 바로 옆이 아니라
     // 강의실 안내처럼 "돌기 → 복도를 따라 쭉 → 도착" 3단계로 안내한다.
     if(!noTurn)   // v150: 동문·서문으로 들어오면 이미 복도 정면이라 돌 필요가 없다
-      out.push({a:arw, type:'turn', tko:lead+turnWord+'으로 도세요', ten:leadEn+turnWordEn, ph:turnPhTxt, code:turnPhCode});
+      out.push({a:arw, type:'turn', tko:lead+turnWord+'으로 도세요', ten:leadEn+turnWordEn, ph:turnPhTxt, code:turnPhCode, cap:(turnPhCode===hallCode ? hallCap : null)});
     out.push({a:'↑', type:'straight', tko:'복도 끝까지 쭉 가세요', ten:'Go straight to the end of the hallway', ph:'['+lvName(lv)+' 복도 사진 ]',
-              code:hallCode});
+              code:hallCode, cap:hallCap});
     out.push({a:'✓', type:'arrive', tko:'비상계단에 도착했습니다', ten:'You have arrived at the emergency stairs', ph:'[ 비상계단 사진 ]', code:'EMS'+lv});   /* v79 : ES 는 중앙계단 */
     return out;
   }
@@ -144,12 +163,12 @@ function buildSteps(){
   var _rtEn = roomTitle(target.code, 'en');
 
   if(!noTurn)   // v150: 동문·서문으로 들어오면 이미 복도 정면이라 돌 필요가 없다
-    out.push({a:arw, type:'turn', tko:lead+turnWord+'으로 도세요', ten:leadEn+turnWordEn, ph:turnPhTxt, code:turnPhCode});
+    out.push({a:arw, type:'turn', tko:lead+turnWord+'으로 도세요', ten:leadEn+turnWordEn, ph:turnPhTxt, code:turnPhCode, cap:(turnPhCode===hallCode ? hallCap : null)});
   /* 문 바로 앞 방(들어와서 첫 번째)이면 '쭉 가세요'가 오히려 헷갈린다 → 생략 */
   var justInside = !!(fromGateHere && ord && ord.n === 1);
   if(!justInside)
     out.push({a:'↑', type:'straight', tko:'복도를 따라 쭉 가세요', ten:'Go straight down the hallway', ph:'['+lvName(lv)+' 복도 사진 ]',
-              code:hallCode});
+              code:hallCode, cap:hallCap});
   // '복도 중간쯤'처럼 두루뭉술한 표현 대신, 엘리베이터에서 몇 번째 문인지 세어서 알려준다.
   // 호실번호·이름은 화면 맨 위 제목("13524호 · PC실 가는 길")에 이미 있으므로 여기서는 뺀다.
   // 그 줄의 마지막 방이면 몇 번째인지 세는 것보다 '맨 끝'이 훨씬 잘 와닿는다.
@@ -285,7 +304,7 @@ function render6(instant){
   }
   ar.className = cls;
   document.getElementById('ins').textContent=(LANG==='ko')?s.tko:s.ten;
-  phFill(document.getElementById('ph'), s.code, s.ph);
+  phFill(document.getElementById('ph'), s.code, s.ph, s.cap);
   document.getElementById('stepno').textContent=(LANG==='ko')
     ? ((si+1)+' / '+steps.length+' 단계')
     : ('Step '+(si+1)+' / '+steps.length);

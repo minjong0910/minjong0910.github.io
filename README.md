@@ -160,7 +160,7 @@ pwsh -File 검사.ps1 -Full   + 1인칭 로드뷰 9가지를 끝까지 재생 (�
 | **로드뷰** `tests/roadview.html` (`-Full`) | 경로 미리보기 9가지를 끝까지 재생 · 직접 걸어보기 — 오류 0 |
 
 안전망은 시계를 멈추고 글꼴을 기다려 그리므로, 같은 앱이면 3D 그림까지 점 하나 다르지 않습니다.
-**일부러 바꾼 화면이면** 확인한 뒤 새 기준을 기록합니다 : `pwsh -File tests\run_golden.ps1 -Mode capture -Tag v92` (지금 기준은 v91)
+**일부러 바꾼 화면이면** 확인한 뒤 새 기준을 기록합니다 : `pwsh -File tests\run_golden.ps1 -Mode capture -Tag v93` (지금 기준은 v92)
 (그다음 `검사.ps1` · `tests/run_golden.ps1` 의 기본 `-Tag` 를 올린다). 검사마다 일부러 망가뜨린 사본으로 실패를 잡는지 확인했습니다.
 
 ## AI 자료 다시 만들기 (사진을 더하거나 옮겼을 때)

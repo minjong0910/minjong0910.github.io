@@ -24,7 +24,7 @@
      install  설정의 「앱 다운로드」 — 안드로이드는 버튼 한 번에 브라우저 설치 창, 아이폰은 그림 안내(아이콘·이름),
               카카오톡 같은 앱 안이면 크롬/사파리로 열기 안내. 기기 흉내 13가지로 어느 안내가 나오는지 본다
      manifest 앱 이름·아이콘 (홈 화면에 보일 것) — 아이콘 크기가 적힌 대로인가
-     offline  sw.js 가 약 23MB 를 저장하고, 인터넷이 끊겨도(흉내) 앱·사진·3D 가 열리는가.
+     offline  sw.js 가 약 14MB 를 저장하고, 인터넷이 끊겨도(흉내) 앱·사진·3D 가 열리는가.
               AI 자료는 저장하지 않고, 끊겼을 때 "AI 는 쉬어요"라고 말하며, 다시 연결되면 다시 받을 수 있게 되는가
      qr       QR인쇄\ 그림 4장을 앱의 QR 읽기(jsQR)로 읽으면 각자 맞는 문 주소가 나오는가 (작게 찍힌 것도) */
 (function(){
@@ -260,9 +260,9 @@ function testOffline(){
     info.offline = {version:s.version, files:s.total, saved:s.cached, MB:Math.round(s.bytes / 1048576 * 10) / 10,
                     progressMsgs:msgs.filter(function(m){ return m.type === 'progress'; }).length};
     check('offline', s.total > 150 && s.cached === s.total, '저장한 파일 ' + s.cached + ' / ' + s.total);
-    /* 2026-09-24 : 장소 사진을 152곳 297장으로 늘려 저장량이 12MB → 약 23MB 가 됐다.
+    /* 2026-09-24 : 장소 사진을 152곳(한 곳 1장)으로 다시 고르면서 저장량이 약 14MB 가 됐다.
        숫자를 딱 맞추면 사진을 한 장 더할 때마다 검사가 깨지므로, "비어 있지도 폭주하지도 않았나"만 본다. */
-    check('offline', s.bytes > 16 * 1048576 && s.bytes < 32 * 1048576, '저장 크기가 약 23MB 가 아님 : ' + info.offline.MB + 'MB');
+    check('offline', s.bytes > 10 * 1048576 && s.bytes < 20 * 1048576, '저장 크기가 약 14MB 가 아님 : ' + info.offline.MB + 'MB');
     return caches.open('b3nav-' + s.version).then(function(c){ return c.keys(); });
   }).then(function(keys){
     var have = {};

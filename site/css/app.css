@@ -59,7 +59,11 @@
   @keyframes bannerSlide{ from{background-position:0% 0;} to{background-position:200% 0;} }
 
   /* 우측 상단 아이콘(즐겨찾기·설정) */
-  .topIcons{position:absolute;top:1rem;right:0.875rem;display:flex;gap:0.5rem;z-index:6;}
+  /* 오른쪽 위 아이콘 — 폰에서는 앱이 화면을 꽉 채우므로 시계·배터리가 그려지는
+     맨 윗줄(safe-area)을 반드시 비켜야 한다. 안 그러면 설정 아이콘이 배터리와 겹친다.
+     (rem 만 쓰면 작은 폰에서 더 위로 올라가 더 심해진다 — 그래서 최소 0.75rem + 기기 여백) */
+  .topIcons{position:absolute;top:calc(0.75rem + env(safe-area-inset-top));
+    right:calc(0.875rem + env(safe-area-inset-right));display:flex;gap:0.5rem;z-index:6;}
   .iconBtn{width:2.125rem;height:2.125rem;border-radius:50%;background:rgba(15,20,28,.7);
     border:1px solid #00E5FF;color:#00E5FF;font-size:1rem;display:flex;
     align-items:center;justify-content:center;cursor:pointer;}
@@ -383,10 +387,12 @@
      남는 자리가 없어 높이가 0 이 되었다 → 그 폰에서만 사진이 아예 안 보였다.
      이제 최소 높이를 주어 어떤 기기에서도 사라지지 않게 하고,
      그래도 모자라면 화면을 위아래로 밀어 볼 수 있게 한다. */
-  #s6{overflow-y:auto;}
+  /* 넘칠 때만 밀어 볼 수 있게 하되, 끝에서 더 끌어도 화면 전체가 따라 움직이지 않게 막는다
+     (overscroll-behavior:contain — 2026-09-24 "화면 전체가 움직인다" 제보). */
+  #s6{overflow-y:auto;overscroll-behavior:contain;}
   #s6 #ph{flex:1 1 auto;min-height:9rem;max-height:52vh;margin-top:0.875rem;}
   /* 도착 화면(s7)의 사진 — 높이를 rem 으로 두어 기기마다 같은 비율로 커진다 */
-  #s7{overflow-y:auto;}
+  #s7{overflow-y:auto;overscroll-behavior:contain;}
   #s7 #ph7{flex:0 0 auto;width:100%;height:13.125rem;max-height:30vh;min-height:7.5rem;}
   .binfo{background:#0D0F18;border:1px solid #1A1D2B;border-radius:0.875rem;padding:1rem;margin-top:0.875rem;
     box-shadow:0 0 40px rgba(0,229,255,.08);}

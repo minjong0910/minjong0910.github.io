@@ -227,6 +227,11 @@ var PWA = (function(){
       var reloaded = false;
       navigator.serviceWorker.addEventListener('controllerchange', function(){
         if(!hadSW || reloaded) return;
+        /* 첫 화면일 때만 새로 고친다 — 길안내 중이거나 카메라(QR)를 켜는 중에
+           화면을 새로 고치면 하던 일이 끊기고 카메라 허용 창도 닫혀 버린다.
+           다른 화면이면 그대로 두고, 다음에 앱을 열 때 새 판으로 뜬다. */
+        var on = document.querySelector('.screen.on');
+        if(!on || on.id !== 's1') return;
         reloaded = true;
         location.reload();
       });

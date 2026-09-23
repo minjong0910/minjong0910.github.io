@@ -198,7 +198,12 @@ function refreshGuideTitles(){
 function startGuide(){
   steps=buildSteps(); si=0;
   refreshGuideTitles();
-  phFill(document.getElementById('ph7'), (target.kind==='room'?target.code:null), '[ '+targetLabel()+' 사진 ]');
+  /* 도착 화면 사진 — 마지막 단계(✓ 도착)가 이미 가진 사진 코드를 그대로 쓴다.
+     예전에는 강의실(kind==='room')일 때만 넣어서, 화장실(WC)·비상계단(EMS)·
+     크리에이티브 존(B1)으로 안내하면 도착 화면 사진이 비어 있었다 (2026-09-24 사용자 제보). */
+  var last = steps.length ? steps[steps.length-1] : null;
+  phFill(document.getElementById('ph7'), last && last.code,
+         (last && last.ph) || ('[ '+targetLabel()+' 사진 ]'));
   render6(true); go(6);
 }
 /* 트랙(.prog와 같은 폭) 위에서 현재 단계에 해당하는 x좌표(px)를 계산한다.

@@ -482,8 +482,13 @@ Promise.all([
   if(!BATCH){ ST.textContent = 'batches.json 을 읽지 못했습니다 — 배치 없이는 공정한 비교가 안 됩니다.'; return; }
   ST.textContent = '사진 ' + PHOTOS.length + '장 · 배치표 ' + Object.keys(BATCH).length + '장 준비됨';
   document.getElementById('go').disabled = false;
+  /* ?auto=1 : 버튼 없이 바로 시작 (헤드리스 브라우저로 돌릴 때) */
+  if(/[?&]auto=1/.test(location.search)) document.getElementById('go').click();
 });
-document.getElementById('go').onclick = function(){ run()['catch'](function(e){ ST.textContent = '오류 : ' + (e && e.message || e); }); };
+document.getElementById('go').onclick = function(){
+  document.title = 'ABL-RUNNING';
+  run().then(function(){ document.title = 'ABL-DONE'; })['catch'](function(e){ ST.textContent = '오류 : ' + (e && e.message || e); document.title = 'ABL-ERROR'; });
+};
 document.getElementById('dl').onclick = function(){
   var b = new Blob([JSON.stringify(RESULT, null, 1)], {type:'application/json'});
   var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'eval_ablation.json'; a.click();

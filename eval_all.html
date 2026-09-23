@@ -157,6 +157,8 @@ function run(){
   });
 
   var stat = {}, conf = {}, sideRows = [], weak = {}, byCode = {};
+  /* 자리 × 촬영 묶음 — 새 사진을 넣었을 때 "예전 사진이 좋아졌나 / 새 사진은 어떤가"를 따로 보려고 (2026-09-23) */
+  var byCodeBatch = window.__BCB = {};
   function add(key, o1, of, o5){
     var s = stat[key] = stat[key] || {n:0,e:0,f:0,t5:0};
     s.n++; s.e += o1; s.f += of; s.t5 += o5;
@@ -179,6 +181,8 @@ function run(){
       if(!room) SEL.push({s1: E[0][1], g: E[0][1] - (E[1] ? E[1][1] : -1), e: o1, f: of, b: p.g});
       var bc = byCode[p.code] = byCode[p.code] || {n:0,e:0,f:0};
       bc.n++; bc.e += o1; bc.f += of;
+      var cb = byCodeBatch[p.code + ' | ' + p.g] = byCodeBatch[p.code + ' | ' + p.g] || {n:0,e:0,f:0};
+      cb.n++; cb.e += o1; cb.f += of;
       if(/^HALL/.test(p.code)){
         var kk = floorOf(p.code) + '→' + floorOf(rk[0]);
         conf[kk] = (conf[kk]||0) + 1;
@@ -381,7 +385,7 @@ function report(stat, conf, sideRows, byCode, one, two, t0){
   OUT.innerHTML = h;
   ST.textContent = '측정 완료';
   PG.style.width = '100%';
-  RESULT = {made:A.made, 측정시각:Date.now(), 종류별:stat, 좌우:sideRows.length, 좌우구간:cuts, 두장:{한장:one, 두장:two}, 혼동:conf, 자리별:byCode,
+  RESULT = {made:A.made, 측정시각:Date.now(), 종류별:stat, 좌우:sideRows.length, 좌우구간:cuts, 두장:{한장:one, 두장:two}, 혼동:conf, 자리별:byCode, 자리별_촬영묶음:window.__BCB,
             확신도:{n:sv.n, 차이:sv.g, 일등점수:sv.s1, 무작위AURC:sv.randomAurc, 반나눠확인:sv.hold},
             신뢰구간:{자리:ciE, 층:ciF}};
   document.getElementById('dl').disabled = false;
@@ -390,13 +394,18 @@ function report(stat, conf, sideRows, byCode, one, two, t0){
   var stamp = d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes());
   var body = JSON.stringify(RESULT);
   try{ fetch('api/save?name=eval_all.json', {method:'POST', body:body}); }catch(e){}
-  try{ fetch('api/save?name=eval_all_' + stamp + '.json', {method:'POST', body:body}); }catch(e){}
+  try{ fetch('api/save?name=eval_all_' + stamp + '.json', {method:'POST', body:body}).then(function(){ document.title = 'EVAL-DONE ' + stamp; }); }catch(e){}
 }
 
 /* 배치 표를 먼저 읽는다 (없으면 거친 규칙으로 계속).
    다 읽기 전에는 측정 버튼을 켜지 않는다 — 그 사이에 누르면 배치가 거칠게 나뉘어 숫자가 조용히 낮게 나온다. */
 var READY = {vec:false, batch:false};
-function arm(){ if(READY.vec && READY.batch) document.getElementById('go').disabled = false; }
+function arm(){
+  if(!(READY.vec && READY.batch)) return;
+  document.getElementById('go').disabled = false;
+  /* ?auto=1 : 버튼 없이 바로 측정 (헤드리스 브라우저로 돌릴 때) */
+  if(/[?&]auto=1/.test(location.search) && !arm.done){ arm.done = true; document.getElementById('go').click(); }
+}
 fetch('batches.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
   if(j){
     BATCH = j;

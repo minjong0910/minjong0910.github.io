@@ -290,8 +290,13 @@ fetch('api/photos').then(function(r){ return r.json(); }).then(function(list){
   PHOTOS=list; ST.textContent='사진 '+list.length+'장 준비됨';
   log('사진 '+list.length+'장');
   document.getElementById('go').disabled=false;
+  /* ?auto=1 : 버튼 없이 바로 시작 (헤드리스 브라우저로 돌릴 때 — 보이는 탭은 다른 화면으로 넘어가면 멈춘다) */
+  if(/[?&]auto=1/.test(location.search)) document.getElementById('go').click();
 });
-document.getElementById('go').onclick=function(){ run()['catch'](function(e){ log('오류: '+(e&&e.message||e)); ST.textContent='오류'; }); };
+document.getElementById('go').onclick=function(){
+  document.title='GEN-RUNNING';
+  run().then(function(){ document.title='GEN-DONE'; })['catch'](function(e){ log('오류: '+(e&&e.message||e)); ST.textContent='오류'; document.title='GEN-ERROR '+(e&&e.message||e); });
+};
 })();
 </script>
 </body></html>

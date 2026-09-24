@@ -29,15 +29,46 @@ var DIAG = (function(){
              ' · 정밀도 ' + gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT).precision;
     }catch(err){ return 'WebGL 확인 못 함'; }
   }
+  /* 3D 자가 점검 — 폰에서만 나던 '물체가 통째로 안 보이는' 문제를 이 줄만 보고 가릴 수 있게.
+     · 셰이더실패 : 재질을 GPU 가 못 만든 횟수. 0 이 아니면 그 재질로 만든 것은 아무것도 안 그려진다.
+     · 못그리는재질 : 폰용 재질(Phong)에 PBR 전용 환경맵(CubeUV)이 붙은 것 — 2026-09-25 에 고친 그 조합. */
+  function check3d(){
+    if(typeof renderer === 'undefined' || !renderer || typeof THREE === 'undefined') return '아직 안 켜짐';
+    var phong = 0, bad = 0, seen = {}, fail = 0;
+    try{
+      if(typeof scene !== 'undefined' && scene) scene.traverse(function(o){
+        var ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
+        for(var i = 0; i < ms.length; i++){
+          var m = ms[i];
+          if(!m || seen[m.uuid]) continue;
+          seen[m.uuid] = 1;
+          if(m.type === 'MeshPhongMaterial'){
+            phong++;
+            if(m.envMap && m.envMap.mapping === THREE.CubeUVReflectionMapping) bad++;
+          }
+        }
+      });
+    }catch(err){}
+    try{
+      var ps = renderer.info.programs || [];
+      for(var k = 0; k < ps.length; k++) if(ps[k].diagnostics) fail++;
+    }catch(err){}
+    return '해상도배율 ' + renderer.getPixelRatio() +
+           ' · 폰재질 ' + (THREE.MeshStandardMaterial.__isMobileFallback ? '예' : '아니오') +
+           ' · 셰이더실패 ' + fail +
+           ' · 못그리는재질 ' + bad + '/' + phong;
+  }
+  function ver(){
+    try{ return (typeof PWA !== 'undefined' && PWA.offline && PWA.offline.version) || '(아직 모름)'; }
+    catch(err){ return '(아직 모름)'; }
+  }
   function full(){
     var L = [];
+    L.push('판 : ' + ver());                     // 이 줄이 있어야 '고친 판인지' 알 수 있다
     L.push('기기 : ' + navigator.userAgent);
     L.push('화면 : ' + innerWidth + 'x' + innerHeight + ' · 배율 ' + (window.devicePixelRatio || 1));
     L.push('그래픽 : ' + gpu());
-    L.push('3D : ' + (typeof renderer !== 'undefined' && renderer
-      ? ('해상도배율 ' + renderer.getPixelRatio() +
-         ' · 폰재질 ' + (THREE.MeshStandardMaterial.__isMobileFallback ? '예' : '아니오'))
-      : '아직 안 켜짐'));
+    L.push('3D : ' + check3d());
     L.push('오류 ' + errs.length + '개');
     for(var i=0;i<errs.length;i++) L.push('  · ' + errs[i]);
     return L.join('\n');
@@ -46,9 +77,11 @@ var DIAG = (function(){
     var el = document.getElementById('diagStat');
     if(!el) return;
     var ko = (typeof LANG === 'undefined' || LANG === 'ko');
-    el.textContent = errs.length
+    /* 판(버전) 앞 6글자를 늘 같이 보여 준다 — '고친 판이 깔렸는지'를 복사하지 않고 눈으로 확인하려고. */
+    var v = ver(), head = (v.charAt(0) === '(' ? '' : (ko ? '판 ' : 'build ') + v.slice(0, 6) + ' · ');
+    el.textContent = head + (errs.length
       ? (ko ? ('오류 ' + errs.length + '개 — 눌러서 복사') : (errs.length + ' errors — tap to copy'))
-      : (ko ? '이상 없음 — 눌러서 복사' : 'No problems — tap to copy');
+      : (ko ? '이상 없음 — 눌러서 복사' : 'No problems — tap to copy'));
   }
   function copy(){
     var t = full();
@@ -79,7 +112,7 @@ var PWA = (function(){
   var deferred = null;          // 안드로이드 크롬이 준 설치 신호 (한 번 쓰면 끝)
   var justInstalled = false;
   var gateFromUrl = null;
-  var off = {state:'', done:0, total:0, bytes:0};   // 인터넷 없이 열기 준비 상태 (sw.js 가 알려 준다)
+  var off = {state:'', done:0, total:0, bytes:0, version:''};   // 인터넷 없이 열기 준비 상태 (sw.js 가 알려 준다)
 
   /* ── ① 출입문 QR 주소 ── */
   try{
@@ -265,11 +298,12 @@ var PWA = (function(){
   function onMsg(e){
     var d = e.data || {};
     if(d.type === 'progress'){ off.state = 'saving'; off.done = d.done; off.total = d.total; off.bytes = d.bytes || off.bytes; }
-    else if(d.type === 'status'){ off.state = d.cached >= d.total ? 'ready' : 'saving'; off.done = d.cached; off.total = d.total; off.bytes = d.bytes; }
-    else if(d.type === 'ready'){ off.state = 'ready'; off.done = off.total = d.total; off.bytes = d.bytes; }
+    else if(d.type === 'status'){ off.state = d.cached >= d.total ? 'ready' : 'saving'; off.done = d.cached; off.total = d.total; off.bytes = d.bytes; off.version = d.version || off.version; }
+    else if(d.type === 'ready'){ off.state = 'ready'; off.done = off.total = d.total; off.bytes = d.bytes; off.version = d.version || off.version; }
     else if(d.type === 'fail'){ off.state = 'fail'; }
     else return;
     syncOff();
+    try{ DIAG.paint(); }catch(err){}   // 판(버전)이 이제 막 왔을 수 있다 — 「문제 기록」 줄을 다시 그린다
   }
   function askStatus(){
     navigator.serviceWorker.ready.then(function(reg){
@@ -334,7 +368,7 @@ var PWA = (function(){
 
   return {
     install:install, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, sync:sync,
-    get offline(){ return {state:off.state, done:off.done, total:off.total, bytes:off.bytes, text:offText()}; },
+    get offline(){ return {state:off.state, done:off.done, total:off.total, bytes:off.bytes, version:off.version, text:offText()}; },
     /* 검사(tests/pwa.html)가 설치 갈래를 확인할 때 쓴다 */
     _env:function(){ return {ios:isIOS(), android:isAndroid(), inapp:inAppName(), standalone:standalone(), prompt:!!deferred}; },
     _envOf:envOf, _pick:pick, _sheet:sheet, _fakePrompt:function(ev){ deferred = ev; sync(); }

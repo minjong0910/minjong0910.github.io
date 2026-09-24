@@ -1,6 +1,6 @@
 /* sw.js — 인터넷 없이 열기 (서비스 워커)
 
-   처음 열 때 앱 파일 약 12MB(화면·코드·장소 사진·3D)를 폰에 저장해 두고, 다음부터는 저장한 것으로 연다.
+   처음 열 때 앱 파일 약 14MB(화면·코드·장소 사진·3D)를 폰에 저장해 두고, 다음부터는 저장한 것으로 연다.
    그래서 지하·계단처럼 인터넷이 약한 곳에서도 길안내가 된다.
    AI 사진 판별 자료(data/aivec.js · data/ailib.js 10.5MB)와 AI 라이브러리(lib/ 12MB)는 저장하지 않는다
    — AI 는 인터넷이 될 때만 쓴다 (sugai.js 가 "인터넷이 없어 AI 는 쉬어요"라고 알려 준다).
@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '3d835f99a452';   // 파일 221개 · 14.3MB
+var VERSION = 'f722eb1bebe9';   // 파일 221개 · 14.3MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -213,7 +213,7 @@ var FILES = [
   ['js/app/guide.js','e019570ad60b',22160],
   ['js/app/overview3d.js','47c06c2bd86f',87519],
   ['js/app/photos.js','7debd2904c8c',51527],
-  ['js/app/pwa.js','b978f3e70530',17366],
+  ['js/app/pwa.js','18f67bf3900a',18401],
   ['js/app/qrnav.js','1ab04e81bfc1',20800],
   ['js/app/roadview-1f.js','14696e0f4c2a',46207],
   ['js/app/roadview-b1.js','7d5ac6c79e08',157916],
@@ -292,8 +292,17 @@ function findOld(olds, f){
   return next();
 }
 
-function precache(){
-  var done = 0, T = totalBytes(), queue = FILES.slice();
+/* 첫 화면에 필요한 파일인가 — 앱 껍데기(HTML·모양·코드·아이콘·장소 이름).
+   사진·3D 그림·AI 라이브러리처럼 무거운 것은 여기 들어가지 않는다. */
+function isShell(f){
+  var p = f[0];
+  return p === 'index.html' || p === 'manifest.webmanifest' || p === 'data/places.js' ||
+         p.indexOf('css/') === 0 || p.indexOf('js/') === 0 || p.indexOf('img/') === 0;
+}
+var preDone = 0;              // 핵심 → 나머지 두 단계를 합친 진행 수
+
+function precache(list, last){
+  var T = totalBytes(), queue = list.slice();
   return Promise.all([caches.open(CACHE), oldCaches()]).then(function(v){
     var cache = v[0], olds = v[1];
     function one(f){
@@ -305,13 +314,14 @@ function precache(){
             .then(function(res){ return cache.put(abs(f[0]), res); });
         });
       }).then(function(){
-        done++;
-        if(done % 8 === 0 || done === FILES.length) tell({type:'progress', done:done, total:FILES.length, bytes:T});
+        preDone++;
+        if(preDone % 8 === 0 || preDone === FILES.length) tell({type:'progress', done:preDone, total:FILES.length, bytes:T});
       });
     }
     function worker(){ var f = queue.shift(); return f ? one(f).then(worker) : Promise.resolve(); }
     return Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]);
   }).then(function(){
+    if(!last) return;                    // 핵심만 받은 단계 — 아직 '다 됐다'가 아니다
     return tell({type:'ready', version:VERSION, total:FILES.length, bytes:T});
   }, function(err){
     /* 하나라도 못 받으면 이번 설치는 실패 — 쓰던 판(있다면)을 그대로 쓰고, 다음에 열 때 다시 한다 */
@@ -319,16 +329,26 @@ function precache(){
   });
 }
 
+/* 2026-09-25 : 예전에는 여기서 14MB 전부를 받을 때까지 기다린 뒤에야 새 판이 앱을 넘겨받았다.
+   그동안 사용자는 이미 옛 화면을 보고 있어서, 고쳐 올려도 그날은 옛 판이 보였다.
+   → 첫 화면에 필요한 것(약 700KB)만 받고 곧바로 넘겨받는다. 나머지(사진·3D)는 그다음에 받는다. */
 self.addEventListener('install', function(e){
   self.skipWaiting();
-  e.waitUntil(precache());
+  preDone = 0;
+  e.waitUntil(precache(FILES.filter(isShell), false));
 });
 
 self.addEventListener('activate', function(e){
-  e.waitUntil(caches.keys().then(function(names){
-    return Promise.all(names.filter(function(n){ return n.indexOf('b3nav-') === 0 && n !== CACHE && n !== FONT_CACHE; })
-                            .map(function(n){ return caches.delete(n); }));
-  }).then(function(){ return self.clients.claim(); }));
+  /* 순서가 중요하다 : 옛 판을 먼저 지우면 '안 바뀐 파일을 옛 판에서 옮겨 담기'를 못 해
+     14MB 를 전부 다시 받게 된다. 그래서 다 옮겨 담은 뒤에 지운다. */
+  e.waitUntil(self.clients.claim()
+    .then(function(){ return precache(FILES.filter(function(f){ return !isShell(f); }), true); })
+    .then(function(){
+      return caches.keys().then(function(names){
+        return Promise.all(names.filter(function(n){ return n.indexOf('b3nav-') === 0 && n !== CACHE && n !== FONT_CACHE; })
+                                .map(function(n){ return caches.delete(n); }));
+      });
+    }));
 });
 
 /* 앱 파일 : 저장한 것 먼저 (주소 뒤 ?gate= 같은 것은 무시), 없으면 인터넷 */

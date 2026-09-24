@@ -223,17 +223,31 @@ var PWA = (function(){
          조금 전에 받아 둔 옛 파일을 그대로 쓰고 있다. 그래서 앱을 껐다 켜도
          한 번은 옛 화면이 보이고 두 번째에야 새 화면이 나왔다 (2026-09-24 사용자 제보).
          처음 설치될 때(원래 맡은 워커가 없던 때)는 새로 고치지 않는다 — 괜히 한 번 깜빡인다. */
+      /* ── 새 판이 나오면 스스로 최신으로 ──────────────────────────────
+         앱을 깔면 저장해 둔 사본으로 열리기 때문에, 그냥 두면 고쳐 올려도 옛 화면이 보인다.
+         sw.js 가 첫 화면 파일만 먼저 받고 곧바로 넘겨받으므로(보통 1초 안),
+         그때 화면을 한 번 새로 고치면 '앱을 켜면 최신 판'이 된다.
+         다만 길안내 중이거나 카메라(QR)를 켜는 중에 새로 고치면 하던 일이 끊기므로,
+         그런 때는 미뤄 뒀다가 ① 첫 화면으로 돌아왔을 때 ② 앱을 다시 열었을 때 적용한다.
+         처음 설치될 때(원래 맡은 워커가 없던 때)는 새로 고치지 않는다 — 괜히 한 번 깜빡인다. */
       var hadSW = !!navigator.serviceWorker.controller;
-      var reloaded = false;
+      var reloaded = false, waiting = false, timer = null;
+      function applyUpdate(){
+        if(!hadSW || reloaded || !waiting) return;
+        var on = document.querySelector('.screen.on');
+        if(!on || on.id !== 's1') return;            // 하던 일은 끊지 않는다
+        reloaded = true;
+        if(timer) clearInterval(timer);
+        location.reload();
+      }
       navigator.serviceWorker.addEventListener('controllerchange', function(){
         if(!hadSW || reloaded) return;
-        /* 첫 화면일 때만 새로 고친다 — 길안내 중이거나 카메라(QR)를 켜는 중에
-           화면을 새로 고치면 하던 일이 끊기고 카메라 허용 창도 닫혀 버린다.
-           다른 화면이면 그대로 두고, 다음에 앱을 열 때 새 판으로 뜬다. */
-        var on = document.querySelector('.screen.on');
-        if(!on || on.id !== 's1') return;
-        reloaded = true;
-        location.reload();
+        waiting = true;
+        applyUpdate();
+        if(!reloaded && !timer) timer = setInterval(applyUpdate, 2000);   // 첫 화면으로 돌아오면 그때
+      });
+      document.addEventListener('visibilitychange', function(){
+        if(document.visibilityState === 'visible') applyUpdate();
       });
       window.addEventListener('load', function(){
         /* updateViaCache:'none' — sw.js 자체는 브라우저 캐시를 거치지 않고 늘 새로 확인한다 */

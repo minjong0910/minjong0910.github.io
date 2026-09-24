@@ -248,7 +248,10 @@ function testOffline(){
     return navigator.serviceWorker.register('../site/sw.js', {scope:'../site/'});
   }).then(function(r){
     reg = r;
-    return waitFor(function(){ return msgs.some(function(m){ return m.type === 'ready' || m.type === 'fail'; }) || (reg.active && !reg.installing); }, 150000, '오프라인 저장이 끝나지 않음');
+    /* 2026-09-25 : sw.js 가 '첫 화면 파일만 받고 먼저 넘겨받은 뒤, 나머지를 마저 받는' 방식으로 바뀌었다.
+       그래서 reg.active 만 보고 넘어가면 아직 사진을 다 안 받은 상태에서 개수를 세게 된다.
+       다 받았다는 신호('ready')만 기다린다. */
+    return waitFor(function(){ return msgs.some(function(m){ return m.type === 'ready' || m.type === 'fail'; }); }, 150000, '오프라인 저장이 끝나지 않음');
   }).then(function(){
     var f = msgs.filter(function(m){ return m.type === 'fail'; })[0];
     check('offline', !f, '저장 실패 : ' + (f && f.why));

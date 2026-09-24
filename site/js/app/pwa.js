@@ -1,4 +1,66 @@
 "use strict";
+
+/* ══════════ DIAG — 문제 기록 (2026-09-25) ══════════
+   특정 기기에서만 나는 문제를 손에 잡히게 하려고 둔다.
+   이 파일은 head 에서 가장 먼저 읽히므로, 여기서 잡아야 앱이 켜지는 동안 난 오류까지 걸린다.
+   설정 화면의 「문제 기록」 줄에 요약이 보이고, 그 줄을 누르면 전체가 복사된다.
+   평소에는 '이상 없음'만 보이므로 일반 사용자에게 방해가 되지 않는다. */
+var DIAG = (function(){
+  var errs = [], MAX = 6;
+  function add(what){
+    if(errs.length && errs[errs.length-1] === what) return;      // 같은 오류가 쏟아지면 한 줄만
+    errs.push(what); if(errs.length > MAX) errs.shift();
+    paint();
+  }
+  window.addEventListener('error', function(e){
+    add((e.message || '오류') + ' @ ' + String(e.filename || '').split('/').pop() + ':' + (e.lineno || 0));
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    var r = e.reason; add('약속 실패 : ' + String((r && (r.message || r)) || r));
+  });
+  function gpu(){
+    try{
+      var c = document.createElement('canvas');
+      var gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+      if(!gl) return 'WebGL 없음';
+      var x = gl.getExtension('WEBGL_debug_renderer_info');
+      return (x ? gl.getParameter(x.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)) +
+             ' · 최대텍스처 ' + gl.getParameter(gl.MAX_TEXTURE_SIZE) +
+             ' · 정밀도 ' + gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT).precision;
+    }catch(err){ return 'WebGL 확인 못 함'; }
+  }
+  function full(){
+    var L = [];
+    L.push('기기 : ' + navigator.userAgent);
+    L.push('화면 : ' + innerWidth + 'x' + innerHeight + ' · 배율 ' + (window.devicePixelRatio || 1));
+    L.push('그래픽 : ' + gpu());
+    L.push('3D : ' + (typeof renderer !== 'undefined' && renderer
+      ? ('해상도배율 ' + renderer.getPixelRatio() +
+         ' · 폰재질 ' + (THREE.MeshStandardMaterial.__isMobileFallback ? '예' : '아니오'))
+      : '아직 안 켜짐'));
+    L.push('오류 ' + errs.length + '개');
+    for(var i=0;i<errs.length;i++) L.push('  · ' + errs[i]);
+    return L.join('\n');
+  }
+  function paint(){
+    var el = document.getElementById('diagStat');
+    if(!el) return;
+    var ko = (typeof LANG === 'undefined' || LANG === 'ko');
+    el.textContent = errs.length
+      ? (ko ? ('오류 ' + errs.length + '개 — 눌러서 복사') : (errs.length + ' errors — tap to copy'))
+      : (ko ? '이상 없음 — 눌러서 복사' : 'No problems — tap to copy');
+  }
+  function copy(){
+    var t = full();
+    try{ navigator.clipboard.writeText(t); }catch(err){}
+    var el = document.getElementById('diagStat');
+    if(el){ el.textContent = (typeof LANG === 'undefined' || LANG === 'ko') ? '복사했어요' : 'Copied'; setTimeout(paint, 1500); }
+    return t;
+  }
+  document.addEventListener('DOMContentLoaded', paint);
+  return {add:add, full:full, copy:copy, paint:paint, errors:function(){ return errs.slice(); }};
+})();
+
 /* pwa.js — 앱 다운로드(홈 화면에 설치) · 인터넷 없이 열기(sw.js) · 출입문 QR 주소(?gate=) 받기
 
    head 에서 일찍 읽는다. 이유 두 가지

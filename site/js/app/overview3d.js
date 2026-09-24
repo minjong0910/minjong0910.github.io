@@ -1164,7 +1164,14 @@ function animate(){
         _cg.visible = (_dy > -8.0 && _dy < 9.0);
       }
     }
-    for(var hsi=0; hsi<fpHiddenSt.length; hsi++) fpHiddenSt[hsi].visible = !fpCorrG.visible;
+    /* ★ 2026-09-25 : 예전에는 '실내가 보일 때만' 조감도의 층 타일을 감췄다(!fpCorrG.visible).
+       그래서 어떤 기기에서 실내가 안 켜지면 — 전환이 덜 끝났거나, 실내를 못 지었거나,
+       fpLastEye 가 아직 없을 때 — 카메라는 이미 건물 안인데 조감도 타일이 그대로 보였다.
+       그 타일이 '가야 할 층 = 노랑'이라, 화면이 통째로 노랗고 바닥은 뚫려 보였다
+       (갤럭시 S20 제보 : "벽면이 전부 노란색, 바닥이 없어지고 밑이 다 보임").
+       → 1인칭에 들어간 순간부터는 실내가 보이든 말든 무조건 감춘다. */
+    var inFP = (rideBlend > 0.01) || !!window.fpActive || !!window.fpFree;
+    for(var hsi=0; hsi<fpHiddenSt.length; hsi++) fpHiddenSt[hsi].visible = !inFP;
     if(fpCorrG.visible){
       for(var cmi=0; cmi<fpCorrMats.length; cmi++)
         fpCorrMats[cmi].m.opacity = fpCorrMats[cmi].op*corrK;

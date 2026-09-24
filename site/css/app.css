@@ -484,12 +484,17 @@
      (터치 처리기가 passive 라 preventDefault 로는 막을 수 없다 — 2026-09-24 제보) */
   #c3d{width:100%;height:100%;border-radius:0.875rem;background:#05060A;border:1px solid #1A1D2B;display:block;cursor:grab;
     touch-action:none;
-    box-shadow:inset 0 0 46px rgba(0,0,0,.6), inset 0 0 90px rgba(0,229,255,.05);}
+    /* 2026-09-24 : 폰에서 "안개 낀 것처럼 뿌옇다"는 제보 — 가장자리를 어둡게 하는 그림자가
+       두 겹(여기 + .c3dWrap::after)으로 겹쳐 있었다. 이 겹은 많이 줄여 건물이 선명하게 보이게 한다.
+       길이를 rem 으로 둬서 작은 폰에서는 더 얕게 깔린다. */
+    box-shadow:inset 0 0 1.25rem rgba(0,0,0,.30);}
   /* 화면 가장자리를 은은하게 어둡게 해서 시선이 건물(가운데) 쪽으로 자연스레 모이게 하는 비네트.
      클릭·드래그를 가리면 안 되므로 pointer-events는 꺼둔다. */
   .c3dWrap::after{content:'';position:absolute;inset:0;border-radius:0.875rem;pointer-events:none;z-index:4;
-    box-shadow:inset 0 0 70px 14px rgba(0,0,0,.55), inset 0 0 130px 40px rgba(0,4,10,.35);
-    background:radial-gradient(ellipse at 50% 46%, rgba(0,229,255,.05), rgba(0,0,0,0) 62%);}
+    /* 예전 : inset 0 0 70px 14px + inset 0 0 130px 40px 두 겹. 폰(가로 약 360px)에서는
+       이 130px+40px 짜리가 화면의 절반 가까이를 덮어 뿌옇게 보였다 → 한 겹으로, 얕게. */
+    box-shadow:inset 0 0 2rem 0.125rem rgba(0,0,0,.26);
+    background:radial-gradient(ellipse at 50% 46%, rgba(0,229,255,.03), rgba(0,0,0,0) 72%);}
   #s4.fsMode .c3dWrap::after{border-radius:0;}
   .fsBtn{position:absolute;bottom:0.75rem;right:0.75rem;width:2.125rem;height:2.125rem;border-radius:50%;
     background:rgba(8,12,20,.78);border:1px solid #00E5FF;color:#00E5FF;font-size:0.9375rem;

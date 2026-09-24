@@ -479,7 +479,11 @@
 
   /* s4 3D */
   .c3dWrap{position:relative;flex:1;min-height:0;display:flex;}
+  /* touch-action:none — 3D 화면의 손가락 동작은 앱이 직접 처리한다(회전·이동·확대).
+     이게 없으면 두 손가락으로 벌릴 때 브라우저가 '페이지 전체'를 확대해서 글자까지 커졌다.
+     (터치 처리기가 passive 라 preventDefault 로는 막을 수 없다 — 2026-09-24 제보) */
   #c3d{width:100%;height:100%;border-radius:0.875rem;background:#05060A;border:1px solid #1A1D2B;display:block;cursor:grab;
+    touch-action:none;
     box-shadow:inset 0 0 46px rgba(0,0,0,.6), inset 0 0 90px rgba(0,229,255,.05);}
   /* 화면 가장자리를 은은하게 어둡게 해서 시선이 건물(가운데) 쪽으로 자연스레 모이게 하는 비네트.
      클릭·드래그를 가리면 안 되므로 pointer-events는 꺼둔다. */
@@ -498,7 +502,11 @@
   /* 건물 3D를 자유 회전·이동(팬)·확대로 보다가 처음 열었을 때 시점으로 되돌리는 버튼 */
   .viewBtn{left:0.75rem;right:auto;}
   /* 전체화면 모드일 때만 나타나는 좌측 상단 뒤로가기 + 바로 오른쪽 이동경로 버튼(유튜브 쇼츠 스타일) */
-  .fsBar{position:absolute;top:0.625rem;left:0.625rem;display:none;align-items:center;gap:0.5rem;z-index:5;}
+  /* 전체화면에서는 #s4 의 안쪽 여백이 0 이라 이 줄이 화면 맨 위(아이폰 노치·시계 자리)에 걸린다.
+     → 기기 여백(safe-area)만큼 내려서 버튼이 가려지지 않게 한다 (2026-09-24 제보 : 아이폰 전체화면에서
+        뒤로가기·처음으로·경로 미리보기·직접 걸어보기 버튼이 안 보임). */
+  .fsBar{position:absolute;top:calc(0.625rem + env(safe-area-inset-top));
+    left:calc(0.625rem + env(safe-area-inset-left));display:none;align-items:center;gap:0.5rem;z-index:5;}
   .fsBar .iconBtn{background:rgba(8,12,20,.85);}
   .fsBar .trip{padding:0.5625rem 0.875rem;font-size:0.7812rem;}
   #s4.fsMode{padding:0;}
@@ -545,7 +553,7 @@
   .legend3d span{display:flex;align-items:center;gap:0.375rem;white-space:nowrap;}
   .legend3d i{width:0.5rem;height:0.5rem;border-radius:2px;flex:0 0 auto;}
   .legend3d em{font-style:normal;}
-  #s4.fsMode .legend3d{top:4rem;}   /* 전체화면에선 좌상단 뒤로가기·이동경로 버튼 줄 아래로 내림 */
+  #s4.fsMode .legend3d{top:calc(4rem + env(safe-area-inset-top));}   /* 전체화면에선 좌상단 뒤로가기·이동경로 버튼 줄 아래로 내림 */
   /* 1인칭(로드뷰) 재생 중 지금 어느 단계인지 알려주는 자막 — 캔버스 안쪽 오버레이라
      일반 화면·전체화면 어디서든 똑같이 보이고, 별도 줄을 차지하지 않는다. */
   .fpcap{position:absolute;left:50%;bottom:0.875rem;transform:translateX(-50%);z-index:6;display:none;
@@ -579,7 +587,7 @@
      가운데 정렬로 떠서 좁은 폰 화면에서는 배지가 그 버튼들 위를 덮어 눌리지
      않았다 — 범례(.legend3d)에 이미 쓰고 있는 것과 같은 값으로 버튼 줄 아래로
      내린다. */
-  #s4.fsMode .fpguide{top:4rem;}
+  #s4.fsMode .fpguide{top:calc(4rem + env(safe-area-inset-top));}
   .fpguide i{display:inline-block;font-style:normal;color:#00E5FF;font-size:1.0625rem;line-height:1;}
   /* 자유 탐색 : 엘리베이터·계단 층 선택 */
   .fpsel{position:absolute;left:50%;bottom:3.625rem;transform:translateX(-50%);z-index:8;display:none;

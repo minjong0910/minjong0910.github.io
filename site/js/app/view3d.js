@@ -103,7 +103,11 @@ function init3D(){
   // 조감도 모드용 연출). 버그 수정: 1인칭으로 걸어 들어갔을 때도
   // 이 격자가 바닥 아래로 계속 비쳐 보여서 실내 바닥이 "3D 청사진 격자판"처럼
   // 보였다 — 걷기 모드(fpActive)에서는 꺼지도록 animate()에서 토글한다.
-  fpHoloGrid=new THREE.GridHelper(240, 48, 0x1E7A94, 0x0D2A33);
+  /* 2026-09-25 : 두 손가락으로 최대한 축소(radius 260)하면 이 격자가 240(±120)밖에 안 돼
+     건물 뒤쪽이 그냥 검은 배경으로 보였다("바닥이 안 보인다"는 제보).
+     칸 크기(5)는 그대로 두고 판만 넓혀, 최대로 축소해도 바닥이 화면을 채우게 한다.
+     선 묶음 하나(LineSegments)라 넓혀도 그리는 부담은 거의 늘지 않는다. */
+  fpHoloGrid=new THREE.GridHelper(560, 112, 0x1E7A94, 0x0D2A33);
   var grid = fpHoloGrid;
   grid.position.y=-0.4; grid.material.transparent=true; grid.material.opacity=0.38;
   scene.add(grid);

@@ -1007,6 +1007,24 @@ function fitRadius(cam, halfW, halfH){
   var hf = 2*Math.atan(Math.tan(vf/2)*cam.aspect);
   return Math.max(halfW/Math.tan(hf/2), halfH/Math.tan(vf/2))*1.0;
 }
+/* 화질(해상도 배율) — 예전에는 폰이면 무조건 1.4 로 고정했다.
+   그런데 무거운 것은 '1인칭 실내'(드로우콜 600~700개)이고,
+   건물 전체를 밖에서 보는 조감도는 훨씬 가볍다. 그래서 조감도에서는 더 선명하게 그리고,
+   1인칭으로 들어가면 예전 값(1.4)으로 되돌린다 — 프레임은 그대로 지키면서 평소 화면이 또렷해진다.
+   값이 바뀔 때만 다시 잡는다(매 프레임 부르면 그리기 버퍼를 계속 새로 만들게 된다). */
+var _prNow = 0;
+function tunePixelRatio(){
+  if(!renderer) return;
+  var heavy = !!(window.fpActive || window.fpFree || (typeof rideBlend !== 'undefined' && rideBlend > 0.01));
+  var cap = A3D_MOBILE ? (heavy ? 1.4 : 2) : 2;
+  var want = Math.min(devicePixelRatio || 1, cap);
+  if(Math.abs(want - _prNow) < 0.01) return;
+  _prNow = want;
+  renderer.setPixelRatio(want);
+  var cv = renderer.domElement;
+  renderer.setSize(cv.clientWidth || 330, cv.clientHeight || 330, false);
+}
+
 function resize3D(resetZoom){
   var cv=document.getElementById('c3d');
   var w=cv.clientWidth||330, h=cv.clientHeight||330;
@@ -1089,6 +1107,7 @@ function animate(){
   // 0~0.1초로 묶는다(예전엔 이때 전환 진행도가 음수가 되어 카메라가 튀었다).
   var frameDt = _frameLast ? Math.max(0, Math.min((_fnow-_frameLast)/1000, 0.1)) : 0.016;
   _frameLast = _fnow;
+  tunePixelRatio();             // 조감도는 선명하게 · 1인칭은 가볍게 (바뀔 때만 다시 잡는다)
   fpTick(frameDt);              // 1인칭 로드뷰 진행(재생 중이 아니면 아무것도 하지 않음)
   fpUpdateAutoDoors(frameDt);   // 걸어서 다가가면 문이 자동으로 열리는 효과
   if(inRideView){

@@ -238,6 +238,9 @@ var PWA = (function(){
         if(!on || on.id !== 's1') return;            // 하던 일은 끊지 않는다
         reloaded = true;
         if(timer) clearInterval(timer);
+        /* 다시 뜰 때 켜는 화면(부팅 연출)을 건너뛰게 표시를 남긴다 — boot.js 가 이것을 본다.
+           안 그러면 사용자 눈에 앱이 두 번 켜지는 것처럼 보인다. */
+        try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(err){}
         location.reload();
       }
       navigator.serviceWorker.addEventListener('controllerchange', function(){

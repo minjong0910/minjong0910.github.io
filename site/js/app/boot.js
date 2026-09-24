@@ -41,6 +41,17 @@ function scanReveal(boot, cb){
 }
 
 (function bootSequence(){
+  /* 새 판으로 조용히 바꿔 다는 중이면 켜는 화면을 아예 건너뛴다.
+     pwa.js 가 화면을 새로 고치기 직전에 이 표시를 남긴다 — 그래야 사용자 눈에는
+     '앱이 한 번 켜졌다'로만 보이고, 켜는 장면이 두 번 나오지 않는다.
+     (앱 자체는 start.js 가 켜므로 이 덮개를 건너뛰어도 화면은 정상으로 뜬다) */
+  try{
+    if(sessionStorage.getItem('b3nav_quiet') === '1'){
+      sessionStorage.removeItem('b3nav_quiet');
+      return;
+    }
+  }catch(err){}
+
   var boot = makeOverlay('fx-boot');
   var ko = (typeof LANG === 'undefined' || LANG === 'ko');
   boot.innerHTML =

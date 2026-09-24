@@ -1145,6 +1145,19 @@ function animate(){
       cm.material.opacity = (cm.userData.baseOp||1)*ceilK;
     }
   }
+  /* ★ 2026-09-25(2차) : 조감도(건물 3D) 감추기를 '실내를 지었는가'와 완전히 떼어 놓는다.
+     1차 수정 때 "실내가 보이든 말든 무조건 감춘다"고 써 놓고는 정작 이 처리를
+     if(fpCorrG) 안에 두었다 — 실내를 못 지은 기기에서는 감추기가 한 번도 돌지 않는다는 뜻이다.
+     갤럭시 S20 사진이 딱 그 모습이었다 : 1인칭 화면인데 조감도의 층 번호표 「1F」가 찍혀 있고,
+     '가야 할 층 = 노랑' 타일이 시야를 가득 채우고 바닥은 뚫려 보였다.
+     게다가 감출 목록(fpHiddenSt)은 실내를 지을 때 모으는 것이라 실내를 못 지으면 비어 있다
+     → 목록과 별개로 층 그룹 자체를 통째로 끈다. 이건 목록이 비어 있어도 언제나 듣는다. */
+  var inFP = (rideBlend > 0.01) || !!window.fpActive || !!window.fpFree;
+  for(var hsi=0; hsi<fpHiddenSt.length; hsi++) fpHiddenSt[hsi].visible = !inFP;
+  if(typeof floorGroups!=='undefined' && floorGroups)
+    for(var fgi=0; fgi<floorGroups.length; fgi++)
+      if(floorGroups[fgi]) floorGroups[fgi].visible = !inFP;
+
   /* 복도 벽·문·명찰도 천장과 같은 타이밍으로 서서히 나타났다 사라진다.
      목적지 문 주변만 은은하게 맥동시켜 멀리서도 어느 문인지 바로 보이게 한다. */
   if(fpCorrG){
@@ -1164,14 +1177,6 @@ function animate(){
         _cg.visible = (_dy > -8.0 && _dy < 9.0);
       }
     }
-    /* ★ 2026-09-25 : 예전에는 '실내가 보일 때만' 조감도의 층 타일을 감췄다(!fpCorrG.visible).
-       그래서 어떤 기기에서 실내가 안 켜지면 — 전환이 덜 끝났거나, 실내를 못 지었거나,
-       fpLastEye 가 아직 없을 때 — 카메라는 이미 건물 안인데 조감도 타일이 그대로 보였다.
-       그 타일이 '가야 할 층 = 노랑'이라, 화면이 통째로 노랗고 바닥은 뚫려 보였다
-       (갤럭시 S20 제보 : "벽면이 전부 노란색, 바닥이 없어지고 밑이 다 보임").
-       → 1인칭에 들어간 순간부터는 실내가 보이든 말든 무조건 감춘다. */
-    var inFP = (rideBlend > 0.01) || !!window.fpActive || !!window.fpFree;
-    for(var hsi=0; hsi<fpHiddenSt.length; hsi++) fpHiddenSt[hsi].visible = !inFP;
     if(fpCorrG.visible){
       for(var cmi=0; cmi<fpCorrMats.length; cmi++)
         fpCorrMats[cmi].m.opacity = fpCorrMats[cmi].op*corrK;

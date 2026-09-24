@@ -660,13 +660,21 @@ function fpBuildCorr(levels){
   var seen={};
   fpHiddenSt=[];
   var _lvG={};
+  /* 한 층을 짓다 실패해도 나머지는 짓고, 무엇보다 아래 '조감도 감출 목록'까지는 반드시 간다.
+     예전에는 여기서 터지면 목록이 빈 채로 남아 조감도가 그대로 보였다 —
+     1인칭 화면이 통째로 노래지던 갤럭시 S20 증상이 그 모습이다.
+     (실패한 층은 「문제 기록」에 남는다 — 어느 층·무슨 이유인지 폰에서 바로 알 수 있게) */
   (levels || [startFloor, f]).forEach(function(lv){
     var k=String(lv); if(seen[k]) return; seen[k]=1;
-    var cg=fpMakeCorr(lv);
-    cg.position.y=fpSlabY(lv);
-    cg.userData.fpSlabY=fpSlabY(lv);     // 아래 animate에서 '지금 층만 보이게' 하는 데 쓴다
-    _lvG[k]=cg;
-    fpCorrG.add(cg);
+    try{
+      var cg=fpMakeCorr(lv);
+      cg.position.y=fpSlabY(lv);
+      cg.userData.fpSlabY=fpSlabY(lv);     // 아래 animate에서 '지금 층만 보이게' 하는 데 쓴다
+      _lvG[k]=cg;
+      fpCorrG.add(cg);
+    }catch(err){
+      try{ DIAG.add('실내 못 지음 ' + k + '층 : ' + ((err && err.message) || err)); }catch(e2){}
+    }
   });
   /* 계단실 천장판(stCap) : 바로 위층도 같이 지어졌다면 그 층의 계단실이
      위를 이어 주므로 이 판은 감춘다(안 감추면 계단을 오를 때 머리 위가

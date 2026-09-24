@@ -179,7 +179,10 @@
       <button class="prime" onclick="QRNAV.pickFile()" data-ko="📷 사진으로 인식" data-en="📷 Scan from photo">📷 사진으로 인식</button>
       <button onclick="QRNAV.retry()" data-ko="↻ 카메라 다시 시도" data-en="↻ Retry camera">↻ 카메라 다시 시도</button>
     </div>
-    <input type="file" id="qrFile" accept="image/*" capture="environment" style="display:none;" onchange="QRNAV.onFile(this)">
+    <!-- 2026-09-25 : capture="environment" 를 뗐다. 그게 붙어 있으면 갤러리가 아니라 '카메라'가 강제로 열리는데,
+         카메라 권한이 막혀 있으면 아무 일도 안 일어나 버튼이 안 눌리는 것처럼 보였다(갤럭시 S20 제보).
+         버튼 이름도 "사진으로 인식"이라 이미 찍어 둔 사진을 고르는 것이 맞다. -->
+    <input type="file" id="qrFile" accept="image/*" style="display:none;" onchange="QRNAV.onFile(this)">
     <div class="qrManual">
       <div class="lbl" data-ko="QR이 안 읽히면 직접 선택하세요" data-en="If the QR will not scan, choose manually">QR이 안 읽히면 직접 선택하세요</div>
       <div class="row">

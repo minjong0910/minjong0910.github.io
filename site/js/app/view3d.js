@@ -53,15 +53,26 @@ function init3D(){
       var rough = (params.roughness!==undefined) ? params.roughness : 0.5;
       var metal = (params.metalness!==undefined) ? params.metalness : 0;
       var p2={};
-      for(var k in params){ if(k!=='roughness' && k!=='metalness') p2[k]=params[k]; }
+      for(var k in params){ if(k!=='roughness' && k!=='metalness' && k!=='envMapIntensity') p2[k]=params[k]; }
       p2.shininess = Math.round(4 + (1-rough)*116 + metal*80);   // 대략 4~200
       var sc = 0.12 + metal*0.55 + (1-rough)*0.15;
       p2.specular = new THREE.Color(sc, sc, sc);
+      /* ★ 2026-09-25 : Phong 에는 envMapIntensity 가 없어서 그대로 넘기면 조용히 무시되고,
+         반사 세기(reflectivity)가 기본값 1(최대)로 남는다. 그러면 주변 환경 그림이 재질 색을
+         통째로 덮어써서 — 옥상에서는 그 환경이 '하늘'이라 — 문·난간이 하늘색으로 물들어
+         "투명해졌다"처럼 보인다. 아이폰·갤럭시 S20 에서 똑같이 났던 그 증상이다.
+         (데스크톱은 PBR 그대로라 0.35 가 지켜져서 멀쩡했고, 그래서 재현이 안 됐다)
+         → 데스크톱에서 쓰던 세기를 Phong 의 reflectivity 로 옮겨 같은 정도로 맞춘다. */
+      if(params.envMap && params.envMapIntensity !== undefined) p2.reflectivity = params.envMapIntensity;
       return new THREE.MeshPhongMaterial(p2);
     };
     THREE.MeshStandardMaterial.__isMobileFallback = true;
   }
-  renderer=new THREE.WebGLRenderer({canvas:cv,antialias:!isMobilePerf,alpha:false,powerPreference:'high-performance'});
+  /* 2026-09-25 : 폰에서 계단현상 보정을 끄고 있었는데(antialias:!isMobilePerf),
+     의자 다리(굵기 3.5cm)·문틀처럼 얇은 것이 화면에서 한 점보다 가늘어지면 통째로 사라져 보였다
+     ("크리에이티브 존 의자 다리가 없다" 제보). 폰에서도 켠다 —
+     요즘 폰 GPU 에서 MSAA 는 싸고, 이 장면은 픽셀보다 '그리는 개수'가 병목이라 부담이 크지 않다. */
+  renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:false,powerPreference:'high-performance'});
   /* 모바일 성능 최적화 : PCFSoftShadowMap은 그림자 지는 라이트마다 픽셀당 여러 번
      텍셀 샘플링을 해서 모바일 GPU에 부담이 크다 — 모바일에서는 그림자 자체를 꺼서
      프레임을 확보하고(그림자 없이도 앰비언트/디렉셔널 조명으로 입체감은 유지됨),

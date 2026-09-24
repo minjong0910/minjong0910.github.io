@@ -66,11 +66,15 @@ function init3D(){
          데스크톱은 PBR 을 그대로 쓰므로 멀쩡했고, 그래서 여태 재현이 안 됐다.
          → 폰에서는 이 환경맵을 떼고 specular(아래 값)로만 금속 느낌을 낸다.
          PMREM 이 아닌 보통 환경맵이면 그대로 쓰되, 세기만 reflectivity 로 옮긴다. */
+      var fixedHere = false;
       if(p2.envMap && p2.envMap.mapping === THREE.CubeUVReflectionMapping){
-        delete p2.envMap;
+        delete p2.envMap; fixedHere = true;
       }else if(params.envMap && params.envMapIntensity !== undefined){
         p2.reflectivity = params.envMapIntensity;
       }
+      /* 「문제 기록」에 '고친 자리 N곳'으로 쌓인다. 1인칭 공간(옥상 문·의자)은 들어갈 때
+         비로소 만들어지므로, 지금 화면만 세면 정작 문제의 그 물체를 못 센다. */
+      try{ DIAG.mat(fixedHere); }catch(err){}
       return new THREE.MeshPhongMaterial(p2);
     };
     THREE.MeshStandardMaterial.__isMobileFallback = true;

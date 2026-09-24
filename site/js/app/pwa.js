@@ -29,12 +29,35 @@ var DIAG = (function(){
              ' · 정밀도 ' + gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT).precision;
     }catch(err){ return 'WebGL 확인 못 함'; }
   }
-  /* 3D 자가 점검 — 폰에서만 나던 '물체가 통째로 안 보이는' 문제를 이 줄만 보고 가릴 수 있게.
+  /* 쌓아 두는 기록. 1인칭 공간(옥상 문·복층 의자)은 거기 들어갈 때 비로소 만들어지고,
+     나오면 없어진다. 그래서 '지금 화면'만 세면 정작 문제의 그 물체를 한 번도 못 센다.
+     view3d.js 의 폰용 재질 바꿔치기가 만들 때마다 DIAG.mat() 으로 여기에 적는다. */
+  var m3d = {made:0, fixed:0, fail:0};
+  function mat(fixedOne){ m3d.made++; if(fixedOne) m3d.fixed++; }
+  /* 셰이더 실패는 three.js 가 console.error 로만 알린다. 내부 목록(renderer.info.programs)을
+     뒤져 보니 그때는 이미 비워져 있어서 0으로 나왔다 — 놓치지 않게 알림을 직접 가로챈다.
+     어떤 재질·어떤 환경맵이었는지도 같이 적어 두어야 폰에서 온 기록만 보고 범인을 안다. */
+  var _consoleError = console.error;
+  console.error = function(){
+    try{
+      var s = Array.prototype.slice.call(arguments).join(' ');
+      if(/shader error|not compiled/i.test(s)){
+        m3d.fail++;
+        var tag = (s.match(/SHADER_NAME\s+(\S+)/) || [])[1] || '?';
+        var env = (s.match(/ENVMAP_TYPE_\S+/) || [])[0] || '환경맵없음';
+        var why = (s.match(/ERROR:[^\n]*/) || [])[0] || '';
+        add('셰이더실패 ' + tag + ' · ' + env + ' · ' + why.slice(0, 60));
+      }
+    }catch(err){}
+    return _consoleError.apply(console, arguments);
+  };
+  /* 3D 자가 점검 — 폰에서만 나던 '물체가 통째로 안 보이는' 문제를 이 한 줄로 가릴 수 있게.
      · 셰이더실패 : 재질을 GPU 가 못 만든 횟수. 0 이 아니면 그 재질로 만든 것은 아무것도 안 그려진다.
-     · 못그리는재질 : 폰용 재질(Phong)에 PBR 전용 환경맵(CubeUV)이 붙은 것 — 2026-09-25 에 고친 그 조합. */
+     · 고친자리 : 폰용 재질로 바꿀 때 PBR 전용 환경맵(CubeUV)을 떼어 낸 횟수 — 고친 판이 실제로 도는 증거.
+     · 지금화면 못그리는재질 : 그래도 남아 있는 것. 항상 0 이어야 한다. */
   function check3d(){
     if(typeof renderer === 'undefined' || !renderer || typeof THREE === 'undefined') return '아직 안 켜짐';
-    var phong = 0, bad = 0, seen = {}, fail = 0;
+    var phong = 0, bad = 0, seen = {};
     try{
       if(typeof scene !== 'undefined' && scene) scene.traverse(function(o){
         var ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
@@ -49,14 +72,11 @@ var DIAG = (function(){
         }
       });
     }catch(err){}
-    try{
-      var ps = renderer.info.programs || [];
-      for(var k = 0; k < ps.length; k++) if(ps[k].diagnostics) fail++;
-    }catch(err){}
     return '해상도배율 ' + renderer.getPixelRatio() +
            ' · 폰재질 ' + (THREE.MeshStandardMaterial.__isMobileFallback ? '예' : '아니오') +
-           ' · 셰이더실패 ' + fail +
-           ' · 못그리는재질 ' + bad + '/' + phong;
+           ' · 셰이더실패 ' + m3d.fail +
+           ' · 고친자리 ' + m3d.fixed + '곳(만든재질 ' + m3d.made + '개 중)' +
+           ' · 지금화면 못그리는재질 ' + bad + '개/' + phong + '개';
   }
   function ver(){
     try{ return (typeof PWA !== 'undefined' && PWA.offline && PWA.offline.version) || '(아직 모름)'; }
@@ -91,7 +111,7 @@ var DIAG = (function(){
     return t;
   }
   document.addEventListener('DOMContentLoaded', paint);
-  return {add:add, full:full, copy:copy, paint:paint, errors:function(){ return errs.slice(); }};
+  return {add:add, mat:mat, full:full, copy:copy, paint:paint, errors:function(){ return errs.slice(); }};
 })();
 
 /* pwa.js — 앱 다운로드(홈 화면에 설치) · 인터넷 없이 열기(sw.js) · 출입문 QR 주소(?gate=) 받기

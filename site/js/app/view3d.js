@@ -57,13 +57,20 @@ function init3D(){
       p2.shininess = Math.round(4 + (1-rough)*116 + metal*80);   // 대략 4~200
       var sc = 0.12 + metal*0.55 + (1-rough)*0.15;
       p2.specular = new THREE.Color(sc, sc, sc);
-      /* ★ 2026-09-25 : Phong 에는 envMapIntensity 가 없어서 그대로 넘기면 조용히 무시되고,
-         반사 세기(reflectivity)가 기본값 1(최대)로 남는다. 그러면 주변 환경 그림이 재질 색을
-         통째로 덮어써서 — 옥상에서는 그 환경이 '하늘'이라 — 문·난간이 하늘색으로 물들어
-         "투명해졌다"처럼 보인다. 아이폰·갤럭시 S20 에서 똑같이 났던 그 증상이다.
-         (데스크톱은 PBR 그대로라 0.35 가 지켜져서 멀쩡했고, 그래서 재현이 안 됐다)
-         → 데스크톱에서 쓰던 세기를 Phong 의 reflectivity 로 옮겨 같은 정도로 맞춘다. */
-      if(params.envMap && params.envMapIntensity !== undefined) p2.reflectivity = params.envMapIntensity;
+      /* ★★ 2026-09-25 : '옥상 문이 투명하다'의 진짜 원인이 여기였다.
+         fpEnsureEnvMap() 이 주는 환경맵은 PMREM(CubeUV · mapping 306)이라 PBR 전용이다.
+         그걸 Phong 에 그대로 넘기면 three.js 가 ENVMAP_TYPE_CUBE_UV 셰이더를 만드는데,
+         Phong 에는 거기 필요한 값이 없어서 **셰이더가 컴파일에 실패한다.**
+         컴파일에 실패한 재질은 아무것도 안 그려진다 — 문짝·난간·의자 다리가 통째로 사라진다.
+         (콘솔에 "SHADER_NAME MeshPhongMaterial … ENVMAP_TYPE_CUBE_UV … syntax error")
+         데스크톱은 PBR 을 그대로 쓰므로 멀쩡했고, 그래서 여태 재현이 안 됐다.
+         → 폰에서는 이 환경맵을 떼고 specular(아래 값)로만 금속 느낌을 낸다.
+         PMREM 이 아닌 보통 환경맵이면 그대로 쓰되, 세기만 reflectivity 로 옮긴다. */
+      if(p2.envMap && p2.envMap.mapping === THREE.CubeUVReflectionMapping){
+        delete p2.envMap;
+      }else if(params.envMap && params.envMapIntensity !== undefined){
+        p2.reflectivity = params.envMapIntensity;
+      }
       return new THREE.MeshPhongMaterial(p2);
     };
     THREE.MeshStandardMaterial.__isMobileFallback = true;

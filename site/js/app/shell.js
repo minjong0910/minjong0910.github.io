@@ -194,18 +194,13 @@ function openOverlay(id){
   go(id);
 }
 function closeOverlay(){ go(beforeOverlay); }
+/* 도착 화면 '처음으로 돌아가기' : 검색어를 지우고 첫 화면(공대 3호관 길안내)으로 간다.
+   2026-09-25 : 예전에는 여기가 '종료'라서 창(웹뷰)을 아예 닫았다. 앱을 다시 켜야 해서
+   불편하기도 하고, 브라우저가 window.close() 를 막으면 "이 창을 닫아 주세요" 하는
+   난데없는 알림만 떴다 — 앱을 끄는 일은 기기의 뒤로가기에 맡기고, 이 버튼은 처음으로 보낸다. */
 function reset(){ clearSearch(); go('s1'); }
 /* 도착 화면 '다른 곳 찾기' : 처음(시작) 화면이 아니라 카테고리 선택 화면으로 바로 연결 */
 function findAnother(){ clearSearch(); go('scat'); }
-/* 도착 화면 '종료' : 앱(브라우저 창/웹뷰)을 닫는다.
-   스크립트로 열지 않은 일반 탭에서는 브라우저가 window.close()를 막을 수 있어,
-   그런 경우를 위해 잠깐 뒤 안내 문구를 보여준다. */
-function exitApp(){
-  window.close();
-  setTimeout(function(){
-    alert((LANG==='ko') ? '이 창을 닫아 주세요.' : 'Please close this window.');
-  }, 300);
-}
 /* ========== 안드로이드 하드웨어 뒤로가기 ==========
    갤럭시 등 안드로이드의 뒤로가기 키는 '브라우저 히스토리를 한 칸 되돌리는' 동작이다.
    그런데 이 앱은 화면 전환을 전부 자바스크립트(go)로만 처리해서 히스토리에 아무것도

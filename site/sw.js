@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '81981d0bb119';   // 파일 221개 · 14.3MB
+var VERSION = '0a5810dcc03a';   // 파일 221개 · 14.3MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -205,7 +205,7 @@ var FILES = [
   ['img/icon-192.png','a6893220bee4',5036],
   ['img/icon-512.png','de753e3f6802',14880],
   ['img/icon.svg','99ad3cbde680',2002],
-  ['index.html','128712c53861',51216],
+  ['index.html','17239f70cda3',51261],
   ['js/app/aid.js','daa92696b9a7',32661],
   ['js/app/boot.js','c49829682f30',8075],
   ['js/app/building.js','647a70cb183a',23274],
@@ -223,7 +223,7 @@ var FILES = [
   ['js/app/roadview-roof.js','21f2a5e8678f',119576],
   ['js/app/roadview-stairs.js','7f992b896804',70498],
   ['js/app/roadview.js','87113d5906a0',126123],
-  ['js/app/shell.js','d0e17fe0f05f',18030],
+  ['js/app/shell.js','34d583d22f83',18097],
   ['js/app/start.js','4065777331b0',1505],
   ['js/app/sugai.js','5a7c207579d1',131009],
   ['js/app/sugdb.js','df49ab439b73',17964],

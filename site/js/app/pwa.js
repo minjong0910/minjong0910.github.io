@@ -89,6 +89,16 @@ var DIAG = (function(){
     L.push('화면 : ' + innerWidth + 'x' + innerHeight + ' · 배율 ' + (window.devicePixelRatio || 1));
     L.push('그래픽 : ' + gpu());
     L.push('3D : ' + check3d());
+    /* 아래 두 줄은 '왜 옛 판이 계속 열리나 · 왜 뒤로가기에 앱이 꺼지나'를 가리는 데 쓴다 */
+    try{
+      var o = (typeof PWA !== 'undefined') && PWA.offline;
+      L.push('저장 : ' + (o ? (o.state + ' · ' + o.done + '/' + o.total) : '아직 모름') +
+             ' · 설치됨 ' + ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) ? '예' : '아니오'));
+    }catch(err){}
+    try{
+      L.push('뒤로가기 : 칸 ' + (history.length || 0) +
+             ' · 받침 ' + ((typeof backGuardOn !== 'undefined' && backGuardOn) ? '있음' : '없음'));
+    }catch(err){}
     L.push('오류 ' + errs.length + '개');
     for(var i=0;i<errs.length;i++) L.push('  · ' + errs[i]);
     return L.join('\n');
@@ -143,8 +153,45 @@ var PWA = (function(){
       history.replaceState(history.state, '', location.pathname + rest + location.hash);
     }
   }catch(e){}
+  /* '최신 판으로 다시 받기'가 붙여 둔 ?fresh= 는 쓰고 나면 주소에서 지운다 (새로고침 때마다 남지 않게) */
+  try{
+    if(/[?&]fresh=/.test(location.search)){
+      var rest2 = location.search.replace(/([?&])fresh=[^&]*(&|$)/, '$1').replace(/[?&]$/, '');
+      history.replaceState(history.state, '', location.pathname + rest2 + location.hash);
+    }
+  }catch(e){}
   /* QRNAV.fromUrl() 이 한 번 가져간다 */
   function takeGate(){ var g = gateFromUrl; gateFromUrl = null; return g; }
+
+  /* ── 최신 판으로 다시 받기 ──
+     저장해 둔 사본(캐시)과 맡은 일꾼(서비스 워커)을 모두 버리고 처음부터 새로 받는다.
+     앱은 원래 스스로 최신이 되지만, 어떤 기기에서는 옛 사본이 계속 열렸다(갤럭시 제보).
+     이 버튼은 그 상태를 확실히 끊는다. 사진까지 다시 받으므로 인터넷이 필요하다. */
+  function refresh(btn){
+    var K = ko();
+    if(btn){ btn.disabled = true; btn.textContent = K ? '받는 중…' : 'Refreshing…'; }
+    var went = false;
+    function done(){
+      if(went) return; went = true;
+      try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(e){}
+      location.replace(location.pathname + '?fresh=' + Date.now() + location.hash);
+    }
+    var jobs = [];
+    try{
+      if('serviceWorker' in navigator)
+        jobs.push(navigator.serviceWorker.getRegistrations().then(function(rs){
+          return Promise.all(rs.map(function(r){ return r.unregister(); }));
+        }));
+    }catch(e){}
+    try{
+      if(window.caches)
+        jobs.push(caches.keys().then(function(ks){
+          return Promise.all(ks.map(function(k){ return caches['delete'](k); }));
+        }));
+    }catch(e){}
+    if(jobs.length) Promise.all(jobs).then(done, done);
+    setTimeout(done, 4000);      // 브라우저가 답을 안 주더라도 반드시 다시 연다
+  }
 
   /* ── 기기 알아보기 ── (검사가 여러 기기 흉내를 넣어 볼 수 있게 글자만 받는 함수로) */
   var UA = navigator.userAgent || '';
@@ -347,11 +394,22 @@ var PWA = (function(){
          그런 때는 미뤄 뒀다가 ① 첫 화면으로 돌아왔을 때 ② 앱을 다시 열었을 때 적용한다.
          처음 설치될 때(원래 맡은 워커가 없던 때)는 새로 고치지 않는다 — 괜히 한 번 깜빡인다. */
       var hadSW = !!navigator.serviceWorker.controller;
+      var startedAt = Date.now();
       var reloaded = false, waiting = false, timer = null;
       function applyUpdate(){
         if(!hadSW || reloaded || !waiting) return;
         var on = document.querySelector('.screen.on');
-        if(!on || on.id !== 's1') return;            // 하던 일은 끊지 않는다
+        /* 2026-09-25 : 예전에는 '첫 화면일 때만' 새로 고쳤다. 그래서 첫 화면으로 돌아오지 않고
+           앱을 닫아 버리면 갱신이 계속 미뤄져, 어떤 기기는 옛 판에 눌러앉았다(갤럭시 제보).
+           → 다음 세 경우로 넓힌다. 어느 쪽도 하던 일을 끊지 않는다.
+             ① 첫 화면 ② 앱을 연 지 6초 안(아직 아무것도 시작하지 않았다)
+             ③ 화면이 안 보이는 동안(길안내·도착·QR 중이 아니면 — 눈에 띄지 않게 갈아탄다) */
+        var id = on ? on.id : '';
+        var busy = (id === 's6' || id === 's7' || id === 'sqr');
+        var okNow = (!on || id === 's1')
+                 || (Date.now() - startedAt < 6000)
+                 || (document.visibilityState === 'hidden' && !busy);
+        if(!okNow) return;
         reloaded = true;
         if(timer) clearInterval(timer);
         /* 다시 뜰 때 켜는 화면(부팅 연출)을 건너뛰게 표시를 남긴다 — boot.js 가 이것을 본다.
@@ -365,9 +423,7 @@ var PWA = (function(){
         applyUpdate();
         if(!reloaded && !timer) timer = setInterval(applyUpdate, 2000);   // 첫 화면으로 돌아오면 그때
       });
-      document.addEventListener('visibilitychange', function(){
-        if(document.visibilityState === 'visible') applyUpdate();
-      });
+      document.addEventListener('visibilitychange', function(){ applyUpdate(); });   // 보일 때도, 안 보이게 될 때도
       window.addEventListener('load', function(){
         /* updateViaCache:'none' — sw.js 자체는 브라우저 캐시를 거치지 않고 늘 새로 확인한다 */
         navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(function(reg){
@@ -387,7 +443,7 @@ var PWA = (function(){
   document.addEventListener('DOMContentLoaded', sync);
 
   return {
-    install:install, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, sync:sync,
+    install:install, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, sync:sync, refresh:refresh,
     get offline(){ return {state:off.state, done:off.done, total:off.total, bytes:off.bytes, version:off.version, text:offText()}; },
     /* 검사(tests/pwa.html)가 설치 갈래를 확인할 때 쓴다 */
     _env:function(){ return {ios:isIOS(), android:isAndroid(), inapp:inAppName(), standalone:standalone(), prompt:!!deferred}; },

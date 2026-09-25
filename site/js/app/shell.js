@@ -245,22 +245,30 @@ function appBackStep(){
   if(btn){ btn.click(); return true; }
   go('s1'); return true;
 }
-var backGuardOn = false;
+var backGuardOn = false, backGuardTouched = false;
 function backGuardArm(){
   if(backGuardOn) return;
   try{ history.pushState({gunsanGuard:1}, ''); backGuardOn = true; }catch(e){}
 }
+/* 사용자가 화면을 처음 건드렸을 때 한 칸을 '더' 쌓는다 — 아래 설명 참고 */
+function backGuardTouch(){
+  if(backGuardTouched) return;
+  backGuardTouched = true;
+  try{ history.pushState({gunsanGuard:2}, ''); backGuardOn = true; }catch(e){}
+}
 (function backGuardInit(){
   if(!window.history || !history.pushState) return;
-  /* ★ 2026-09-25 : 예전에는 여기서 곧바로 칸을 채웠다. 그런데 크로미움 계열 브라우저는
-     "사용자가 아직 손대지도 않았는데 페이지가 스스로 쌓은 히스토리 칸"을 뒤로가기 때 건너뛴다
-     (Chrome 74 부터의 history manipulation intervention — 삼성 인터넷도 크로미움이라 같다).
-     그래서 삼성 폰에서는 이 칸이 통째로 무시되고 어느 화면에서 눌러도 앱이 바로 꺼졌다.
-     같은 장치가 없는 아이폰 사파리는 멀쩡했고 — 그래서 기종을 타는 것처럼 보였다.
-     → 사용자가 화면을 처음 건드린 순간에 채운다. 손댄 뒤에 쌓은 칸은 건너뛰지 않는다.
-     (뒤로가기가 한 번 먹은 뒤에도 이 귀는 그대로 달려 있어, 다음 손짓에 저절로 다시 채워진다) */
+  /* ★ 2026-09-25 : 칸을 두 번에 나눠 쌓는다.
+     ① 앱이 켜질 때 한 칸 — 사용자가 아무것도 안 하고 바로 뒤로가기를 눌러도 앱 안에서 받는다.
+     ② 사용자가 화면을 처음 건드렸을 때 한 칸 더 — 크로미움 계열 브라우저는
+        "사용자가 손대기 전에 페이지가 스스로 쌓은 칸"을 뒤로가기 때 건너뛰기 때문이다
+        (Chrome 74 부터의 history manipulation intervention · 삼성 인터넷도 크로미움이라 같다).
+        ①만 있으면 삼성 폰에서는 그 칸이 무시되어 한 번에 앱이 꺼졌다.
+        같은 장치가 없는 아이폰 사파리는 멀쩡해서 기종을 타는 것처럼 보였다.
+     뒤로가기가 한 번 먹은 뒤의 다시 채우기는 popstate 안에서 하므로 손짓 뒤라 건너뛰지 않는다. */
+  backGuardArm();
   ['pointerdown','touchstart','keydown'].forEach(function(ev){
-    window.addEventListener(ev, backGuardArm, {passive:true, capture:true});
+    window.addEventListener(ev, backGuardTouch, {passive:true, capture:true});
   });
   window.addEventListener('popstate', function(){
     backGuardOn = false;

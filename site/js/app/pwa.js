@@ -153,45 +153,8 @@ var PWA = (function(){
       history.replaceState(history.state, '', location.pathname + rest + location.hash);
     }
   }catch(e){}
-  /* '최신 판으로 다시 받기'가 붙여 둔 ?fresh= 는 쓰고 나면 주소에서 지운다 (새로고침 때마다 남지 않게) */
-  try{
-    if(/[?&]fresh=/.test(location.search)){
-      var rest2 = location.search.replace(/([?&])fresh=[^&]*(&|$)/, '$1').replace(/[?&]$/, '');
-      history.replaceState(history.state, '', location.pathname + rest2 + location.hash);
-    }
-  }catch(e){}
   /* QRNAV.fromUrl() 이 한 번 가져간다 */
   function takeGate(){ var g = gateFromUrl; gateFromUrl = null; return g; }
-
-  /* ── 최신 판으로 다시 받기 ──
-     저장해 둔 사본(캐시)과 맡은 일꾼(서비스 워커)을 모두 버리고 처음부터 새로 받는다.
-     앱은 원래 스스로 최신이 되지만, 어떤 기기에서는 옛 사본이 계속 열렸다(갤럭시 제보).
-     이 버튼은 그 상태를 확실히 끊는다. 사진까지 다시 받으므로 인터넷이 필요하다. */
-  function refresh(btn){
-    var K = ko();
-    if(btn){ btn.disabled = true; btn.textContent = K ? '받는 중…' : 'Refreshing…'; }
-    var went = false;
-    function done(){
-      if(went) return; went = true;
-      try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(e){}
-      location.replace(location.pathname + '?fresh=' + Date.now() + location.hash);
-    }
-    var jobs = [];
-    try{
-      if('serviceWorker' in navigator)
-        jobs.push(navigator.serviceWorker.getRegistrations().then(function(rs){
-          return Promise.all(rs.map(function(r){ return r.unregister(); }));
-        }));
-    }catch(e){}
-    try{
-      if(window.caches)
-        jobs.push(caches.keys().then(function(ks){
-          return Promise.all(ks.map(function(k){ return caches['delete'](k); }));
-        }));
-    }catch(e){}
-    if(jobs.length) Promise.all(jobs).then(done, done);
-    setTimeout(done, 4000);      // 브라우저가 답을 안 주더라도 반드시 다시 연다
-  }
 
   /* ── 기기 알아보기 ── (검사가 여러 기기 흉내를 넣어 볼 수 있게 글자만 받는 함수로) */
   var UA = navigator.userAgent || '';
@@ -386,28 +349,44 @@ var PWA = (function(){
          조금 전에 받아 둔 옛 파일을 그대로 쓰고 있다. 그래서 앱을 껐다 켜도
          한 번은 옛 화면이 보이고 두 번째에야 새 화면이 나왔다 (2026-09-24 사용자 제보).
          처음 설치될 때(원래 맡은 워커가 없던 때)는 새로 고치지 않는다 — 괜히 한 번 깜빡인다. */
-      /* ── 새 판이 나오면 스스로 최신으로 ──────────────────────────────
+      /* ── 앱을 열 때마다 스스로 최신 판으로 ────────────────────────────
          앱을 깔면 저장해 둔 사본으로 열리기 때문에, 그냥 두면 고쳐 올려도 옛 화면이 보인다.
-         sw.js 가 첫 화면 파일만 먼저 받고 곧바로 넘겨받으므로(보통 1초 안),
-         그때 화면을 한 번 새로 고치면 '앱을 켜면 최신 판'이 된다.
-         다만 길안내 중이거나 카메라(QR)를 켜는 중에 새로 고치면 하던 일이 끊기므로,
-         그런 때는 미뤄 뒀다가 ① 첫 화면으로 돌아왔을 때 ② 앱을 다시 열었을 때 적용한다.
+         그래서 ① 열 때마다 새 판이 있는지 묻고 ② 새 일꾼이 넘겨받으면 화면을 한 번 새로 고친다.
+         sw.js 가 첫 화면 파일만 먼저 받고 곧바로 넘겨받으므로(보통 1초 안) 사용자는 눈치채지 못한다.
+
+         ★ 2026-09-25 : 여기에 큰 구멍이 있었다. 새 판 확인을 window.load 에서만 했는데,
+           안드로이드는 앱을 껐다 켜도 대개 페이지를 다시 읽지 않고 잠자던 것을 깨운다
+           (아이폰은 자주 완전히 종료돼 다시 읽는다). 그래서 안드로이드에서는 처음 설치한 뒤로
+           새 판 확인이 한 번도 일어나지 않아 옛 판에 그대로 눌러앉았다 — 갤럭시에서만
+           고친 것이 계속 반영 안 되던 이유다. → 화면이 다시 보일 때마다 직접 물어본다.
+
+         새로 고치는 때는 사용자가 잃을 것이 없는 순간으로만 고른다
+         (첫 화면 · 아직 아무것도 건드리지 않았을 때 · 화면이 안 보이는 동안).
+         길안내·도착·QR 중에는 절대 끊지 않는다.
          처음 설치될 때(원래 맡은 워커가 없던 때)는 새로 고치지 않는다 — 괜히 한 번 깜빡인다. */
       var hadSW = !!navigator.serviceWorker.controller;
-      var startedAt = Date.now();
+      var swReg = null;
+      /* '아직 아무것도 건드리지 않았다' = 지금 새로 고쳐도 사용자가 잃을 것이 없다.
+         시간(6초)으로 재던 것을 이 쪽으로 바꾼다 — 인터넷이 느린 폰에서 6초를 넘겨 버리면
+         갱신이 미뤄져 옛 판에 눌러앉기 때문이다. */
+      var userActed = false;
+      ['pointerdown','touchstart','keydown'].forEach(function(ev){
+        window.addEventListener(ev, function(){ userActed = true; }, {passive:true, capture:true, once:true});
+      });
       var reloaded = false, waiting = false, timer = null;
+      function checkUpdate(){ try{ if(swReg) swReg.update(); }catch(err){} }   // 새 판이 있는지 물어본다
       function applyUpdate(){
         if(!hadSW || reloaded || !waiting) return;
         var on = document.querySelector('.screen.on');
         /* 2026-09-25 : 예전에는 '첫 화면일 때만' 새로 고쳤다. 그래서 첫 화면으로 돌아오지 않고
            앱을 닫아 버리면 갱신이 계속 미뤄져, 어떤 기기는 옛 판에 눌러앉았다(갤럭시 제보).
-           → 다음 세 경우로 넓힌다. 어느 쪽도 하던 일을 끊지 않는다.
-             ① 첫 화면 ② 앱을 연 지 6초 안(아직 아무것도 시작하지 않았다)
+           → 다음 세 경우로 넓힌다. 어느 쪽도 사용자가 하던 일을 끊지 않는다.
+             ① 첫 화면 ② 아직 화면을 한 번도 건드리지 않았을 때(잃을 것이 없다)
              ③ 화면이 안 보이는 동안(길안내·도착·QR 중이 아니면 — 눈에 띄지 않게 갈아탄다) */
         var id = on ? on.id : '';
         var busy = (id === 's6' || id === 's7' || id === 'sqr');
         var okNow = (!on || id === 's1')
-                 || (Date.now() - startedAt < 6000)
+                 || !userActed
                  || (document.visibilityState === 'hidden' && !busy);
         if(!okNow) return;
         reloaded = true;
@@ -423,13 +402,19 @@ var PWA = (function(){
         applyUpdate();
         if(!reloaded && !timer) timer = setInterval(applyUpdate, 2000);   // 첫 화면으로 돌아오면 그때
       });
-      document.addEventListener('visibilitychange', function(){ applyUpdate(); });   // 보일 때도, 안 보이게 될 때도
+      /* 안드로이드는 앱을 '껐다 켜도' 대개 페이지를 다시 읽지 않고 잠자던 것을 깨운다.
+         그러면 window.load 가 다시 오지 않아 새 판 확인을 건너뛴다 — 다시 보일 때마다 직접 물어본다.
+         안 보이게 될 때도 한 번 불러서, 미뤄 둔 갱신을 눈에 안 띄게 끝내 둔다. */
+      document.addEventListener('visibilitychange', function(){ checkUpdate(); applyUpdate(); });
+      window.addEventListener('focus', checkUpdate);            // 다른 앱 쓰다 돌아왔을 때
+      window.addEventListener('pageshow', function(e){ if(e.persisted){ checkUpdate(); applyUpdate(); } });
       window.addEventListener('load', function(){
         /* updateViaCache:'none' — sw.js 자체는 브라우저 캐시를 거치지 않고 늘 새로 확인한다 */
         navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(function(reg){
+          swReg = reg;
           askStatus();
           reg.addEventListener('updatefound', function(){ off.state = 'saving'; syncOff(); });
-          try{ reg.update(); }catch(err){}          // 앱을 열 때마다 새 판이 있는지 물어본다
+          checkUpdate();                            // 앱을 열 때마다 새 판이 있는지 물어본다
         })['catch'](function(){ off.state = 'fail'; syncOff(); });
       });
     } else {
@@ -443,7 +428,7 @@ var PWA = (function(){
   document.addEventListener('DOMContentLoaded', sync);
 
   return {
-    install:install, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, sync:sync, refresh:refresh,
+    install:install, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, sync:sync,
     get offline(){ return {state:off.state, done:off.done, total:off.total, bytes:off.bytes, version:off.version, text:offText()}; },
     /* 검사(tests/pwa.html)가 설치 갈래를 확인할 때 쓴다 */
     _env:function(){ return {ios:isIOS(), android:isAndroid(), inapp:inAppName(), standalone:standalone(), prompt:!!deferred}; },

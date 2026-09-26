@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '22bfc50ff773';   // 파일 225개 · 14.7MB
+var VERSION = '69ebe1c63d72';   // 파일 226개 · 14.9MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -38,7 +38,7 @@ var FILES = [
   ['3d/tex/21.png','5185337f5f27',7799],
   ['css/app.css','1b63c9b4c3b2',79082],
   ['css/boot.css','b3a18297534a',1353],
-  ['data/photos.js','2c0c83b83bc6',15585],
+  ['data/photos.js','7255b5a3dd32',15682],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
   ['data/photos/13102/01.jpg','523c6f068a4c',76075],
   ['data/photos/13103/01.jpg','a733992e9e36',59160],
@@ -157,6 +157,7 @@ var FILES = [
   ['data/photos/EMS5/01.jpg','889c6d9b0206',42585],
   ['data/photos/ES1/01.jpg','7e7a0a8553a4',97855],
   ['data/photos/EV1/01.jpg','3e572e2a49be',100031],
+  ['data/photos/EV1WEST/01.jpg','5554599ddca6',122843],
   ['data/photos/EV2/01.jpg','87367b0019ae',95052],
   ['data/photos/EV3/01.jpg','5da3c636a001',93338],
   ['data/photos/EV4/01.jpg','d036042f48d4',86347],
@@ -214,7 +215,7 @@ var FILES = [
   ['js/app/boot.js','c49829682f30',8075],
   ['js/app/building.js','647a70cb183a',23274],
   ['js/app/floor-detail.js','9d10c5aa9ba7',19078],
-  ['js/app/guide.js','f164953177e7',27184],
+  ['js/app/guide.js','2d9ca5d57182',29697],
   ['js/app/overview3d.js','e16d51396168',89724],
   ['js/app/photos.js','7debd2904c8c',51527],
   ['js/app/pwa.js','85a9eecf6165',28729],

@@ -107,6 +107,44 @@ function buildSteps(){
   }
 
   var p=targetPos();
+
+  /* ★ 2026-09-27 : 동문 → 1층 호실 — 사용자가 정한 안내.
+     기준은 '동문으로 들어와 서문 쪽(+Z)으로 걸어가는 자세'다.
+       · 엘리베이터와 같은 쪽(x>0)이 왼손 쪽 = 왼쪽,  반대쪽(x<0) = 오른쪽
+       · 엘리베이터 앞에 있는 방(z < 엘리베이터)   → ① 동문 ② 도착            (두 단계)
+       · 엘리베이터를 지나야 하는 방(z > 엘리베이터) → ① 동문 ② 지나 직진 ③ 도착 (세 단계)
+       · '몇 번째'는 그 구간의 시작(동문 / 엘리베이터)부터 그 쪽 방만 센다.
+     ※ 동문 + 1층 호실만 여기서 처리하고 곧바로 끝낸다. 다른 문·다른 층·화장실·비상계단은
+       아래의 기존 안내를 그대로 쓴다(아직 절차를 정하지 않았다). */
+  if(gk === 'EAST' && sf === 1 && lv === 1 && target.kind === 'room' && ROOM_PHOTOS['EV1WEST']){
+    var evZ1  = evXZ(1).z;
+    var past  = (p.z > evZ1);              // 엘리베이터를 지나야 하는 방인가
+    var leftS = (p.x > 0);                 // +X = 동문에서 걸어갈 때 왼손 쪽
+    var base  = String(target.code).replace(/-[A-Za-z]$/, '');   // 13121-A → 13121
+    var mates = [];
+    Object.keys(FLOOR_LAYOUT[1].lookup).forEach(function(k){
+      var q = place3D(k);
+      if(q && ((q.x > 0) === leftS) && ((q.z > evZ1) === past)) mates.push({code:k, z:q.z});
+    });
+    mates.sort(function(a, b){ return a.z - b.z; });             // 동문(-Z)에서 가까운 순
+    var nth = 0;
+    for(var mi = 0; mi < mates.length; mi++) if(mates[mi].code === base) nth = mi + 1;
+    if(past)
+      out.push({a:'↑', type:'straight',
+                tko:'엘리베이터를 지나 앞으로 직진하세요',
+                ten:'Pass the elevator and keep going straight',
+                ph:'[ 1층 복도 사진 ]', code:'EV1WEST'});
+    var sideKo1 = leftS ? '왼쪽' : '오른쪽', sideEn1 = leftS ? 'left' : 'right';
+    var ttlKo1 = roomTitle(target.code, 'ko'), ttlEn1 = roomTitle(target.code, 'en');
+    out.push({a:'✓', type:'arrive',
+              tko: (nth ? (sideKo1+'에서 '+ordWord(nth)+' 방에 ') : (sideKo1+'에 ')) +
+                   ttlKo1 + subjParticle(ttlKo1) + ' 있습니다',
+              ten: ttlEn1 + (nth ? (' is the '+ordWordEn(nth)+' room on the '+sideEn1+'.')
+                                 : (' is on the '+sideEn1+'.')),
+              ph:'[ '+target.code+'호 문 앞 사진 ]', code:target.code});
+    return out;
+  }
+
   /* ── 좌우 안내 기준 ────────────────────────────────────────────
      '어느 쪽으로 도는가'와 '방이 어느 쪽에 있는가'는 서로 다른 기준이다.
      예전에는 둘 다 방의 X좌표 하나로 정해서, 13524처럼

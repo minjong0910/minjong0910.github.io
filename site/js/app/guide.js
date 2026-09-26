@@ -29,14 +29,19 @@ function buildSteps(){
     WEST: {hall:'GATE_W',         tko:'복도를 따라 직진하세요', ten:'Go straight along the hallway'},
     /* 정문은 옆면에 있어 들어서면 바로 로비다 — 복도가 아니라 엘리베이터 쪽으로 간다.
        다만 위층 호실로 갈 때는 이 단계를 넣지 않는다(skipOnUp) — 바로 '엘리베이터를 타고'로 간다. */
-    MAIN: {hall:'GATE_MAIN_WAY',  tko:'엘리베이터 앞으로 가세요',  ten:'Head to the elevator', skipOnUp:true}
+    MAIN: {hall:'GATE_MAIN_WAY',  tko:'엘리베이터 앞으로 가세요',  ten:'Head to the elevator', skipOnUp:true},
+    /* 후문은 들어서면 1층 라운지다. 엘리베이터는 늘 오른쪽에 있으므로 방향이 고정이다. */
+    BACK: {hall:'LNG1',           tko:'1층 라운지에서 우회전 하세요', ten:'In the lobby, turn right'}
   };
   var flow = (gk && sf === 1) ? GATE_FLOW[gk] : null;
   /* 문·층별로 '엘리베이터로 올라가 좌·우회전' 절차를 정해 둔 표 (아래에서 단계를 만든다).
      여기서는 '그 절차를 쓰는 길인가'만 먼저 안다 — 위 정문 단계를 넣을지 말지에 쓰인다. */
-  var UP_FLOW = {EAST:[2], WEST:[2], MAIN:[2]};
+  var UP_FLOW = {EAST:[2], WEST:[2], MAIN:[2], BACK:[2]};
   var onUpFlow = !!(gk && sf === 1 && target.kind === 'room' &&
                     UP_FLOW[gk] && UP_FLOW[gk].indexOf(lv) >= 0);
+  /* 후문 → 크리에이티브 존은 엘리베이터가 아니라 바로 옆 계단으로 내려간다(아래 전용 갈래).
+     그 길에서는 '1층 라운지에서 우회전'(=엘리베이터 쪽)이 끼면 반대로 가라는 말이 된다 → 넣지 않는다. */
+  var backStairZone = !!(gk === 'BACK' && sf === 1 && target.kind === 'zone');
   if(gk && sf===1 && ROOM_PHOTOS['GATE_'+gk]){
     var GN = {MAIN:{ko:'정문', en:'the main gate'},  BACK:{ko:'후문', en:'the back gate'},
               EAST:{ko:'동문', en:'the east gate'}, WEST:{ko:'서문', en:'the west gate'}};
@@ -48,7 +53,7 @@ function buildSteps(){
               code: (gk && GATE_OUT[gk] && ROOM_PHOTOS[GATE_OUT[gk]]) ? GATE_OUT[gk] : ('GATE_'+gk)});
     /* 이 복도 단계는 '문 → 엘리베이터' 구간이다. 목적지가 1층이면 엘리베이터에 갈 일이 없고,
        아래에서 어차피 '복도를 따라 쭉 가세요'가 나오므로 같은 말이 두 번 겹친다 → 그때는 넣지 않는다. */
-    if(flow && !sameFloor && !(flow.skipOnUp && onUpFlow) && ROOM_PHOTOS[flow.hall])
+    if(flow && !sameFloor && !backStairZone && !(flow.skipOnUp && onUpFlow) && ROOM_PHOTOS[flow.hall])
       out.push({a:'↑', type:'straight',
                 tko:flow.tko, ten:flow.ten,
                 ph:'[ '+gn.ko+' 안쪽 사진 ]', code:flow.hall});

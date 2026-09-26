@@ -135,10 +135,11 @@ function captureLogic(w){
         if(w.QRNAV) w.QRNAV.gate = function(){ return null; };
         out.steps[t.kind + ':' + (t.code || t.floor) + '@' + sf] = stepList(w);
       });
-      /* 문별 경로 : 1층 목적지 + 지하 크리에이티브 존.
-         2026-09-27 에 '동문 → 크리에이티브 존' 전용 절차가 생겼는데 안전망이 그 경로를
-         담고 있지 않아 바뀌어도 아무도 몰랐다 — 존도 문별로 함께 기록한다. */
-      if((t.floor === 1 || t.kind === 'zone') && w.QRNAV) ['MAIN', 'BACK', 'EAST', 'WEST'].forEach(function(g){
+      /* 문별 경로 — 어느 층이든 전부 기록한다(출발은 1층).
+         2026-09-27 : 처음엔 1층 목적지만, 다음엔 지하만 더 담았는데, '동문 → 2층' 절차를
+         새로 만들고 보니 그것도 안 담겨 있어 바뀌어도 아무도 몰랐다. 문별 안내를 층마다
+         하나씩 정하는 중이므로, 처음부터 전부 담아 두는 편이 맞다. */
+      if(w.QRNAV) ['MAIN', 'BACK', 'EAST', 'WEST'].forEach(function(g){
         w.target = JSON.parse(JSON.stringify(t)); w.startFloor = 1;
         w.QRNAV.gate = function(){ return g; };
         out.steps[t.kind + ':' + (t.code || t.floor) + '@1/' + g] = stepList(w);

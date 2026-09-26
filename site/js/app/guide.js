@@ -201,6 +201,48 @@ function buildSteps(){
     return out;
   }
 
+  /* ★ 2026-09-27 : 문으로 들어와 엘리베이터로 올라간 층의 호실 — 사용자가 정한 안내.
+     ①②③(문 외관 · 복도 · 엘리베이터 타기)은 위에서 이미 넣었고 여기서 ④⑤⑥ 을 잇는다.
+       ④ 엘리베이터 안에서 밖을 본 사진   엘리베이터에서 내려서 좌회전/우회전 하세요
+       ⑤ 그 쪽 복도                      복도를 따라 직진하세요
+       ⑥ 도착                            왼쪽/오른쪽에서 몇 번째 방에 …
+     엘리베이터에서 내리면 -X(복도)를 보고 선다 → 왼손이 +Z(서문 쪽), 오른손이 -Z(동문 쪽).
+     '몇 번째'는 엘리베이터에서부터 그 쪽 방만 센다.
+     UP_FLOW 에 문과 층을 적어 두는 대로 늘린다 — 지금은 동문 2층만 정했다. */
+  var UP_FLOW = {EAST:[2]};
+  if(gk && sf === 1 && target.kind === 'room' && UP_FLOW[gk] && UP_FLOW[gk].indexOf(lv) >= 0 &&
+     ROOM_PHOTOS['EVIN'+lv] && ROOM_PHOTOS['HALL'+lv+'L'] && ROOM_PHOTOS['HALL'+lv+'R']){
+    var evZu   = evXZ(lv).z;
+    var dirU   = (p.z >= evZu) ? 1 : -1;                // +1 = 서문 쪽(좌회전) · -1 = 동문 쪽(우회전)
+    var isLeftU = function(x){ return (dirU > 0) ? (x > 0) : (x < 0); };
+    var leftU  = isLeftU(p.x);
+    var baseU  = String(target.code).replace(/-[A-Za-z]$/, '');
+    var matesU = [];
+    Object.keys(FLOOR_LAYOUT[lv].lookup).forEach(function(k){
+      var q = place3D(k);
+      if(q && (isLeftU(q.x) === leftU) && (((q.z >= evZu) ? 1 : -1) === dirU)) matesU.push({code:k, z:q.z});
+    });
+    matesU.sort(function(a, b){ return (a.z - b.z) * dirU; });   // 엘리베이터에서 가까운 순
+    var nthU = 0;
+    for(var mu = 0; mu < matesU.length; mu++) if(matesU[mu].code === baseU) nthU = mu + 1;
+    out.push({a: dirU > 0 ? '←' : '→', type:'turn',
+              tko:'엘리베이터에서 내려서 ' + (dirU > 0 ? '좌회전' : '우회전') + ' 하세요',
+              ten:'Get off the elevator and turn ' + (dirU > 0 ? 'left' : 'right'),
+              ph:'['+lvName(lv)+' 엘리베이터 안 사진 ]', code:'EVIN'+lv});
+    out.push({a:'↑', type:'straight',
+              tko:'복도를 따라 직진하세요', ten:'Go straight along the hallway',
+              ph:'['+lvName(lv)+' 복도 사진 ]', code:'HALL'+lv+(dirU > 0 ? 'L' : 'R')});
+    var sideKoU = leftU ? '왼쪽' : '오른쪽', sideEnU = leftU ? 'left' : 'right';
+    var ttlKoU = roomTitle(target.code, 'ko'), ttlEnU = roomTitle(target.code, 'en');
+    out.push({a:'✓', type:'arrive',
+              tko: (nthU ? (sideKoU+'에서 '+ordWord(nthU)+' 방에 ') : (sideKoU+'에 ')) +
+                   ttlKoU + subjParticle(ttlKoU) + ' 있습니다',
+              ten: ttlEnU + (nthU ? (' is the '+ordWordEn(nthU)+' room on the '+sideEnU+'.')
+                                  : (' is on the '+sideEnU+'.')),
+              ph:'[ '+target.code+'호 문 앞 사진 ]', code:target.code});
+    return out;
+  }
+
   /* ── 좌우 안내 기준 ────────────────────────────────────────────
      '어느 쪽으로 도는가'와 '방이 어느 쪽에 있는가'는 서로 다른 기준이다.
      예전에는 둘 다 방의 X좌표 하나로 정해서, 13524처럼

@@ -15,7 +15,7 @@ function buildSteps(){
   var gk = (typeof currentGateKey==='function') ? currentGateKey() : null;
   /* ★ 2026-09-27 : 문별 절차 — 사용자가 정한 순서를 그대로 따른다.
        ① 그 문의 **외관** 사진 — ○문으로 들어오세요   (아직 안 정한 문은 예전처럼 문 안쪽 사진)
-       ② 들어와서 본 복도     — 복도를 따라 쭉 이동하세요
+       ② 들어와서 본 복도     — 복도를 따라 직진하세요
        ③ 1층 엘리베이터 정면  — 엘리베이터를 타고 …
      지하 크리에이티브 존이 목적지면 아래 zone 갈래에서 ④⑤⑥ 이 이어진다.
      GATE_OUT  : 그 문의 '바깥' 사진 — ①에 쓴다. 없는 문은 예전처럼 문 안쪽 사진을 쓴다.
@@ -25,8 +25,8 @@ function buildSteps(){
                    BACK:'GATE_BACK_OUT', MAIN:'GATE_MAIN_OUT'};
   var GATE_FLOW = {
     /* 동문·서문은 복도 끝에 있어 복도를 따라 걸어 들어온다 */
-    EAST: {hall:'GATE_E',         tko:'복도를 따라 쭉 이동하세요', ten:'Go straight along the hallway'},
-    WEST: {hall:'GATE_W',         tko:'복도를 따라 쭉 이동하세요', ten:'Go straight along the hallway'},
+    EAST: {hall:'GATE_E',         tko:'복도를 따라 직진하세요', ten:'Go straight along the hallway'},
+    WEST: {hall:'GATE_W',         tko:'복도를 따라 직진하세요', ten:'Go straight along the hallway'},
     /* 정문은 옆면에 있어 들어서면 바로 로비다 — 복도가 아니라 엘리베이터 쪽으로 간다 */
     MAIN: {hall:'GATE_MAIN_WAY',  tko:'엘리베이터 앞으로 가세요',  ten:'Head to the elevator'}
   };

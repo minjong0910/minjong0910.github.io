@@ -7,7 +7,7 @@
 #   화면을 바꾸면 비교가 흔들리기 때문이다. 미리보기 서버(8080)가 켜져 있어야 한다.
 param(
   [ValidateSet('capture','compare')][string]$Mode = 'compare',
-  [string]$Tag = 'v112',
+  [string]$Tag = 'v113',
   [string]$App = '../site/index.html',
   [int]$Port = 8080,
   [string]$Parts = ''   # 'ci' = 글자 폭·3D 그림 비교를 뺀다 (다른 컴퓨터)

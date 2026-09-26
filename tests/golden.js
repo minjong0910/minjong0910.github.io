@@ -380,6 +380,13 @@ function run(){
     try{
       if(w.PHOTO_INDEX){
         w.ROOM_PHOTOS = JSON.parse(JSON.stringify(w.PHOTO_INDEX));
+        /* ★ 되돌린 다음에는 앱이 켤 때 하는 정리를 같은 순서로 다시 해 줘야 한다.
+           phNormalize() 안의 phBuildGateLists() 가 GATE_EAST·GATE_WEST·GATE_MAIN 을
+           건물 사진(BLD)에서 그때그때 만들어 내는데, 이걸 빼먹으면 그 세 문에는 사진이
+           없는 셈이 되어 길안내 ①②('동문으로 들어오세요' · 복도) 단계가 통째로 빠진
+           채 기록됐다. 문별 절차를 새로 만들어도 안전망이 보지 못했다 (2026-09-27).
+           둘 다 PHOTO_INDEX 만 보고 계산하므로 기록이 달라지지 않는다. */
+        if(w.phNormalize) w.phNormalize();
         if(w.phRebuildRoomNames) w.phRebuildRoomNames();
       }
     }catch(e){}

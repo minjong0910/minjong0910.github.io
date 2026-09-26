@@ -119,6 +119,47 @@ function buildSteps(){
        화장실·비상계단은 아래의 기존 안내를 그대로 쓴다(아직 절차를 정하지 않았다).
        dir  : 걸어가는 방향(+1 = +Z, -1 = -Z)
        pass : '엘리베이터를 지나 …' 단계에 쓸, 그 방향으로 뻗은 복도 사진 */
+  /* ★ 2026-09-27 : 정문 → 1층 호실 — 사용자가 정한 안내.
+     정문은 건물 옆면이라 들어서면 엘리베이터를 마주 본다. 거기서 좌·우로 한 번 돈 뒤 복도를 걷는다.
+       ① 정문 외관   정문으로 들어오세요
+       ② 정문 라운지  엘리베이터에서 좌회전/우회전 하세요
+       ③ 그 쪽 복도   복도를 따라 직진하세요
+       ④ 도착        왼쪽/오른쪽에서 몇 번째 방에 …
+     엘리베이터를 마주 보면 왼손이 -Z(동문 쪽), 오른손이 +Z(서문 쪽)이다.
+     '몇 번째'는 어느 쪽이든 엘리베이터에서부터 센다. */
+  if(gk === 'MAIN' && sf === 1 && lv === 1 && target.kind === 'room' && ROOM_PHOTOS['GATE_MAIN_WAY']){
+    var evZm  = evXZ(1).z;
+    var dirM  = (p.z >= evZm) ? 1 : -1;                 // +1 = 서문 쪽(우회전) · -1 = 동문 쪽(좌회전)
+    var isLeftM = function(x){ return (dirM > 0) ? (x > 0) : (x < 0); };   // 돌고 나서 걸을 때 왼손 쪽
+    var leftM = isLeftM(p.x);
+    var baseM = String(target.code).replace(/-[A-Za-z]$/, '');
+    var matesM = [];
+    Object.keys(FLOOR_LAYOUT[1].lookup).forEach(function(k){
+      var q = place3D(k);
+      if(q && (isLeftM(q.x) === leftM) && (((q.z >= evZm) ? 1 : -1) === dirM)) matesM.push({code:k, z:q.z});
+    });
+    matesM.sort(function(a, b){ return (a.z - b.z) * dirM; });   // 엘리베이터에서 가까운 순
+    var nthM = 0;
+    for(var mj = 0; mj < matesM.length; mj++) if(matesM[mj].code === baseM) nthM = mj + 1;
+    out.push({a: dirM < 0 ? '←' : '→', type:'turn',
+              tko:'엘리베이터에서 ' + (dirM < 0 ? '좌회전' : '우회전') + ' 하세요',
+              ten:'At the elevator, turn ' + (dirM < 0 ? 'left' : 'right'),
+              ph:'[ 정문 라운지 사진 ]', code:'GATE_MAIN_WAY'});
+    out.push({a:'↑', type:'straight',
+              tko:'복도를 따라 직진하세요', ten:'Go straight along the hallway',
+              ph:'[ 1층 복도 사진 ]', code:(dirM > 0 ? 'HALL1L' : 'HALL1R'),
+              cap:{ko:'1층 복도', en:'Floor 1 hallway'}});
+    var sideKoM = leftM ? '왼쪽' : '오른쪽', sideEnM = leftM ? 'left' : 'right';
+    var ttlKoM = roomTitle(target.code, 'ko'), ttlEnM = roomTitle(target.code, 'en');
+    out.push({a:'✓', type:'arrive',
+              tko: (nthM ? (sideKoM+'에서 '+ordWord(nthM)+' 방에 ') : (sideKoM+'에 ')) +
+                   ttlKoM + subjParticle(ttlKoM) + ' 있습니다',
+              ten: ttlEnM + (nthM ? (' is the '+ordWordEn(nthM)+' room on the '+sideEnM+'.')
+                                  : (' is on the '+sideEnM+'.')),
+              ph:'[ '+target.code+'호 문 앞 사진 ]', code:target.code});
+    return out;
+  }
+
   var END_FLOW = {EAST:{dir: 1, pass:'EV1WEST'}, WEST:{dir:-1, pass:'EV1EAST'}};
   var ef = (gk && sf === 1 && lv === 1 && target.kind === 'room') ? END_FLOW[gk] : null;
   if(ef && ROOM_PHOTOS[ef.pass]){

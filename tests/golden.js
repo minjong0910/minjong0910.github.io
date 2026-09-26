@@ -236,14 +236,23 @@ function captureDynamic(w){
     none:     {id:'gD', ai:null}
   };
   Object.keys(fakes).forEach(function(k){ out.badge[k] = w.SUGAI.adminBadge(fakes[k]); });
-  var saveT = w.target, saveS = w.startFloor;
-  [[{kind:'room', floor:3, code:'13310'}, 1], [{kind:'emstair', floor:4}, 4], [{kind:'zone', floor:'B1'}, 2]].forEach(function(x){
-    w.target = JSON.parse(JSON.stringify(x[0])); w.startFloor = x[1];
-    w.startGuide();
-    var el = w.document.getElementById('s6');
-    out.guide[(x[0].code || x[0].kind) + '@' + x[1]] = normHtml(el ? el.innerHTML : '');
-  });
-  w.target = saveT; w.startFloor = saveS; w.go('s1');
+  var saveT = w.target, saveS = w.startFloor, saveGate = w.QRNAV && w.QRNAV.gate;
+  /* 2026-09-27 : 출입문이 남아 있으면 안내 단계 수가 달라져 기록이 들쭉날쭉했다
+     (emstair@4 · zone@2 가 2단계로 찍히는 일이 두 번 있었다). 위 captureLogic 처럼
+     여기서도 '문 없음'으로 못박고, 끝나면 되돌린다. */
+  if(w.QRNAV) w.QRNAV.gate = function(){ return null; };
+  try {
+    [[{kind:'room', floor:3, code:'13310'}, 1], [{kind:'emstair', floor:4}, 4], [{kind:'zone', floor:'B1'}, 2]].forEach(function(x){
+      w.target = JSON.parse(JSON.stringify(x[0])); w.startFloor = x[1];
+      w.startGuide();
+      var el = w.document.getElementById('s6');
+      out.guide[(x[0].code || x[0].kind) + '@' + x[1]] = normHtml(el ? el.innerHTML : '');
+    });
+  } finally {
+    w.target = saveT; w.startFloor = saveS;
+    if(w.QRNAV) w.QRNAV.gate = saveGate;
+  }
+  w.go('s1');
   return out;
 }
 

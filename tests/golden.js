@@ -372,6 +372,17 @@ function run(){
   }).then(function(){
     return sleep(1500);   /* 처음 화면(부팅 글자 등)이 자리를 잡을 시간 */
   }).then(function(){
+    /* ★ 2026-09-27 : 사진 목록을 앱이 담고 나온 그대로(PHOTO_INDEX)로 되돌린다.
+       앱은 이 브라우저에 저장해 둔 사진(관리자가 넣어 본 것·승인한 제보)을 여기에 얹는데,
+       검사 브라우저에 그런 것이 남아 있으면 기록이 그때그때 달라진다 —
+       실제로 라운지 5곳에 남아 있던 사진 때문에 '사진 173장/178장', 엘리베이터 사진
+       '1 / 2 · 1 / 3' 이 왔다 갔다 했다. 기록은 '앱이 배포하는 것'만 담아야 한다. */
+    try{
+      if(w.PHOTO_INDEX){
+        w.ROOM_PHOTOS = JSON.parse(JSON.stringify(w.PHOTO_INDEX));
+        if(w.phRebuildRoomNames) w.phRebuildRoomNames();
+      }
+    }catch(e){}
     rec.dom = captureDom(w);          log('화면 : id ' + rec.dom.ids.length + '개 · 요소 ' + rec.dom.style.length + '개');
     freezeTime(w);
     if(w.rebuildAllFloors) w.rebuildAllFloors();   /* 글꼴이 다 받아진 뒤 이름표를 다시 그린다 */

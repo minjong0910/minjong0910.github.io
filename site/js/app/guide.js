@@ -208,8 +208,9 @@ function buildSteps(){
        ⑥ 도착                            왼쪽/오른쪽에서 몇 번째 방에 …
      엘리베이터에서 내리면 -X(복도)를 보고 선다 → 왼손이 +Z(서문 쪽), 오른손이 -Z(동문 쪽).
      '몇 번째'는 엘리베이터에서부터 그 쪽 방만 센다.
-     UP_FLOW 에 문과 층을 적어 두는 대로 늘린다 — 지금은 동문 2층만 정했다. */
-  var UP_FLOW = {EAST:[2]};
+     엘리베이터에서 내린 뒤는 어느 문으로 들어왔든 똑같으므로, 문을 한 줄 더 적으면 그대로 따라온다.
+     UP_FLOW 에 문과 층을 적어 두는 대로 늘린다 — 지금은 동문·서문의 2층까지 정했다. */
+  var UP_FLOW = {EAST:[2], WEST:[2]};
   if(gk && sf === 1 && target.kind === 'room' && UP_FLOW[gk] && UP_FLOW[gk].indexOf(lv) >= 0 &&
      ROOM_PHOTOS['EVIN'+lv] && ROOM_PHOTOS['HALL'+lv+'L'] && ROOM_PHOTOS['HALL'+lv+'R']){
     var evZu   = evXZ(lv).z;

@@ -255,11 +255,29 @@ function showFloorDetail(lv){
       if(target.kind==='zone') p2 = {x:B1_ZONE_MID_X_D, z:B1_ZONE_MID_Z_D};
     }
     var AY=SLAB+0.55;
-    // 4번 화면과 같은 문제(엘베와 계단 사이로 돌아 나옴)가 있어 동일하게 수정
-    var raw=[ new THREE.Vector3(ev2.x,AY,ev2.z),   // 엘리베이터에서 출발
-              new THREE.Vector3(0,AY,ev2.z),       // 복도로 곧장 나옴
-              new THREE.Vector3(0,AY,p2.z),        // 복도를 따라 이동
-              new THREE.Vector3(p2.x,AY,p2.z) ];
+    /* ★ 2026-09-27 : 1층에서 출입문이 확정돼 있고(QR·직접 선택) 그 층에서 곧장 걸어가는
+       경우에는 엘리베이터가 아니라 **들어온 그 문**에서 선이 시작해야 한다.
+       동문·서문으로 들어왔는데 화살표가 엘리베이터에서 시작해 반대로 돌아가는 것처럼
+       보인다는 제보. 건물 3D 의 빨간 선(buildRouteA)은 이미 이렇게 하고 있었고
+       층 상세만 빠져 있었다 — 같은 규칙으로 맞춘다.
+         · 동문·서문 : 복도 연장선(x=0)에 있으므로 문에서 곧장 복도를 따라 간다
+         · 정문·후문 : 옆벽에 있으므로 복도 중앙(x=0)으로 한 번 나온 뒤 복도를 따라 간다 */
+    var st2 = null;
+    if(lv === 1 && (startFloor === 1 || startFloor === '1') && typeof gateXZ === 'function')
+      st2 = gateXZ(typeof currentGateKey === 'function' ? currentGateKey() : null);
+    var raw;
+    if(st2){
+      raw = [ new THREE.Vector3(st2.x, AY, st2.z) ];                             // 들어온 문에서 출발
+      if(Math.abs(st2.x) > CORR_HALF) raw.push(new THREE.Vector3(0, AY, st2.z)); // 옆벽 문은 복도 중앙으로 먼저
+      raw.push(new THREE.Vector3(0,     AY, p2.z));                              // 복도를 따라 이동
+      raw.push(new THREE.Vector3(p2.x,  AY, p2.z));                              // 복도에서 방 안으로
+    }else{
+      // 4번 화면과 같은 문제(엘베와 계단 사이로 돌아 나옴)가 있어 동일하게 수정
+      raw=[ new THREE.Vector3(ev2.x,AY,ev2.z),   // 엘리베이터에서 출발
+            new THREE.Vector3(0,AY,ev2.z),       // 복도로 곧장 나옴
+            new THREE.Vector3(0,AY,p2.z),        // 복도를 따라 이동
+            new THREE.Vector3(p2.x,AY,p2.z) ];
+    }
     var pts=[];
     raw.forEach(function(v){ if(!pts.length || pts[pts.length-1].distanceTo(v)>0.15) pts.push(v); });
     if(pts.length>=2){

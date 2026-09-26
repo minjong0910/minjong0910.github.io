@@ -21,8 +21,15 @@ function buildSteps(){
      GATE_OUT  : 그 문의 '바깥' 사진 — ①에 쓴다. 없는 문은 예전처럼 문 안쪽 사진을 쓴다.
      GATE_FLOW : '복도를 지나 엘리베이터로 가는' 문 — ②③ 이 붙는다.
                  후문은 바로 옆 계단으로 내려가므로 여기 없고, 아래에 따로 있다. */
-  var GATE_OUT  = {EAST:'GATE_EAST_OUT', WEST:'GATE_WEST_OUT', BACK:'GATE_BACK_OUT'};
-  var GATE_FLOW = {EAST:{hall:'GATE_E'}, WEST:{hall:'GATE_W'}};
+  var GATE_OUT  = {EAST:'GATE_EAST_OUT', WEST:'GATE_WEST_OUT',
+                   BACK:'GATE_BACK_OUT', MAIN:'GATE_MAIN_OUT'};
+  var GATE_FLOW = {
+    /* 동문·서문은 복도 끝에 있어 복도를 따라 걸어 들어온다 */
+    EAST: {hall:'GATE_E',         tko:'복도를 따라 쭉 이동하세요', ten:'Go straight along the hallway'},
+    WEST: {hall:'GATE_W',         tko:'복도를 따라 쭉 이동하세요', ten:'Go straight along the hallway'},
+    /* 정문은 옆면에 있어 들어서면 바로 로비다 — 복도가 아니라 엘리베이터 쪽으로 간다 */
+    MAIN: {hall:'GATE_MAIN_WAY',  tko:'엘리베이터 앞으로 가세요',  ten:'Head to the elevator'}
+  };
   var flow = (gk && sf === 1) ? GATE_FLOW[gk] : null;
   if(gk && sf===1 && ROOM_PHOTOS['GATE_'+gk]){
     var GN = {MAIN:{ko:'정문', en:'the main gate'},  BACK:{ko:'후문', en:'the back gate'},
@@ -37,8 +44,8 @@ function buildSteps(){
        아래에서 어차피 '복도를 따라 쭉 가세요'가 나오므로 같은 말이 두 번 겹친다 → 그때는 넣지 않는다. */
     if(flow && !sameFloor && ROOM_PHOTOS[flow.hall])
       out.push({a:'↑', type:'straight',
-                tko:'복도를 따라 쭉 이동하세요', ten:'Go straight along the hallway',
-                ph:'[ '+gn.ko+' 복도 사진 ]', code:flow.hall});
+                tko:flow.tko, ten:flow.ten,
+                ph:'[ '+gn.ko+' 안쪽 사진 ]', code:flow.hall});
   }
   /* ★ 후문 → 크리에이티브 존 : 사용자가 정한 네 단계.
      후문은 들어서면 바로 옆이 지하로 내려가는 계단이라 엘리베이터를 타지 않는다

@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '1f008489a331';   // 파일 224개 · 14.6MB
+var VERSION = '22bfc50ff773';   // 파일 225개 · 14.7MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -38,7 +38,7 @@ var FILES = [
   ['3d/tex/21.png','5185337f5f27',7799],
   ['css/app.css','1b63c9b4c3b2',79082],
   ['css/boot.css','b3a18297534a',1353],
-  ['data/photos.js','70a645bbc39a',15379],
+  ['data/photos.js','2c0c83b83bc6',15585],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
   ['data/photos/13102/01.jpg','523c6f068a4c',76075],
   ['data/photos/13103/01.jpg','a733992e9e36',59160],
@@ -170,6 +170,7 @@ var FILES = [
   ['data/photos/GATE_BACK/01.jpg','55ae785c0aac',84895],
   ['data/photos/GATE_BACK_STAIR/01.jpg','9da73a0f7c8b',127773],
   ['data/photos/GATE_E/01.jpg','bf182412afe1',70347],
+  ['data/photos/GATE_MAIN_WAY/01.jpg','a6a99212b589',117582],
   ['data/photos/GATE_W/01.jpg','733a7a265bb5',67853],
   ['data/photos/HALL1L/01.jpg','14345fa23c0d',90266],
   ['data/photos/HALL1R/01.jpg','4a34851fd2dc',71992],
@@ -213,7 +214,7 @@ var FILES = [
   ['js/app/boot.js','c49829682f30',8075],
   ['js/app/building.js','647a70cb183a',23274],
   ['js/app/floor-detail.js','9d10c5aa9ba7',19078],
-  ['js/app/guide.js','c315d74ebac2',26687],
+  ['js/app/guide.js','f164953177e7',27184],
   ['js/app/overview3d.js','e16d51396168',89724],
   ['js/app/photos.js','7debd2904c8c',51527],
   ['js/app/pwa.js','85a9eecf6165',28729],

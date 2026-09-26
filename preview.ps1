@@ -126,6 +126,7 @@ $worker = {
             }
             else {
                 $allowed = ($rel -match '^(eval\w*|gen|sheet|ocrtest)\.html$') -or ($rel -eq 'batches.json') -or
+                           ($rel -eq '사진고르기.html') -or
                            ($rel -like 'site/*') -or ($rel -like 'tests/*') -or ($rel -like '문서/*') -or
                            ($rel -like '사진원본/*') -or ($rel -like '_검토_*') -or
                            ($rel -like '도구/QR_*') -or ($rel -like 'QR인쇄/*')

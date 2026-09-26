@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진 고르기 — 공대 3호관 길안내</title>
+<style>
+  :root{ --bg:#0E1217; --card:#161C24; --line:#2A3340; --ink:#E7F6FF; --dim:#8FA3B8; --on:#00E5FF; --warn:#FFD400; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink);
+        font-family:Pretendard,"맑은 고딕","Malgun Gothic",sans-serif; font-size:15px; }
+  header{ position:sticky; top:0; z-index:9; background:rgba(14,18,23,.96); border-bottom:1px solid var(--line);
+          padding:12px 16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  header h1{ font-size:17px; margin:0; }
+  .grow{ flex:1; }
+  .stat{ color:var(--dim); font-size:13px; }
+  .stat b{ color:var(--on); }
+  button{ font-family:inherit; font-size:14px; padding:8px 14px; border-radius:8px; cursor:pointer;
+          background:#1B2430; color:var(--ink); border:1px solid var(--line); }
+  button.go{ background:linear-gradient(90deg,#00E5FF,#7C6CFF); color:#06121A; border:0; font-weight:700; }
+  button:hover{ filter:brightness(1.15); }
+  .tip{ padding:14px 16px; color:var(--dim); line-height:1.7; border-bottom:1px solid var(--line); }
+  .tip b{ color:var(--ink); }
+  h2.floor{ margin:28px 16px 6px; font-size:16px; color:var(--warn); }
+  .place{ border-top:1px solid var(--line); padding:14px 16px 18px; }
+  .place.done{ opacity:.45; }
+  .place h3{ margin:0 0 10px; font-size:15px; font-weight:700; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; }
+  .place h3 .code{ color:var(--dim); font-weight:400; font-size:13px; }
+  .place h3 .picked{ color:var(--on); font-size:13px; font-weight:400; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:10px; }
+  figure{ margin:0; background:var(--card); border:2px solid transparent; border-radius:10px; overflow:hidden;
+          cursor:pointer; position:relative; }
+  figure.sel{ border-color:var(--on); box-shadow:0 0 0 3px rgba(0,229,255,.22); }
+  figure img{ display:block; width:100%; height:190px; object-fit:cover; background:#0a0e13; }
+  figcaption{ font-size:11px; color:var(--dim); padding:6px 8px; word-break:break-all; line-height:1.4; }
+  .badge{ position:absolute; top:6px; left:6px; background:rgba(255,212,0,.92); color:#1a1200;
+          font-size:11px; font-weight:700; padding:2px 7px; border-radius:20px; }
+  figure.sel .badge2{ position:absolute; top:6px; right:6px; background:var(--on); color:#06121A;
+          font-size:11px; font-weight:700; padding:2px 7px; border-radius:20px; }
+  .more{ margin-top:10px; }
+  #big{ position:fixed; inset:0; background:rgba(0,0,0,.92); display:none; z-index:20;
+        align-items:center; justify-content:center; flex-direction:column; gap:10px; padding:16px; }
+  #big img{ max-width:96vw; max-height:84vh; object-fit:contain; }
+  #big .row{ display:flex; gap:10px; align-items:center; }
+  #big p{ margin:0; color:var(--dim); font-size:13px; text-align:center; word-break:break-all; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>사진 고르기</h1>
+  <span class="stat">고른 곳 <b id="n">0</b> / <span id="t">0</span></span>
+  <span class="grow"></span>
+  <button id="onlyLeft">아직 안 고른 곳만</button>
+  <button id="clear">고른 것 모두 지우기</button>
+  <button class="go" id="save">고른 것 저장 ↓</button>
+</header>
+
+<div class="tip">
+  장소마다 <b>마음에 드는 사진 한 장</b>을 눌러 주세요. 누르면 파란 테두리가 생깁니다. 다시 누르면 취소됩니다.<br>
+  노란 <b>「지금 쓰는 사진」</b> 표가 붙은 것이 현재 앱에 들어가 있는 사진입니다 — 그게 제일 낫다면 그걸 누르시면 됩니다.<br>
+  사진을 <b>오른쪽 클릭</b>하면 크게 볼 수 있습니다. 고른 것은 <b>자동으로 저장</b>되니 창을 닫았다 다시 열어도 됩니다.<br>
+  다 고르셨으면 <b>「고른 것 저장 ↓」</b>을 눌러 나온 파일(<b>고른사진.txt</b>)을 저에게 주세요.
+</div>
+
+<main id="main"></main>
+
+<div id="big"><img alt=""><p></p><div class="row"><button id="bigPick">이 사진으로 고르기</button><button id="bigClose">닫기</button></div></div>
+
+<script>
+var DATA = /*__DATA__*/;
+var KEY = 'b3nav_pick_v1';
+var FIRST = 24;                     // 사진이 많은 곳은 처음에 이만큼만 보여 준다
+
+var pick = {};
+try{ pick = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){ pick = {}; }
+
+function enc(p){ return encodeURI(p); }
+function srcOf(pl, f){
+  return (f === '(그대로)') ? enc('site/data/photos/' + pl.code + '/' + pl.cur)
+                            : enc('사진원본/' + pl.code + '/' + f);
+}
+var FLOORS = [['B1','지하 1층'],['1','1층'],['2','2층'],['3','3층'],['4','4층'],['5','5층'],['R','옥상'],['외부','건물 외부'],['기타','그 밖']];
+
+function draw(){
+  var main = document.getElementById('main');
+  main.innerHTML = '';
+  var total = 0;
+  FLOORS.forEach(function(fl){
+    var list = DATA.filter(function(p){ return p.floor === fl[0]; });
+    if(!list.length) return;
+    var h = document.createElement('h2'); h.className = 'floor'; h.textContent = fl[1] + ' — ' + list.length + '곳';
+    main.appendChild(h);
+    list.forEach(function(pl){
+      total++;
+      var box = document.createElement('section'); box.className = 'place'; box.dataset.code = pl.code;
+      if(pick[pl.code]) box.classList.add('done');
+      var t = document.createElement('h3');
+      t.innerHTML = '<span>' + esc(pl.label) + '</span><span class="code">' + esc(pl.code) + ' · 사진 ' + pl.files.length + '장</span>' +
+                    (pick[pl.code] ? '<span class="picked">✓ 고름</span>' : '');
+      box.appendChild(t);
+      var g = document.createElement('div'); g.className = 'grid';
+      var items = [];
+      if(pl.cur) items.push('(그대로)');
+      items = items.concat(pl.files);
+      var shown = box.dataset.all === '1' ? items.length : Math.min(items.length, FIRST);
+      items.slice(0, shown).forEach(function(f){ g.appendChild(tile(pl, f)); });
+      box.appendChild(g);
+      if(items.length > shown){
+        var b = document.createElement('button'); b.className = 'more';
+        b.textContent = '나머지 ' + (items.length - shown) + '장 더 보기';
+        b.onclick = function(){
+          items.slice(shown).forEach(function(f){ g.appendChild(tile(pl, f)); });
+          b.remove();
+        };
+        box.appendChild(b);
+      }
+      main.appendChild(box);
+    });
+  });
+  document.getElementById('t').textContent = total;
+  count();
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+
+function tile(pl, f){
+  var fig = document.createElement('figure');
+  if(pick[pl.code] === f) fig.classList.add('sel');
+  var img = document.createElement('img');
+  img.loading = 'lazy'; img.src = srcOf(pl, f); img.alt = f;
+  fig.appendChild(img);
+  if(f === '(그대로)'){
+    var b = document.createElement('span'); b.className = 'badge'; b.textContent = '지금 쓰는 사진'; fig.appendChild(b);
+  }
+  var b2 = document.createElement('span'); b2.className = 'badge2'; b2.textContent = '고름'; fig.appendChild(b2);
+  var cap = document.createElement('figcaption'); cap.textContent = (f === '(그대로)' ? '지금 앱에 들어 있는 사진' : f);
+  fig.appendChild(cap);
+  fig.onclick = function(){ choose(pl.code, f, fig); };
+  fig.oncontextmenu = function(e){ e.preventDefault(); big(pl, f); };
+  return fig;
+}
+function choose(code, f, fig){
+  var box = fig.closest('.place');
+  if(pick[code] === f){ delete pick[code]; }
+  else { pick[code] = f; }
+  box.querySelectorAll('figure').forEach(function(x){ x.classList.remove('sel'); });
+  if(pick[code]) fig.classList.add('sel');
+  box.classList.toggle('done', !!pick[code]);
+  var t = box.querySelector('h3');
+  var mark = t.querySelector('.picked');
+  if(pick[code] && !mark){ var s = document.createElement('span'); s.className='picked'; s.textContent='✓ 고름'; t.appendChild(s); }
+  if(!pick[code] && mark) mark.remove();
+  save(); count();
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(pick)); }catch(e){} }
+function count(){ document.getElementById('n').textContent = Object.keys(pick).length; }
+
+/* 크게 보기 */
+var bigEl = document.getElementById('big'), bigCur = null;
+function big(pl, f){
+  bigCur = {pl:pl, f:f};
+  bigEl.querySelector('img').src = srcOf(pl, f);
+  bigEl.querySelector('p').textContent = pl.label + ' · ' + (f === '(그대로)' ? '지금 앱에 들어 있는 사진' : f);
+  bigEl.style.display = 'flex';
+}
+document.getElementById('bigClose').onclick = function(){ bigEl.style.display = 'none'; };
+bigEl.onclick = function(e){ if(e.target === bigEl) bigEl.style.display = 'none'; };
+document.getElementById('bigPick').onclick = function(){
+  if(!bigCur) return;
+  var box = document.querySelector('.place[data-code="' + bigCur.pl.code + '"]');
+  var figs = box.querySelectorAll('figure');
+  for(var i = 0; i < figs.length; i++){
+    if(figs[i].querySelector('img').alt === bigCur.f){ choose(bigCur.pl.code, bigCur.f, figs[i]); break; }
+  }
+  bigEl.style.display = 'none';
+};
+
+/* 머리줄 버튼 */
+document.getElementById('clear').onclick = function(){
+  if(!confirm('고른 것을 모두 지울까요?')) return;
+  pick = {}; save(); draw();
+};
+var onlyLeft = false;
+document.getElementById('onlyLeft').onclick = function(){
+  onlyLeft = !onlyLeft;
+  this.textContent = onlyLeft ? '전체 보기' : '아직 안 고른 곳만';
+  document.querySelectorAll('.place').forEach(function(b){
+    b.style.display = (onlyLeft && pick[b.dataset.code]) ? 'none' : '';
+  });
+};
+document.getElementById('save').onclick = function(){
+  var lines = ['# 공대 3호관 길안내 — 사람이 고른 사진',
+               '# 만든 날 : ' + new Date().toLocaleString('ko-KR'),
+               '# 형식 : <코드><탭><고른 사진 파일 이름>   ((그대로) = 지금 쓰는 사진 유지)',
+               '# 고른 곳 ' + Object.keys(pick).length + ' / ' + DATA.length, ''];
+  DATA.forEach(function(p){ if(pick[p.code]) lines.push(p.code + '\t' + pick[p.code]); });
+  var blob = new Blob([lines.join('\r\n')], {type:'text/plain;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = '고른사진.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+};
+
+draw();
+</script>
+</body>
+</html>

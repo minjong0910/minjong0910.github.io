@@ -234,6 +234,11 @@ function setPart(p){
     p ? ('맡은 곳 : ' + (p === 'A' ? '가 — 지하~3층' : '나 — 4·5층')) : '전체';
   draw();
 }
+/* 이미 열어 둔 창에서 주소 끝만 #A · #B 로 바꿔도 따라가게 */
+window.addEventListener('hashchange', function(){
+  var h = location.hash.replace('#','').toUpperCase();
+  setPart(h === 'A' || h === 'B' ? h : '');
+});
 if(part){ setPart(part); }
 else if(Object.keys(pick).length){ setPart(''); }      // 하던 사람은 바로 이어서
 else { document.getElementById('choose').style.display = 'block'; draw(); }

@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '79492d8c576a';   // 파일 221개 · 14.3MB
+var VERSION = '0d090e1fcd7a';   // 파일 222개 · 14.4MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -38,7 +38,7 @@ var FILES = [
   ['3d/tex/21.png','5185337f5f27',7799],
   ['css/app.css','1b63c9b4c3b2',79082],
   ['css/boot.css','b3a18297534a',1353],
-  ['data/photos.js','a9bda21ea79d',14728],
+  ['data/photos.js','8bc9ab6bbb6d',14940],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
   ['data/photos/13102/01.jpg','523c6f068a4c',76075],
   ['data/photos/13103/01.jpg','a733992e9e36',59160],
@@ -139,7 +139,8 @@ var FILES = [
   ['data/photos/13522/01.jpg','b09fa6a6018d',68287],
   ['data/photos/13523/01.jpg','fc30e4012b39',71586],
   ['data/photos/13524/01.jpg','bb1303d5061a',72229],
-  ['data/photos/B1/01.jpg','5353a79e196a',65982],
+  ['data/photos/B1/01.jpg','e49a9f90c6cb',90524],
+  ['data/photos/B1WAY/01.jpg','d97bac3b971c',66076],
   ['data/photos/BLD/01.jpg','ba7d93b5e0c4',138193],
   ['data/photos/BLD/02.jpg','0be76ded8b3e',112249],
   ['data/photos/BLD/03.jpg','9748826a6b07',129215],
@@ -210,7 +211,7 @@ var FILES = [
   ['js/app/boot.js','c49829682f30',8075],
   ['js/app/building.js','647a70cb183a',23274],
   ['js/app/floor-detail.js','9d10c5aa9ba7',19078],
-  ['js/app/guide.js','e019570ad60b',22160],
+  ['js/app/guide.js','9f7676fb58ec',24885],
   ['js/app/overview3d.js','e16d51396168',89724],
   ['js/app/photos.js','7debd2904c8c',51527],
   ['js/app/pwa.js','85a9eecf6165',28729],

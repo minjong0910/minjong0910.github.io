@@ -135,7 +135,10 @@ function captureLogic(w){
         if(w.QRNAV) w.QRNAV.gate = function(){ return null; };
         out.steps[t.kind + ':' + (t.code || t.floor) + '@' + sf] = stepList(w);
       });
-      if(t.floor === 1 && w.QRNAV) ['MAIN', 'BACK', 'EAST', 'WEST'].forEach(function(g){
+      /* 문별 경로 : 1층 목적지 + 지하 크리에이티브 존.
+         2026-09-27 에 '동문 → 크리에이티브 존' 전용 절차가 생겼는데 안전망이 그 경로를
+         담고 있지 않아 바뀌어도 아무도 몰랐다 — 존도 문별로 함께 기록한다. */
+      if((t.floor === 1 || t.kind === 'zone') && w.QRNAV) ['MAIN', 'BACK', 'EAST', 'WEST'].forEach(function(g){
         w.target = JSON.parse(JSON.stringify(t)); w.startFloor = 1;
         w.QRNAV.gate = function(){ return g; };
         out.steps[t.kind + ':' + (t.code || t.floor) + '@1/' + g] = stepList(w);

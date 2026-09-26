@@ -4,11 +4,11 @@
 #   사진원본\ 의 그 사진을 앱 크기(긴 변 900)로 구워 site\data\photos\<코드>\01.jpg 로 넣고
 #   site\data\photos.js 의 이름표도 함께 고친다.
 #
-#   실행 : pwsh -File 도구\고른사진_넣기.ps1 -Pick "C:\Users\KMJ\Downloads\고른사진.txt"
-#          (-Pick 을 안 주면 내려받기 폴더와 프로젝트 폴더에서 고른사진.txt 를 찾는다)
+#   실행 : pwsh -File 도구\고른사진_넣기.ps1 -Pick "...\고른사진_가.txt","...\고른사진_나.txt"
+#          (두 사람이 나눠 골랐으면 두 파일을 한 번에 준다. 안 주면 내려받기 폴더에서 고른사진*.txt 를 찾는다)
 #   한 뒤 : pwsh -File 도구\오프라인목록.ps1   →   pwsh -File 검사.ps1 -Full
 
-param([string]$Pick = '', [switch]$WhatIfOnly)
+param([string[]]$Pick = @(), [switch]$WhatIfOnly)
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
@@ -19,13 +19,14 @@ $jsP  = Join-Path $root 'site\data\photos.js'
 $LONG = 900          # 긴 변 길이 — 지금 앱에 들어 있는 사진과 같은 기준
 $Q    = 82           # JPEG 품질
 
-if(-not $Pick){
-  foreach($p in @((Join-Path $env:USERPROFILE 'Downloads\고른사진.txt'), (Join-Path $root '고른사진.txt'))){
-    if(Test-Path $p){ $Pick = $p; break }
-  }
+if(-not $Pick.Count){
+  $Pick = @(Get-ChildItem (Join-Path $env:USERPROFILE 'Downloads') -File -Filter '고른사진*.txt' -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime | ForEach-Object { $_.FullName })
+  $Pick += @(Get-ChildItem $root -File -Filter '고른사진*.txt' -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
 }
-if(-not $Pick -or -not (Test-Path $Pick)){ throw "고른사진.txt 를 찾지 못했습니다. -Pick 으로 경로를 알려주세요." }
-Write-Output "  고른 목록 : $Pick"
+$Pick = @($Pick | Where-Object { Test-Path $_ })
+if(-not $Pick.Count){ throw "고른사진*.txt 를 찾지 못했습니다. -Pick 으로 경로를 알려주세요." }
+$Pick | ForEach-Object { Write-Output "  고른 목록 : $_" }
 
 $names = (Get-Content (Join-Path $root '도구\방이름.json') -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable)['이름']
 
@@ -61,13 +62,16 @@ function 굽기($from, $to){
 }
 
 # ── 고른 목록 읽기 ──────────────────────────────────────────────
-$picks = @()
-foreach($line in (Get-Content $Pick -Encoding utf8)){
-  if($line -match '^\s*(#|$)'){ continue }
-  $p = $line -split "`t", 2
-  if($p.Count -lt 2){ Write-Warning "건너뜀(형식이 이상함) : $line"; continue }
-  $picks += [pscustomobject]@{ code = $p[0].Trim(); file = $p[1].Trim() }
+$map = [ordered]@{}          # 같은 곳이 두 파일에 겹치면 나중 파일이 이긴다
+foreach($file in $Pick){
+  foreach($line in (Get-Content $file -Encoding utf8)){
+    if($line -match '^\s*(#|$)'){ continue }
+    $p = $line -split "`t", 2
+    if($p.Count -lt 2){ Write-Warning "건너뜀(형식이 이상함) : $line"; continue }
+    $map[$p[0].Trim()] = $p[1].Trim()
+  }
 }
+$picks = @($map.Keys | ForEach-Object { [pscustomobject]@{ code = $_; file = $map[$_] } })
 Write-Output "  적힌 장소 : $($picks.Count) 곳"
 
 # ── 넣기 ───────────────────────────────────────────────────────

@@ -21,6 +21,12 @@
   button:hover{ filter:brightness(1.15); }
   .tip{ padding:14px 16px; color:var(--dim); line-height:1.7; border-bottom:1px solid var(--line); }
   .tip b{ color:var(--ink); }
+  .part{ color:var(--warn); font-size:13px; font-weight:700; }
+  #choose{ padding:18px 16px 22px; border-bottom:1px solid var(--line); }
+  #choose p{ margin:0 0 12px; color:var(--dim); }
+  #choose .row{ display:flex; gap:10px; flex-wrap:wrap; }
+  #choose button{ padding:14px 18px; text-align:left; line-height:1.5; }
+  #choose button small{ display:block; font-weight:400; opacity:.75; font-size:12px; }
   h2.floor{ margin:28px 16px 6px; font-size:16px; color:var(--warn); }
   .place{ border-top:1px solid var(--line); padding:14px 16px 18px; }
   .place.done{ opacity:.45; }
@@ -50,17 +56,28 @@
 <header>
   <h1>사진 고르기</h1>
   <span class="stat">고른 곳 <b id="n">0</b> / <span id="t">0</span></span>
+  <span class="part" id="partName"></span>
   <span class="grow"></span>
   <button id="onlyLeft">아직 안 고른 곳만</button>
   <button id="clear">고른 것 모두 지우기</button>
   <button class="go" id="save">고른 것 저장 ↓</button>
 </header>
 
+<div id="choose" style="display:none">
+  <p>두 분이 나눠서 고르시면 됩니다. <b>맡은 쪽을 눌러 주세요.</b> (한 사람이 다 하려면 「전체」)</p>
+  <div class="row">
+    <button class="go" onclick="setPart('A')">가 — 지하 1층 · 1층 · 2층 · 3층<small>장소 93곳 · 사진 1,187장</small></button>
+    <button class="go" onclick="setPart('B')">나 — 4층 · 5층<small>장소 59곳 · 사진 888장</small></button>
+    <button onclick="setPart('')">전체 (152곳 · 2,075장)</button>
+  </div>
+</div>
+
 <div class="tip">
   장소마다 <b>마음에 드는 사진 한 장</b>을 눌러 주세요. 누르면 파란 테두리가 생깁니다. 다시 누르면 취소됩니다.<br>
   노란 <b>「지금 쓰는 사진」</b> 표가 붙은 것이 현재 앱에 들어가 있는 사진입니다 — 그게 제일 낫다면 그걸 누르시면 됩니다.<br>
   사진을 <b>오른쪽 클릭</b>하면 크게 볼 수 있습니다. 고른 것은 <b>자동으로 저장</b>되니 창을 닫았다 다시 열어도 됩니다.<br>
-  다 고르셨으면 <b>「고른 것 저장 ↓」</b>을 눌러 나온 파일(<b>고른사진.txt</b>)을 저에게 주세요.
+  다 고르셨으면 <b>「고른 것 저장 ↓」</b>을 눌러 나온 파일(<b>고른사진_가.txt</b> 또는 <b>고른사진_나.txt</b>)을 보내 주세요.<br>
+  전부 고르실 필요는 없습니다 — <b>바꾸고 싶은 곳만</b> 고르시면 나머지는 지금 사진이 그대로 남습니다.
 </div>
 
 <main id="main"></main>
@@ -77,9 +94,13 @@ try{ pick = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){ pick
 
 function enc(p){ return encodeURI(p); }
 function srcOf(pl, f){
-  return (f === '(그대로)') ? enc('site/data/photos/' + pl.code + '/' + pl.cur)
-                            : enc('사진원본/' + pl.code + '/' + f);
+  return (f === '(그대로)') ? enc('../data/photos/' + pl.code + '/' + pl.cur)
+                            : enc('사진/' + pl.code + '/' + f);
 }
+/* 두 사람이 나눠 고를 수 있게 — 사진 수가 비슷하게 갈린다 (지하~3층 1,187장 / 4~5층 888장) */
+var PARTS = { 'A': ['B1','1','2','3'], 'B': ['4','5'] };
+var part = (location.hash.replace('#','').toUpperCase() === 'B') ? 'B'
+         : (location.hash.replace('#','').toUpperCase() === 'A') ? 'A' : '';
 var FLOORS = [['B1','지하 1층'],['1','1층'],['2','2층'],['3','3층'],['4','4층'],['5','5층'],['R','옥상'],['외부','건물 외부'],['기타','그 밖']];
 
 function draw(){
@@ -87,6 +108,7 @@ function draw(){
   main.innerHTML = '';
   var total = 0;
   FLOORS.forEach(function(fl){
+    if(part && PARTS[part].indexOf(fl[0]) < 0) return;      // 맡은 부분만
     var list = DATA.filter(function(p){ return p.floor === fl[0]; });
     if(!list.length) return;
     var h = document.createElement('h2'); h.className = 'floor'; h.textContent = fl[1] + ' — ' + list.length + '곳';
@@ -189,18 +211,32 @@ document.getElementById('onlyLeft').onclick = function(){
   });
 };
 document.getElementById('save').onclick = function(){
+  var 몫 = part ? (part === 'A' ? '가 (지하~3층)' : '나 (4~5층)') : '전체';
   var lines = ['# 공대 3호관 길안내 — 사람이 고른 사진',
+               '# 맡은 곳 : ' + 몫,
                '# 만든 날 : ' + new Date().toLocaleString('ko-KR'),
                '# 형식 : <코드><탭><고른 사진 파일 이름>   ((그대로) = 지금 쓰는 사진 유지)',
-               '# 고른 곳 ' + Object.keys(pick).length + ' / ' + DATA.length, ''];
+               '# 고른 곳 ' + Object.keys(pick).length + '곳', ''];
   DATA.forEach(function(p){ if(pick[p.code]) lines.push(p.code + '\t' + pick[p.code]); });
   var blob = new Blob([lines.join('\r\n')], {type:'text/plain;charset=utf-8'});
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = '고른사진.txt';
+  a.href = URL.createObjectURL(blob);
+  a.download = '고른사진' + (part ? ('_' + (part === 'A' ? '가' : '나')) : '') + '.txt';
   document.body.appendChild(a); a.click(); a.remove();
 };
 
-draw();
+/* 맡은 곳 고르기 — 주소 끝의 #A / #B 로도 바로 들어올 수 있다 */
+function setPart(p){
+  part = p;
+  location.hash = p ? p : '';
+  document.getElementById('choose').style.display = 'none';
+  document.getElementById('partName').textContent =
+    p ? ('맡은 곳 : ' + (p === 'A' ? '가 — 지하~3층' : '나 — 4·5층')) : '전체';
+  draw();
+}
+if(part){ setPart(part); }
+else if(Object.keys(pick).length){ setPart(''); }      // 하던 사람은 바로 이어서
+else { document.getElementById('choose').style.display = 'block'; draw(); }
 </script>
 </body>
 </html>

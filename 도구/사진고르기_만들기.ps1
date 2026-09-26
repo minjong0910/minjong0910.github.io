@@ -1,17 +1,53 @@
-# 사진고르기_만들기.ps1 — 「사진 고르기」 화면을 만든다
+# 사진고르기_만들기.ps1 — 「사진 고르기」 화면을 만든다 (인터넷 주소로 열린다)
 #
-#   사진원본\ 의 사진 전부를 장소별로 모아 한 페이지에 늘어놓고,
-#   사람이 눈으로 보고 클릭해서 고를 수 있게 한다. 고른 결과는 텍스트 파일로 내려받는다.
-#   그 파일을 도구\고른사진_넣기.ps1 에 주면 앱에 그대로 반영된다.
+#   사진원본\ 의 사진 전부를 작은 미리보기로 구워 site\pick\ 에 담고,
+#   장소별로 늘어놓은 고르기 화면(site\pick\index.html)을 만든다.
+#   올리면 https://minjong0910.github.io/pick/ 으로 누구나 열 수 있다 —
+#   조원들이 각자 컴퓨터·휴대폰에서 고르고, 「고른 것 저장 ↓」으로 받은 파일을 보내 주면 된다.
 #
 #   실행 : pwsh -File 도구\사진고르기_만들기.ps1
-#   결과 : 사진고르기.html  (더블클릭해서 열면 된다)
+#          (이미 구운 미리보기는 건너뛴다. -Force 면 전부 다시 굽는다)
+#
+#   ※ site\pick\ 은 오프라인 저장 목록에서 빠져 있다(도구\오프라인목록.ps1 의 $SKIP).
+#     앱 사용자가 이 사진까지 내려받는 일은 없다.
+
+param([switch]$Force)
 
 $ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Drawing
 $root = Split-Path $PSScriptRoot -Parent
 $src  = Join-Path $root '사진원본'
 $cur  = Join-Path $root 'site\data\photos'
-$out  = Join-Path $root '사진고르기.html'
+$out  = Join-Path $root 'site\pick'
+$thumb= Join-Path $out '사진'
+$LONG = 480      # 미리보기 긴 변 — 고르기에 충분하면서 가볍다
+$Q    = 72
+
+if(-not (Test-Path $thumb)){ New-Item -ItemType Directory -Path $thumb -Force | Out-Null }
+
+$enc  = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object { $_.MimeType -eq 'image/jpeg' }
+$pars = New-Object System.Drawing.Imaging.EncoderParameters 1
+$pars.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter ([System.Drawing.Imaging.Encoder]::Quality), ([int]$Q)
+
+function 미리보기굽기($from, $to){
+  $im = [System.Drawing.Image]::FromFile($from)
+  try{
+    if($im.PropertyIdList -contains 0x0112){
+      switch([int]$im.GetPropertyItem(0x0112).Value[0]){
+        3 { $im.RotateFlip([System.Drawing.RotateFlipType]::Rotate180FlipNone) }
+        6 { $im.RotateFlip([System.Drawing.RotateFlipType]::Rotate90FlipNone) }
+        8 { $im.RotateFlip([System.Drawing.RotateFlipType]::Rotate270FlipNone) }
+      }
+    }
+    $r = [Math]::Min(1.0, $LONG / [Math]::Max($im.Width, $im.Height))
+    $w = [int][Math]::Round($im.Width * $r); $h = [int][Math]::Round($im.Height * $r)
+    $bm = New-Object System.Drawing.Bitmap $w, $h
+    $g  = [System.Drawing.Graphics]::FromImage($bm)
+    $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $g.DrawImage($im, (New-Object System.Drawing.Rectangle 0, 0, $w, $h))
+    $g.Dispose(); $bm.Save($to, $enc, $pars); $bm.Dispose()
+  } finally { $im.Dispose() }
+}
 
 # ── 방 이름표 ───────────────────────────────────────────────
 $names = (Get-Content (Join-Path $root '도구\방이름.json') -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable)['이름']
@@ -30,7 +66,6 @@ function 장소이름($code){
   if($code -eq 'ES1'){ return '1층 중앙계단' }
   if($code -eq 'B1'){  return '지하 1층 크리에이티브 존' }
   if($code -eq 'KTC'){ return 'KTC 동아리실' }
-  if($code -eq 'BLD'){ return '건물 외부 (정문·후문·동문·서문)' }
   if($code -eq 'GATE_BACK'){ return '후문 · 지하로 내려가는 계단' }
   if($code -eq 'GATE_E'){ return '동문으로 들어올 때' }
   if($code -eq 'GATE_W'){ return '서문으로 들어올 때' }
@@ -48,30 +83,45 @@ function 층찾기($files, $code){
   return '기타'
 }
 
-$places = @()
-
-Get-ChildItem $src -Directory | Sort-Object Name | ForEach-Object {
-  $code  = $_.Name
-  $files = @(Get-ChildItem $_.FullName -File -Filter *.jpg | Sort-Object Name | ForEach-Object { $_.Name })
-  if(-not $files.Count){ return }
+# ── 미리보기 굽기 + 목록 만들기 ────────────────────────────────
+$places = @(); $baked = 0; $kept = 0
+$dirs = @(Get-ChildItem $src -Directory | Sort-Object Name)
+$i = 0
+foreach($d in $dirs){
+  $i++
+  Write-Progress -Activity '미리보기 굽는 중' -Status "$($d.Name)  ($i / $($dirs.Count))" -PercentComplete ($i * 100 / $dirs.Count)
+  $code  = $d.Name
+  $files = @(Get-ChildItem $d.FullName -File -Filter *.jpg | Sort-Object Name)
+  if(-not $files.Count){ continue }
+  $tdir = Join-Path $thumb $code
+  if(-not (Test-Path $tdir)){ New-Item -ItemType Directory -Path $tdir -Force | Out-Null }
+  foreach($f in $files){
+    $to = Join-Path $tdir $f.Name
+    if(-not $Force -and (Test-Path $to) -and ((Get-Item $to).LastWriteTime -ge $f.LastWriteTime)){ $kept++; continue }
+    미리보기굽기 $f.FullName $to
+    $baked++
+  }
   $curFile = $null
   $curDir  = Join-Path $cur $code
   if(Test-Path $curDir){ $curFile = (Get-ChildItem $curDir -File -Filter *.jpg | Sort-Object Name | Select-Object -First 1).Name }
+  $names2 = @($files | ForEach-Object { $_.Name })
   $places += [pscustomobject]@{
-    code = $code; label = (장소이름 $code); floor = (층찾기 $files $code)
-    cur = $curFile; files = $files
+    code = $code; label = (장소이름 $code); floor = (층찾기 $names2 $code)
+    cur = $curFile; files = $names2
   }
 }
+Write-Progress -Activity '미리보기 굽는 중' -Completed
 
 # 건물 외부(BLD)는 여기서 뺀다 — 정문·후문·동문·서문의 안/밖 8장이 자리마다 정해진 한 묶음이라
 # '한 장 고르기'가 성립하지 않는다. 바꿔야 하면 따로 말씀해 주시면 그 자리만 바꾼다.
 
 $json = $places | ConvertTo-Json -Depth 6 -Compress
-
 $html = Get-Content (Join-Path $PSScriptRoot '사진고르기_틀.html') -Raw -Encoding utf8
 $html = $html.Replace('/*__DATA__*/', $json)
-[System.IO.File]::WriteAllText($out, $html, (New-Object System.Text.UTF8Encoding $true))
+[System.IO.File]::WriteAllText((Join-Path $out 'index.html'), $html, (New-Object System.Text.UTF8Encoding $true))
 
 $total = ($places | ForEach-Object { $_.files.Count } | Measure-Object -Sum).Sum
+$mb    = (Get-ChildItem $thumb -Recurse -File | Measure-Object Length -Sum).Sum / 1MB
 Write-Output ("  사진 고르기 화면을 만들었습니다 — 장소 {0}곳 · 사진 {1}장" -f $places.Count, $total)
-Write-Output ("  {0}" -f $out)
+Write-Output ("  미리보기 : 새로 구운 것 {0}장 · 그대로 둔 것 {1}장 · 모두 {2:N0} MB" -f $baked, $kept, $mb)
+Write-Output  "  올린 뒤 주소 : https://minjong0910.github.io/pick/"

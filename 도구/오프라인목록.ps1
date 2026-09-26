@@ -20,7 +20,8 @@ $SITE = Join-Path $ROOT 'site'
 $SW   = Join-Path $SITE 'sw.js'
 $UTF8 = New-Object System.Text.UTF8Encoding($false)
 
-$SKIP = '^(sw\.js|data/aivec\.js|data/ailib\.js|lib/.*)$'
+# pick/ 은 사진 고르기 작업용 화면이다 — 앱이 아니므로 사용자가 내려받을 이유가 없다 (약 29MB)
+$SKIP = '^(sw\.js|data/aivec\.js|data/ailib\.js|lib/.*|pick/.*)$'
 $files = @(Get-ChildItem $SITE -Recurse -File | ForEach-Object {
   [pscustomobject]@{ rel = ($_.FullName.Substring($SITE.Length + 1) -replace '\\', '/'); full = $_.FullName; size = $_.Length }
 } | Where-Object { $_.rel -notmatch $SKIP })

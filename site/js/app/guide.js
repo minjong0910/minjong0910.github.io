@@ -18,12 +18,11 @@ function buildSteps(){
        ② 들어와서 본 복도     — 복도를 따라 쭉 이동하세요
        ③ 1층 엘리베이터 정면  — 엘리베이터를 타고 …
      지하 크리에이티브 존이 목적지면 아래 zone 갈래에서 ④⑤⑥ 이 이어진다.
-     아래 표에 문을 한 줄 더 넣으면 그 문도 같은 절차를 따른다 — 정문·후문은 아직 정하지 않았다.
-       out  : 문 바깥에서 찍은 사진(①)      hall : 들어와서 복도를 바라본 사진(②) */
-  var GATE_FLOW = {
-    EAST: {out:'GATE_EAST_OUT', hall:'GATE_E'},
-    WEST: {out:'GATE_WEST_OUT', hall:'GATE_W'}
-  };
+     GATE_OUT  : 그 문의 '바깥' 사진 — ①에 쓴다. 없는 문은 예전처럼 문 안쪽 사진을 쓴다.
+     GATE_FLOW : '복도를 지나 엘리베이터로 가는' 문 — ②③ 이 붙는다.
+                 후문은 바로 옆 계단으로 내려가므로 여기 없고, 아래에 따로 있다. */
+  var GATE_OUT  = {EAST:'GATE_EAST_OUT', WEST:'GATE_WEST_OUT', BACK:'GATE_BACK_OUT'};
+  var GATE_FLOW = {EAST:{hall:'GATE_E'}, WEST:{hall:'GATE_W'}};
   var flow = (gk && sf === 1) ? GATE_FLOW[gk] : null;
   if(gk && sf===1 && ROOM_PHOTOS['GATE_'+gk]){
     var GN = {MAIN:{ko:'정문', en:'the main gate'},  BACK:{ko:'후문', en:'the back gate'},
@@ -33,7 +32,7 @@ function buildSteps(){
               tko: gn.ko+'으로 들어오세요',
               ten: 'Enter through '+gn.en,
               ph: '[ '+gn.ko+' 사진 ]',
-              code: (flow && ROOM_PHOTOS[flow.out]) ? flow.out : ('GATE_'+gk)});
+              code: (gk && GATE_OUT[gk] && ROOM_PHOTOS[GATE_OUT[gk]]) ? GATE_OUT[gk] : ('GATE_'+gk)});
     /* 이 복도 단계는 '문 → 엘리베이터' 구간이다. 목적지가 1층이면 엘리베이터에 갈 일이 없고,
        아래에서 어차피 '복도를 따라 쭉 가세요'가 나오므로 같은 말이 두 번 겹친다 → 그때는 넣지 않는다. */
     if(flow && !sameFloor && ROOM_PHOTOS[flow.hall])
@@ -41,6 +40,27 @@ function buildSteps(){
                 tko:'복도를 따라 쭉 이동하세요', ten:'Go straight along the hallway',
                 ph:'[ '+gn.ko+' 복도 사진 ]', code:flow.hall});
   }
+  /* ★ 후문 → 크리에이티브 존 : 사용자가 정한 네 단계.
+     후문은 들어서면 바로 옆이 지하로 내려가는 계단이라 엘리베이터를 타지 않는다
+     → 여기서 끝내고 아래 엘리베이터 단계로 내려가지 않는다.
+       ① 후문 외관        후문으로 들어오세요            (위에서 이미 넣었다)
+       ② 지하로 내려가는 계단  좌측에 보이는 계단을 통해 내려가세요
+       ③ 계단 중간에서 본 존   좌측에 크리에이티브 존이 있습니다
+       ④ 존 정면            크리에이티브 존에 도착했습니다 */
+  if(gk === 'BACK' && sf === 1 && target.kind === 'zone' &&
+     ROOM_PHOTOS['GATE_BACK_STAIR'] && ROOM_PHOTOS['B1PATH']){
+    out.push({a:'↓', type:'lift',
+              tko:'좌측에 보이는 계단을 통해 내려가세요', ten:'Take the stairs on your left down',
+              ph:'[ 후문 계단 사진 ]', code:'GATE_BACK_STAIR'});
+    out.push({a:'←', type:'turn',
+              tko:'좌측에 크리에이티브 존이 있습니다', ten:'The Creative Zone is on your left',
+              ph:'[ 계단 중간 사진 ]', code:'B1PATH'});
+    out.push({a:'✓', type:'arrive',
+              tko:'크리에이티브 존에 도착했습니다', ten:'You have arrived at the Creative Zone',
+              ph:'[ 크리에이티브 존 사진 ]', code:'B1'});
+    return out;
+  }
+
   // 출발층 엘리베이터 앞 사진(있으면). B1은 EV 사진이 없으므로 EV1로 대체.
   var startEV = (typeof sf==='number') ? ('EV'+sf) : 'EV1';
   var sfName = typeof sf==='number' ? lvName(sf) : lvName(1);

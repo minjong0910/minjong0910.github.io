@@ -27,10 +27,16 @@ function buildSteps(){
     /* 동문·서문은 복도 끝에 있어 복도를 따라 걸어 들어온다 */
     EAST: {hall:'GATE_E',         tko:'복도를 따라 직진하세요', ten:'Go straight along the hallway'},
     WEST: {hall:'GATE_W',         tko:'복도를 따라 직진하세요', ten:'Go straight along the hallway'},
-    /* 정문은 옆면에 있어 들어서면 바로 로비다 — 복도가 아니라 엘리베이터 쪽으로 간다 */
-    MAIN: {hall:'GATE_MAIN_WAY',  tko:'엘리베이터 앞으로 가세요',  ten:'Head to the elevator'}
+    /* 정문은 옆면에 있어 들어서면 바로 로비다 — 복도가 아니라 엘리베이터 쪽으로 간다.
+       다만 위층 호실로 갈 때는 이 단계를 넣지 않는다(skipOnUp) — 바로 '엘리베이터를 타고'로 간다. */
+    MAIN: {hall:'GATE_MAIN_WAY',  tko:'엘리베이터 앞으로 가세요',  ten:'Head to the elevator', skipOnUp:true}
   };
   var flow = (gk && sf === 1) ? GATE_FLOW[gk] : null;
+  /* 문·층별로 '엘리베이터로 올라가 좌·우회전' 절차를 정해 둔 표 (아래에서 단계를 만든다).
+     여기서는 '그 절차를 쓰는 길인가'만 먼저 안다 — 위 정문 단계를 넣을지 말지에 쓰인다. */
+  var UP_FLOW = {EAST:[2], WEST:[2], MAIN:[2]};
+  var onUpFlow = !!(gk && sf === 1 && target.kind === 'room' &&
+                    UP_FLOW[gk] && UP_FLOW[gk].indexOf(lv) >= 0);
   if(gk && sf===1 && ROOM_PHOTOS['GATE_'+gk]){
     var GN = {MAIN:{ko:'정문', en:'the main gate'},  BACK:{ko:'후문', en:'the back gate'},
               EAST:{ko:'동문', en:'the east gate'}, WEST:{ko:'서문', en:'the west gate'}};
@@ -42,7 +48,7 @@ function buildSteps(){
               code: (gk && GATE_OUT[gk] && ROOM_PHOTOS[GATE_OUT[gk]]) ? GATE_OUT[gk] : ('GATE_'+gk)});
     /* 이 복도 단계는 '문 → 엘리베이터' 구간이다. 목적지가 1층이면 엘리베이터에 갈 일이 없고,
        아래에서 어차피 '복도를 따라 쭉 가세요'가 나오므로 같은 말이 두 번 겹친다 → 그때는 넣지 않는다. */
-    if(flow && !sameFloor && ROOM_PHOTOS[flow.hall])
+    if(flow && !sameFloor && !(flow.skipOnUp && onUpFlow) && ROOM_PHOTOS[flow.hall])
       out.push({a:'↑', type:'straight',
                 tko:flow.tko, ten:flow.ten,
                 ph:'[ '+gn.ko+' 안쪽 사진 ]', code:flow.hall});
@@ -208,11 +214,9 @@ function buildSteps(){
        ⑥ 도착                            왼쪽/오른쪽에서 몇 번째 방에 …
      엘리베이터에서 내리면 -X(복도)를 보고 선다 → 왼손이 +Z(서문 쪽), 오른손이 -Z(동문 쪽).
      '몇 번째'는 엘리베이터에서부터 그 쪽 방만 센다.
-     엘리베이터에서 내린 뒤는 어느 문으로 들어왔든 똑같으므로, 문을 한 줄 더 적으면 그대로 따라온다.
-     UP_FLOW 에 문과 층을 적어 두는 대로 늘린다 — 지금은 동문·서문의 2층까지 정했다. */
-  var UP_FLOW = {EAST:[2], WEST:[2]};
-  if(gk && sf === 1 && target.kind === 'room' && UP_FLOW[gk] && UP_FLOW[gk].indexOf(lv) >= 0 &&
-     ROOM_PHOTOS['EVIN'+lv] && ROOM_PHOTOS['HALL'+lv+'L'] && ROOM_PHOTOS['HALL'+lv+'R']){
+     엘리베이터에서 내린 뒤는 어느 문으로 들어왔든 똑같으므로, 위쪽 UP_FLOW 표에 문을 한 줄
+     더 적으면 그대로 따라온다 — 지금은 동문·서문·정문의 2층까지 정했다. */
+  if(onUpFlow && ROOM_PHOTOS['EVIN'+lv] && ROOM_PHOTOS['HALL'+lv+'L'] && ROOM_PHOTOS['HALL'+lv+'R']){
     var evZu   = evXZ(lv).z;
     var dirU   = (p.z >= evZu) ? 1 : -1;                // +1 = 서문 쪽(좌회전) · -1 = 동문 쪽(우회전)
     var isLeftU = function(x){ return (dirU > 0) ? (x > 0) : (x < 0); };

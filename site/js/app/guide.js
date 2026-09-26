@@ -13,13 +13,18 @@ function buildSteps(){
      '그 문으로 들어와 복도로 나온다'를 맨 앞 단계로 하나 더 넣는다(4단계 → 5단계).
      처음 온 사람은 문을 지나 복도까지 나오는 이 첫 구간이 제일 막막하기 때문. */
   var gk = (typeof currentGateKey==='function') ? currentGateKey() : null;
-  /* ★ 2026-09-27 : 동문 절차는 사용자가 정한 순서를 그대로 따른다.
-       ① 동문 **외관** 사진 — 동문으로 들어오세요      (다른 문은 예전처럼 문 안쪽 사진)
-       ② 동문에서 본 복도  — 복도를 따라 쭉 이동하세요  (동문에만 있는 단계)
-       ③ 1층 엘리베이터 정면 — 엘리베이터를 타고 …
+  /* ★ 2026-09-27 : 문별 절차 — 사용자가 정한 순서를 그대로 따른다.
+       ① 그 문의 **외관** 사진 — ○문으로 들어오세요   (아직 안 정한 문은 예전처럼 문 안쪽 사진)
+       ② 들어와서 본 복도     — 복도를 따라 쭉 이동하세요
+       ③ 1층 엘리베이터 정면  — 엘리베이터를 타고 …
      지하 크리에이티브 존이 목적지면 아래 zone 갈래에서 ④⑤⑥ 이 이어진다.
-     정문·후문·서문은 손대지 않았다 — 절차를 확정하는 대로 같은 방식으로 맞추면 된다. */
-  var eastFlow = (gk === 'EAST' && sf === 1);
+     아래 표에 문을 한 줄 더 넣으면 그 문도 같은 절차를 따른다 — 정문·후문은 아직 정하지 않았다.
+       out  : 문 바깥에서 찍은 사진(①)      hall : 들어와서 복도를 바라본 사진(②) */
+  var GATE_FLOW = {
+    EAST: {out:'GATE_EAST_OUT', hall:'GATE_E'},
+    WEST: {out:'GATE_WEST_OUT', hall:'GATE_W'}
+  };
+  var flow = (gk && sf === 1) ? GATE_FLOW[gk] : null;
   if(gk && sf===1 && ROOM_PHOTOS['GATE_'+gk]){
     var GN = {MAIN:{ko:'정문', en:'the main gate'},  BACK:{ko:'후문', en:'the back gate'},
               EAST:{ko:'동문', en:'the east gate'}, WEST:{ko:'서문', en:'the west gate'}};
@@ -28,13 +33,13 @@ function buildSteps(){
               tko: gn.ko+'으로 들어오세요',
               ten: 'Enter through '+gn.en,
               ph: '[ '+gn.ko+' 사진 ]',
-              code: (eastFlow && ROOM_PHOTOS['GATE_EAST_OUT']) ? 'GATE_EAST_OUT' : ('GATE_'+gk)});
-    /* 이 복도 단계는 '동문 → 엘리베이터' 구간이다. 목적지가 1층이면 엘리베이터에 갈 일이 없고,
+              code: (flow && ROOM_PHOTOS[flow.out]) ? flow.out : ('GATE_'+gk)});
+    /* 이 복도 단계는 '문 → 엘리베이터' 구간이다. 목적지가 1층이면 엘리베이터에 갈 일이 없고,
        아래에서 어차피 '복도를 따라 쭉 가세요'가 나오므로 같은 말이 두 번 겹친다 → 그때는 넣지 않는다. */
-    if(eastFlow && !sameFloor && ROOM_PHOTOS['GATE_E'])
+    if(flow && !sameFloor && ROOM_PHOTOS[flow.hall])
       out.push({a:'↑', type:'straight',
                 tko:'복도를 따라 쭉 이동하세요', ten:'Go straight along the hallway',
-                ph:'[ 동문 복도 사진 ]', code:'GATE_E'});
+                ph:'[ '+gn.ko+' 복도 사진 ]', code:flow.hall});
   }
   // 출발층 엘리베이터 앞 사진(있으면). B1은 EV 사진이 없으므로 EV1로 대체.
   var startEV = (typeof sf==='number') ? ('EV'+sf) : 'EV1';
@@ -45,18 +50,18 @@ function buildSteps(){
   if(!sameFloor){
     var goUp = lvIndex(lv) > lvIndex(sf);
     out.push({a: goUp?'↑':'↓', type:'lift',
-              /* 동문 절차의 문구는 사용자가 정한 그대로 — '엘리베이터를 타고 ○○으로 …' */
-              tko: eastFlow ? ('엘리베이터를 타고 '+lvName(lv)+'으로 '+(goUp?'올라가세요':'내려가세요'))
-                            : ('엘리베이터로 '+lvName(lv)+'까지 '+(goUp?'올라가세요':'내려가세요')),
+              /* 절차를 정한 문의 문구는 사용자가 정한 그대로 — '엘리베이터를 타고 ○○으로 …' */
+              tko: flow ? ('엘리베이터를 타고 '+lvName(lv)+'으로 '+(goUp?'올라가세요':'내려가세요'))
+                        : ('엘리베이터로 '+lvName(lv)+'까지 '+(goUp?'올라가세요':'내려가세요')),
               ten: 'Take the elevator '+(goUp?'up to ':'down to ')+lvName(lv),
               ph:'['+sfName+' 엘리베이터 사진 ]', code:startEV});
   }
   if(target.kind==='zone'){
-    /* ★ 동문 → 크리에이티브 존 : 사용자가 정한 ④⑤⑥ 단계
+    /* ★ 절차를 정한 문(동문·서문) → 크리에이티브 존 : 사용자가 정한 ④⑤⑥ 단계
          ④ 지하에서 엘리베이터 안에서 밖을 본 사진 — 내려서 왼쪽으로 가세요
          ⑤ 엘리베이터 앞에서 존 문을 본 사진     — 정면에 크리에이티브 존이 있습니다
          ⑥ 존 문 정면                            — 크리에이티브 존에 도착했습니다 */
-    if(eastFlow && !sameFloor && ROOM_PHOTOS['EVB1'] && ROOM_PHOTOS['B1WAY']){
+    if(flow && !sameFloor && ROOM_PHOTOS['EVB1'] && ROOM_PHOTOS['B1WAY']){
       out.push({a:'←', type:'turn',
                 tko:'내려서 왼쪽으로 가세요', ten:'Get off and turn left',
                 ph:'[ 지하 1층 엘리베이터 사진 ]', code:'EVB1'});

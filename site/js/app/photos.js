@@ -105,10 +105,14 @@ var ROOM_NAME_EN = {
   '학과사무실':'Department Office', '학부장실':"Dean's Office", '안내실':'Information Desk',
   '캡스톤디자인실':'Capstone Design Room', '캡스톤디자인 취업실':'Capstone Design Career Room',
   '캡스톤 디자인 실습실':'Capstone Design Practice Room', '캡스톤디자인 회의실':'Capstone Design Meeting Room',
-  '명예교수 및 시간강사실':'Emeritus & Adjunct Faculty Office'
+  '명예교수 및 시간강사실':'Emeritus & Adjunct Faculty Office',
+  '프로그래밍 동아리실':'Programming Club Room'
 };
 function rn(nm){ if(!nm || LANG!=='en') return nm; return ROOM_NAME_EN[nm] || nm; }
-var ROOM_NAME = {};
+/* 방 이름은 아래 phRebuildRoomNames() 가 사진 파일명에서 뽑는다 — 다만 그 규칙은 5자리 호실번호만
+   보므로 KTC 처럼 번호가 없는 곳은 이름이 비어 '왼쪽에서 첫 번째 방에 KTC호가 있습니다' 가 됐다.
+   층 상세에 적힌 대로 여기에 미리 적어 둔다 (2026-09-27 사용자 요청). */
+var ROOM_NAME = {KTC:'프로그래밍 동아리실'};
 /* 사진을 새로 등록한 뒤에도 방 이름을 다시 뽑을 수 있게 이름 있는 함수로 둔다. */
 function phRebuildRoomNames(){
   function nameFrom(fn){
@@ -141,6 +145,9 @@ function roomTitle(code, forceLang){
   var lang = forceLang || LANG;
   var raw = ROOM_NAME[code];
   var nm = (lang==='en') ? ((ROOM_NAME_EN[raw]) || raw) : raw;
+  /* KTC 처럼 5자리 호실번호가 아닌 곳은 '호'를 붙이지 않는다 — phCap() 과 같은 규칙.
+     이름이 있으면 'KTC 프로그래밍 동아리실' 처럼 곧바로 이어 붙인다. */
+  if(!/^\d{5}/.test(code)) return nm ? (code+' '+nm) : code;
   if(lang==='en') return nm ? ('Room '+code+' · '+nm) : ('Room '+code);
   return nm ? (code+'호 · '+nm) : (code+'호');
 }

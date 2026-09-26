@@ -22,7 +22,7 @@
 #     설치·오프라인(tests/pwa.html) QR 주소로 열기·기기별 설치 안내 13가지·12MB 저장·끊김 흉내·AI 는 인터넷 될 때만·QR 4장 다시 읽기
 #     안전망(tests/golden)        길안내 754가지·사진·화면·CSS·3D 그림 15장이 기록과 같은가
 #   pwsh -File 검사.ps1 -Ci      GitHub 자동 검사용 — 다른 컴퓨터라 글꼴·그래픽이 달라, 안전망에서 글자 폭·3D 그림 비교를 뺀다
-param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v118', [int]$Port = 8080)
+param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v119', [int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ROOT = $PSScriptRoot

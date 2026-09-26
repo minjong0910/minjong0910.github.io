@@ -17,6 +17,17 @@ function targetPos(){
   }
   var L = FLOOR_LAYOUT[target.floor];
   var info = L.lookup[target.code];
+  /* ★ 2026-09-27 : 13121-A 처럼 한 칸을 둘로 나눈 방은 lookup 에 부모(13121)만 있다.
+     그래서 여기서 못 찾고 (0,0) — 건물 한가운데 — 를 목적지로 돌려주고 있었다.
+     그 결과 13121-A·13121-B 는 빨간 안내선이 엉뚱한 곳으로 가고,
+     안내도 늘 '엘리베이터에서 가까운 곳'으로 나왔다. 나뉜 칸의 제 좌표를 찾아 쓴다. */
+  if(!info){
+    var par = L.lookup[String(target.code).replace(/-[A-Za-z]$/, '')];
+    if(par && par.cells)
+      for(var ci = 0; ci < par.cells.length; ci++)
+        if(par.cells[ci].code === target.code) info = par.cells[ci];
+    if(!info) info = par;
+  }
   return info ? {x:info.x, z:info.z} : {x:0,z:0};
 }
 function targetLabel(){

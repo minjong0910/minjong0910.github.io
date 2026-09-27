@@ -370,14 +370,27 @@ function buildSteps(){
     return out;
   }
 
+  /* ★ 2026-09-28 : 비상계단 — 사용자가 정한 네 단계. 층이 달라도 말과 사진 자리는 같다.
+     비상계단은 다섯 층 모두 **동문 쪽(-Z) 복도 끝**에 있다 (EMS z=-43.05 · 엘리베이터 z=-2.55).
+     기준 자세는 '엘리베이터를 마주 보고 선 자세'다 — 그 자세에서 동문 쪽은 왼손 쪽이라 '좌측'.
+       ※ 호실 안내는 반대로 '엘리베이터에서 내려서(밖을 보고)'가 기준이라 같은 복도를 '우회전'이라
+         부른다. 둘 다 맞지만 말이 반대다 — 사진이 자세를 정해 주므로 사용자가 그렇게 정했다.
+     ③ 의 '오른쪽 복도'는 그 복도의 이름(HALL..R)이면서, 복도를 따라 걸을 때 비상계단이
+     오른손 쪽(x=+6.6)에 있다는 뜻이기도 하다. */
   if(target.kind==='emstair'){
-    // 비상계단은 복도 맨 끝(강의실보다 더 바깥쪽)에 있으므로, 화장실처럼 바로 옆이 아니라
-    // 강의실 안내처럼 "돌기 → 복도를 따라 쭉 → 도착" 3단계로 안내한다.
-    if(!noTurn)   // v150: 동문·서문으로 들어오면 이미 복도 정면이라 돌 필요가 없다
-      out.push({a:arw, type:'turn', tko:lead+turnWord+'으로 도세요', ten:leadEn+turnWordEn, ph:turnPhTxt, code:turnPhCode, cap:(turnPhCode===hallCode ? hallCap : null)});
-    out.push({a:'↑', type:'straight', tko:'복도 끝까지 쭉 가세요', ten:'Go straight to the end of the hallway', ph:'['+lvName(lv)+' 복도 사진 ]',
-              code:hallCode, cap:hallCap});
-    out.push({a:'✓', type:'arrive', tko:'비상계단에 도착했습니다', ten:'You have arrived at the emergency stairs', ph:'[ 비상계단 사진 ]', code:'EMS'+lv});   /* v79 : ES 는 중앙계단 */
+    out.push({a:'←', type:'turn',
+              tko:'엘리베이터 정면에서 좌측으로 꺾으세요', ten:'Facing the elevator, turn left',
+              ph:'['+lvName(lv)+' 엘리베이터 사진 ]', code:'EV'+lv});
+    out.push({a:'↑', type:'straight',
+              tko:'복도를 따라 직진하세요', ten:'Go straight along the hallway',
+              ph:'['+lvName(lv)+' 복도 사진 ]', code:'HALL'+lv+'R'});
+    out.push({a:'→', type:'turn',
+              tko:'오른쪽 복도 끝에 비상계단이 위치해 있습니다',
+              ten:'The emergency stairs are at the far end of the hallway, on the right',
+              ph:'[ 비상계단 사진 ]', code:'EMS'+lv});
+    out.push({a:'✓', type:'arrive',
+              tko:'비상계단에 도착했습니다', ten:'You have arrived at the emergency stairs',
+              ph:'[ 비상계단 사진 ]', code:'EMS'+lv});   /* v79 : ES 는 중앙계단 */
     return out;
   }
 

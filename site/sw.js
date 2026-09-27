@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = 'fd6ecd5ede10';   // 파일 230개 · 15.3MB
+var VERSION = '5ff2b1ae35d8';   // 파일 230개 · 15.3MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -219,7 +219,7 @@ var FILES = [
   ['js/app/boot.js','c49829682f30',8075],
   ['js/app/building.js','647a70cb183a',23274],
   ['js/app/floor-detail.js','9d10c5aa9ba7',19078],
-  ['js/app/guide.js','c2d8e0f22c4f',40477],
+  ['js/app/guide.js','5c8cfdb6ec21',41318],
   ['js/app/overview3d.js','e16d51396168',89724],
   ['js/app/photos.js','78fa37551619',52252],
   ['js/app/pwa.js','85a9eecf6165',28729],
@@ -237,7 +237,7 @@ var FILES = [
   ['js/app/sugai.js','5a7c207579d1',131009],
   ['js/app/sugdb.js','df49ab439b73',17964],
   ['js/app/suggest.js','dd852f0fd5de',46898],
-  ['js/app/ui.js','d5a2efa4e407',25194],
+  ['js/app/ui.js','f0c8693dca05',25627],
   ['js/app/view3d.js','f6a131c2a02d',44913],
   ['js/app/zoom.js','0bc33c826b8c',8395],
   ['js/vendor/jsqr.min.js','a07c909282f1',130501],

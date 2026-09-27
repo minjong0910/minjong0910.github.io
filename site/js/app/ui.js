@@ -394,11 +394,17 @@ function buildFloorPicker(){
 function buildStartFloorPicker(){
   var box=document.getElementById('sfp'); if(!box) return;
   box.innerHTML='';
+  /* 비상계단을 찾을 때는 '지금 계신 층'에서 지하 1층을 뺀다 —
+     지하에서는 안내를 기다리지 말고 알아서 대피하면 된다 (2026-09-28 사용자 요청).
+     지하를 골라 둔 채 비상계단으로 넘어왔으면 1층으로 되돌린다. */
+  var noB1 = !!(target && target.kind==='emstair');
+  if(noB1 && startFloor==='B1') startFloor=1;
   // 바로 위 '층 상세' 줄과 순서가 반대(오름차순)여서 같은 층 버튼 위치가 서로 달랐음
   // → 잘못 누르기 쉬웠으므로 위 줄과 똑같이 내림차순(5F…B1)으로 맞춘다.
   for(var i=LEVELS.length-1; i>=0; i--){
     /* 옥상은 엘리베이터가 안 서서 '출발층'로 고르면 경로 미리보기를 만들 수 없다 */
     if(LEVELS[i]==='R') continue;
+    if(LEVELS[i]==='B1' && noB1) continue;
     (function(lv){
       var b=document.createElement('button');
       b.textContent=lvLabel(lv);

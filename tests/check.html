@@ -156,7 +156,17 @@ function run(w){
           var st = w.buildSteps();
           var turn = st.filter(function(s){ return s.type === 'turn'; })[0];
           var arr  = st.filter(function(s){ return s.type === 'arrive'; })[0];
-          var gTurn = turn ? (turn.tko.indexOf('왼쪽') >= 0 ? 'L' : (turn.tko.indexOf('오른쪽') >= 0 ? 'R' : '?')) : '-';
+          /* 2026-09-28 : 비상계단만 기준 자세가 반대다. 사용자가 「엘리베이터 정면에서 좌측으로
+             꺾으세요」로 정했는데, 이건 엘리베이터를 **마주 보고** 선 자세라 내렸을 때와 좌우가
+             정반대다. 그래프(내렸을 때 기준)와 대조하려면 뒤집어 읽어야 한다.
+             호실·화장실은 예전대로 '내려서 왼쪽/오른쪽' 그대로 읽는다. */
+          var gTurn;
+          if(turn && t.kind === 'emstair'){
+            var facing = turn.tko.indexOf('좌측') >= 0 ? 'L' : (turn.tko.indexOf('우측') >= 0 ? 'R' : '?');
+            gTurn = (facing === 'L') ? 'R' : (facing === 'R' ? 'L' : '?');
+          } else {
+            gTurn = turn ? (turn.tko.indexOf('왼쪽') >= 0 ? 'L' : (turn.tko.indexOf('오른쪽') >= 0 ? 'R' : '?')) : '-';
+          }
           var r = w.NAVGRAPH.route('EV' + lv, t.code);
           if(!r.ok){ bad.guideGraph.push(t.code + ' 그래프 경로 없음'); return; }
           var pts = r.points.filter(function(p){ return p.floor === lv; });

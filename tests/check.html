@@ -165,7 +165,10 @@ function run(w){
             var facing = turn.tko.indexOf('좌측') >= 0 ? 'L' : (turn.tko.indexOf('우측') >= 0 ? 'R' : '?');
             gTurn = (facing === 'L') ? 'R' : (facing === 'R' ? 'L' : '?');
           } else {
-            gTurn = turn ? (turn.tko.indexOf('왼쪽') >= 0 ? 'L' : (turn.tko.indexOf('오른쪽') >= 0 ? 'R' : '?')) : '-';
+            /* '왼쪽으로 도세요'(예전 말)와 '좌회전 하세요'(사용자가 정한 말)를 둘 다 읽는다 —
+               2026-09-28 에 화장실이 '엘리베이터에서 내려서 좌회전 하세요'로 바뀌었다. */
+            gTurn = turn ? ((turn.tko.indexOf('왼쪽') >= 0 || turn.tko.indexOf('좌회전') >= 0) ? 'L'
+                         : ((turn.tko.indexOf('오른쪽') >= 0 || turn.tko.indexOf('우회전') >= 0) ? 'R' : '?')) : '-';
           }
           var r = w.NAVGRAPH.route('EV' + lv, t.code);
           if(!r.ok){ bad.guideGraph.push(t.code + ' 그래프 경로 없음'); return; }

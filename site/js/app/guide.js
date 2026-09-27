@@ -368,10 +368,22 @@ function buildSteps(){
                                 : ('['+lvName(lv)+' 엘리베이터 앞 사진 ]');
 
   if(target.kind==='toilet'){
-    out.push({a:arw, type:'turn',
-              tko:(facingEV ? '엘리베이터를 마주 보고 ' : '복도 건너 ')+turnWord+'으로 가세요',
-              ten:(facingEV ? 'Facing the elevator, go ' : 'Cross the hallway to the ')+turnWordEn,
-              ph:turnPhTxt, code:turnPhCode, cap:(turnPhCode===hallCode ? hallCap : null)});
+    /* ★ 2026-09-28 : 2~5층 화장실은 '엘리베이터를 나갈 때'가 기준이다(사용자 확인) —
+       호실 안내와 같은 자세·같은 말·같은 사진(EVIN)을 쓴다.
+       좌우는 예전부터 이 자세로 재고 있었는데(faceX = -X, 내렸을 때) 말과 사진만 엇나가 있었다 :
+       '복도 건너' + 엘리베이터를 **마주 본** 사진(EV). 이제 '엘리베이터에서 내려서 …' +
+       엘리베이터 **안에서 밖을 본** 사진(EVIN)으로 맞춘다 — 방향은 그대로다.
+       1층은 엘리베이터를 마주 보고 서는 자세라 예전 그대로 둔다(문에서 오는 길은 위의 WC1_FLOW). */
+    if(!facingEV && ROOM_PHOTOS['EVIN'+lv])
+      out.push({a:arw, type:'turn',
+                tko:'엘리베이터에서 내려서 '+(turnLeft ? '좌회전' : '우회전')+' 하세요',
+                ten:'Get off the elevator and turn '+turnWordEn,
+                ph:'['+lvName(lv)+' 엘리베이터 안 사진 ]', code:'EVIN'+lv});
+    else
+      out.push({a:arw, type:'turn',
+                tko:(facingEV ? '엘리베이터를 마주 보고 ' : '복도 건너 ')+turnWord+'으로 가세요',
+                ten:(facingEV ? 'Facing the elevator, go ' : 'Cross the hallway to the ')+turnWordEn,
+                ph:turnPhTxt, code:turnPhCode, cap:(turnPhCode===hallCode ? hallCap : null)});
     out.push({a:'✓', type:'arrive', tko:'화장실에 도착했습니다', ten:'You have arrived at the restroom', ph:'[ 화장실 앞 사진 ]', code:'WC'+lv});
     return out;
   }

@@ -42,7 +42,13 @@ function buildSteps(){
   /* 후문 → 크리에이티브 존은 엘리베이터가 아니라 바로 옆 계단으로 내려간다(아래 전용 갈래).
      그 길에서는 '1층 라운지에서 우회전'(=엘리베이터 쪽)이 끼면 반대로 가라는 말이 된다 → 넣지 않는다. */
   var backStairZone = !!(gk === 'BACK' && sf === 1 && target.kind === 'zone');
-  if(gk && sf===1 && ROOM_PHOTOS['GATE_'+gk]){
+  /* ★ 2026-09-28 : 1층 비상계단만 문 단계를 넣지 않는다 — 안내가 '엘리베이터 정면'에서 시작한다.
+     동문은 바로 옆이 비상계단이라(동문 z=-45.1 · 비상계단 z=-43.05 · 엘리베이터 z=-2.55)
+     '동문으로 들어오세요 → 엘리베이터 정면에서 …' 가 42m 갔다가 되돌아오라는 말이 됐다.
+     문을 기준으로 삼는 대신 엘리베이터를 기준으로 삼아 네 문 모두 같은 네 단계가 되게 했다.
+     2~5층은 어차피 엘리베이터를 타야 하므로 문 단계를 그대로 둔다. */
+  var ems1FromEV = !!(target.kind === 'emstair' && lv === 1 && sf === 1);
+  if(gk && sf===1 && !ems1FromEV && ROOM_PHOTOS['GATE_'+gk]){
     var GN = {MAIN:{ko:'정문', en:'the main gate'},  BACK:{ko:'후문', en:'the back gate'},
               EAST:{ko:'동문', en:'the east gate'}, WEST:{ko:'서문', en:'the west gate'}};
     var gn = GN[gk] || GN.MAIN;

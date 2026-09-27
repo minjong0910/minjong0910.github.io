@@ -70,6 +70,10 @@ $앱전용 = [ordered]@{
   'GATE_BACK_STAIR' = @{ label = '후문 옆 지하 계단 — 존 안내 ②';             floor = '1' }
   'EV1EAST'         = @{ label = '1층 복도 — 동문 쪽으로 지나갈 때';          floor = '1' }
   'EV1WEST'         = @{ label = '1층 복도 — 서문 쪽으로 지나갈 때';          floor = '1' }
+  'WC1WEST'         = @{ label = '서문 → 화장실 · 13119호실 앞 — 안내 ③';    floor = '1' }
+  'WC1BACK'         = @{ label = '후문 → 화장실 · 1층 라운지 — 안내 ②';      floor = '1' }
+  'WC1MAIN'         = @{ label = '정문 → 화장실 · 1층 라운지 — 안내 ②';      floor = '1' }
+  'WC1NEAR'         = @{ label = '화장실 바로 앞 로비 — 정문·후문 안내 ③';   floor = '1' }
   'B1PATH'          = @{ label = '지하로 내려가는 통로 — 존 안내 ③';          floor = 'B1' }
   'B1WAY'           = @{ label = '크리에이티브 존 입구 — 존 안내';            floor = 'B1' }
   'BLD'             = @{ label = '건물 외부'; floor = '외부'; pick = $false }

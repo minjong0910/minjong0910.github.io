@@ -79,6 +79,33 @@ function buildSteps(){
     return out;
   }
 
+  /* ★ 2026-09-28 : 1층 화장실 — 문마다 가는 길이 전혀 다르다(사용자가 문별로 정해 줌).
+     화장실은 엘리베이터 옆이 아니라 1층 로비 쪽에 있어서, 아래의 '엘리베이터 기준 좌우' 셈이
+     네 문 모두에 똑같은 한 줄("엘리베이터를 마주 보고 오른쪽으로 가세요")을 내놓고 있었다.
+     ① 문 외관은 위에서 이미 넣었고, 여기서 나머지를 그대로 잇고 끝낸다.
+     사진 자리 WC1WEST·WC1BACK·WC1MAIN·WC1NEAR 는 이 안내 전용으로 새로 만든 곳이다. */
+  var WC1_FLOW = {
+    EAST: [{a:'↑', type:'straight', code:'GATE_E',  tko:'복도를 따라 직진하세요',                              ten:'Go straight along the hallway'},
+           {a:'→', type:'turn',     code:'HALL1L',  tko:'1층 중앙계단을 지나 우측으로 꺾으세요',                ten:'Pass the main stairs and turn right'},
+           {a:'↑', type:'straight', code:'WC1',     tko:'정면에 화장실이 있습니다',                            ten:'The restroom is straight ahead'}],
+    WEST: [{a:'↑', type:'straight', code:'GATE_W',  tko:'복도를 따라 직진하세요',                              ten:'Go straight along the hallway'},
+           {a:'←', type:'turn',     code:'WC1WEST', tko:'왼쪽 네 번째 강의실 13119호실을 지나 좌측으로 꺾으세요', ten:'Pass room 13119, the 4th room on the left, and turn left'},
+           {a:'↑', type:'straight', code:'WC1',     tko:'정면에 화장실이 있습니다',                            ten:'The restroom is straight ahead'}],
+    BACK: [{a:'←', type:'turn',     code:'WC1BACK', tko:'1층 라운지에서 좌측으로 꺾으세요',                     ten:'In the lobby, turn left'},
+           {a:'→', type:'turn',     code:'WC1NEAR', tko:'우측에 화장실이 있습니다',                            ten:'The restroom is on your right'}],
+    MAIN: [{a:'→', type:'turn',     code:'WC1MAIN', tko:'1층 라운지에서 우측으로 꺾으세요',                     ten:'In the lobby, turn right'},
+           {a:'→', type:'turn',     code:'WC1NEAR', tko:'우측에 화장실이 있습니다',                            ten:'The restroom is on your right'}]
+  };
+  if(gk && sf === 1 && lv === 1 && target.kind === 'toilet' && WC1_FLOW[gk] &&
+     WC1_FLOW[gk].every(function(s){ return ROOM_PHOTOS[s.code]; })){
+    WC1_FLOW[gk].forEach(function(s){
+      out.push({a:s.a, type:s.type, tko:s.tko, ten:s.ten, ph:'[ '+s.code+' 사진 ]', code:s.code});
+    });
+    out.push({a:'✓', type:'arrive', tko:'화장실에 도착했습니다', ten:'You have arrived at the restroom',
+              ph:'[ 화장실 앞 사진 ]', code:'WC1'});
+    return out;
+  }
+
   // 출발층 엘리베이터 앞 사진(있으면). B1은 EV 사진이 없으므로 EV1로 대체.
   var startEV = (typeof sf==='number') ? ('EV'+sf) : 'EV1';
   var sfName = typeof sf==='number' ? lvName(sf) : lvName(1);

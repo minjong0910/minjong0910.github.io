@@ -1,8 +1,13 @@
 # 고른사진_넣기.ps1 — 사람이 고른 사진을 앱에 넣는다
 #
 #   사진고르기.html 에서 「고른 것 저장 ↓」 으로 받은 고른사진.txt 를 읽어,
-#   사진원본\ 의 그 사진을 앱 크기(긴 변 900)로 구워 site\data\photos\<코드>\01.jpg 로 넣고
-#   site\data\photos.js 의 이름표도 함께 고친다.
+#   그 사진을 앱 크기(긴 변 900)로 구워 site\data\photos\<코드>\01.jpg 로 넣고
+#   site\data\photos.js 의 이름표·주소도 함께 고친다.
+#
+#   적히는 형식 세 가지 (2026-09-28 에 세 번째가 늘었다) :
+#     (그대로)            지금 쓰는 사진 그대로 — 아무것도 안 한다
+#     파일이름.jpg        사진원본\<코드>\ 의 사진
+#     다른코드/파일.jpg   **다른 장소**에서 가져온 사진 (문 외관처럼 제 사진이 없는 자리에 쓴다)
 #
 #   실행 : pwsh -File 도구\고른사진_넣기.ps1 -Pick "...\고른사진_가.txt","...\고른사진_나.txt"
 #          (두 사람이 나눠 골랐으면 두 파일을 한 번에 준다. 안 주면 내려받기 폴더에서 고른사진*.txt 를 찾는다)
@@ -80,8 +85,16 @@ $done = 0; $same = 0; $miss = @()
 
 foreach($p in $picks){
   if($p.file -eq '(그대로)'){ $same++; continue }
-  $from = Join-Path (Join-Path $src $p.code) $p.file
+
+  # '다른코드/파일.jpg' 면 그 장소에서 가져온다. 그런 사진은 사진원본\ 에 없을 수도 있어
+  # (건물 외부 BLD 8장이 그렇다) 앱 폴더도 같이 뒤진다.
+  $srcCode = $p.code; $file = $p.file
+  $i = $p.file.IndexOf('/')
+  if($i -gt 0){ $srcCode = $p.file.Substring(0, $i); $file = $p.file.Substring($i + 1) }
+  $from = Join-Path (Join-Path $src $srcCode) $file
+  if(-not (Test-Path $from)){ $from = Join-Path (Join-Path $dst $srcCode) $file }
   if(-not (Test-Path $from)){ $miss += "$($p.code) : $($p.file)"; continue }
+
   $outDir = Join-Path $dst $p.code
   if(-not (Test-Path $outDir)){ New-Item -ItemType Directory -Path $outDir | Out-Null }
   $to = Join-Path $outDir '01.jpg'
@@ -89,14 +102,26 @@ foreach($p in $picks){
   $tmp = "$to.tmp"
   $size = 굽기 $from $tmp
   Move-Item -Force $tmp $to
-  # 이름표(n) — 방 이름이 있는 곳은 앱이 읽는 형식으로 맞춰 둔다
+
+  # photos.js 고치기 — 이름표(n) 와 **주소(u)** 를 함께 바꾼다.
+  # 주소까지 바꿔야 하는 이유 : 문 외관 네 곳(GATE_*_OUT)처럼 **다른 곳 사진을 가리키고 있던**
+  # 자리가 있어서, 새 사진을 제 폴더에 넣어도 u 를 안 고치면 화면은 옛 사진 그대로다.
   $nm = if($names.ContainsKey($p.code)){ $names[$p.code] } else { $null }
-  if($nm){
-    $newN = "1. $($p.code)_$nm-1.jpg"
-    $pat  = '"' + [regex]::Escape($p.code) + '":\[\{"n":"[^"]*"'
-    $js   = [regex]::Replace($js, $pat, ('"' + $p.code + '":[{"n":"' + $newN.Replace('$','$$') + '"'))
+  # 이름표는 알아볼 수 있게 — 방 이름이 있으면 앱이 읽는 형식, 다른 곳에서 가져왔으면 '원본코드_파일이름'
+  $newN = if($nm){ "1. $($p.code)_$nm-1.jpg" } elseif($srcCode -ne $p.code){ "$($srcCode)_$file" } else { $file }
+  $newU = "data/photos/$($p.code)/01.jpg"
+  $pat  = '"' + [regex]::Escape($p.code) + '":\[\{(.*?)\}'
+  $m    = [regex]::Match($js, $pat)
+  if($m.Success){
+    $cap = [regex]::Match($m.Groups[1].Value, '"cap":"([^"]*)"')      # 설명글이 있으면 살린다
+    $one = '"n":"' + $newN + '","u":"' + $newU + '"'
+    if($cap.Success){ $one += ',"cap":"' + $cap.Groups[1].Value + '"' }
+    $js = $js.Remove($m.Index, $m.Length).Insert($m.Index, '"' + $p.code + '":[{' + $one + '}')
+  } else {
+    Write-Warning "photos.js 에 $($p.code) 항목이 없습니다 — 사진만 넣었습니다."
   }
-  Write-Output ("    {0,-10} ← {1}  ({2})" -f $p.code, $p.file, $size)
+  $mark = if($srcCode -ne $p.code){ "  ← $srcCode 에서" } else { '' }
+  Write-Output ("    {0,-16} ← {1}  ({2}){3}" -f $p.code, $file, $size, $mark)
   $done++
 }
 

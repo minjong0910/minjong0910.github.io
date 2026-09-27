@@ -19,14 +19,10 @@
           background:#1B2430; color:var(--ink); border:1px solid var(--line); }
   button.go{ background:linear-gradient(90deg,#00E5FF,#7C6CFF); color:#06121A; border:0; font-weight:700; }
   button:hover{ filter:brightness(1.15); }
+  input[type=search]{ font-family:inherit; font-size:14px; padding:8px 12px; border-radius:8px;
+          background:#0A0E13; color:var(--ink); border:1px solid var(--line); min-width:220px; }
   .tip{ padding:14px 16px; color:var(--dim); line-height:1.7; border-bottom:1px solid var(--line); }
   .tip b{ color:var(--ink); }
-  .part{ color:var(--warn); font-size:13px; font-weight:700; }
-  #choose{ padding:18px 16px 22px; border-bottom:1px solid var(--line); }
-  #choose p{ margin:0 0 12px; color:var(--dim); }
-  #choose .row{ display:flex; gap:10px; flex-wrap:wrap; }
-  #choose button{ padding:14px 18px; text-align:left; line-height:1.5; }
-  #choose button small{ display:block; font-weight:400; opacity:.75; font-size:12px; }
   h2.floor{ margin:28px 16px 6px; font-size:16px; color:var(--warn); }
   .place{ border-top:1px solid var(--line); padding:14px 16px 18px; }
   .place.done{ opacity:.45; }
@@ -41,14 +37,26 @@
   figcaption{ font-size:11px; color:var(--dim); padding:6px 8px; word-break:break-all; line-height:1.4; }
   .badge{ position:absolute; top:6px; left:6px; background:rgba(255,212,0,.92); color:#1a1200;
           font-size:11px; font-weight:700; padding:2px 7px; border-radius:20px; }
-  figure.sel .badge2{ position:absolute; top:6px; right:6px; background:var(--on); color:#06121A;
+  .badge.from{ background:rgba(124,108,255,.95); color:#fff; }
+  /* 「고름」 표는 고른 칸에만 — 예전에는 자리 지정이 .sel 안에만 있어서, 안 고른 칸에도
+     「고름」 이라는 글자가 사진 밑에 그대로 찍혀 있었다 (2026-09-28 고침). */
+  .badge2{ display:none; }
+  figure.sel .badge2{ display:block; position:absolute; top:6px; right:6px; background:var(--on); color:#06121A;
           font-size:11px; font-weight:700; padding:2px 7px; border-radius:20px; }
   .more{ margin-top:10px; }
-  #big{ position:fixed; inset:0; background:rgba(0,0,0,.92); display:none; z-index:20;
+  .none{ color:var(--dim); font-size:13px; padding:6px 0 2px; line-height:1.7; }
+  #big{ position:fixed; inset:0; background:rgba(0,0,0,.92); display:none; z-index:30;
         align-items:center; justify-content:center; flex-direction:column; gap:10px; padding:16px; }
   #big img{ max-width:96vw; max-height:84vh; object-fit:contain; }
   #big .row{ display:flex; gap:10px; align-items:center; }
   #big p{ margin:0; color:var(--dim); font-size:13px; text-align:center; word-break:break-all; }
+  /* 전체 사진에서 고르기 */
+  #lib{ position:fixed; inset:0; background:var(--bg); display:none; z-index:20; flex-direction:column; }
+  #lib header{ position:static; }
+  #lib .who{ color:var(--on); font-weight:700; }
+  #libBody{ overflow:auto; padding:0 0 24px; }
+  #libBody h4{ margin:18px 16px 8px; font-size:14px; color:var(--warn); font-weight:700; }
+  #libBody .grid{ padding:0 16px; }
 </style>
 </head>
 <body>
@@ -56,27 +64,18 @@
 <header>
   <h1>사진 고르기</h1>
   <span class="stat">고른 곳 <b id="n">0</b> / <span id="t">0</span></span>
-  <span class="part" id="partName"></span>
   <span class="grow"></span>
   <button id="onlyLeft">아직 안 고른 곳만</button>
   <button id="clear">고른 것 모두 지우기</button>
   <button class="go" id="save">고른 것 저장 ↓</button>
 </header>
 
-<div id="choose" style="display:none">
-  <p>두 분이 나눠서 고르시면 됩니다. <b>맡은 쪽을 눌러 주세요.</b> (한 사람이 다 하려면 「전체」)</p>
-  <div class="row">
-    <button class="go" onclick="setPart('A')">가 — 지하 1층 · 1층 · 2층 · 3층<small>장소 93곳 · 사진 1,187장</small></button>
-    <button class="go" onclick="setPart('B')">나 — 4층 · 5층<small>장소 59곳 · 사진 888장</small></button>
-    <button onclick="setPart('')">전체 (152곳 · 2,075장)</button>
-  </div>
-</div>
-
 <div class="tip">
   장소마다 <b>마음에 드는 사진 한 장</b>을 눌러 주세요. 누르면 파란 테두리가 생깁니다. 다시 누르면 취소됩니다.<br>
   노란 <b>「지금 쓰는 사진」</b> 표가 붙은 것이 현재 앱에 들어가 있는 사진입니다 — 그게 제일 낫다면 그걸 누르시면 됩니다.<br>
+  그 자리에 <b>다른 곳에서 찍은 사진</b>을 넣고 싶으면 <b>「전체 사진에서 고르기」</b>를 누르세요 — 2,000장 전부에서 찾아 넣을 수 있습니다.<br>
   사진을 <b>오른쪽 클릭</b>하면 크게 볼 수 있습니다. 고른 것은 <b>자동으로 저장</b>되니 창을 닫았다 다시 열어도 됩니다.<br>
-  다 고르셨으면 <b>「고른 것 저장 ↓」</b>을 눌러 나온 파일(<b>고른사진_가.txt</b> 또는 <b>고른사진_나.txt</b>)을 보내 주세요.<br>
+  다 고르셨으면 <b>「고른 것 저장 ↓」</b>을 눌러 나온 파일(<b>고른사진.txt</b>)을 쓰시면 됩니다.<br>
   전부 고르실 필요는 없습니다 — <b>바꾸고 싶은 곳만</b> 고르시면 나머지는 지금 사진이 그대로 남습니다.
 </div>
 
@@ -84,23 +83,46 @@
 
 <div id="big"><img alt=""><p></p><div class="row"><button id="bigPick">이 사진으로 고르기</button><button id="bigClose">닫기</button></div></div>
 
+<div id="lib">
+  <header>
+    <h1>전체 사진에서 고르기</h1>
+    <span class="who" id="libWho"></span>
+    <span class="grow"></span>
+    <input type="search" id="libQ" placeholder="장소 이름 · 코드 · 파일 이름으로 찾기">
+    <span class="stat"><b id="libN">0</b>장</span>
+    <button id="libClose">닫기</button>
+  </header>
+  <div id="libBody"></div>
+</div>
+
 <script>
 var DATA = /*__DATA__*/;
-var KEY = 'b3nav_pick_v1';
+var KEY = 'b3nav_pick_v2';
 var FIRST = 24;                     // 사진이 많은 곳은 처음에 이만큼만 보여 준다
 
+/* 고른 것 : { 코드 : '(그대로)' | '파일이름' | '다른코드/파일이름' } */
 var pick = {};
 try{ pick = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){ pick = {}; }
+/* 예전(나눠 고르던) 판에서 고른 것이 있으면 그대로 이어받는다 */
+if(!Object.keys(pick).length){
+  try{ var old = JSON.parse(localStorage.getItem('b3nav_pick_v1') || '{}'); if(old && Object.keys(old).length) pick = old; }catch(e){}
+}
+
+var BY = {};
+DATA.forEach(function(p){ BY[p.code] = p; });
 
 function enc(p){ return encodeURI(p); }
+/* 고른 값 → 미리보기 주소.
+   '(그대로)' 는 앱이 지금 쓰는 사진, '코드/파일' 은 다른 곳 사진, 그냥 파일 이름은 그 장소 사진. */
 function srcOf(pl, f){
-  return (f === '(그대로)') ? enc('../data/photos/' + pl.code + '/' + pl.cur)
-                            : enc('사진/' + pl.code + '/' + f);
+  if(f === '(그대로)') return pl.cur ? enc('../' + pl.cur) : '';
+  var i = f.indexOf('/');
+  if(i > 0) return enc('사진/' + f);
+  return enc('사진/' + pl.code + '/' + f);
 }
-/* 두 사람이 나눠 고를 수 있게 — 사진 수가 비슷하게 갈린다 (지하~3층 1,187장 / 4~5층 888장) */
-var PARTS = { 'A': ['B1','1','2','3'], 'B': ['4','5'] };
-var part = (location.hash.replace('#','').toUpperCase() === 'B') ? 'B'
-         : (location.hash.replace('#','').toUpperCase() === 'A') ? 'A' : '';
+function fromCode(f){ var i = f.indexOf('/'); return i > 0 ? f.slice(0, i) : null; }
+function fileName(f){ var i = f.indexOf('/'); return i > 0 ? f.slice(i + 1) : f; }
+
 var FLOORS = [['B1','지하 1층'],['1','1층'],['2','2층'],['3','3층'],['4','4층'],['5','5층'],['R','옥상'],['외부','건물 외부'],['기타','그 밖']];
 
 function draw(){
@@ -108,42 +130,53 @@ function draw(){
   main.innerHTML = '';
   var total = 0;
   FLOORS.forEach(function(fl){
-    if(part && PARTS[part].indexOf(fl[0]) < 0) return;      // 맡은 부분만
-    var list = DATA.filter(function(p){ return p.floor === fl[0]; });
+    var list = DATA.filter(function(p){ return p.floor === fl[0] && p.pick; });
     if(!list.length) return;
     var h = document.createElement('h2'); h.className = 'floor'; h.textContent = fl[1] + ' — ' + list.length + '곳';
     main.appendChild(h);
-    list.forEach(function(pl){
-      total++;
-      var box = document.createElement('section'); box.className = 'place'; box.dataset.code = pl.code;
-      if(pick[pl.code]) box.classList.add('done');
-      var t = document.createElement('h3');
-      t.innerHTML = '<span>' + esc(pl.label) + '</span><span class="code">' + esc(pl.code) + ' · 사진 ' + pl.files.length + '장</span>' +
-                    (pick[pl.code] ? '<span class="picked">✓ 고름</span>' : '');
-      box.appendChild(t);
-      var g = document.createElement('div'); g.className = 'grid';
-      var items = [];
-      if(pl.cur) items.push('(그대로)');
-      items = items.concat(pl.files);
-      var shown = box.dataset.all === '1' ? items.length : Math.min(items.length, FIRST);
-      items.slice(0, shown).forEach(function(f){ g.appendChild(tile(pl, f)); });
-      box.appendChild(g);
-      if(items.length > shown){
-        var b = document.createElement('button'); b.className = 'more';
-        b.textContent = '나머지 ' + (items.length - shown) + '장 더 보기';
-        b.onclick = function(){
-          items.slice(shown).forEach(function(f){ g.appendChild(tile(pl, f)); });
-          b.remove();
-        };
-        box.appendChild(b);
-      }
-      main.appendChild(box);
-    });
+    list.forEach(function(pl){ total++; main.appendChild(placeBox(pl)); });
   });
   document.getElementById('t').textContent = total;
   count();
 }
 function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+
+function placeBox(pl){
+  var box = document.createElement('section'); box.className = 'place'; box.dataset.code = pl.code;
+  if(pick[pl.code]) box.classList.add('done');
+  var t = document.createElement('h3');
+  t.innerHTML = '<span>' + esc(pl.label) + '</span><span class="code">' + esc(pl.code) +
+                ' · 사진 ' + pl.files.length + '장</span>' +
+                (pick[pl.code] ? '<span class="picked">✓ 고름</span>' : '');
+  box.appendChild(t);
+
+  var g = document.createElement('div'); g.className = 'grid';
+  var items = [];
+  if(pl.cur) items.push('(그대로)');
+  /* 다른 곳에서 가져온 사진을 골라 뒀으면 그 한 장도 같이 보여 준다 */
+  if(pick[pl.code] && fromCode(pick[pl.code])) items.push(pick[pl.code]);
+  items = items.concat(pl.files);
+  var shown = Math.min(items.length, FIRST);
+  items.slice(0, shown).forEach(function(f){ g.appendChild(tile(pl, f)); });
+  box.appendChild(g);
+  if(items.length > shown){
+    var b = document.createElement('button'); b.className = 'more';
+    b.textContent = '나머지 ' + (items.length - shown) + '장 더 보기';
+    b.onclick = function(){ items.slice(shown).forEach(function(f){ g.appendChild(tile(pl, f)); }); b.remove(); };
+    box.appendChild(b);
+  }
+  if(!pl.files.length){
+    var p = document.createElement('p'); p.className = 'none';
+    p.innerHTML = '이 자리에는 <b>따로 찍어 둔 사진이 없습니다</b> — 지금은 다른 곳 사진을 빌려 쓰고 있습니다.' +
+                  ' 바꾸시려면 아래 <b>「전체 사진에서 고르기」</b>를 눌러 주세요.';
+    box.appendChild(p);
+  }
+  var lb = document.createElement('button'); lb.className = 'more'; lb.style.marginLeft = pl.files.length > shown ? '8px' : '0';
+  lb.textContent = '전체 사진에서 고르기 …';
+  lb.onclick = function(){ openLib(pl); };
+  box.appendChild(lb);
+  return box;
+}
 
 function tile(pl, f){
   var fig = document.createElement('figure');
@@ -151,51 +184,118 @@ function tile(pl, f){
   var img = document.createElement('img');
   img.loading = 'lazy'; img.src = srcOf(pl, f); img.alt = f;
   fig.appendChild(img);
+  var fc = fromCode(f);
   if(f === '(그대로)'){
     var b = document.createElement('span'); b.className = 'badge'; b.textContent = '지금 쓰는 사진'; fig.appendChild(b);
+  } else if(fc){
+    var b3 = document.createElement('span'); b3.className = 'badge from';
+    b3.textContent = (BY[fc] ? BY[fc].label : fc) + '에서';
+    fig.appendChild(b3);
   }
   var b2 = document.createElement('span'); b2.className = 'badge2'; b2.textContent = '고름'; fig.appendChild(b2);
-  var cap = document.createElement('figcaption'); cap.textContent = (f === '(그대로)' ? '지금 앱에 들어 있는 사진' : f);
+  var cap = document.createElement('figcaption');
+  cap.textContent = (f === '(그대로)' ? '지금 앱에 들어 있는 사진' : fileName(f));
   fig.appendChild(cap);
-  fig.onclick = function(){ choose(pl.code, f, fig); };
+  fig.onclick = function(){ choose(pl.code, f); };
   fig.oncontextmenu = function(e){ e.preventDefault(); big(pl, f); };
   return fig;
 }
-function choose(code, f, fig){
-  var box = fig.closest('.place');
-  if(pick[code] === f){ delete pick[code]; }
-  else { pick[code] = f; }
-  box.querySelectorAll('figure').forEach(function(x){ x.classList.remove('sel'); });
-  if(pick[code]) fig.classList.add('sel');
-  box.classList.toggle('done', !!pick[code]);
-  var t = box.querySelector('h3');
-  var mark = t.querySelector('.picked');
-  if(pick[code] && !mark){ var s = document.createElement('span'); s.className='picked'; s.textContent='✓ 고름'; t.appendChild(s); }
-  if(!pick[code] && mark) mark.remove();
+
+/* 고르기 — 고른 값이 바뀌면 그 장소 칸만 다시 그린다 (다른 곳 사진이 새로 끼어들 수 있으므로) */
+function choose(code, f){
+  if(pick[code] === f) delete pick[code]; else pick[code] = f;
   save(); count();
+  var box = document.querySelector('.place[data-code="' + code + '"]');
+  if(box){ var fresh = placeBox(BY[code]); box.replaceWith(fresh);
+           if(onlyLeft && pick[code]) fresh.style.display = 'none'; }
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(pick)); }catch(e){} }
 function count(){ document.getElementById('n').textContent = Object.keys(pick).length; }
+
+/* ── 전체 사진에서 고르기 ─────────────────────────────────────
+   장소를 가리지 않고 2,000여 장 전부에서 한 장을 골라 이 자리에 넣는다.
+   문 외관처럼 제 사진이 없는 자리는 이 길로만 바꿀 수 있다. */
+var libEl = document.getElementById('lib'), libFor = null;
+function openLib(pl){
+  libFor = pl;
+  document.getElementById('libWho').textContent = '→ ' + pl.label + ' (' + pl.code + ')';
+  document.getElementById('libQ').value = '';
+  libEl.style.display = 'flex';
+  libDraw('');
+  document.getElementById('libQ').focus();
+}
+function libDraw(q){
+  var body = document.getElementById('libBody');
+  body.innerHTML = '';
+  q = String(q || '').trim().toLowerCase();
+  var shown = 0;
+  DATA.forEach(function(pl){
+    if(!pl.files.length) return;
+    var hitPlace = !q || (pl.label + ' ' + pl.code).toLowerCase().indexOf(q) >= 0;
+    var files = hitPlace ? pl.files : pl.files.filter(function(f){ return f.toLowerCase().indexOf(q) >= 0; });
+    if(!files.length) return;
+    var h = document.createElement('h4');
+    h.textContent = pl.label + '  ·  ' + pl.code + '  ·  ' + files.length + '장';
+    body.appendChild(h);
+    var g = document.createElement('div'); g.className = 'grid';
+    files.forEach(function(f){
+      shown++;
+      var val = pl.code + '/' + f;
+      var fig = document.createElement('figure');
+      if(libFor && pick[libFor.code] === val) fig.classList.add('sel');
+      var img = document.createElement('img');
+      img.loading = 'lazy'; img.src = enc('사진/' + pl.code + '/' + f); img.alt = f;
+      fig.appendChild(img);
+      var b2 = document.createElement('span'); b2.className = 'badge2'; b2.textContent = '고름'; fig.appendChild(b2);
+      var cap = document.createElement('figcaption'); cap.textContent = f; fig.appendChild(cap);
+      fig.onclick = function(){
+        if(!libFor) return;
+        /* 제 폴더 사진이면 코드를 붙이지 않는다 — 저장 파일이 예전 형식 그대로가 된다 */
+        choose(libFor.code, (pl.code === libFor.code) ? f : val);
+        libEl.style.display = 'none';
+        var box = document.querySelector('.place[data-code="' + libFor.code + '"]');
+        if(box) box.scrollIntoView({block:'center'});
+      };
+      fig.oncontextmenu = function(e){ e.preventDefault(); big(pl, f); };
+      g.appendChild(fig);
+    });
+    body.appendChild(g);
+  });
+  document.getElementById('libN').textContent = shown;
+}
+document.getElementById('libClose').onclick = function(){ libEl.style.display = 'none'; };
+var libTimer = null;
+document.getElementById('libQ').oninput = function(){
+  var v = this.value;
+  clearTimeout(libTimer); libTimer = setTimeout(function(){ libDraw(v); }, 180);
+};
 
 /* 크게 보기 */
 var bigEl = document.getElementById('big'), bigCur = null;
 function big(pl, f){
   bigCur = {pl:pl, f:f};
   bigEl.querySelector('img').src = srcOf(pl, f);
-  bigEl.querySelector('p').textContent = pl.label + ' · ' + (f === '(그대로)' ? '지금 앱에 들어 있는 사진' : f);
+  bigEl.querySelector('p').textContent = pl.label + ' · ' + (f === '(그대로)' ? '지금 앱에 들어 있는 사진' : fileName(f));
   bigEl.style.display = 'flex';
 }
 document.getElementById('bigClose').onclick = function(){ bigEl.style.display = 'none'; };
 bigEl.onclick = function(e){ if(e.target === bigEl) bigEl.style.display = 'none'; };
 document.getElementById('bigPick').onclick = function(){
   if(!bigCur) return;
-  var box = document.querySelector('.place[data-code="' + bigCur.pl.code + '"]');
-  var figs = box.querySelectorAll('figure');
-  for(var i = 0; i < figs.length; i++){
-    if(figs[i].querySelector('img').alt === bigCur.f){ choose(bigCur.pl.code, bigCur.f, figs[i]); break; }
+  /* 전체 사진 창에서 크게 본 것이면 그 자리로, 아니면 제 장소로 넣는다 */
+  if(libEl.style.display === 'flex' && libFor){
+    choose(libFor.code, (bigCur.pl.code === libFor.code) ? bigCur.f : (bigCur.pl.code + '/' + bigCur.f));
+    libEl.style.display = 'none';
+  } else {
+    choose(bigCur.pl.code, bigCur.f);
   }
   bigEl.style.display = 'none';
 };
+document.addEventListener('keydown', function(e){
+  if(e.key !== 'Escape') return;
+  if(bigEl.style.display === 'flex'){ bigEl.style.display = 'none'; return; }
+  if(libEl.style.display === 'flex'){ libEl.style.display = 'none'; }
+});
 
 /* 머리줄 버튼 */
 document.getElementById('clear').onclick = function(){
@@ -211,37 +311,22 @@ document.getElementById('onlyLeft').onclick = function(){
   });
 };
 document.getElementById('save').onclick = function(){
-  var 몫 = part ? (part === 'A' ? '가 (지하~3층)' : '나 (4~5층)') : '전체';
   var lines = ['# 공대 3호관 길안내 — 사람이 고른 사진',
-               '# 맡은 곳 : ' + 몫,
                '# 만든 날 : ' + new Date().toLocaleString('ko-KR'),
-               '# 형식 : <코드><탭><고른 사진 파일 이름>   ((그대로) = 지금 쓰는 사진 유지)',
+               '# 형식 : <코드><탭><고른 사진>',
+               '#        (그대로)          = 지금 쓰는 사진 그대로',
+               '#        파일이름.jpg      = 그 장소 폴더의 사진',
+               '#        다른코드/파일.jpg = 다른 장소에서 가져온 사진',
                '# 고른 곳 ' + Object.keys(pick).length + '곳', ''];
   DATA.forEach(function(p){ if(pick[p.code]) lines.push(p.code + '\t' + pick[p.code]); });
   var blob = new Blob([lines.join('\r\n')], {type:'text/plain;charset=utf-8'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = '고른사진' + (part ? ('_' + (part === 'A' ? '가' : '나')) : '') + '.txt';
+  a.download = '고른사진.txt';
   document.body.appendChild(a); a.click(); a.remove();
 };
 
-/* 맡은 곳 고르기 — 주소 끝의 #A / #B 로도 바로 들어올 수 있다 */
-function setPart(p){
-  part = p;
-  location.hash = p ? p : '';
-  document.getElementById('choose').style.display = 'none';
-  document.getElementById('partName').textContent =
-    p ? ('맡은 곳 : ' + (p === 'A' ? '가 — 지하~3층' : '나 — 4·5층')) : '전체';
-  draw();
-}
-/* 이미 열어 둔 창에서 주소 끝만 #A · #B 로 바꿔도 따라가게 */
-window.addEventListener('hashchange', function(){
-  var h = location.hash.replace('#','').toUpperCase();
-  setPart(h === 'A' || h === 'B' ? h : '');
-});
-if(part){ setPart(part); }
-else if(Object.keys(pick).length){ setPart(''); }      // 하던 사람은 바로 이어서
-else { document.getElementById('choose').style.display = 'block'; draw(); }
+draw();
 </script>
 </body>
 </html>

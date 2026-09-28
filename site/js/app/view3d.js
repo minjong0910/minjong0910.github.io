@@ -33,6 +33,7 @@ var camTarget=new THREE.Vector3(0,FLOOR_H*2,BUILDING_MID_Z*BUILDING_Z_STRETCH);
 function init3D(){
   var cv=document.getElementById('c3d');
   var isMobilePerf = ('ontouchstart' in window) || navigator.maxTouchPoints>0 || /Mobi|Android|iPhone|iPad/.test(navigator.userAgent);
+  window.FP_PHONE = isMobilePerf;   // 1인칭 재질에서 '폰에서만 하는 처리'에 쓴다 (roadview.js 의 fpPhoneNoEmissive)
   /* 모바일 성능 최적화 : 1인칭 실내(fpMakeCorr·fpMakeB1 등)에서 쓰는
      MeshStandardMaterial(PBR)은 픽셀마다 GGX 반사 계산까지 들어가서 무겁다.
      이 프로젝트에서는 항상 {color/map, roughness, metalness}만 넘기고
@@ -78,8 +79,9 @@ function init3D(){
          갤럭시 S20+ 에서 찍어 온 사진의 색을 재어 보니 **지도가 있는 면만 제대로** 나왔다 —
          바닥 #E4E1D8 · 나무문 #A86141 은 정상인데, 지도 없는 벽은 #FBFC1C(새노랑),
          지도 없는 천장은 배경색 그대로(#030915)였다. 지도 없는 재질만 어긋난다.
-         그 한 장(128x128 옅은 회색, 전체가 공유)을 붙여 같은 길로 보낸다 —
-         보기에는 거의 달라지지 않고 GPU 부담도 늘지 않는다. */
+         그래서 그 한 장(128x128 옅은 회색, 전체가 공유)을 붙여 봤는데 **이것으로는 안 고쳐졌다** —
+         진짜 원인은 자발광이었다(roadview.js 의 fpPhoneNoEmissive 주석).
+         지도는 그대로 둔다 : 재질이 한 종류로 통일되고, 한 장을 공유해 부담이 늘지 않는다. */
       try{ if(!p2.map && typeof fpEnsureNoiseTex==='function') p2.map = fpEnsureNoiseTex(); }catch(err){}
       try{ DIAG.mat(fixedHere); }catch(err){}
       return new THREE.MeshPhongMaterial(p2);

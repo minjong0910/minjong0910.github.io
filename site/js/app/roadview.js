@@ -317,7 +317,7 @@ function fpMakeCab(){
       ln.position.set(-W/4 + (W/2)*i/4, 0, 0.013); dm.add(ln);
     }
   });
-  return g;
+  return fpPhoneNoEmissive(g);   /* 폰에서는 자발광을 뺀다 — fpPhoneNoEmissive 주석 참고 */
 }
 /* ── 복도 천장 ────────────────────────────────────────────────────
    건물 3D는 밖에서 내려다보는 홀로그램이라 천장이 아예 없다. 그대로 1인칭으로
@@ -369,7 +369,7 @@ function fpMakeCeil(){
   /* v121: 이 큰 천장판 한가운데를 따라 길게 깔던 옅은 하늘색 띠(0.34m × 건물 전체
      길이, 조명선 흉내)를 없앤다 — 복도 천장은 fpMakeCorr가 형광등까지 따로 그리므로, 이 띠는
      복도 천장 위에 파란 줄이 겹쳐 보이는 원인이었다. 천장판 자체는 그대로 둔다. */
-  return g;
+  return fpPhoneNoEmissive(g);   /* 폰에서는 자발광을 뺀다 — fpPhoneNoEmissive 주석 참고 */
 }
 /* 캡 안 층 표시등 글씨 갱신(같은 글씨면 다시 그리지 않는다) */
 function fpSetPanel(txt){
@@ -1135,6 +1135,30 @@ function fpEnsureNoiseTex(){
   FP_NOISE_TEX=t;
   return t;
 }
+/* ★ 2026-09-28 : 폰에서는 1인칭 재질의 자발광(emissive)을 쓰지 않는다.
+   갤럭시 S20+(Adreno 650 · SamsungBrowser 30) 화면 사진에서 색을 직접 재어 보니
+   **자발광이 있는 면만 파랑이 무너져 있었다.**
+       벽      #FCEF0B   자발광 있음   ← color+emissive 의 R·G 는 정확히 맞고 파랑만 255→11
+       형광등  #FDFF46   자발광 있음
+       천장판  #1A3522   자발광 있음   ← 있어야 할 값 (27,51,73) 중 파랑만 73→34
+       바닥    #E4E1D8   자발광 없음   ← 정상
+       나무문  #A86141   자발광 없음   ← 정상
+   무늬(map)를 붙여 봐도 그대로였다(노란 면에 무늬만 생겼다) — 무늬가 아니라 자발광 문제다.
+   → 폰에서는 자발광을 빼고 조명만으로 그린다. 바닥·문이 이미 그 방식으로 정상이다.
+     (데스크톱은 그대로 두어 지금 모습이 달라지지 않는다) */
+function fpPhoneNoEmissive(root){
+  if(!root || !window.FP_PHONE) return root;
+  try{
+    root.traverse(function(o){
+      var ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
+      for(var i=0;i<ms.length;i++){
+        var m = ms[i];
+        if(m && m.emissive && m.emissive.getHex() !== 0) m.emissive.setHex(0x000000);
+      }
+    });
+  }catch(e){}
+  return root;
+}
 function fpMkPlane(w,h,col,op,emi){
   var mat;
   if(emi===undefined){
@@ -1146,8 +1170,10 @@ function fpMkPlane(w,h,col,op,emi){
        갤럭시 S20+ 사진에서 색을 재어 보니 **지도(map)가 있는 면만 제대로** 나왔다 —
        바닥 #E4E1D8 · 나무문 #A86141 은 정상인데, 지도 없는 벽은 #FBFC1C(새노랑),
        지도 없는 천장은 배경색 그대로였다. 지도가 없는 재질만 어긋나는 셈이라,
-       이미 다른 벽이 쓰고 있는 그 한 장을 여기에도 붙여 같은 길로 보낸다.
-       (196~254 옅은 회색이라 보기에는 거의 달라지지 않고, 텍스처는 한 장을 공유한다) */
+       이미 다른 벽이 쓰고 있는 그 한 장을 여기에도 붙여 봤는데 — **이것으로는 안 고쳐졌다**
+       (노란 면에 무늬만 생겼다). 진짜 원인은 자발광이었다: 위 fpPhoneNoEmissive 주석 참고.
+       지도는 그대로 둔다 — 재질 종류가 하나로 통일되고, 196~254 옅은 회색이라 보기에는
+       거의 달라지지 않으며, 텍스처는 한 장을 공유해 부담도 늘지 않는다. */
     mat=new THREE.MeshPhongMaterial({color:col, emissive:emi, emissiveIntensity:0.5, shininess:40,
       map:fpEnsureNoiseTex(), transparent:true, opacity:op, side:THREE.DoubleSide});
   }

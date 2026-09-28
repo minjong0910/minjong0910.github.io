@@ -733,6 +733,9 @@ function fpBuildCorr(levels){
       if(o.type==='Mesh' || o.type==='LineSegments' || o.isSprite) fpHiddenSt.push(o);
     });
   });
+  /* 폰에서는 1인칭 재질의 자발광(emissive)을 뺀다 — roadview.js 의 fpPhoneNoEmissive 주석 참고.
+     (갤럭시 S20+ 에서 자발광이 있는 면만 파랑이 무너져 벽이 샛노랗게 보였다) */
+  if(typeof fpPhoneNoEmissive==='function') fpPhoneNoEmissive(fpCorrG);
   fpCorrG.visible=false;
   scene.add(fpCorrG);
 }

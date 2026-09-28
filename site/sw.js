@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = 'f4134e7fe1fc';   // 파일 230개 · 15.3MB
+var VERSION = '138e5e51298c';   // 파일 230개 · 15.3MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -226,19 +226,19 @@ var FILES = [
   ['js/app/qrnav.js','1ab04e81bfc1',20800],
   ['js/app/roadview-1f.js','14696e0f4c2a',46207],
   ['js/app/roadview-b1.js','7d5ac6c79e08',157916],
-  ['js/app/roadview-corr.js','0676f146b01f',47964],
+  ['js/app/roadview-corr.js','85c158267c8b',48264],
   ['js/app/roadview-free.js','c0d1249f0b54',92167],
   ['js/app/roadview-play.js','8532c01564db',23533],
   ['js/app/roadview-roof.js','21f2a5e8678f',119576],
   ['js/app/roadview-stairs.js','7f992b896804',70498],
-  ['js/app/roadview.js','774cbcf6fc5f',126868],
+  ['js/app/roadview.js','2985464ef652',128670],
   ['js/app/shell.js','e05181b4f869',19104],
   ['js/app/start.js','4065777331b0',1505],
   ['js/app/sugai.js','5a7c207579d1',131009],
   ['js/app/sugdb.js','df49ab439b73',17964],
   ['js/app/suggest.js','dd852f0fd5de',46898],
   ['js/app/ui.js','f0c8693dca05',25627],
-  ['js/app/view3d.js','7f2d975cb718',45642],
+  ['js/app/view3d.js','8a18f644fdb7',45942],
   ['js/app/zoom.js','0bc33c826b8c',8395],
   ['js/vendor/jsqr.min.js','a07c909282f1',130501],
   ['js/vendor/jszip.min.js','57fff0459a39',97676],

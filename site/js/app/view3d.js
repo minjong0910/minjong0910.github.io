@@ -74,6 +74,13 @@ function init3D(){
       }
       /* 「문제 기록」에 '고친 자리 N곳'으로 쌓인다. 1인칭 공간(옥상 문·의자)은 들어갈 때
          비로소 만들어지므로, 지금 화면만 세면 정작 문제의 그 물체를 못 센다. */
+      /* ★ 2026-09-28 : 지도(map)가 없는 재질에는 공용 노이즈 지도를 붙여 준다.
+         갤럭시 S20+ 에서 찍어 온 사진의 색을 재어 보니 **지도가 있는 면만 제대로** 나왔다 —
+         바닥 #E4E1D8 · 나무문 #A86141 은 정상인데, 지도 없는 벽은 #FBFC1C(새노랑),
+         지도 없는 천장은 배경색 그대로(#030915)였다. 지도 없는 재질만 어긋난다.
+         그 한 장(128x128 옅은 회색, 전체가 공유)을 붙여 같은 길로 보낸다 —
+         보기에는 거의 달라지지 않고 GPU 부담도 늘지 않는다. */
+      try{ if(!p2.map && typeof fpEnsureNoiseTex==='function') p2.map = fpEnsureNoiseTex(); }catch(err){}
       try{ DIAG.mat(fixedHere); }catch(err){}
       return new THREE.MeshPhongMaterial(p2);
     };

@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '82dbea8a637f';   // 파일 230개 · 15.3MB
+var VERSION = 'f4134e7fe1fc';   // 파일 230개 · 15.3MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -231,14 +231,14 @@ var FILES = [
   ['js/app/roadview-play.js','8532c01564db',23533],
   ['js/app/roadview-roof.js','21f2a5e8678f',119576],
   ['js/app/roadview-stairs.js','7f992b896804',70498],
-  ['js/app/roadview.js','87113d5906a0',126123],
+  ['js/app/roadview.js','774cbcf6fc5f',126868],
   ['js/app/shell.js','e05181b4f869',19104],
   ['js/app/start.js','4065777331b0',1505],
   ['js/app/sugai.js','5a7c207579d1',131009],
   ['js/app/sugdb.js','df49ab439b73',17964],
   ['js/app/suggest.js','dd852f0fd5de',46898],
   ['js/app/ui.js','f0c8693dca05',25627],
-  ['js/app/view3d.js','f6a131c2a02d',44913],
+  ['js/app/view3d.js','7f2d975cb718',45642],
   ['js/app/zoom.js','0bc33c826b8c',8395],
   ['js/vendor/jsqr.min.js','a07c909282f1',130501],
   ['js/vendor/jszip.min.js','57fff0459a39',97676],

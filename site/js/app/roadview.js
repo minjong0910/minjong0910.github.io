@@ -1142,8 +1142,14 @@ function fpMkPlane(w,h,col,op,emi){
     mat=new THREE.MeshStandardMaterial({color:col, map:nt, roughness:0.88, metalness:0.04,
       transparent:true, opacity:op, side:THREE.DoubleSide});
   }else{
+    /* ★ 2026-09-28 : 여기에도 공용 노이즈 지도를 붙인다.
+       갤럭시 S20+ 사진에서 색을 재어 보니 **지도(map)가 있는 면만 제대로** 나왔다 —
+       바닥 #E4E1D8 · 나무문 #A86141 은 정상인데, 지도 없는 벽은 #FBFC1C(새노랑),
+       지도 없는 천장은 배경색 그대로였다. 지도가 없는 재질만 어긋나는 셈이라,
+       이미 다른 벽이 쓰고 있는 그 한 장을 여기에도 붙여 같은 길로 보낸다.
+       (196~254 옅은 회색이라 보기에는 거의 달라지지 않고, 텍스처는 한 장을 공유한다) */
     mat=new THREE.MeshPhongMaterial({color:col, emissive:emi, emissiveIntensity:0.5, shininess:40,
-      transparent:true, opacity:op, side:THREE.DoubleSide});
+      map:fpEnsureNoiseTex(), transparent:true, opacity:op, side:THREE.DoubleSide});
   }
   fpCorrMats.push({m:mat, op:op});
   var ms=new THREE.Mesh(new THREE.PlaneGeometry(w,h), mat);
@@ -1160,8 +1166,9 @@ function fpMkBox(w,h,d,col,op,emi){
     mat=new THREE.MeshStandardMaterial({color:col, map:nt2, roughness:0.88, metalness:0.04,
       transparent:true, opacity:op});
   }else{
+    /* 위 fpMkPlane 과 같은 이유로 지도를 붙인다 (2026-09-28) */
     mat=new THREE.MeshPhongMaterial({color:col, emissive:emi, emissiveIntensity:0.45, shininess:30,
-      transparent:true, opacity:op});
+      map:fpEnsureNoiseTex(), transparent:true, opacity:op});
   }
   fpCorrMats.push({m:mat, op:op});
   var mb=new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);

@@ -194,7 +194,9 @@ var PWA = (function(){
     else if(/DaumApps/.test(ua)) app = '다음';
     else if(/everytimeApp/i.test(ua)) app = '에브리타임';
     else if(android && /; wv\)/.test(ua)) app = '앱';
-    return {ios:ios, android:android, inapp:app};
+    /* 삼성 인터넷은 메뉴가 **화면 아래 ≡** 이고 크롬은 **오른쪽 위 ⋮** 라 안내가 서로 다르다.
+       예전에는 한 줄에 둘을 같이 적어 두어 읽는 사람이 자기 것을 골라내야 했다 (2026-09-29). */
+    return {ios:ios, android:android, inapp:app, samsung:/SamsungBrowser/i.test(ua)};
   }
   var ENV = envOf(UA, navigator.platform, navigator.maxTouchPoints || 0);
   function isIOS(){ return ENV.ios; }
@@ -317,11 +319,27 @@ var PWA = (function(){
       if(android) btns += '<button class="go" onclick="PWA.openChrome()">' + (K ? '크롬으로 열기' : 'Open in Chrome') + '</button>';
       btns += '<button onclick="PWA.copyLink(this)">' + (K ? '주소 복사하기' : 'Copy link') + '</button>';
     } else if(kind === 'android'){
-      h = head(sub) + '<ol class="pwaSteps">' +
-        step(1, ICON_DOTS, K ? '크롬 오른쪽 위 <b>⋮</b> (삼성 인터넷은 아래 <b>≡</b>)를 누르세요.' : 'Tap <b>⋮</b> at the top right of Chrome (<b>≡</b> in Samsung Internet).') +
-        step(2, ICON_ADD, K ? '<b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 누르세요.' : 'Tap <b>Install app</b> or <b>Add to Home screen</b>.') +
-        '</ol><p class="pwaNote">' + (K ? '이미 설치했다면 홈 화면에서 <b>' + APP_NAME + '</b>를 찾아 주세요.'
-                                          : 'Already installed? Look for <b>' + APP_NAME + '</b> on your home screen.') + '</p>';
+      /* ★ 2026-09-29 : 아이폰 안내처럼 '누구라도 알아보게' 세 단계로 다시 썼다.
+         ① 안 깔아도 된다를 먼저 ② 쓰는 브라우저에 맞는 메뉴만 보여 준다(삼성 인터넷은 아래 ≡,
+         크롬은 오른쪽 위 ⋮ — 예전에는 한 줄에 둘을 같이 적어 자기 것을 골라내야 했다)
+         ③ 마지막에 아이콘이 생긴다는 그림까지. */
+      var sam = ENV.samsung;
+      h = head(sub) +
+        '<p class="pwaNote">' + (K
+          ? '<b>안 깔아도 지금 그대로 쓸 수 있어요.</b> 홈 화면 아이콘과 인터넷 없이 열기가 필요할 때만 아래대로 하세요.'
+          : '<b>You can keep using it without installing.</b> Install only if you want a home-screen icon and offline use.') + '</p>' +
+        '<ol class="pwaSteps">' +
+        step(1, ICON_DOTS, K ? (sam ? '화면 <b>아래 ≡</b> 를 누르세요.<br><small>삼성 인터넷 메뉴예요.</small>'
+                                    : '오른쪽 위 <b>⋮</b> 를 누르세요.<br><small>크롬 메뉴예요.</small>')
+                             : (sam ? 'Tap <b>≡</b> at the bottom.<br><small>The Samsung Internet menu.</small>'
+                                    : 'Tap <b>⋮</b> at the top right.<br><small>The Chrome menu.</small>')) +
+        step(2, ICON_ADD, K ? '<b>앱 설치</b> 를 누르세요.<br><small>없으면 <b>홈 화면에 추가</b> 를 누르세요.</small>'
+                            : 'Tap <b>Install app</b>.<br><small>No such item? Tap <b>Add to Home screen</b>.</small>') +
+        step(3, iconImg().replace('<img', '<img style="width:30px;height:30px;border-radius:7px"'),
+             K ? '<b>설치</b>를 누르면 홈 화면에<br><b>' + APP_NAME + '</b> 아이콘이 생겨요.'
+               : 'Tap <b>Install</b> — the <b>' + APP_NAME + '</b> icon appears on your home screen.') +
+        '</ol><p class="pwaNote">' + (K ? '처음 한 번만 인터넷이 될 때 열어 주세요 — 그때 ' + sizeText() + '를 저장하고, 그 뒤로는 인터넷 없이도 열려요.<br>이미 설치했다면 홈 화면에서 <b>' + APP_NAME + '</b>를 찾아 주세요.'
+                                          : 'Open it once while online — it saves ' + sizeText() + ', then it works offline.<br>Already installed? Look for <b>' + APP_NAME + '</b> on your home screen.') + '</p>';
     } else if(kind === 'desktop'){
       h = head(sub) + '<p class="pwaNote">' + (K
         ? '주소창 오른쪽의 <b>설치</b> 아이콘(⊕)이나 브라우저 메뉴 → <b>앱 설치</b>를 누르세요.<br>휴대폰에서는 출입문 QR을 찍어 연 뒤 설정 → 앱 다운로드를 누르면 돼요.'

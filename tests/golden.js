@@ -199,7 +199,13 @@ function captureDom(w){
   /* 부팅 화면(.fx-boot) 안의 것은 id 도 담지 않는다 — 부팅이 끝나면 통째로 사라지는 화면이라
      담는 시점에 따라 있었다 없었다 한다(pre#fxBootLog 로 CI 가 한 번 실패했다. 2026-09-28).
      글자·모양은 예전부터 빼고 있었는데 id 만 빠져 있었다. */
-  d.querySelectorAll('[id]').forEach(function(e){ if(!e.closest('script,style,.fx-boot')) out.ids.push(e.tagName.toLowerCase() + '#' + e.id); });
+  /* 실사 3D 틀(#b3dFrame)도 뺀다 — 그 화면에 들어갈 때 비로소 만들어지는 것이라(mountBld3D),
+     담는 시점에 있었다 없었다 한다. 내 PC 는 빨라서 늘 있었고 깃허브 검사 컴퓨터에서는 없어서
+     배포가 한 번 막혔다 (2026-09-29). 틀 안의 내용은 원래도 담지 않는다. */
+  d.querySelectorAll('[id]').forEach(function(e){
+    if(e.id === 'b3dFrame') return;
+    if(!e.closest('script,style,.fx-boot')) out.ids.push(e.tagName.toLowerCase() + '#' + e.id);
+  });
   out.ids.sort();
   /* 부팅 화면(.fx-boot)은 글자를 한 자씩 찍는 연출이라 찍힌 시점마다 글자 수·높이가 달라서 뺀다.
      (같은 앱을 두 번 돌려 확인한 유일한 흔들림 — 2단계에서 부팅 화면을 따로 고친다) */

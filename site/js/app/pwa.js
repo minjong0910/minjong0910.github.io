@@ -89,6 +89,18 @@ var DIAG = (function(){
     L.push('화면 : ' + innerWidth + 'x' + innerHeight + ' · 배율 ' + (window.devicePixelRatio || 1));
     L.push('그래픽 : ' + gpu());
     L.push('3D : ' + check3d());
+    /* 「직접 걸어보기」가 실제로 지어졌는지 — 안 지어졌으면 화면에 조감도가 그대로 남아
+       "벽이 노랗다 · 바닥이 없다"로 보인다. 걷기에 들어가 본 뒤 이 줄을 보면 바로 갈린다.
+       (걷기에 안 들어갔으면 '들어간 적 없음' — 기록을 보낼 때 꼭 먼저 들어가 봐야 한다) */
+    try{
+      var cg = (typeof fpCorrG !== 'undefined') ? fpCorrG : null;
+      var 물체 = 0;
+      if(cg) cg.traverse(function(o){ if(o.material) 물체++; });
+      L.push('걷기 : ' + (cg ? ('지은 층 ' + cg.children.length + ' · 물체 ' + 물체 + '개 · 지금 ' +
+                                (cg.visible ? '보임' : '안 보임')) : '들어간 적 없음') +
+             ' · 걷는중 ' + ((typeof fpFree !== 'undefined' && fpFree) ? '예' : '아니오') +
+             ' · 나타남 ' + ((typeof rideBlend !== 'undefined') ? rideBlend.toFixed(2) : '?'));
+    }catch(err){ L.push('걷기 : 확인 못 함'); }
     /* 아래 두 줄은 '왜 옛 판이 계속 열리나 · 왜 뒤로가기에 앱이 꺼지나'를 가리는 데 쓴다 */
     try{
       var o = (typeof PWA !== 'undefined') && PWA.offline;

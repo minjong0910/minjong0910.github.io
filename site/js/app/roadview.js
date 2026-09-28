@@ -1174,7 +1174,15 @@ function fpMkPlane(w,h,col,op,emi){
      (판 138e5e51298c 에서 확인), 지도를 붙여 봐도 그대로였다 — 남은 차이가 '어느 길로 만들었나'뿐이다.
      그래서 폰에서는 **바닥과 똑같은 길**로 만든다. 그 길은 이 기기에서도 색이 멀쩡하다.
      (데스크톱은 예전 그대로 — 자발광이 있는 따뜻한 벽을 유지한다) */
-  if(emi===undefined || window.FP_PHONE){
+  if(window.FP_FLAT){
+    /* ★★ 2026-09-28 (마지막 수단) : 폰에서는 **조명 계산을 아예 하지 않는** 가장 단순한 재질을 쓴다.
+       무늬·자발광·만드는 길을 차례로 지워도 갤럭시 S20+ 의 벽은 계속 #FFFF00 이었다.
+       MeshBasicMaterial 은 색 = 재질색 × 무늬 뿐이라, 조명·반사 계산이 끼어들 자리가 없다.
+       입체감(면마다 밝기 차이)은 줄지만 색은 반드시 맞는다 — 길찾기에는 색이 더 중요하다.
+       데스크톱·아이폰은 예전 그대로다. */
+    mat=new THREE.MeshBasicMaterial({color:col, map:fpEnsureNoiseTex(),
+      transparent:true, opacity:op, side:THREE.DoubleSide});
+  }else if(emi===undefined || window.FP_PHONE){
     var nt=fpEnsureNoiseTex();
     mat=new THREE.MeshStandardMaterial({color:col, map:nt, roughness:0.88, metalness:0.04,
       transparent:true, opacity:op, side:THREE.DoubleSide});
@@ -1201,7 +1209,9 @@ function fpMkPlane(w,h,col,op,emi){
 function fpMkBox(w,h,d,col,op,emi){
   var mat;
   /* 위 fpMkPlane 과 같은 이유로, 폰에서는 자발광 갈래를 쓰지 않는다 (2026-09-28) */
-  if(emi===undefined || window.FP_PHONE){
+  if(window.FP_FLAT){
+    mat=new THREE.MeshBasicMaterial({color:col, map:fpEnsureNoiseTex(), transparent:true, opacity:op});
+  }else if(emi===undefined || window.FP_PHONE){
     var nt2=fpEnsureNoiseTex();
     mat=new THREE.MeshStandardMaterial({color:col, map:nt2, roughness:0.88, metalness:0.04,
       transparent:true, opacity:op});

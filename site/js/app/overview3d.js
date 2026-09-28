@@ -1393,9 +1393,24 @@ function fpColorShot(){
     function hx(v){ return (v < 16 ? '0' : '') + v.toString(16); }
     out.push('#' + (hx(r) + hx(g) + hx(b)).toUpperCase() + ' ' + Math.round(cnt[k2] * 100 / tot) + '%');
   }
+  /* ★ 화면 한가운데에 **무엇이** 있는지도 같이 적는다 — '그려진 색'만으로는
+     그게 벽인지 천장인지 알 수 없어, 어떤 재질이 어떤 색으로 그려졌는지 짝을 지어 둔다.
+     (갤럭시 S20+ 의 노란 벽 : 원래 #E8DFC8 인데 화면엔 #FFFF00 으로 나오는지 바로 확인) */
+  var 앞 = '';
+  try{
+    var rc = new THREE.Raycaster();
+    rc.setFromCamera({x:0, y:0}, camera);
+    var hit = rc.intersectObject(fpCorrG, true)[0];
+    if(hit){
+      var mm = Array.isArray(hit.object.material) ? hit.object.material[0] : hit.object.material;
+      앞 = ' | 가운데 : ' + (mm.type || '?').replace('Material', '') +
+           ' 원래색 #' + (mm.color ? mm.color.getHexString().toUpperCase() : '-') +
+           (mm.map ? ' +무늬' : '') + ' · ' + hit.distance.toFixed(1) + 'm';
+    }else{ 앞 = ' | 가운데 : 아무것도 없음'; }
+  }catch(e){ 앞 = ' | 가운데 : 확인 못 함'; }
   var v = '';
   try{ v = (PWA.offline && PWA.offline.version) || ''; }catch(e){}
-  if(window.DIAG && DIAG.shot) DIAG.shot(out.join(' · ') + (v ? ('  (판 ' + v.slice(0, 6) + ')') : ''));
+  if(window.DIAG && DIAG.shot) DIAG.shot(out.join(' · ') + 앞 + (v ? ('  (판 ' + v.slice(0, 6) + ')') : ''));
 }
 /* 건물 전체 뷰에서 보고 싶은 곳으로 카메라 중심(camTarget) 자체를 옮기는 '이동(팬)'.
    지금까지는 camTarget이 건물 가운데에 고정된 채 회전·거리(줌)만 바꿀 수 있어서,

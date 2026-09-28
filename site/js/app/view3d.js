@@ -34,6 +34,22 @@ function init3D(){
   var cv=document.getElementById('c3d');
   var isMobilePerf = ('ontouchstart' in window) || navigator.maxTouchPoints>0 || /Mobi|Android|iPhone|iPad/.test(navigator.userAgent);
   window.FP_PHONE = isMobilePerf;   // 1인칭 재질에서 '폰에서만 하는 처리'에 쓴다 (roadview.js 의 fpPhoneNoEmissive)
+  /* ★ 2026-09-28 : 안드로이드 GPU(Adreno·Mali·PowerVR)에서는 1인칭 벽을 **조명 계산 없는
+     단색 재질**로 그린다. 갤럭시 S20+(Adreno 650)에서 벽이 계속 #FFFF00 으로 나왔는데,
+     무늬·자발광·재질을 만드는 길을 차례로 지워도 그대로였다. 조명 계산을 아예 빼면
+     색이 틀릴 자리가 없다. 아이폰(Apple GPU)·데스크톱은 지금 모습 그대로 둔다. */
+  window.FP_FLAT = false;
+  try{
+    if(isMobilePerf){
+      var _c = document.createElement('canvas');
+      var _g = _c.getContext('webgl') || _c.getContext('experimental-webgl');
+      if(_g){
+        var _x = _g.getExtension('WEBGL_debug_renderer_info');
+        var _s = String(_x ? _g.getParameter(_x.UNMASKED_RENDERER_WEBGL) : _g.getParameter(_g.RENDERER));
+        window.FP_FLAT = /Adreno|Mali|PowerVR/i.test(_s);
+      }
+    }
+  }catch(_e){}
   /* 모바일 성능 최적화 : 1인칭 실내(fpMakeCorr·fpMakeB1 등)에서 쓰는
      MeshStandardMaterial(PBR)은 픽셀마다 GGX 반사 계산까지 들어가서 무겁다.
      이 프로젝트에서는 항상 {color/map, roughness, metalness}만 넘기고

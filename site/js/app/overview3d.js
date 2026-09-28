@@ -1360,6 +1360,42 @@ function animate(){
       DIAG.add('3D 프레임 실패 : ' + (_frameErr && _frameErr.message ? _frameErr.message : _frameErr));
   }
   if(!A3D_SKIP){ if(PERF_ON) perfRender(); else renderer.render(scene,camera); }
+  /* ★ 2026-09-28 : 걷기 화면이 다 나타난 뒤 **화면 색을 한 번만 재서 저장**한다.
+     기기에서만 색이 틀리게 나오는 문제(갤럭시 S20+ 노란 벽)를 말이 아니라 숫자로 잡으려고 둔다.
+     그리기 바로 뒤에서만 읽을 수 있고(화면 버퍼는 매 프레임 지워진다), 가운데 96x96 한 번이라
+     부담이 거의 없다. 결과는 저장해 두므로 나중에 「문제 기록」을 떠도 그대로 남아 있다. */
+  if(!A3D_SKIP && !_shotDone && window.fpFree && fpCorrG && fpCorrG.visible && rideBlend > 0.99){
+    _shotDone = true;
+    try{ fpColorShot(); }catch(e){}
+  }
+}
+var _shotDone = false;
+/* 화면 가운데를 조금 읽어 '가장 많이 나온 색' 세 가지를 남긴다. */
+function fpColorShot(){
+  var gl = renderer.getContext(), cv = renderer.domElement;
+  var S = 96;
+  var x0 = Math.max(0, ((cv.width  - S) / 2) | 0);
+  var y0 = Math.max(0, ((cv.height - S) / 2) | 0);
+  var w = Math.min(S, cv.width), h = Math.min(S, cv.height);
+  var px = new Uint8Array(w * h * 4);
+  gl.readPixels(x0, y0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  var cnt = {}, tot = 0;
+  for(var i = 0; i < w * h; i++){
+    /* 16 단위로 뭉쳐 세면 비슷한 색이 한 덩어리로 모인다(JPEG·조명 얼룩 무시) */
+    var k = ((px[i*4] >> 4) << 8) | ((px[i*4+1] >> 4) << 4) | (px[i*4+2] >> 4);
+    cnt[k] = (cnt[k] || 0) + 1; tot++;
+  }
+  var keys = Object.keys(cnt).sort(function(a, b){ return cnt[b] - cnt[a]; });
+  var out = [];
+  for(var n = 0; n < 3 && n < keys.length; n++){
+    var k2 = +keys[n];
+    var r = ((k2 >> 8) & 15) * 17, g = ((k2 >> 4) & 15) * 17, b = (k2 & 15) * 17;
+    function hx(v){ return (v < 16 ? '0' : '') + v.toString(16); }
+    out.push('#' + (hx(r) + hx(g) + hx(b)).toUpperCase() + ' ' + Math.round(cnt[k2] * 100 / tot) + '%');
+  }
+  var v = '';
+  try{ v = (PWA.offline && PWA.offline.version) || ''; }catch(e){}
+  if(window.DIAG && DIAG.shot) DIAG.shot(out.join(' · ') + (v ? ('  (판 ' + v.slice(0, 6) + ')') : ''));
 }
 /* 건물 전체 뷰에서 보고 싶은 곳으로 카메라 중심(camTarget) 자체를 옮기는 '이동(팬)'.
    지금까지는 camTarget이 건물 가운데에 고정된 채 회전·거리(줌)만 바꿀 수 있어서,

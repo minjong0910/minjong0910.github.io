@@ -111,9 +111,21 @@ var DIAG = (function(){
       L.push('뒤로가기 : 칸 ' + (history.length || 0) +
              ' · 받침 ' + ((typeof backGuardOn !== 'undefined' && backGuardOn) ? '있음' : '없음'));
     }catch(err){}
+    /* ★ 2026-09-28 : 걷기 화면에 실제로 그려진 색. 앱이 스스로 재서 **저장해 두므로**,
+       걷기에 들어갔다가 앱을 껐다 켠 뒤에 이 기록을 떠도 그대로 남아 있다.
+       — 「직접 걸어보기에 들어간 다음 기록을 떠 주세요」라는 부탁이 더는 필요 없다.
+       갤럭시 S20+ 의 노란 벽처럼 기기에서만 나는 색 문제를 숫자로 잡으려고 둔다. */
+    try{
+      var sh = localStorage.getItem('b3nav_diag_shot');
+      if(sh) L.push('걷기 색 : ' + sh);
+    }catch(err){}
     L.push('오류 ' + errs.length + '개');
     for(var i=0;i<errs.length;i++) L.push('  · ' + errs[i]);
     return L.join('\n');
+  }
+  /* 걷기 중에 화면에서 잰 색을 저장한다(한 번만). overview3d.js 의 animate() 가 부른다. */
+  function shot(text){
+    try{ localStorage.setItem('b3nav_diag_shot', text); }catch(err){}
   }
   function paint(){
     var el = document.getElementById('diagStat');
@@ -133,7 +145,7 @@ var DIAG = (function(){
     return t;
   }
   document.addEventListener('DOMContentLoaded', paint);
-  return {add:add, mat:mat, full:full, copy:copy, paint:paint, errors:function(){ return errs.slice(); }};
+  return {add:add, mat:mat, shot:shot, full:full, copy:copy, paint:paint, errors:function(){ return errs.slice(); }};
 })();
 
 /* pwa.js — 앱 다운로드(홈 화면에 설치) · 인터넷 없이 열기(sw.js) · 출입문 QR 주소(?gate=) 받기

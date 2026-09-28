@@ -1396,18 +1396,36 @@ function fpColorShot(){
   /* ★ 화면 한가운데에 **무엇이** 있는지도 같이 적는다 — '그려진 색'만으로는
      그게 벽인지 천장인지 알 수 없어, 어떤 재질이 어떤 색으로 그려졌는지 짝을 지어 둔다.
      (갤럭시 S20+ 의 노란 벽 : 원래 #E8DFC8 인데 화면엔 #FFFF00 으로 나오는지 바로 확인) */
+  /* ★ 화면에서 **가장 노란 자리**를 직접 찾아, 그 방향으로 쏘아 무엇인지 알아낸다.
+     '노랗다'는 말만으로는 어느 물건인지 알 수 없어 여태 여러 번 헛짚었다.
+     여기서 '원래색 → 그려진 색'을 짝지어 적어 두면 다음 기록 하나로 범인이 정해진다. */
   var 앞 = '';
   try{
-    var rc = new THREE.Raycaster();
-    rc.setFromCamera({x:0, y:0}, camera);
-    var hit = rc.intersectObject(fpCorrG, true)[0];
-    if(hit){
-      var mm = Array.isArray(hit.object.material) ? hit.object.material[0] : hit.object.material;
-      앞 = ' | 가운데 : ' + (mm.type || '?').replace('Material', '') +
-           ' 원래색 #' + (mm.color ? mm.color.getHexString().toUpperCase() : '-') +
-           (mm.map ? ' +무늬' : '') + ' · ' + hit.distance.toFixed(1) + 'm';
-    }else{ 앞 = ' | 가운데 : 아무것도 없음'; }
-  }catch(e){ 앞 = ' | 가운데 : 확인 못 함'; }
+    var W2 = cv.width, H2 = cv.height, SX = Math.max(1, (W2/48)|0), SY = Math.max(1, (H2/48)|0);
+    var line = new Uint8Array(W2 * 4), best = -1, bx = 0, by = 0;
+    for(var yy = 0; yy < H2; yy += SY){
+      gl.readPixels(0, yy, W2, 1, gl.RGBA, gl.UNSIGNED_BYTE, line);
+      for(var xx = 0; xx < W2; xx += SX){
+        var R = line[xx*4], G = line[xx*4+1], B = line[xx*4+2];
+        var 노랑 = Math.min(R, G) - B;              // 빨강·초록은 높고 파랑은 낮을수록 크다
+        if(노랑 > best){ best = 노랑; bx = xx; by = yy; }
+      }
+    }
+    if(best > 90){
+      var rc = new THREE.Raycaster();
+      rc.setFromCamera({x: (bx / W2) * 2 - 1, y: (by / H2) * 2 - 1}, camera);
+      var hit = rc.intersectObjects(scene.children, true)[0];
+      var 색 = '';
+      gl.readPixels(bx, by, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, line);
+      색 = '#' + [line[0], line[1], line[2]].map(function(v){ return (v<16?'0':'') + v.toString(16); }).join('').toUpperCase();
+      if(hit){
+        var mm = Array.isArray(hit.object.material) ? hit.object.material[0] : hit.object.material;
+        앞 = ' | 가장 노란 곳 ' + 색 + ' ← ' + (mm.type || '?').replace('Material', '') +
+             ' 원래색 #' + (mm.color ? mm.color.getHexString().toUpperCase() : '-') +
+             (mm.map ? ' +무늬' : '') + ' · ' + hit.distance.toFixed(1) + 'm';
+      }else{ 앞 = ' | 가장 노란 곳 ' + 색 + ' ← 무엇인지 못 찾음'; }
+    }else{ 앞 = ' | 노란 곳 없음'; }
+  }catch(e){ 앞 = ' | 노란 곳 확인 못 함'; }
   var v = '';
   try{ v = (PWA.offline && PWA.offline.version) || ''; }catch(e){}
   if(window.DIAG && DIAG.shot) DIAG.shot(out.join(' · ') + 앞 + (v ? ('  (판 ' + v.slice(0, 6) + ')') : ''));

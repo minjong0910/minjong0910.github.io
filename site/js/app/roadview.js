@@ -1161,6 +1161,38 @@ function fpPhoneNoEmissive(root){
       }
     });
   }catch(e){}
+  /* ★ 2026-09-28 (2차) : 안드로이드 GPU 에서는 **남아 있는 조명 재질까지 전부** 단색으로 바꾼다.
+     fpMkPlane·fpMkBox 로 만든 벽·상자는 이미 단색이라 색이 제대로 나왔는데(사용자 확인),
+     그 밖의 경로로 만들어진 415개는 아직 조명 재질이라 그중 일부가 계속 노랗게 보였다.
+     여기서 한 번에 쓸어 담아 1인칭 화면 안에는 조명 계산이 하나도 남지 않게 한다.
+     페이드 목록(fpCorrMats)이 옛 재질을 가리키고 있으면 복도가 나타나지 않으므로 같이 고친다. */
+  if(!window.FP_FLAT) return root;
+  try{
+    var 바뀜 = [];
+    root.traverse(function(o){
+      if(!o.material || o.isSprite) return;
+      var arr = Array.isArray(o.material) ? o.material : [o.material];
+      var 새것 = arr.map(function(m){
+        if(!m) return m;
+        if(m.type !== 'MeshPhongMaterial' && m.type !== 'MeshStandardMaterial' &&
+           m.type !== 'MeshLambertMaterial') return m;
+        var b = new THREE.MeshBasicMaterial({
+          color: m.color ? m.color.getHex() : 0xFFFFFF,
+          map: m.map || null,
+          transparent: m.transparent, opacity: m.opacity, side: m.side,
+          depthWrite: m.depthWrite, depthTest: m.depthTest,
+          alphaTest: m.alphaTest, blending: m.blending
+        });
+        바뀜.push([m, b]);
+        return b;
+      });
+      o.material = Array.isArray(o.material) ? 새것 : 새것[0];
+    });
+    if(typeof fpCorrMats !== 'undefined' && fpCorrMats)
+      for(var ci=0; ci<fpCorrMats.length; ci++)
+        for(var bi=0; bi<바뀜.length; bi++)
+          if(fpCorrMats[ci].m === 바뀜[bi][0]){ fpCorrMats[ci].m = 바뀜[bi][1]; break; }
+  }catch(e2){}
   return root;
 }
 function fpMkPlane(w,h,col,op,emi){

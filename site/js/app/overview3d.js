@@ -1123,6 +1123,14 @@ function animate(){
     }
   }
 
+  /* ★ 2026-09-28 : 여기서부터 그리기 직전까지는 '한 프레임 분량의 계산'이다.
+     어느 한 곳에서 예외가 나면 예전에는 그 프레임이 통째로 끊겨 **그리기까지 건너뛰었고**,
+     화면에는 직전에 그린 그림이 그대로 얼어붙었다 — 갤럭시 S20 의 「노란 화면」이 그 모습이다.
+     (조감도의 '가야 할 층'이 노란색이라 벽이 온통 노랗게 보이고, 걷기용 복도는 아직 안 나타나
+      바닥이 뚫린 것처럼 지하까지 내려다보였다. 삼성폰 세 대에서 증상이 똑같았던 이유다.)
+     계산이 실패하더라도 그리기는 반드시 하도록 통째로 감싼다 —
+     무엇이 터졌는지는 설정의 「문제 기록」에 남아 폰만 보고도 알 수 있다. */
+  try{
   if(spin) theta+=0.003;
   updatePerson();
   // 목적지 상자를 숨쉬듯 은은하게 반짝이게 — 멀리서도 "저기다!" 하고 시선이 가도록 하는
@@ -1345,6 +1353,11 @@ function animate(){
         obj.scale.set(ud._fpSc.x*0.26, ud._fpSc.y*0.26, 1);
       }
     });
+  }
+  }catch(_frameErr){
+    /* 계산은 실패했지만 아래 그리기는 그대로 한다 — 화면이 옛 그림으로 얼어붙지 않게. */
+    if(window.DIAG && DIAG.add)
+      DIAG.add('3D 프레임 실패 : ' + (_frameErr && _frameErr.message ? _frameErr.message : _frameErr));
   }
   if(!A3D_SKIP){ if(PERF_ON) perfRender(); else renderer.render(scene,camera); }
 }

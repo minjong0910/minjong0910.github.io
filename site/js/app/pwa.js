@@ -266,14 +266,25 @@ var PWA = (function(){
     var K = ko(), h = '', btns = '';
     var sub = K ? ('홈 화면에 앱으로 설치 · ' + sizeText()) : ('Install to your home screen · ' + sizeText());
     if(kind === 'ios'){
-      h = head(sub) + '<ol class="pwaSteps">' +
+      /* ★ 2026-09-29 : 아이폰은 애플이 '설치 버튼'을 막아 두어 삼성처럼 한 번에 깔 수 없다.
+         그래서 ① 안 깔아도 그냥 쓸 수 있다는 것을 맨 앞에 알려 주고,
+         ② 출입문 QR 을 기본 카메라로 찍으면 사파리가 바로 열려서 이 안내가 제일 짧아진다는 것을
+         알려 준다(다른 브라우저·카톡 안에서 시작하면 '주소 복사 → 사파리에 붙여넣기'가 더 붙는다). */
+      h = head(sub) +
+        '<p class="pwaNote">' + (K
+          ? '<b>안 깔아도 지금 그대로 쓸 수 있어요.</b> 홈 화면 아이콘과 인터넷 없이 열기가 필요할 때만 아래대로 하세요.'
+          : '<b>You can keep using it without installing.</b> Install only if you want a home-screen icon and offline use.') + '</p>' +
+        '<ol class="pwaSteps">' +
         step(1, ICON_SHARE, K ? '화면 아래(아이패드는 위) <b>공유</b> 버튼을 누르세요.<br><small>안 보이면 <b>⋯</b> 를 먼저 누르세요.</small>'
                               : 'Tap the <b>Share</b> button at the bottom (top on iPad).<br><small>If you can\'t see it, tap <b>⋯</b> first.</small>') +
-        step(2, ICON_ADD, K ? '목록을 내려 <b>홈 화면에 추가</b>를 누르세요.' : 'Scroll down and tap <b>Add to Home Screen</b>.') +
+        /* 실제로 해 본 분 제보(2026-09-29) : 공유 목록 첫 화면에 '홈 화면에 추가'가 없어서
+           '더 보기'를 눌러야 나오는 기기가 있다. 두 경우를 다 적어 준다. */
+        step(2, ICON_ADD, K ? '목록을 내려 <b>홈 화면에 추가</b>를 누르세요.<br><small>안 보이면 맨 아래 <b>더 보기</b>를 먼저 누르세요.</small>'
+                            : 'Scroll down and tap <b>Add to Home Screen</b>.<br><small>Not there? Tap <b>Edit Actions…</b> at the bottom first.</small>') +
         step(3, iconImg().replace('<img', '<img style="width:30px;height:30px;border-radius:7px"'),
              K ? '오른쪽 위 <b>추가</b>를 누르면 홈 화면에<br><b>' + APP_NAME + '</b> 아이콘이 생겨요.'
                : 'Tap <b>Add</b> — the <b>' + APP_NAME + '</b> icon appears on your home screen.') +
-        '</ol><p class="pwaNote">' + (K ? '사파리에서 가장 잘 돼요. 설치한 앱은 처음 한 번만 인터넷이 될 때 열어 주세요 — 그때 ' + sizeText() + '를 저장하고, 그 뒤로는 인터넷 없이도 열려요 (AI 사진 판별만 인터넷이 필요해요).'
+        '</ol><p class="pwaNote">' + (K ? '<b>출입문 QR 을 기본 카메라로 찍으면</b> 사파리가 바로 열려서 이 두 번이면 끝나요 — 주소를 옮겨 적을 일이 없어요.<br>설치한 앱은 처음 한 번만 인터넷이 될 때 열어 주세요 — 그때 ' + sizeText() + '를 저장하고, 그 뒤로는 인터넷 없이도 열려요 (AI 사진 판별만 인터넷이 필요해요).'
                                           : 'Works best in Safari. Open the installed app once while online — it saves ' + sizeText() + ', then it opens without internet (only the AI photo check needs it).') + '</p>';
     } else if(kind === 'inapp'){
       var android = isAndroid();

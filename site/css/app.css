@@ -68,6 +68,11 @@
     border:1px solid #00E5FF;color:#00E5FF;font-size:1rem;display:flex;
     align-items:center;justify-content:center;cursor:pointer;}
   .iconBtn:active{background:rgba(0,229,255,.2);}
+  /* 인터넷 상태 동그라미 (2026-09-29) — 켜져 있으면 녹색으로 차고, 끊기면 색 없는 테두리만 남는다.
+     글자가 아니라 색·채움으로만 알리므로 눈에 거슬리지 않으면서 한눈에 들어온다. */
+  #netBtn i{display:block;width:0.75rem;height:0.75rem;border-radius:50%;
+    border:0.125rem solid #6E7C8C;background:transparent;transition:background .2s,border-color .2s;}
+  #netBtn.netOn i{background:#27E07A;border-color:#27E07A;box-shadow:0 0 0.375rem rgba(39,224,122,.75);}
 
   /* 설정·이용안내·즐겨찾기 화면 */
   #sset .row, #sguide .card{background:#131A24;border:1px solid #232D3A;border-radius:0.625rem;

@@ -326,6 +326,18 @@ var PWA = (function(){
       h = head(sub) + '<p class="pwaNote">' + (K
         ? '주소창 오른쪽의 <b>설치</b> 아이콘(⊕)이나 브라우저 메뉴 → <b>앱 설치</b>를 누르세요.<br>휴대폰에서는 출입문 QR을 찍어 연 뒤 설정 → 앱 다운로드를 누르면 돼요.'
         : 'Use the <b>Install</b> icon (⊕) in the address bar or the browser menu → <b>Install app</b>.') + '</p>';
+    } else if(kind === 'net'){
+      /* 오른쪽 위 동그라미를 눌렀을 때 — 지금 인터넷이 되는지와, 인터넷 없이 열 준비가 됐는지. */
+      var on = netOn();
+      h = head(K ? (on ? '인터넷 연결됨' : '인터넷 끊김') : (on ? 'Online' : 'Offline')) +
+        '<p class="pwaNote">' + (K
+          ? (on ? '지금은 인터넷이 돼요. 사진으로 위치 찾기(AI)까지 모두 쓸 수 있어요.'
+                : '지금은 인터넷이 끊겼어요. 길안내·3D·사진은 그대로 되고, <b>사진으로 위치 찾기(AI)만</b> 안 돼요.')
+          : (on ? 'You are online. Everything works, including the AI photo check.'
+                : 'You are offline. Directions, 3D and photos still work — only the AI photo check needs internet.')) + '</p>' +
+        '<p class="pwaNote"><b>' + (K ? '인터넷 없이 열기' : 'Offline use') + '</b> : ' + offText() + '<br>' +
+        (K ? '앱을 처음 한 번만 인터넷이 될 때 열어 두면 ' + sizeText() + '를 폰에 저장해서, 그 뒤로는 신호가 약한 건물 안에서도 열려요.'
+           : 'Open it once while online — it saves ' + sizeText() + ', then it opens even where the signal is weak.') + '</p>';
     } else if(kind === 'done'){
       h = head(K ? '설치했어요!' : 'Installed!') + '<p class="pwaNote">' + (K
         ? '홈 화면의 <b>' + APP_NAME + '</b> 아이콘으로 여세요. 인터넷이 없어도 열려요.'
@@ -377,9 +389,25 @@ var PWA = (function(){
     return K ? '준비하는 중…' : 'Preparing…';
   }
   function syncOff(){
-    var el = document.getElementById('offStat');
+    var el = document.getElementById('offStat');      // 설정에 있던 줄 — 지금은 없앴지만 있으면 채운다
     if(el) el.textContent = offText();
   }
+  /* ── 인터넷 상태 동그라미 (화면 오른쪽 위, 홈 버튼 왼쪽) ─────────────────
+     2026-09-29 : 설정의 「인터넷 없이 열기」 줄을 여기로 옮겼다.
+     설정을 열지 않아도 지금 인터넷이 되는지 한눈에 보이고, 누르면 저장 상태까지 나온다.
+     켜짐 = 녹색으로 찬 동그라미 · 끊김 = 색 없는 테두리만. */
+  function netOn(){ return navigator.onLine !== false; }
+  function netSync(){
+    var b = document.getElementById('netBtn');
+    if(!b) return;
+    var on = netOn(), K = ko();
+    b.classList.toggle('netOn', on);
+    b.setAttribute('title', on ? (K ? '인터넷 연결됨' : 'Online') : (K ? '인터넷 끊김' : 'Offline'));
+    b.setAttribute('aria-label', b.getAttribute('title'));
+  }
+  function netInfo(){ sheet('net'); return netOn() ? 'online' : 'offline'; }
+  window.addEventListener('online',  netSync);
+  window.addEventListener('offline', netSync);
   function onMsg(e){
     var d = e.data || {};
     if(d.type === 'progress'){ off.state = 'saving'; off.done = d.done; off.total = d.total; off.bytes = d.bytes || off.bytes; }
@@ -480,10 +508,11 @@ var PWA = (function(){
       }
     }
   }
-  document.addEventListener('DOMContentLoaded', sync);
+  document.addEventListener('DOMContentLoaded', function(){ sync(); netSync(); });
 
   return {
     install:install, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, sync:sync,
+    netInfo:netInfo, netSync:netSync, netOn:netOn,
     get offline(){ return {state:off.state, done:off.done, total:off.total, bytes:off.bytes, version:off.version, text:offText()}; },
     /* 검사(tests/pwa.html)가 설치 갈래를 확인할 때 쓴다 */
     _env:function(){ return {ios:isIOS(), android:isAndroid(), inapp:inAppName(), standalone:standalone(), prompt:!!deferred}; },

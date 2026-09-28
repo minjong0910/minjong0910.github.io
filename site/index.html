@@ -28,6 +28,9 @@
 <div class="phone">
   <div class="notch"><i></i></div>
   <div class="topIcons" style="z-index:60;">
+    <!-- 인터넷 상태 — 켜져 있으면 녹색 동그라미, 끊겨 있으면 색 없는 동그라미.
+         누르면 '인터넷 없이 열기' 저장 상태까지 보여 준다(설정에 있던 그 줄을 여기로 옮겼다). -->
+    <button class="iconBtn" id="netBtn" title="인터넷 상태" onclick="PWA.netInfo()"><i id="netDot"></i></button>
     <button class="iconBtn" title="처음으로" onclick="go(1)">🏠</button>
     <button class="iconBtn" title="즐겨찾기" onclick="openOverlay('sfav')">⭐</button>
     <button class="iconBtn" title="설정" onclick="openOverlay('sset')">⚙️</button>
@@ -74,11 +77,8 @@
         <button class="ghost" id="pwaBtnIos" style="padding:6px 12px;border-radius:8px;" onclick="PWA.install('ios')" data-ko="아이폰 →" data-en="iPhone →">아이폰 →</button>
       </span>
     </div>
-    <!-- 인터넷 없이 열기 — 처음 열 때 약 14MB 를 폰에 저장한다 (sw.js). AI 사진 판별 자료는 저장하지 않는다 -->
-    <div class="row">
-      <b data-ko="인터넷 없이 열기" data-en="Offline use">인터넷 없이 열기</b>
-      <span class="offStat" id="offStat">준비하는 중…</span>
-    </div>
+    <!-- 「인터넷 없이 열기」 줄은 2026-09-29 에 화면 오른쪽 위 인터넷 상태 동그라미(#netBtn)로 옮겼다.
+         설정을 열지 않아도 지금 인터넷이 되는지 한눈에 보이고, 동그라미를 누르면 저장 상태도 나온다. -->
     <!-- 문제 기록 — 특정 기기에서만 나는 문제를 찾을 때 쓴다. 이 줄을 찍어서 보내 주면 원인을 좁힐 수 있다.
          평소에는 '이상 없음'만 보이므로 일반 사용자에게 방해가 되지 않는다. -->
     <div class="row">

@@ -138,7 +138,19 @@ function testUi(){
       check('settings', btnI && /PWA\.install\('ios'\)/.test(btnI.getAttribute('onclick') || ''),
             '아이폰 전용 버튼(pwaBtnIos)이 없거나 PWA.install(\'ios\') 를 부르지 않음');
     }
-    check('settings', txt(w, 'offStat').trim().length > 0, '"인터넷 없이 열기" 상태 글자가 비었음');
+    /* 2026-09-29 : 「인터넷 없이 열기」 줄을 설정에서 빼고 오른쪽 위 인터넷 상태 동그라미로 옮겼다.
+       동그라미가 있는지 · 눌렀을 때 저장 상태 글자가 나오는지를 본다. */
+    var net = d.getElementById('netBtn');
+    if(check('settings', net && d.getElementById('netDot'), '오른쪽 위에 인터넷 상태 동그라미(netBtn)가 없음')){
+      check('settings', /PWA\.netInfo\(\)/.test(net.getAttribute('onclick') || ''), '동그라미가 PWA.netInfo() 를 부르지 않음');
+      check('settings', net.classList.contains('netOn') === (w.navigator.onLine !== false), '동그라미 색이 지금 인터넷 상태와 다름');
+      w.PWA.netInfo();
+      var ns = d.getElementById('pwaSheet');
+      check('settings', ns && ns.getAttribute('data-kind') === 'net' && /인터넷 없이 열기/.test(ns.textContent),
+            '동그라미를 눌러도 인터넷·저장 상태 안내가 안 뜸');
+      w.PWA.close();
+    }
+    check('settings', (w.PWA.offline.text || '').trim().length > 0, '"인터넷 없이 열기" 상태 글자가 비었음');
 
     /* install : 위에서 받은 가짜 설치 신호로 버튼을 누르면 → 설치 창 → 설치함 */
     var r = w.PWA.install();

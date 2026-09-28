@@ -228,16 +228,28 @@ var PWA = (function(){
     var b = document.getElementById('pwaBtn');
     if(!b) return;
     var done = standalone() || justInstalled;
-    b.setAttribute('data-ko', done ? '설치됨 ✓' : '받기 →');
-    b.setAttribute('data-en', done ? 'Installed ✓' : 'Get →');
+    /* 버튼이 둘이다 — 「삼성 →」과 「아이폰 →」. 설치가 끝나면 삼성 쪽만 '설치됨 ✓'로 바꾸고
+       아이폰 버튼은 감춘다(이미 깔았으면 그림 안내가 필요 없다). (2026-09-29) */
+    b.setAttribute('data-ko', done ? '설치됨 ✓' : '삼성 →');
+    b.setAttribute('data-en', done ? 'Installed ✓' : 'Android →');
     b.innerHTML = ko() ? b.getAttribute('data-ko') : b.getAttribute('data-en');
+    var bi = document.getElementById('pwaBtnIos');
+    if(bi){
+      bi.style.display = done ? 'none' : '';
+      bi.innerHTML = ko() ? bi.getAttribute('data-ko') : bi.getAttribute('data-en');
+    }
     syncOff();
   }
 
   /* ── 버튼을 눌렀을 때 ── */
-  function install(){
+  /* force 를 주면 그 기기용 안내를 바로 띄운다 — 설정의 「삼성 →」·「아이폰 →」 두 버튼이 쓴다.
+     (2026-09-29) 기기를 알아서 맞히기는 하지만, 쓰는 분이 자기 폰을 직접 고르는 편이 덜 헷갈린다.
+     force 없이 부르면 예전 그대로 자동 판별이다 — 검사(tests/pwa.html)가 그 동작을 본다. */
+  function install(force){
+    if(force === 'ios'){ sheet(standalone() ? 'already' : 'ios'); return 'ios'; }
     var kind = pick({standalone:standalone(), inapp:inAppName(), prompt:!!deferred, ios:isIOS(),
                      installed:justInstalled, android:isAndroid()});
+    if(force === 'android' && kind === 'ios') kind = 'android';
     if(kind !== 'prompt') return sheet(kind, inAppName());
     var ev = deferred; deferred = null;             // 신호는 한 번만 쓸 수 있다
     try{
@@ -254,6 +266,12 @@ var PWA = (function(){
   var ICON_SHARE = '<svg viewBox="0 0 30 30" aria-hidden="true"><rect x="7" y="11" width="16" height="15" rx="3" fill="none" stroke="#4FC3F7" stroke-width="2"/><path d="M15 3v14M10 8l5-5 5 5" fill="none" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var ICON_ADD   = '<svg viewBox="0 0 30 30" aria-hidden="true"><rect x="4" y="4" width="22" height="22" rx="5" fill="none" stroke="#E7F6FF" stroke-width="2"/><path d="M15 10v10M10 15h10" stroke="#E7F6FF" stroke-width="2" stroke-linecap="round"/></svg>';
   var ICON_DOTS  = '<svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="7" r="2.4" fill="#E7F6FF"/><circle cx="15" cy="15" r="2.4" fill="#E7F6FF"/><circle cx="15" cy="23" r="2.4" fill="#E7F6FF"/></svg>';
+  /* 출입문 QR 그림 — 아이폰 안내 1단계('카메라로 QR 찍기')에 쓴다 (2026-09-29) */
+  var ICON_QR    = '<svg viewBox="0 0 30 30" aria-hidden="true">' +
+    '<rect x="4" y="4" width="8" height="8" rx="1.5" fill="none" stroke="#E7F6FF" stroke-width="2"/>' +
+    '<rect x="18" y="4" width="8" height="8" rx="1.5" fill="none" stroke="#E7F6FF" stroke-width="2"/>' +
+    '<rect x="4" y="18" width="8" height="8" rx="1.5" fill="none" stroke="#E7F6FF" stroke-width="2"/>' +
+    '<path d="M18 18h3v3h-3zM23 18h3M18 23h3M23 23v3" stroke="#E7F6FF" stroke-width="2" fill="#E7F6FF" stroke-linecap="round"/></svg>';
   function iconImg(){ return '<img src="img/icon-180.png" alt="">'; }
   function head(sub){
     return '<div class="pwaHead">' + iconImg() + '<div><b>' + APP_NAME + '</b><span>' + sub + '</span></div></div>';
@@ -275,16 +293,18 @@ var PWA = (function(){
           ? '<b>안 깔아도 지금 그대로 쓸 수 있어요.</b> 홈 화면 아이콘과 인터넷 없이 열기가 필요할 때만 아래대로 하세요.'
           : '<b>You can keep using it without installing.</b> Install only if you want a home-screen icon and offline use.') + '</p>' +
         '<ol class="pwaSteps">' +
-        step(1, ICON_SHARE, K ? '화면 아래(아이패드는 위) <b>공유</b> 버튼을 누르세요.<br><small>안 보이면 <b>⋯</b> 를 먼저 누르세요.</small>'
+        /* ① 사파리에서 시작하는 것이 핵심이다. 카톡·크롬 안에서 시작하면 '주소 복사 → 사파리에
+              붙여넣기'가 앞에 더 붙어 여섯 단계가 된다(실제 제보). 문에 붙은 QR 을 기본 카메라로
+              찍으면 사파리가 바로 열려서 그 앞이 통째로 없어진다. */
+        step(1, ICON_QR, K ? '문에 붙은 <b>QR</b>을 휴대폰 <b>기본 카메라</b>로 찍으세요.<br><small>사파리가 바로 열려요. 지금 사파리로 보고 계시면 건너뛰세요.</small>'
+                           : 'Scan the <b>QR</b> on the door with the <b>Camera</b> app.<br><small>It opens in Safari. Already in Safari? Skip this.</small>') +
+        step(2, ICON_SHARE, K ? '화면 아래(아이패드는 위) <b>공유</b> 버튼을 누르세요.<br><small>안 보이면 <b>⋯</b> 를 먼저 누르세요.</small>'
                               : 'Tap the <b>Share</b> button at the bottom (top on iPad).<br><small>If you can\'t see it, tap <b>⋯</b> first.</small>') +
         /* 실제로 해 본 분 제보(2026-09-29) : 공유 목록 첫 화면에 '홈 화면에 추가'가 없어서
            '더 보기'를 눌러야 나오는 기기가 있다. 두 경우를 다 적어 준다. */
-        step(2, ICON_ADD, K ? '목록을 내려 <b>홈 화면에 추가</b>를 누르세요.<br><small>안 보이면 맨 아래 <b>더 보기</b>를 먼저 누르세요.</small>'
-                            : 'Scroll down and tap <b>Add to Home Screen</b>.<br><small>Not there? Tap <b>Edit Actions…</b> at the bottom first.</small>') +
-        step(3, iconImg().replace('<img', '<img style="width:30px;height:30px;border-radius:7px"'),
-             K ? '오른쪽 위 <b>추가</b>를 누르면 홈 화면에<br><b>' + APP_NAME + '</b> 아이콘이 생겨요.'
-               : 'Tap <b>Add</b> — the <b>' + APP_NAME + '</b> icon appears on your home screen.') +
-        '</ol><p class="pwaNote">' + (K ? '<b>출입문 QR 을 기본 카메라로 찍으면</b> 사파리가 바로 열려서 이 두 번이면 끝나요 — 주소를 옮겨 적을 일이 없어요.<br>설치한 앱은 처음 한 번만 인터넷이 될 때 열어 주세요 — 그때 ' + sizeText() + '를 저장하고, 그 뒤로는 인터넷 없이도 열려요 (AI 사진 판별만 인터넷이 필요해요).'
+        step(3, ICON_ADD, K ? '<b>홈 화면에 추가</b> → 오른쪽 위 <b>추가</b>.<br><small>안 보이면 목록을 내리거나 맨 아래 <b>더 보기</b>를 먼저 누르세요.</small>'
+                            : 'Tap <b>Add to Home Screen</b> → <b>Add</b>.<br><small>Not there? Scroll down or tap <b>Edit Actions…</b> first.</small>') +
+        '</ol><p class="pwaNote">' + (K ? '설치한 앱은 처음 한 번만 인터넷이 될 때 열어 주세요 — 그때 ' + sizeText() + '를 저장하고, 그 뒤로는 인터넷 없이도 열려요 (AI 사진 판별만 인터넷이 필요해요).'
                                           : 'Works best in Safari. Open the installed app once while online — it saves ' + sizeText() + ', then it opens without internet (only the AI photo check needs it).') + '</p>';
     } else if(kind === 'inapp'){
       var android = isAndroid();

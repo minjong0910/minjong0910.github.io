@@ -64,10 +64,15 @@
       <b data-ko="건의함" data-en="Suggestion Box">건의함</b>
       <button class="ghost" style="padding:6px 14px;border-radius:8px;" onclick="go('ssug')" data-ko="열기 →" data-en="Open →">열기 →</button>
     </div>
-    <!-- 앱 다운로드 (홈 화면에 설치) — 안드로이드는 버튼 한 번, 아이폰은 그림 안내 (js/app/pwa.js) -->
+    <!-- 앱 다운로드 (홈 화면에 설치) — 쓰는 분이 자기 폰을 직접 고른다 (2026-09-29).
+         삼성·안드로이드는 버튼 한 번으로 깔리고, 아이폰은 애플이 그 버튼을 막아 두어 그림 안내다.
+         자동으로 알아맞히기도 하지만, 직접 고르는 편이 덜 헷갈린다는 요청. (js/app/pwa.js) -->
     <div class="row" id="pwaRow">
       <b data-ko="앱 다운로드" data-en="Install App">앱 다운로드</b>
-      <button class="ghost" id="pwaBtn" style="padding:6px 14px;border-radius:8px;" onclick="PWA.install()" data-ko="받기 →" data-en="Get →">받기 →</button>
+      <span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="ghost" id="pwaBtn" style="padding:6px 12px;border-radius:8px;" onclick="PWA.install()" data-ko="삼성 →" data-en="Android →">삼성 →</button>
+        <button class="ghost" id="pwaBtnIos" style="padding:6px 12px;border-radius:8px;" onclick="PWA.install('ios')" data-ko="아이폰 →" data-en="iPhone →">아이폰 →</button>
+      </span>
     </div>
     <!-- 인터넷 없이 열기 — 처음 열 때 약 14MB 를 폰에 저장한다 (sw.js). AI 사진 판별 자료는 저장하지 않는다 -->
     <div class="row">

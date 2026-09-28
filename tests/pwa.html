@@ -129,8 +129,14 @@ function testUi(){
     /* settings */
     var btn = d.getElementById('pwaBtn');
     if(check('settings', btn && d.getElementById('sset').contains(btn), '설정에 「앱 다운로드」 버튼이 없음')){
-      check('settings', btn.parentNode.textContent.indexOf('앱 다운로드') >= 0, '버튼 옆 이름이 "앱 다운로드"가 아님');
+      /* 2026-09-29 : 버튼이 둘(삼성·아이폰)이 되면서 <span> 으로 묶였다 —
+         바로 위 부모가 아니라 그 줄(.row) 전체에서 이름을 찾는다. 보려던 것은 그대로다. */
+      var row = btn.closest('.row') || btn.parentNode;
+      check('settings', row.textContent.indexOf('앱 다운로드') >= 0, '버튼 옆 이름이 "앱 다운로드"가 아님');
       check('settings', /PWA\.install\(\)/.test(btn.getAttribute('onclick') || ''), '버튼이 PWA.install() 을 부르지 않음');
+      var btnI = d.getElementById('pwaBtnIos');
+      check('settings', btnI && /PWA\.install\('ios'\)/.test(btnI.getAttribute('onclick') || ''),
+            '아이폰 전용 버튼(pwaBtnIos)이 없거나 PWA.install(\'ios\') 를 부르지 않음');
     }
     check('settings', txt(w, 'offStat').trim().length > 0, '"인터넷 없이 열기" 상태 글자가 비었음');
 

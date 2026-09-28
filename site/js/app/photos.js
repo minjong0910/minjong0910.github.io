@@ -621,7 +621,9 @@ function phTargets(){
     out.push({code:'WC'+i,       label:i+'층 화장실',       g:i+'층 공용', f:i});
     out.push({code:'ES'+i,       label:i+'층 계단',         g:i+'층 공용', f:i});
     out.push({code:'EMS'+i,      label:i+'층 비상계단',     g:i+'층 공용', f:i});   /* v79 */
-    if(i === 4) out.push({code:'KTC', label:'KTC 동아리방',  g:'4층 공용', f:4});
+    /* 이름은 길안내·검색과 같게 맞춘다 — 여기만 '동아리방'으로 남아 있었다 (2026-09-29).
+       층은 옆 칸(g)에 따로 붙으므로 여기서는 이름만 적는다. */
+    if(i === 4) out.push({code:'KTC', label:'KTC 프로그래밍 동아리실',  g:'4층 공용', f:4});
   }
   Object.keys(VALID_FULL5).sort().forEach(function(c){
     var f = phFloorOf(c);

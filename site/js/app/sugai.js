@@ -339,7 +339,9 @@ var SUGAI = (function(){
     var mw = code.match(/^WIN(\d)([LR]?)$/);
     if(mw) return mw[1] + (ko()?'층 ':'F ') + (mw[2]==='L' ? (ko()?'왼쪽 ':'left ') : mw[2]==='R' ? (ko()?'오른쪽 ':'right ') : '') + (ko()?'창밖':'window view');
     if(code === 'EVB1') return ko()?'엘리베이터 지하 1층':'Elevator B1';
-    if(code === 'KTC')  return ko()?'4층 KTC 동아리방':'4F KTC club room';     /* v77 */
+    /* 길안내·검색과 같은 이름으로 맞춘다 — 여기만 '동아리방'으로 남아 있었다.
+       앞의 '4층'은 그대로 둔다(사용자 요청, 2026-09-29). */
+    if(code === 'KTC')  return ko()?'4층 KTC 프로그래밍 동아리실':'4F KTC Programming Club Room';   /* v77 */
     /* v75 : 같은 문이 GATE_E 와 GATE_EAST 두 가지로 불린다 — 둘 다 받는다 */
     var GATE_KO = {MAIN:'정문', BACK:'후문', E:'동문', W:'서문', EAST:'동문', WEST:'서문'},
         GATE_EN = {MAIN:'Main gate', BACK:'Back gate', E:'East gate', W:'West gate', EAST:'East gate', WEST:'West gate'};

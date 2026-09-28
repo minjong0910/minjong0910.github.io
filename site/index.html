@@ -30,7 +30,7 @@
   <div class="topIcons" style="z-index:60;">
     <!-- 인터넷 상태 — 켜져 있으면 녹색 동그라미, 끊겨 있으면 색 없는 동그라미.
          누르면 '인터넷 없이 열기' 저장 상태까지 보여 준다(설정에 있던 그 줄을 여기로 옮겼다). -->
-    <button class="iconBtn" id="netBtn" title="인터넷 상태" onclick="PWA.netInfo()"><i id="netDot"></i></button>
+    <button class="iconBtn" id="netBtn" title="인터넷 상태" onclick="PWA.netInfo()"><i id="netDot"></i><b id="netTxt" data-ko="오프라인" data-en="Offline">오프라인</b></button>
     <button class="iconBtn" title="처음으로" onclick="go(1)">🏠</button>
     <button class="iconBtn" title="즐겨찾기" onclick="openOverlay('sfav')">⭐</button>
     <button class="iconBtn" title="설정" onclick="openOverlay('sset')">⚙️</button>

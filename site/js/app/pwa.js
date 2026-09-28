@@ -402,6 +402,9 @@ var PWA = (function(){
     if(!b) return;
     var on = netOn(), K = ko();
     b.classList.toggle('netOn', on);
+    b.classList.toggle('netOff', !on);            // 끊겼을 때만 「오프라인」 글자·빗금·주황 테두리
+    var t = document.getElementById('netTxt');
+    if(t) t.textContent = K ? '오프라인' : 'Offline';
     b.setAttribute('title', on ? (K ? '인터넷 연결됨' : 'Online') : (K ? '인터넷 끊김' : 'Offline'));
     b.setAttribute('aria-label', b.getAttribute('title'));
   }

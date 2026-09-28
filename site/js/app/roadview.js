@@ -362,9 +362,13 @@ function fpMakeCeil(){
     var ex1 = sg>0 ? (FP_WALL_X+FP_ST_WD+0.6) : (-FP_WALL_X+0.3);
     ceilHole(ex0, ex1, ez-2.5, ez+2.5);
   });
-  var m=new THREE.Mesh(new THREE.ShapeGeometry(shp),
-    new THREE.MeshPhongMaterial({color:0x141D2A, emissive:0x0C2534, emissiveIntensity:0.6,
-      side:THREE.DoubleSide, transparent:true}));
+  /* 폰에서는 이 큰 천장판도 바닥과 같은 길로 만든다 — 갤럭시 S20+ 에서 이 판이
+     #111B03(파랑 42→3)으로 나왔다. 위 fpMkPlane 주석 참고. (2026-09-28) */
+  var m=new THREE.Mesh(new THREE.ShapeGeometry(shp), window.FP_PHONE
+    ? new THREE.MeshStandardMaterial({color:0x141D2A, roughness:0.9, metalness:0.02,
+        side:THREE.DoubleSide, transparent:true})
+    : new THREE.MeshPhongMaterial({color:0x141D2A, emissive:0x0C2534, emissiveIntensity:0.6,
+        side:THREE.DoubleSide, transparent:true}));
   m.rotation.x=Math.PI/2; m.userData.baseOp=1; m.renderOrder=-2; g.add(m);
   /* v121: 이 큰 천장판 한가운데를 따라 길게 깔던 옅은 하늘색 띠(0.34m × 건물 전체
      길이, 조명선 흉내)를 없앤다 — 복도 천장은 fpMakeCorr가 형광등까지 따로 그리므로, 이 띠는
@@ -1161,7 +1165,16 @@ function fpPhoneNoEmissive(root){
 }
 function fpMkPlane(w,h,col,op,emi){
   var mat;
-  if(emi===undefined){
+  /* ★★ 2026-09-28 : 폰에서는 자발광 갈래(아래 else)를 쓰지 않고 **이 위쪽 길**로 보낸다.
+     갤럭시 S20+ 사진 세 장에서 색을 재어 보니 갈리는 선이 정확히 여기였다.
+         정상 : 바닥 #E3E0D7 · 나무문 #A86141   → MeshStandardMaterial 로 만들어
+                                                  폰용 재질 바꿔치기(view3d.js)를 거친 것
+         깨짐 : 벽 #FDF612 · 천장판 #111B03     → MeshPhongMaterial 을 **직접** 만든 것
+     깨진 쪽은 파랑만 사라진다(벽 200→18 · 천장판 42→3). 자발광을 0 으로 만들어 봐도 그대로였고
+     (판 138e5e51298c 에서 확인), 지도를 붙여 봐도 그대로였다 — 남은 차이가 '어느 길로 만들었나'뿐이다.
+     그래서 폰에서는 **바닥과 똑같은 길**로 만든다. 그 길은 이 기기에서도 색이 멀쩡하다.
+     (데스크톱은 예전 그대로 — 자발광이 있는 따뜻한 벽을 유지한다) */
+  if(emi===undefined || window.FP_PHONE){
     var nt=fpEnsureNoiseTex();
     mat=new THREE.MeshStandardMaterial({color:col, map:nt, roughness:0.88, metalness:0.04,
       transparent:true, opacity:op, side:THREE.DoubleSide});
@@ -1187,7 +1200,8 @@ function fpMkPlane(w,h,col,op,emi){
 /* 계단 단·난간처럼 두께가 있어야 입체로 읽히는 부분은 판이 아니라 상자로 만든다 */
 function fpMkBox(w,h,d,col,op,emi){
   var mat;
-  if(emi===undefined){
+  /* 위 fpMkPlane 과 같은 이유로, 폰에서는 자발광 갈래를 쓰지 않는다 (2026-09-28) */
+  if(emi===undefined || window.FP_PHONE){
     var nt2=fpEnsureNoiseTex();
     mat=new THREE.MeshStandardMaterial({color:col, map:nt2, roughness:0.88, metalness:0.04,
       transparent:true, opacity:op});

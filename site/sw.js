@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '76f4b472958f';   // 파일 230개 · 15.3MB
+var VERSION = '2e5299db536e';   // 파일 230개 · 15.3MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -231,7 +231,7 @@ var FILES = [
   ['js/app/roadview-play.js','8532c01564db',23533],
   ['js/app/roadview-roof.js','21f2a5e8678f',119576],
   ['js/app/roadview-stairs.js','7f992b896804',70498],
-  ['js/app/roadview.js','2985464ef652',128670],
+  ['js/app/roadview.js','6391d20e8b72',130181],
   ['js/app/shell.js','e05181b4f869',19104],
   ['js/app/start.js','4065777331b0',1505],
   ['js/app/sugai.js','5a7c207579d1',131009],

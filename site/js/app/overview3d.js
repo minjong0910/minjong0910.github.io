@@ -1080,6 +1080,49 @@ function animate(){
     if(_now - A3D_LAST < 26){ A3D_SKIP = true; } else { A3D_SKIP = false; A3D_LAST = _now; }
   }
   if(fpHoloGrid) fpHoloGrid.visible = !fpActive;   // 걷기 모드에서는 홀로그램 격자를 끈다
+  /* '지금 1인칭(걷기·미리보기) 안인가' — 아래 여러 곳에서 쓰므로 맨 앞에서 한 번만 정한다.
+     예전에는 이 판단이 함수 중간(조감도 감추기 직전)에 있어서, 그 앞의 '가야 할 층 노란 반짝임'은
+     걷기 중에도 계속 돌고 있었다. */
+  var inFP = (rideBlend > 0.01) || !!window.fpActive || !!window.fpFree;
+
+  /* ★ 2026-09-25(2차) : 조감도(건물 3D) 감추기를 '실내를 지었는가'와 완전히 떼어 놓는다.
+     1차 수정 때 "실내가 보이든 말든 무조건 감춘다"고 써 놓고는 정작 이 처리를
+     if(fpCorrG) 안에 두었다 — 실내를 못 지은 기기에서는 감추기가 한 번도 돌지 않는다는 뜻이다.
+     갤럭시 S20 사진이 딱 그 모습이었다 : 1인칭 화면인데 조감도의 층 번호표 「1F」가 찍혀 있고,
+     '가야 할 층 = 노랑' 타일이 시야를 가득 채우고 바닥은 뚫려 보였다.
+     ★ 2026-09-28(3차) : 그런데도 같은 제보가 또 왔다. 이유를 다시 짚어 보니 이 처리가
+     animate() **한가운데**에 있었다 — 앞쪽(사람 갱신·fpTick 같은 1인칭 계산)에서 한 번이라도
+     예외가 나면 여기까지 오지 못하고, 화면에는 **마지막으로 그려진 조감도 그림이 그대로 남는다.**
+     '가야 할 층'이 노란색이니 화면이 통째로 노래 보이는 것도 정확히 그 모습이다.
+     → 감추기를 animate() 맨 앞으로 끌어올린다. 뒤에서 무슨 일이 나든 조감도는 이미 꺼져 있다.
+     (rideBlend 가 한 프레임 묵은 값이 되지만 0.01 문턱이라 눈에 띄지 않는다) */
+  for(var hsi=0; hsi<fpHiddenSt.length; hsi++) fpHiddenSt[hsi].visible = !inFP;
+  if(typeof floorGroups!=='undefined' && floorGroups)
+    for(var fgi=0; fgi<floorGroups.length; fgi++)
+      if(floorGroups[fgi]) floorGroups[fgi].visible = !inFP;
+  /* 위 두 줄은 **목록에 있는 것**만 끈다 — 층 그룹과, 실내를 지을 때 모아 둔 목록.
+     조감도 물건은 그 밖에도 buildingRoot 밑에 더 있다(경로 화살표 routeA · 출발 표시 · 말풍선 …).
+     세어서 끄는 대신, 걷기용으로 만든 것만 남기고 나머지를 전부 끈다 —
+     앞으로 조감도에 무엇을 더 붙이더라도 걷기 화면으로 새어 나올 수 없다.
+     끈 것만 기억해 뒀다가 걷기에서 나올 때 되돌린다(원래 숨어 있던 것까지 켜 버리면 안 되므로).
+     ※ 「직접 걸어보기」(fpFree)에만 건다. 「경로 미리보기」는 조감도에서 건물 안으로 날아 들어가는
+       연출이라, 들어가는 동안 경로 화살표·이름표가 서서히 멀어지는 지금 모습을 그대로 둔다. */
+  var hardHide = !!window.fpFree;
+  if(buildingRoot && buildingRoot.children){
+    for(var bri=0; bri<buildingRoot.children.length; bri++){
+      var _bc = buildingRoot.children[bri];
+      /* 걷기용 바닥 빨간 유도선은 남긴다. (fpRouteG 는 다른 파일에서 선언되므로,
+         읽는 순서가 바뀌어도 터지지 않게 typeof 로 먼저 확인한다) */
+      if(typeof fpRouteG!=='undefined' && _bc === fpRouteG) continue;
+      if(!_bc.userData) _bc.userData = {};
+      if(hardHide){
+        if(_bc.visible){ _bc.userData._fpHid = 1; _bc.visible = false; }
+      }else if(_bc.userData._fpHid){
+        _bc.userData._fpHid = 0; _bc.visible = true;
+      }
+    }
+  }
+
   if(spin) theta+=0.003;
   updatePerson();
   // 목적지 상자를 숨쉬듯 은은하게 반짝이게 — 멀리서도 "저기다!" 하고 시선이 가도록 하는
@@ -1092,7 +1135,8 @@ function animate(){
     }
   }
   // 가야 할 층 전체를 노란색으로 반짝이게 — "이 층으로 가야 해요"가 멀리서도 눈에 띄도록.
-  if(pulseFloorTargets.length){
+  // 걷기 중에는 조감도가 보이면 안 되므로 반짝임도 멈춘다(혹시 새어 보이더라도 노랗게 빛나지 않게).
+  if(pulseFloorTargets.length && !inFP){
     var fglow = 0.34 + Math.sin(performance.now()*0.004)*0.26;
     for(var ffi=0; ffi<pulseFloorTargets.length; ffi++){
       var ffm = pulseFloorTargets[ffi].material;
@@ -1108,8 +1152,14 @@ function animate(){
   var frameDt = _frameLast ? Math.max(0, Math.min((_fnow-_frameLast)/1000, 0.1)) : 0.016;
   _frameLast = _fnow;
   tunePixelRatio();             // 조감도는 선명하게 · 1인칭은 가볍게 (바뀔 때만 다시 잡는다)
-  fpTick(frameDt);              // 1인칭 로드뷰 진행(재생 중이 아니면 아무것도 하지 않음)
-  fpUpdateAutoDoors(frameDt);   // 걸어서 다가가면 문이 자동으로 열리는 효과
+  /* 1인칭 계산이 어떤 기기에서 한 번 터지면 그 뒤 프레임 전체(카메라·그리기)가 통째로 멈춰,
+     화면에는 마지막으로 그린 그림이 얼어붙는다 — 갤럭시 S20 의 '노란 화면'이 그 모습이다.
+     여기서 잡아 두면 1인칭이 안 움직이더라도 화면은 계속 정상으로 그려지고,
+     무슨 오류였는지는 설정의 「문제 기록」에 남아 폰만 보고도 알 수 있다. (2026-09-28) */
+  try{ fpTick(frameDt); }              // 1인칭 로드뷰 진행(재생 중이 아니면 아무것도 하지 않음)
+  catch(e){ if(window.DIAG && DIAG.add) DIAG.add('걷기 계산 실패 : ' + (e && e.message ? e.message : e)); }
+  try{ fpUpdateAutoDoors(frameDt); }   // 걸어서 다가가면 문이 자동으로 열리는 효과
+  catch(e2){ if(window.DIAG && DIAG.add) DIAG.add('자동문 실패 : ' + (e2 && e2.message ? e2.message : e2)); }
   if(inRideView){
     if(!rideSaved) rideSaved={theta:theta,phi:phi,radius:radius};
     rideBlend = Math.max(0, Math.min(1, rideBlend + frameDt*1.05));   // 약 0.95초에 걸쳐 전환
@@ -1145,19 +1195,6 @@ function animate(){
       cm.material.opacity = (cm.userData.baseOp||1)*ceilK;
     }
   }
-  /* ★ 2026-09-25(2차) : 조감도(건물 3D) 감추기를 '실내를 지었는가'와 완전히 떼어 놓는다.
-     1차 수정 때 "실내가 보이든 말든 무조건 감춘다"고 써 놓고는 정작 이 처리를
-     if(fpCorrG) 안에 두었다 — 실내를 못 지은 기기에서는 감추기가 한 번도 돌지 않는다는 뜻이다.
-     갤럭시 S20 사진이 딱 그 모습이었다 : 1인칭 화면인데 조감도의 층 번호표 「1F」가 찍혀 있고,
-     '가야 할 층 = 노랑' 타일이 시야를 가득 채우고 바닥은 뚫려 보였다.
-     게다가 감출 목록(fpHiddenSt)은 실내를 지을 때 모으는 것이라 실내를 못 지으면 비어 있다
-     → 목록과 별개로 층 그룹 자체를 통째로 끈다. 이건 목록이 비어 있어도 언제나 듣는다. */
-  var inFP = (rideBlend > 0.01) || !!window.fpActive || !!window.fpFree;
-  for(var hsi=0; hsi<fpHiddenSt.length; hsi++) fpHiddenSt[hsi].visible = !inFP;
-  if(typeof floorGroups!=='undefined' && floorGroups)
-    for(var fgi=0; fgi<floorGroups.length; fgi++)
-      if(floorGroups[fgi]) floorGroups[fgi].visible = !inFP;
-
   /* 복도 벽·문·명찰도 천장과 같은 타이밍으로 서서히 나타났다 사라진다.
      목적지 문 주변만 은은하게 맥동시켜 멀리서도 어느 문인지 바로 보이게 한다. */
   if(fpCorrG){

@@ -134,7 +134,8 @@ else {
 }
 $ui = @()
 if($html -notmatch 'class="appHint"[^>]*>[^<]*앱을 다운로드 하시려면 설정에 들어가주세요'){ $ui += '첫 화면 "앱을 다운로드 하시려면 설정에 들어가주세요" 문구' }
-if($html -notmatch 'onclick="PWA\.install\(\)"'){ $ui += '설정의 「앱 다운로드」 버튼' }
+if($html -notmatch "onclick=`"PWA\.install\('android'\)`""){ $ui += '설정의 「삼성 →」 버튼' }
+if($html -notmatch "onclick=`"PWA\.install\('ios'\)`""){ $ui += '설정의 「아이폰 →」 버튼' }
 if($ui.Count){ Bad ('빠짐 : ' + ($ui -join ' · ')) } else { Ok '첫 화면 앱 다운로드 문구 · 설정의 앱 다운로드 버튼' }
 $ol = & pwsh -NoProfile -File (Join-Path $ROOT '도구\오프라인목록.ps1') -Check 2>&1 | Out-String
 if($LASTEXITCODE -eq 0){ Ok ('인터넷 없이 열기(sw.js) ' + $ol.Trim()) } else { Bad ('인터넷 없이 열기(sw.js) ' + $ol.Trim()) }

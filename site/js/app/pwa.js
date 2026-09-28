@@ -131,10 +131,11 @@ var DIAG = (function(){
     var el = document.getElementById('diagStat');
     if(!el) return;
     var ko = (typeof LANG === 'undefined' || LANG === 'ko');
-    /* 판(버전) 앞 6글자를 늘 같이 보여 준다 — '고친 판이 깔렸는지'를 복사하지 않고 눈으로 확인하려고. */
-    var v = ver(), head = (v.charAt(0) === '(' ? '' : (ko ? '판 ' : 'build ') + v.slice(0, 6) + ' · ');
-    el.textContent = head + (errs.length
-      ? (ko ? ('오류 ' + errs.length + '개 — 눌러서 복사') : (errs.length + ' errors — tap to copy'))
+    /* ★ 2026-09-29 : 화면에는 '판(버전)'도 '오류 몇 개'도 적지 않는다 — 처음 쓰는 분에게는
+       모르는 말이라 겁만 준다. 눈에 보이는 것은 「이상 있음 / 이상 없음 — 눌러서 복사」뿐이고,
+       판·오류 목록은 눌러서 복사한 글 안에 그대로 들어 있다(고치는 사람만 보면 된다). */
+    el.textContent = (errs.length
+      ? (ko ? '이상 있음 — 눌러서 복사' : 'Problem found — tap to copy')
       : (ko ? '이상 없음 — 눌러서 복사' : 'No problems — tap to copy'));
   }
   function copy(){
@@ -251,9 +252,23 @@ var PWA = (function(){
     if(force === 'ios'){ sheet(standalone() ? 'already' : 'ios'); return 'ios'; }
     var kind = pick({standalone:standalone(), inapp:inAppName(), prompt:!!deferred, ios:isIOS(),
                      installed:justInstalled, android:isAndroid()});
-    if(force === 'android' && kind === 'ios') kind = 'android';
+    /* ★ 2026-09-29 : 설정의 「삼성 →」는 **언제나** 그림 안내를 먼저 보여 준다.
+       예전에는 설치 신호가 잡힌 폰에서 곧바로 브라우저의 설치 창만 떠서, 안내를 아무리 고쳐도
+       쓰는 분 눈에는 하나도 바뀐 것이 없었다(실제 제보). 한 번에 깔리는 편함은 없애지 않고
+       안내 창 안의 「지금 바로 설치하기」 버튼으로 그대로 남긴다. */
+    if(force === 'android'){
+      if(kind === 'already' || kind === 'done') return sheet(kind);
+      if(kind === 'inapp') return sheet('inapp', inAppName());
+      return sheet('android');
+    }
     if(kind !== 'prompt') return sheet(kind, inAppName());
-    var ev = deferred; deferred = null;             // 신호는 한 번만 쓸 수 있다
+    return doPrompt();
+  }
+  /* 브라우저가 가진 설치 신호로 한 번에 깐다 — 신호는 한 번만 쓸 수 있다. */
+  function doPrompt(){
+    if(!deferred) return sheet('android');
+    var ev = deferred; deferred = null;
+    close();                                        // 안내 창을 먼저 닫고 브라우저 창을 띄운다
     try{
       ev.prompt();                                  // 브라우저의 설치 창 — 사용자가 「설치」를 누르면 끝
       ev.userChoice.then(function(c){
@@ -323,11 +338,16 @@ var PWA = (function(){
          ① 안 깔아도 된다를 먼저 ② 쓰는 브라우저에 맞는 메뉴만 보여 준다(삼성 인터넷은 아래 ≡,
          크롬은 오른쪽 위 ⋮ — 예전에는 한 줄에 둘을 같이 적어 자기 것을 골라내야 했다)
          ③ 마지막에 아이콘이 생긴다는 그림까지. */
-      var sam = ENV.samsung;
+      var sam = ENV.samsung, one = !!deferred;
+      /* 설치 신호가 잡힌 폰이면 버튼 한 번으로 끝난다 — 아래 세 단계는 그 버튼이 없거나
+         눌러도 안 될 때 쓰는 길이다. */
+      if(one) btns += '<button class="go" onclick="PWA.doPrompt()">' + (K ? '지금 바로 설치하기' : 'Install now') + '</button>';
       h = head(sub) +
         '<p class="pwaNote">' + (K
-          ? '<b>안 깔아도 지금 그대로 쓸 수 있어요.</b> 홈 화면 아이콘과 인터넷 없이 열기가 필요할 때만 아래대로 하세요.'
-          : '<b>You can keep using it without installing.</b> Install only if you want a home-screen icon and offline use.') + '</p>' +
+          ? ('<b>안 깔아도 지금 그대로 쓸 수 있어요.</b> 홈 화면 아이콘과 인터넷 없이 열기가 필요할 때만 ' +
+             (one ? '맨 아래 <b>지금 바로 설치하기</b>를 누르세요.<br>그 버튼이 안 되면 이렇게 하세요 —' : '아래대로 하세요.'))
+          : ('<b>You can keep using it without installing.</b> Install only if you want a home-screen icon and offline use.' +
+             (one ? ' Tap the blue button below, or follow these steps.' : ''))) + '</p>' +
         '<ol class="pwaSteps">' +
         step(1, ICON_DOTS, K ? (sam ? '화면 <b>아래 ≡</b> 를 누르세요.<br><small>삼성 인터넷 메뉴예요.</small>'
                                     : '오른쪽 위 <b>⋮</b> 를 누르세요.<br><small>크롬 메뉴예요.</small>')
@@ -532,7 +552,7 @@ var PWA = (function(){
   document.addEventListener('DOMContentLoaded', function(){ sync(); netSync(); });
 
   return {
-    install:install, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, sync:sync,
+    install:install, doPrompt:doPrompt, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, sync:sync,
     netInfo:netInfo, netSync:netSync, netOn:netOn,
     get offline(){ return {state:off.state, done:off.done, total:off.total, bytes:off.bytes, version:off.version, text:offText()}; },
     /* 검사(tests/pwa.html)가 설치 갈래를 확인할 때 쓴다 */

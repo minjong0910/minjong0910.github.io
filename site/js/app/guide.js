@@ -89,7 +89,11 @@ function buildSteps(){
      화장실은 엘리베이터 옆이 아니라 1층 로비 쪽에 있어서, 아래의 '엘리베이터 기준 좌우' 셈이
      네 문 모두에 똑같은 한 줄("엘리베이터를 마주 보고 오른쪽으로 가세요")을 내놓고 있었다.
      ① 문 외관은 위에서 이미 넣었고, 여기서 나머지를 그대로 잇고 끝낸다.
-     사진 자리 WC1WEST·WC1BACK·WC1MAIN·WC1NEAR 는 이 안내 전용으로 새로 만든 곳이다. */
+     사진 자리 WC1WEST·WC1BACK·WC1MAIN·WC1NEAR 는 이 안내 전용으로 새로 만든 곳이다.
+     ※ 동문·서문은 마지막 두 단계('정면에 화장실이 있습니다' → '화장실에 도착했습니다')가
+       **일부러 같은 사진(WC1)** 이다. 실수가 아니다 — 사진은 같아도 문구가 달라 헷갈리지 않는다고
+       사용자가 2026-09-29 에 그대로 두기로 정했다. (후문·정문은 ③에 WC1NEAR 가 따로 있어 다르다)
+       바꾸고 싶어지면 '복도에서 화장실 쪽을 본 사진' 자리를 하나 더 만들면 된다. */
   var WC1_FLOW = {
     EAST: [{a:'↑', type:'straight', code:'GATE_E',  tko:'복도를 따라 직진하세요',                              ten:'Go straight along the hallway'},
            {a:'→', type:'turn',     code:'HALL1L',  tko:'1층 중앙계단을 지나 우측으로 꺾으세요',                ten:'Pass the main stairs and turn right'},

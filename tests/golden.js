@@ -196,7 +196,10 @@ var PROPS = ['display', 'position', 'color', 'background-color', 'font-size', 'f
              'padding', 'margin', 'width', 'height', 'text-align', 'opacity', 'z-index', 'border-top', 'box-shadow', 'grid-template-columns', 'gap'];
 function captureDom(w){
   var d = w.document, out = {ids:[], text:'', style:[]};
-  d.querySelectorAll('[id]').forEach(function(e){ if(!e.closest('script,style')) out.ids.push(e.tagName.toLowerCase() + '#' + e.id); });
+  /* 부팅 화면(.fx-boot) 안의 것은 id 도 담지 않는다 — 부팅이 끝나면 통째로 사라지는 화면이라
+     담는 시점에 따라 있었다 없었다 한다(pre#fxBootLog 로 CI 가 한 번 실패했다. 2026-09-28).
+     글자·모양은 예전부터 빼고 있었는데 id 만 빠져 있었다. */
+  d.querySelectorAll('[id]').forEach(function(e){ if(!e.closest('script,style,.fx-boot')) out.ids.push(e.tagName.toLowerCase() + '#' + e.id); });
   out.ids.sort();
   /* 부팅 화면(.fx-boot)은 글자를 한 자씩 찍는 연출이라 찍힌 시점마다 글자 수·높이가 달라서 뺀다.
      (같은 앱을 두 번 돌려 확인한 유일한 흔들림 — 2단계에서 부팅 화면을 따로 고친다) */
@@ -370,7 +373,17 @@ function run(){
     log('앱 준비됨 (' + Math.round((Date.now() - t0) / 1000) + '초)');
     return (w.document.fonts && w.document.fonts.ready) ? w.document.fonts.ready : null;
   }).then(function(){
-    return sleep(1500);   /* 처음 화면(부팅 글자 등)이 자리를 잡을 시간 */
+    /* ★ 2026-09-28 : 부팅 화면(.fx-boot)이 **사라질 때까지** 기다린 다음에 담는다.
+       예전에는 1.5초만 자고 담았는데, 그 사이 부팅 글자가 한 자씩 찍히는 중이라
+       기계가 느리면(깃허브 검사 컴퓨터) 화면이 덜 된 상태로 담겼다.
+       그래서 같은 코드인데도 「dom.ids — pre#fxBootLog 빠짐」·「dom.text 1곳 다름」으로
+       CI 에서만 두 번 실패해 **사이트가 배포되지 않았다**(내 PC 에서는 늘 통과).
+       부팅이 끝난 뒤를 담으면 어느 기계에서 돌려도 같은 화면이 된다. */
+    return (function waitBoot(left){
+      var el = w.document.querySelector('.fx-boot');
+      if(!el || left <= 0) return sleep(600);            // 사라졌거나 더 못 기다림
+      return sleep(300).then(function(){ return waitBoot(left - 1); });
+    })(60);                                              // 최대 18초
   }).then(function(){
     /* ★ 2026-09-27 : 사진 목록을 앱이 담고 나온 그대로(PHOTO_INDEX)로 되돌린다.
        앱은 이 브라우저에 저장해 둔 사진(관리자가 넣어 본 것·승인한 제보)을 여기에 얹는데,

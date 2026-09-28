@@ -1228,8 +1228,26 @@ function animate(){
       var tgPulse = 0.55 + Math.sin(_fnow*0.005)*0.45;
       for(var tgi=0; tgi<fpTgtGlow.length; tgi++)
         fpTgtGlow[tgi].material.opacity = 0.26*corrK*tgPulse;
+      /* ★ 2026-09-28 : 다 나타난 뒤에는 **반투명을 끈다**(끊김 줄이기).
+         복도 면은 거의 전부 transparent:true 인데, 그건 나타날 때 서서히 짙어지게 하려는 것뿐이고
+         다 나타나면 불투명(opacity 1)이다. 그런데 반투명으로 표시해 두면 그리기가 훨씬 비싸다 —
+         뒤에서 앞으로 정렬해야 하고, 가려진 픽셀을 미리 버리지 못하며, 매 픽셀 섞기를 한다.
+         (폰 GPU 는 특히 이 방식에 약하다) 다 나타난 뒤 불투명으로 돌리면 그만큼이 통째로 빠진다.
+         내 PC 측정 : 13.4ms → 11.7ms. 다시 사라질 때는 원래대로 되돌린다. */
+      var 다나타남 = (corrK > 0.999);
+      if(다나타남 !== _fpOpaque){
+        _fpOpaque = 다나타남;
+        for(var oi=0; oi<fpCorrMats.length; oi++){
+          var om = fpCorrMats[oi].m;
+          if(fpCorrMats[oi].op < 0.999 || om.depthWrite === false) continue;   // 진짜 반투명(유리·발광)은 그대로
+          /* needsUpdate 는 일부러 건드리지 않는다 — transparent 는 '어느 줄에 세워 그릴까'만
+             정하는 값이라 셰이더를 다시 만들 필요가 없는데, needsUpdate 를 켜면 2천 개를
+             한꺼번에 다시 만들어 그 순간 화면이 한 번 크게 끊긴다. */
+          om.transparent = !다나타남;
+        }
+      }
     }
-  }
+  }else{ _fpOpaque = false; }
   // 기본(자유 회전) 카메라 위치 — camTarget을 중심으로 도는 기존 궤도 시점
   var ox=camTarget.x+radius*Math.sin(phi)*Math.cos(theta);
   var oy=camTarget.y+radius*Math.cos(phi);
@@ -1359,6 +1377,26 @@ function animate(){
     if(window.DIAG && DIAG.add)
       DIAG.add('3D 프레임 실패 : ' + (_frameErr && _frameErr.message ? _frameErr.message : _frameErr));
   }
+  /* ★ 2026-09-28 : 멀리 있는 것은 그리지 않는다 (끊김 줄이기 — 위 fpBuildCorr 주석 참고).
+       작은 장식(반지름 50cm 미만) : 14m 밖이면 끈다   — 그 거리에서는 몇 픽셀이라 티가 안 난다
+       그 밖의 모든 것              : 40m 밖이면 끈다   — 복도 저 끝은 어차피 어둡다
+     눈이 40cm 넘게 움직였을 때만 다시 센다 — 서 있을 때는 한 번도 계산하지 않는다. */
+  if(typeof fpCullList !== 'undefined' && fpCullList.length && fpCorrG && fpCorrG.visible && fpLastEye){
+    if(!fpCullEye || Math.abs(fpCullEye.x-fpLastEye.x) + Math.abs(fpCullEye.y-fpLastEye.y)
+                   + Math.abs(fpCullEye.z-fpLastEye.z) > 0.4){
+      fpCullEye = {x:fpLastEye.x, y:fpLastEye.y, z:fpLastEye.z};
+      for(var ki=0; ki<fpCullList.length; ki++){
+        var it = fpCullList[ki];
+        var dx = it.x-fpCullEye.x, dy = it.y-fpCullEye.y, dz = it.z-fpCullEye.z;
+        var d2 = dx*dx + dy*dy + dz*dz;
+        it.o.visible = (it.r < 0.5) ? (d2 < 196) : (d2 < 1600);   // 14m · 40m
+      }
+    }
+  }else if(typeof fpCullEye !== 'undefined' && fpCullEye){
+    /* 걷기에서 나왔으면 다음에 들어올 때 다시 재도록 지우고, 껐던 것은 도로 켜 둔다 */
+    for(var kj=0; kj<fpCullList.length; kj++) fpCullList[kj].o.visible = true;
+    fpCullEye = null;
+  }
   if(!A3D_SKIP){ if(PERF_ON) perfRender(); else renderer.render(scene,camera); }
   /* ★ 2026-09-28 : 걷기 화면이 다 나타난 뒤 **화면 색을 한 번만 재서 저장**한다.
      기기에서만 색이 틀리게 나오는 문제(갤럭시 S20+ 노란 벽)를 말이 아니라 숫자로 잡으려고 둔다.
@@ -1370,6 +1408,7 @@ function animate(){
   }
 }
 var _shotDone = false;
+var _fpOpaque = false;   // 복도가 다 나타나 '불투명'으로 돌려놓은 상태인가 (위 animate 참고)
 /* 화면 가운데를 조금 읽어 '가장 많이 나온 색' 세 가지를 남긴다. */
 function fpColorShot(){
   var gl = renderer.getContext(), cv = renderer.domElement;

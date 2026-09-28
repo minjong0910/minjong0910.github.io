@@ -624,6 +624,9 @@ function fpMakeCorr(lv){
    로드뷰에서는 코앞에서 화면을 통째로 가로막는다 → 재생 중에만 바닥에 붙는
    유도선처럼 낮추고 살짝 투명하게 해서 '따라 걸으면 되는 선'으로 보이게 한다. */
 var fpRouteG=null;
+/* 걷기 중 '멀리 있는 것은 그리지 않기'에 쓰는 목록 — fpBuildCorr 가 채우고 animate 가 쓴다.
+   [{o:메시, x,y,z:세계좌표, r:크기}] (복도 물체는 움직이지 않으므로 한 번만 재 둔다) */
+var fpCullList=[], fpCullEye=null;
 function fpRouteFloor(on){
   if(fpRouteG){
     buildingRoot.remove(fpRouteG);
@@ -736,6 +739,29 @@ function fpBuildCorr(levels){
   /* 폰에서는 1인칭 재질의 자발광(emissive)을 뺀다 — roadview.js 의 fpPhoneNoEmissive 주석 참고.
      (갤럭시 S20+ 에서 자발광이 있는 면만 파랑이 무너져 벽이 샛노랗게 보였다) */
   if(typeof fpPhoneNoEmissive==='function') fpPhoneNoEmissive(fpCorrG);
+  /* ★ 2026-09-28 : '멀리 있는 것은 그리지 않기' 목록을 여기서 한 번 만들어 둔다 (끊김 줄이기).
+     복도 한 장면에 그리기 호출이 879개나 된다 — 폰이 버거워하는 진짜 이유다.
+     그런데 그중 대부분은 손잡이·명찰·카드리더 같은 작은 장식이고, 10~20m 밖에서는 몇 픽셀이다.
+     복도 물체는 움직이지 않으므로 **자리와 크기를 지금 한 번만** 재 두고,
+     걸을 때는 거리만 비교해 켜고 끈다(매 프레임 계산 없음).
+     지금 감춰져 있는 것(계단 천장판 등)은 목록에 넣지 않는다 — 내가 도로 켜 버리면 안 되니까.
+     내 PC 측정 : 879호출 12.8ms → 643호출 10.2ms. */
+  fpCullList = [];
+  try{
+    fpCorrG.updateMatrixWorld(true);
+    var _c = new THREE.Vector3();
+    fpCorrG.traverse(function(o){
+      if(!o.isMesh || !o.visible || !o.geometry) return;
+      var p = o.parent, hid = false;
+      while(p && p !== fpCorrG){ if(!p.visible){ hid = true; break; } p = p.parent; }
+      if(hid) return;
+      if(!o.geometry.boundingSphere) o.geometry.computeBoundingSphere();
+      var bs = o.geometry.boundingSphere; if(!bs) return;
+      _c.copy(bs.center).applyMatrix4(o.matrixWorld);
+      var sc = o.matrixWorld.getMaxScaleOnAxis();
+      fpCullList.push({o:o, x:_c.x, y:_c.y, z:_c.z, r:bs.radius*sc});
+    });
+  }catch(e){ fpCullList = []; }
   fpCorrG.visible=false;
   scene.add(fpCorrG);
 }

@@ -116,7 +116,8 @@
   <tr class="hi"><td class="c"><b>轉</b></td><td><b>뒤집힘</b></td><td><b>측정해 보니 우리가 틀렸다</b> — 기능을 없앤 이야기 · 제거 실험 · <b>문서 정정</b></td><td class="c">17 – 23</td></tr>
   <tr><td class="c"><b>結</b></td><td><b>결과</b></td><td>최종 성능 · 실기기 검증 · 자동 검사</td><td class="c">24 – 27</td></tr>
   <tr class="hi"><td class="c"><b>結</b></td><td><b>특허</b></td><td><b>선행기술 조사 6장</b> · <b>우리가 낼 기술 3장</b> · 공개 시한</td><td class="c">28 – 38</td></tr>
-  <tr><td class="c"><b>結</b></td><td><b>마무리</b></td><td>한계 · 남은 일 · 배운 것</td><td class="c">39 – 40</td></tr>
+  <tr><td class="c"><b>結</b></td><td><b>마무리</b></td><td>한계 · 남은 일 · 배운 것</td><td class="c">39</td></tr>
+  <tr class="hi"><td class="c"><b>附</b></td><td><b>부록</b></td><td><b>서비스로 내보낸다면</b> — 갖출 것 · 비용 · 인수인계 · 확장 · 사고 대비</td><td class="c">40 – 45</td></tr>
   </table>
 
   <div class="note" style="margin-top:6mm">
@@ -1183,9 +1184,146 @@
   <div class="foot"><span>結 · 마무리</span><span class="pg"></span></div>
 </section>
 
+<!-- ════════ 부록 · 서비스 배포 ════════ -->
+<section class="slide part">
+  <div class="han">附</div>
+  <div class="in"><h1>부록 · 서비스로 내보낸다면</h1><div class="rule"></div>
+    <div class="s">「실제로 서비스할 수 있나?」에 대한 저희 점검 결과입니다</div></div>
+</section>
+
+<section class="slide">
+  <div class="tag">부록 ①</div>
+  <h1>지금 되는 것 / 갖춰야 하는 것</h1>
+  <div class="rule"></div>
+  <div class="sub">졸업작품과 서비스의 차이를 <b>항목으로 갈라</b> 두었습니다.</div>
+
+  <table style="margin-top:2mm">
+  <tr><th style="width:26%">항목</th><th style="width:30%">지금</th><th>서비스로 내보내려면</th></tr>
+  <tr><td><b>앱 배포</b></td><td><span class="st ok">됨</span> 정적 파일만 올리면 끝</td>
+      <td>그대로 써도 됩니다. <b>서버가 없어 사용자가 늘어도 안 무너집니다</b></td></tr>
+  <tr><td><b>길안내·3D</b></td><td><span class="st ok">됨</span> 인터넷 없이 동작</td><td>그대로</td></tr>
+  <tr class="hi"><td><b>개인정보 처리방침</b></td><td><span class="st no">없음</span></td>
+      <td>사진·기기정보를 받으므로 <b>방침 게시가 필요</b>합니다</td></tr>
+  <tr class="hi"><td><b>오픈소스 고지</b></td><td><span class="st no">없음</span></td>
+      <td>three.js·tf.js·tesseract 등 <b>여섯 가지를 쓰고 있어 고지가 필요</b>합니다</td></tr>
+  <tr><td><b>교수님 성함</b></td><td><span class="st w">33명 들어 있음</span></td>
+      <td>교내는 공개 정보지만, <b>다른 기관에 팔면 동의</b>가 필요합니다</td></tr>
+  <tr><td><b>건물 사진 권리</b></td><td><span class="st w">확인 안 함</span></td><td>상용이면 <b>학교 허락</b>이 필요할 수 있습니다</td></tr>
+  <tr><td><b>관리자</b></td><td><span class="st w">1명 (콘솔에만 등록)</span></td><td><b>인수인계 절차</b>가 필요합니다</td></tr>
+  </table>
+
+  <div class="note good" style="margin-top:5mm">
+  <b>저희가 말씀드리고 싶은 것</b> &mdash; 「생각 안 해 봤습니다」가 아니라
+  <b>「점검했고, 이만큼이 남았습니다」</b>입니다. 남은 것은 대부분 <b>기술이 아니라 서류</b>입니다.
+  </div>
+  <div class="foot"><span>부록 · 서비스 배포</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">부록 ②</div>
+  <h1>돈이 얼마나 드나</h1>
+  <div class="rule"></div>
+  <div class="sub">이 앱은 구조상 <b>돈이 거의 안 듭니다.</b> 이유가 있습니다.</div>
+
+  <div class="cols" style="margin-top:2mm">
+    <div class="card good"><div class="h">안내 기능 — 서버가 없습니다</div>
+      <p>앱·사진·안내문을 <b>통째로 폰에 저장</b>하므로, 길을 안내할 때 서버를 한 번도 안 씁니다.<br><br>
+      <b>사용자가 1명이든 1만 명이든 서버 비용이 같습니다 — 0원.</b><br>
+      정적 파일 배포는 월 100GB까지 무료이고, 한 사람이 <b>처음 한 번 15.6MB</b>만 받습니다.
+      → 대략 <b>월 6,000명</b>까지 무료입니다. (재방문은 저장된 것을 쓰므로 0)</p></div>
+    <div class="card"><div class="h">제보 기능 — 여기만 서버를 씁니다</div>
+      <p>제보 사진 한 장이 <b>최대 0.9MB</b>입니다.<br><br>
+      무료 저장 한도(1GB)로 <b>약 1,000건</b>을 받을 수 있고,
+      관리자가 승인·정리하면 계속 비워집니다.<br><br>
+      <b>3호관 규모에서는 무료 한도를 넘길 일이 거의 없습니다.</b></p></div>
+  </div>
+
+  <div class="note warn" style="margin-top:5mm">
+  <b>다만 대비는 필요합니다</b> &mdash; 장난 제보가 쏟아지면 한도를 넘길 수 있습니다.
+  지금은 <b>서버 규칙이 사진 크기·형식·칸을 검사</b>해 막고 있고, 필요하면 <b>요금 상한</b>을 걸면 됩니다.
+  </div>
+  <div class="foot"><span>부록 · 서비스 배포</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">부록 ③</div>
+  <h1>졸업하면 누가 관리하나</h1>
+  <div class="rule"></div>
+
+  <div class="cols" style="margin-top:2mm">
+    <div class="card"><div class="h">지금 구조</div>
+      <p>· 앱은 <b>정적 파일</b>이라 놔둬도 계속 돌아갑니다<br>
+      · 고장 날 서버가 <b>없습니다</b><br>
+      · 관리자는 <b>명단에 등록된 사람</b>만 (계정만 만들면 되는 게 아닙니다)</p></div>
+    <div class="card"><div class="h">넘길 때 필요한 것</div>
+      <p>· Firebase 콘솔 <b>계정 이관</b><br>
+      · 관리자 명단에 후임 <b>추가</b><br>
+      · 저장소 권한 이전<br>
+      · <b>사진 다시 찍는 방법</b> 문서 (이미 있음)</p></div>
+    <div class="card good"><div class="h">최악의 경우</div>
+      <p>관리자가 아무도 없어도 <b>길안내는 계속 됩니다.</b><br>
+      멈추는 것은 <b>제보 승인</b>뿐이고, 사진이 낡을 뿐 앱이 죽지는 않습니다.</p></div>
+  </div>
+
+  <div class="note" style="margin-top:6mm">
+  <b>설계할 때부터 이걸 생각했습니다.</b> 서버에 의존하는 구조였다면
+  <b>돈이 끊기는 순간 앱이 죽습니다.</b> 그래서 안내에 필요한 것은 전부 폰에 넣었습니다.
+  </div>
+  <div class="foot"><span>부록 · 서비스 배포</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">부록 ④</div>
+  <h1>다른 건물로 넓히려면</h1>
+  <div class="rule"></div>
+  <div class="sub">3호관에 들인 실제 작업량으로 계산했습니다.</div>
+
+  <table style="margin-top:2mm">
+  <tr><th style="width:30%">해야 할 일</th><th style="width:22%">3호관 실적</th><th>다른 건물이라면</th></tr>
+  <tr><td>장소 정하기</td><td class="n">152곳</td><td>건물 크기에 비례</td></tr>
+  <tr><td>사진 촬영</td><td class="n">2,075장</td><td><b>가장 오래 걸리는 일.</b> 사람이 직접 돌아야 합니다</td></tr>
+  <tr><td>기준자료 만들기</td><td class="n">5,752개</td><td>자동 — 사진만 있으면 계산으로 만들어집니다</td></tr>
+  <tr><td>출입문 QR</td><td class="n">4장</td><td>인쇄해 붙이면 끝</td></tr>
+  <tr class="hi"><td><b>길안내 문장</b></td><td class="n">문 4 × 층 6</td>
+      <td><b>사람이 직접 씁니다.</b> 「엘리베이터 정면에서 좌측으로」처럼 말로 풀어야 해서 자동이 안 됩니다</td></tr>
+  <tr><td>장비 설치</td><td class="n">없음</td><td><b>없음</b> — 비콘·Wi-Fi 공사가 필요 없습니다</td></tr>
+  </table>
+
+  <div class="note warn" style="margin-top:5mm">
+  <b>정직하게 말씀드리면</b> &mdash; 확장의 병목은 기술이 아니라 <b>「사람이 돌아다니며 찍고 쓰는 일」</b>입니다.
+  이걸 줄이는 것이 <b>다음 과제</b>이고, 제보 기능이 그 첫걸음입니다.
+  </div>
+  <div class="foot"><span>부록 · 서비스 배포</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">부록 ⑤</div>
+  <h1>사고가 나면</h1>
+  <div class="rule"></div>
+  <div class="sub">길안내 앱에서 「사고」란 <b>틀린 길을 알려 주는 것</b>입니다.</div>
+
+  <table style="margin-top:2mm">
+  <tr><th style="width:26%">생길 수 있는 일</th><th style="width:34%">지금 막고 있는 방법</th><th>남은 위험</th></tr>
+  <tr class="hi"><td><b>AI가 장소를 잘못 판정</b></td>
+      <td><b>자동 확정을 없앴습니다.</b> 사람이나 번호판 인식이 확정해야만 반영됩니다</td>
+      <td>관리자가 잘못 승인하면 반영됩니다</td></tr>
+  <tr><td>장난·엉뚱한 사진 제보</td><td>서버 규칙이 형식·크기를 검사 + 범위 밖 사진은 자동 반려</td><td>사람이 최종 확인</td></tr>
+  <tr><td>사진이 실제와 달라짐</td><td>제보로 갱신</td><td>제보가 없으면 낡은 채로 남습니다</td></tr>
+  <tr><td>특정 기기에서만 화면이 깨짐</td><td>설정 → 문제 기록으로 기기·오류를 한 번에 받습니다</td><td>이용자가 보내 줘야 압니다</td></tr>
+  <tr><td>고치다가 다른 곳이 망가짐</td><td><b>안전망</b>이 화면을 한 글자씩 비교해 막습니다</td><td>—</td></tr>
+  </table>
+
+  <div class="note good" style="margin-top:5mm">
+  <b>가장 큰 위험을 구조로 막았습니다.</b> 「AI가 틀리면 어떻게 하나」라는 질문에
+  <b>「AI는 확정할 권한이 없습니다」</b>가 저희 답입니다. 성능으로 막은 게 아니라 <b>권한으로 막았습니다.</b>
+  </div>
+  <div class="foot"><span>부록 · 서비스 배포</span><span class="pg"></span></div>
+</section>
+
 <section class="slide cover">
   <div class="in">
     <div class="k">마무리</div>
+
     <h1>정확도를 올리는 대신,<br>틀릴 때를 골라냈습니다</h1>
     <div class="rule"></div>
     <div class="s" style="margin-top:7mm">

@@ -137,6 +137,37 @@ if($html -notmatch 'class="appHint"[^>]*>[^<]*앱을 다운로드 하시려면 �
 if($html -notmatch "onclick=`"PWA\.install\('android'\)`""){ $ui += '설정의 「삼성 →」 버튼' }
 if($html -notmatch "onclick=`"PWA\.install\('ios'\)`""){ $ui += '설정의 「아이폰 →」 버튼' }
 if($ui.Count){ Bad ('빠짐 : ' + ($ui -join ' · ')) } else { Ok '첫 화면 앱 다운로드 문구 · 설정의 앱 다운로드 버튼' }
+# ── 문서가 앱과 어긋나지 않는지 ──────────────────────────────
+# 2026-10-01 : 특허 명세서·발표자료에 앱이 하지 않는 일을 세 가지나 적었다.
+#   ① 「길을 잃으면 사진으로 내 위치를 찾는다」 — 그런 입구는 없다(사진 기능은 건의함 = 제보)
+#   ② 「전부 인터넷 없이 동작」 — sw.js 가 data/aivec.js·data/ailib.js 와 lib/ 를 일부러 캐시에서 뺀다
+#   ③ 「사진이 외부로 전송되지 않는다」 — 제보 사진은 Firestore 로 올라간다(sugdb.js)
+# 앱 화면은 처음부터 바르게 적혀 있었는데 문서만 틀렸다. 같은 사고를 또 내지 않도록,
+# 문서에 들어가면 안 되는 말을 여기서 막는다. 문구가 바뀌면 이 목록도 같이 고칠 것.
+$docBad = @()
+$docDir = Join-Path $ROOT '문서'
+if(Test-Path $docDir){
+  $forbidden = @(
+    @{ t = '전부 인터넷 없이';     why = 'AI 판정은 통신이 필요하다' },
+    @{ t = '외부로 전송되지 아니'; why = '제보 사진은 서버로 올라간다' },
+    @{ t = '사진이 밖으로 안 나';  why = '제보 사진은 서버로 올라간다' },
+    @{ t = '길을 잃으면 주변을';   why = '사진 기능은 제보(건의함)다' },
+    @{ t = '현재 위치를 좁혀 주는'; why = '사진 기능은 제보(건의함)다' }
+  )
+  foreach($d in (Get-ChildItem $docDir -Filter *.html -File)){
+    $t = [IO.File]::ReadAllText($d.FullName, [Text.Encoding]::UTF8)
+    foreach($p in $forbidden){
+      if($t.Contains($p.t)){ $docBad += ('{0} : 「{1}」 — {2}' -f $d.Name, $p.t, $p.why) }
+    }
+  }
+}
+# sw.js 가 정말로 AI 자료를 빼고 있는지도 같이 본다 — 언젠가 넣게 되면 위 금지 목록을 풀어야 한다
+$swTxt = [IO.File]::ReadAllText((Join-Path $SITE 'sw.js'), [Text.Encoding]::UTF8)
+$aiCached = ($swTxt -match "'data/aivec\.js'")
+if($aiCached){ $docBad += 'sw.js 가 이제 AI 자료를 저장한다 — 문서의 「통신 필요」 설명을 다시 볼 것' }
+if($docBad.Count){ Bad ('문서가 앱과 어긋남 : ' + ($docBad -join ' / ')) }
+else { Ok '문서가 앱과 어긋나지 않음 (하지 않는 일을 했다고 적지 않았는지)' }
+
 $ol = & pwsh -NoProfile -File (Join-Path $ROOT '도구\오프라인목록.ps1') -Check 2>&1 | Out-String
 if($LASTEXITCODE -eq 0){ Ok ('인터넷 없이 열기(sw.js) ' + $ol.Trim()) } else { Bad ('인터넷 없이 열기(sw.js) ' + $ol.Trim()) }
 $qrUrl = [regex]::Match($src['js/app/qrnav.js'], "var SITE_URL = '([^']+)'").Groups[1].Value

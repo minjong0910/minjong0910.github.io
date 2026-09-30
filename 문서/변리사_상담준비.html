@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>변리사 상담 준비 — 예상 질문과 답변</title>
+<style>
+  @page {
+    size: A4; margin: 17mm 15mm 15mm 15mm;
+    @top-right { content: "변리사 상담 준비 · 예상 질문과 답변"; font: 7.5pt "Malgun Gothic"; color: #A9A29A; }
+    @bottom-center { content: counter(page) " / " counter(pages); font: 8pt "Malgun Gothic"; color: #8A837A; }
+  }
+  @page :first { margin-top: 0; @top-right { content: none; } @bottom-center { content: none; } }
+  :root{
+    --paper:#FBFAF7; --ink:#1F1D1A; --ink2:#55504A; --muted:#8A837A;
+    --rule:#DAD4C9; --rule2:#EDE9E1;
+    --red:#8C2F1E; --blue:#2C5F6B; --ok:#2D6A4F; --warn:#8A6200;
+    --tintR:#FAF1EE; --tintB:#EFF4F5; --tintG:#EEF4F0; --tintY:#FAF5E8;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ background:var(--paper); }
+  body{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; font-size:9.6pt; line-height:1.72;
+        color:var(--ink); margin:0; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  h1{ font-size:16pt; color:var(--ink); margin:0 0 2mm; letter-spacing:-0.4px; }
+  .rule{ width:22mm; height:1mm; background:var(--ink); margin-bottom:4mm; }
+  h2{ font-size:11.5pt; color:var(--ink); margin:14px 0 6px; padding-bottom:3px;
+      border-bottom:1.5px solid var(--red); page-break-after:avoid; break-after:avoid; }
+  h3{ font-size:10pt; color:var(--red); margin:11px 0 4px; page-break-after:avoid; break-after:avoid; }
+  p{ margin:0 0 6px; }
+  ul,ol{ margin:0 0 7px; padding-left:18px; }
+  li{ margin-bottom:3px; }
+  b.hl{ background:#F6E7C9; padding:0 2px; }
+  .part{ font-size:9pt; color:var(--red); letter-spacing:2.5px; font-weight:700; margin:0 0 2mm; }
+  table{ width:100%; border-collapse:collapse; margin:6px 0 9px; font-size:8.8pt;
+         background:#fff; page-break-inside:avoid; }
+  th,td{ border:1px solid var(--rule); padding:4px 7px; text-align:left; vertical-align:top; color:var(--ink2); }
+  th{ background:#F3EFE8; font-weight:700; color:var(--ink); }
+  td b{ color:var(--ink); }
+  td.c,th.c{ text-align:center; white-space:nowrap; }
+  tr.hi td{ background:var(--tintY); }
+  .note{ font-size:8.8pt; color:var(--ink2); background:#F3EFE8; border-left:2.5mm solid var(--rule);
+         padding:6px 10px; margin:8px 0; line-height:1.65; page-break-inside:avoid; }
+  .note b{ color:var(--ink); }
+  .note.warn{ border-left-color:var(--red); background:var(--tintR); }
+  .note.good{ border-left-color:var(--ok); background:var(--tintG); }
+  .pb{ page-break-before:always; }
+
+  /* 질문 카드 */
+  .q{ border:1px solid var(--rule); border-left:2.5mm solid var(--red); border-radius:1mm;
+      padding:7px 11px; margin-bottom:7px; page-break-inside:avoid; background:#fff; }
+  .q .ask{ font-size:10.2pt; font-weight:700; color:var(--ink); margin-bottom:3px; }
+  .q .ask i{ font-style:normal; color:var(--red); margin-right:5px; }
+  .q .why{ font-size:8.5pt; color:var(--muted); margin-bottom:4px; }
+  .q .say{ font-size:9.3pt; color:var(--ink2); background:var(--tintY); border-radius:1mm;
+           padding:5px 9px; line-height:1.65; }
+  .q .say::before{ content:"이렇게 답하세요 — "; font-weight:700; color:var(--warn); }
+  .q .ref{ font-size:8.3pt; color:var(--blue); margin-top:4px; }
+  .q .ref::before{ content:"자료 : "; font-weight:700; }
+  .q.b{ border-left-color:var(--blue); }
+  .q.g{ border-left-color:var(--ok); }
+
+  .cover{ height:250mm; position:relative; padding-top:34mm; }
+  .cover .band{ background:var(--ink); color:var(--paper); padding:15mm 14mm 13mm; }
+  .cover .k{ font-size:10pt; letter-spacing:4px; color:#D9A497; margin-bottom:6mm; }
+  .cover .t{ font-size:26pt; font-weight:700; line-height:1.3; }
+  .cover .s{ font-size:11.5pt; margin-top:6mm; color:#CFC9C0; }
+  .cover .meta{ margin-top:12mm; font-size:10pt; color:var(--ink2); line-height:2; }
+  .cover .meta b{ color:var(--ink); }
+  .cover .foot{ position:absolute; bottom:0; left:0; right:0; font-size:8.4pt; color:var(--muted);
+                border-top:1px solid var(--rule2); padding-top:5px; }
+
+  .big{ font-size:22pt; font-weight:700; color:var(--red); line-height:1.35; }
+  .cheat{ border:2px solid var(--ink); border-radius:2mm; padding:8mm 9mm; background:#fff; }
+  .cheat h3{ margin-top:9px; }
+  .five{ display:table; width:100%; table-layout:fixed; border-spacing:4px 0; margin:5px 0 8px; }
+  .five > div{ display:table-cell; text-align:center; border:1px solid var(--rule); border-radius:1mm;
+               padding:5px 3px; background:#fff; }
+  .five .v{ font-size:14pt; font-weight:700; color:var(--red); font-variant-numeric:tabular-nums; }
+  .five .l{ font-size:7.6pt; color:var(--muted); margin-top:1px; line-height:1.35; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="band">
+    <div class="k">특허 출원 상담 대비</div>
+    <div class="t">변리사가 물어볼 것,<br>이렇게만 답하시면 됩니다</div>
+    <div class="s">예상 질문 20개 · 30초 대본 · 들고 갈 것</div>
+  </div>
+
+  <div class="meta">
+    <b>발명</b> &nbsp;&nbsp;&nbsp;&nbsp;영상 유사도 격차를 이용한 오프라인 실내 길안내 방법 및 시스템<br>
+    <b>상담자</b> &nbsp;&nbsp;김민종<br>
+    <b>작성일</b> &nbsp;&nbsp;2026-09-30
+  </div>
+
+  <div class="note good" style="margin-top:12mm">
+  <b>먼저 &mdash; 겁먹지 않으셔도 됩니다.</b><br>
+  변리사는 <b>기술 강의를 들으러 오는 사람이 아닙니다.</b> 명세서를 쓰기 위해 다섯 가지만 알면 됩니다 &mdash;
+  <b>① 무슨 문제를 ② 어떻게 풀었고 ③ 남들과 뭐가 다르며 ④ 증거가 있고 ⑤ 언제 공개했는가.</b>
+  이 다섯 가지는 이미 자료에 다 있고, 이 문서에 답할 말까지 적어 두었습니다.
+  </div>
+
+  <div class="note warn">
+  <b>그리고 가장 중요한 규칙 하나</b><br>
+  <b class="hl">모르는 것은 「모릅니다」라고 하십시오.</b> 추측해서 답하면 그 추측이 그대로 명세서에 들어갑니다.
+  사실과 다른 내용이 명세서에 있으면 나중에 <b>특허가 무효가 될 수 있습니다.</b>
+  「모릅니다. 자료에 있을 텐데 찾아서 알려 드리겠습니다」가 <b>가장 좋은 답</b>입니다.
+  </div>
+
+  <div class="foot">
+  본 문서는 상담 준비용으로 발명자 측이 스스로 작성한 것이며 법률 자문이 아닙니다.
+  </div>
+</section>
+
+<!-- ─────────── 1 ─────────── -->
+<section class="pb">
+<p class="part">1</p>
+<h1>상담 30분 전에 이것만 보십시오</h1>
+<div class="rule"></div>
+
+<h2>1.1 외울 숫자는 다섯 개뿐입니다</h2>
+<div class="five">
+  <div><div class="v">152</div><div class="l">앱이 아는<br>장소 수</div></div>
+  <div><div class="v">5,752</div><div class="l">비교용<br>자료 개수</div></div>
+  <div><div class="v">55.6%</div><div class="l">전부 답할 때<br>정확도</div></div>
+  <div><div class="v">92.9%</div><div class="l">확신 상위 10%만<br>답할 때</div></div>
+  <div><div class="v">2026.9.21</div><div class="l">공개한 날<br>(가장 중요)</div></div>
+</div>
+
+<h2>1.2 외울 문장은 하나입니다</h2>
+<div class="note good" style="font-size:11pt; line-height:1.8">
+<b class="hl" style="font-size:12pt">「정확도를 올리는 대신, 틀릴 때를 골라냈습니다.」</b><br>
+이 한 문장이 발명의 핵심입니다. 변리사가 <b>「그래서 뭐가 다르죠?」</b>라고 물으면 이 말부터 하십시오.
+</div>
+
+<h2>1.3 30초 설명 &mdash; 그대로 외우시면 됩니다</h2>
+<div class="note" style="font-size:10.5pt; line-height:1.85; background:#fff; border-left-color:var(--red)">
+「건물 안에서 <b>인터넷이 끊겨도</b> 길을 안내하는 앱입니다.<br>
+출입문에 붙인 <b>QR을 찍으면 몇 층인지</b> 확정되고, 길을 잃으면 <b>주변을 한 장 찍어</b>
+휴대폰 안에 저장된 사진들과 맞춰 봅니다.<br>
+그런데 실내는 닮은 곳이 많아 <b>자주 틀립니다.</b> 그래서 저희는
+<b>1등과 2등이 얼마나 벌어졌는지</b>를 재서, 차이가 크면 자리까지 알려 주고,
+어중간하면 층만 알려 주고, <b>확신이 없으면 「모르겠다」고 답합니다.</b><br>
+그리고 <b>AI가 혼자 위치를 확정하지 못하게</b> 막아 두었습니다. 확정은 문에 붙은
+<b>호실 번호를 읽거나</b> 사용자가 직접 고를 때만 됩니다.」
+</div>
+
+<h2>1.4 3분으로 늘려야 하면 이 순서로</h2>
+<table>
+<tr><th class="c" style="width:8%">순서</th><th style="width:26%">말할 것</th><th>한 줄</th></tr>
+<tr><td class="c">1</td><td>문제</td><td>3호관은 문이 넷, 층이 여섯. 안쪽은 인터넷도 안 됩니다.</td></tr>
+<tr><td class="c">2</td><td>기존 방법이 안 되는 이유</td><td>비콘은 장비값, 서버 방식은 인터넷이 필요, QR만으로는 그 자리만 압니다.</td></tr>
+<tr class="hi"><td class="c">3</td><td><b>진짜 문제</b></td><td><b>기존 방식은 틀려도 확신에 차서 알려 줍니다.</b> 길안내에서 틀린 답은 답이 없는 것보다 해롭습니다.</td></tr>
+<tr><td class="c">4</td><td>우리 해법</td><td>1·2등 격차로 확신을 재서 <b>자리 / 층 / 모름</b> 세 단계로 답합니다.</td></tr>
+<tr><td class="c">5</td><td>증거</td><td>전부 답하면 55.6%인데, <b>확신 상위 10%만 답하면 92.9%</b>입니다.</td></tr>
+<tr><td class="c">6</td><td>정직한 고백</td><td>1·2등 격차 기법 자체는 <b>이미 알려져 있었습니다.</b> 조사해서 알았습니다.</td></tr>
+</table>
+
+<div class="note warn">
+<b>6번을 꼭 말하십시오.</b> 숨기면 변리사가 나중에 찾아냅니다. 먼저 말하면
+<b>「조사를 제대로 한 의뢰인」</b>이 되고, 상담이 훨씬 빨라집니다.
+</div>
+</section>
+
+<!-- ─────────── 2 ─────────── -->
+<section class="pb">
+<p class="part">2</p>
+<h1>변리사가 물어볼 질문 20개</h1>
+<div class="rule"></div>
+<p>실제 상담에서 나오는 순서대로 적었습니다. <span style="color:var(--red)">■</span> 발명 파악 ·
+<span style="color:var(--blue)">■</span> 권리와 절차 · <span style="color:var(--ok)">■</span> 사업과 비용</p>
+
+<h2>A. 발명을 파악하려는 질문 (명세서를 쓰기 위해)</h2>
+
+<div class="q">
+  <div class="ask"><i>Q1</i>이게 뭘 하는 건지 한 마디로 설명해 주세요.</div>
+  <div class="why">가장 먼저 나옵니다. 여기서 못 하면 나머지가 다 힘들어집니다.</div>
+  <div class="say">1.3의 <b>30초 설명</b>을 그대로 하십시오. 외워 가시면 됩니다.</div>
+  <div class="ref">발표자료 9쪽 「전체 구조 한 장」을 펴서 보여 드리면 가장 빠릅니다.</div>
+</div>
+
+<div class="q">
+  <div class="ask"><i>Q2</i>기존에는 이걸 어떻게 했나요? 뭐가 불편했습니까?</div>
+  <div class="why">「종래기술의 문제점」 항목을 쓰려는 것입니다. 명세서의 뼈대입니다.</div>
+  <div class="say">「셋이 있는데 다 걸렸습니다. <b>비콘</b>은 장비를 사서 달아야 하고,
+  <b>서버로 사진을 보내는 방식</b>은 정작 인터넷이 안 되는 곳에서 못 쓰고,
+  <b>QR만 붙이는 방식</b>은 찍은 그 자리에서만 압니다.」</div>
+  <div class="ref">설명서 「나. 종래기술의 문제점」 · 발표자료 5~6쪽</div>
+</div>
+
+<div class="q">
+  <div class="ask"><i>Q3</i>그래서 어떻게 해결하셨습니까? 순서대로 말씀해 주세요.</div>
+  <div class="why">청구항의 단계 (a)~(g)가 여기서 나옵니다.</div>
+  <div class="say">「① 문 QR로 층 확정 → ② 사진 찍기 → ③ 폰 안에서 저장된 자료와 대조 →
+  ④ 1·2등 격차 계산 → ⑤ 격차에 따라 자리/층/모름으로 답 → ⑥ 확정은 번호판 읽기나 사람이.
+  이 전부가 <b>인터넷 없이</b> 됩니다.」</div>
+  <div class="ref">설명서 「4. 특허청구범위 청구항 1」 (a)~(g) · 발표자료 34쪽에 쉬운 말 대조표</div>
+</div>
+
+<div class="q">
+  <div class="ask"><i>Q4</i>그중에 <b>딱 하나</b>만 고르면 무엇이 핵심입니까?</div>
+  <div class="why">독립항의 중심을 정하려는 질문입니다. <b>가장 중요한 질문</b>입니다.</div>
+  <div class="say">「<b>AI가 혼자 확정하지 못하게 막은 것</b>입니다. 그리고 확신을 <b>1등 점수가 아니라
+  1·2등 격차</b>로 잰 것입니다. 이 둘이 묶여 있습니다.」</div>
+  <div class="ref">조사서 5.2 「조합 X」 · 발표자료 32쪽</div>
+</div>
+
+<div class="q">
+  <div class="ask"><i>Q5</i>그게 없으면 동작이 안 됩니까? 빼도 되는 건 어떤 겁니까?</div>
+  <div class="why">필수 구성요소와 선택 구성요소를 가르려는 것입니다. 권리범위가 여기서 갈립니다.</div>
+  <div class="say">「<b>QR·대조·격차·확정금지</b>는 빠지면 안 됩니다.
+  <b>번호판 읽기·사진 두 장·품질 검사</b>는 없어도 동작은 합니다.」<br>
+  <b>확실치 않으면 「그건 판단이 어렵습니다. 봐 주시겠습니까?」</b>라고 하십시오.</div>
+  <div class="ref">발표자료 33쪽 「청구항 나무」 — 기둥과 가지가 그려져 있습니다</div>
+</div>
+
+<div class="q">
+  <div class="ask"><i>Q6</i>어디까지가 기존 기술이고, 어디부터가 본인 아이디어입니까?</div>
+  <div class="why">진보성을 가늠하려는 질문입니다. 솔직해야 합니다.</div>
+  <div class="say">「<b>거의 다 기존 기술입니다.</b> 사진 대조도, QR도, 격차 기법도 이미 있었습니다.
+  저희가 다른 건 <b>그것들을 엮은 순서</b>와, <b>자동 확정을 없앤 판단</b>입니다.」</div>
+  <div class="ref">조사서 4.2 선행문헌 6건 · 발표자료 29쪽 지도</div>
+</div>
+
+<div class="q">
+  <div class="ask"><i>Q7</i>0.22, 0.16 같은 숫자는 어떻게 정하셨습니까?</div>
+  <div class="why">수치 한정이 종속항이 될 수 있는지 보는 것입니다.</div>
+  <div class="say">「감으로 정하지 않았습니다. <b>사진 1,844장을 격차 크기순으로 줄 세워</b>
+  목표 정확도가 나오는 지점의 값으로 정했습니다. <b>기준 사진을 찍은 사람과 다른 사람이</b> 찍은 사진으로 쟀습니다.」</div>
+  <div class="ref">설명서 청구항 5항 · 도 5 · 발표자료 33쪽 5항</div>
+</div>
+
+<div class="q">
+  <div class="ask"><i>Q8</i>다른 방식으로도 구현할 수 있습니까? (신경망 말고, QR 말고)</div>
+  <div class="why">권리범위를 넓게 쓰려는 질문입니다. <b>넓게 답할수록 좋습니다.</b></div>
+  <div class="say">「<b>네, 됩니다.</b> 광학코드는 QR이 아니라 바코드나 NFC여도 되고,
+  사진을 숫자로 바꾸는 방법도 다른 것을 써도 됩니다. 핵심은 <b>격차로 답의 수준을 가르는 것</b>이라
+  그 부분만 유지되면 됩니다.」</div>
+  <div class="ref">이 답은 권리범위를 넓힙니다. 자신 있게 하십시오.</div>
+</div>
+
+<div class="q">
+  <div class="ask"><i>Q9</i>효과를 뒷받침할 데이터가 있습니까?</div>
+  <div class="why">진보성 주장의 근거가 됩니다. <b>우리의 최대 무기</b>입니다.</div>
+  <div class="say">「있습니다. 원본 측정 파일도 보관하고 있습니다.
+  <b>같은 사진·같은 계산인데 확신을 재는 자만 바꿨더니 64.7% → 92.9%</b>, <b>28.2%p</b> 차이가 났습니다.」</div>
+  <div class="ref">발표자료 20쪽 그래프 · 조사서 6.3 · 원본 JSON 보관 중</div>
+</div>
+
+<div class="q">
+  <div class="ask"><i>Q10</i>정확도가 55.6%면 낮은 것 아닙니까?</div>
+  <div class="why">약점을 찌르는 질문입니다. <b>미리 준비해 두면 오히려 점수를 땁니다.</b></div>
+  <div class="say">「<b>맞습니다. 낮습니다.</b> 그래서 저희는 전부 답하지 않습니다.
+  확신이 큰 것만 골라 답하면 <b>92.9%</b>이고, 나머지는 층만 알려 주거나 모른다고 합니다.
+  <b>저희가 주장하는 효과는 정확도가 아니라 「틀릴 때를 골라내는 것」</b>입니다.」</div>
+  <div class="ref">조사서 6.1 · 발표자료 23쪽</div>
+</div>
+</section>
+
+<!-- ─────────── 3 ─────────── -->
+<section class="pb">
+<h2 style="margin-top:0">B. 권리와 절차에 관한 질문</h2>
+
+<div class="q b">
+  <div class="ask"><i>Q11</i>언제, 어디에 공개하셨습니까?</div>
+  <div class="why"><b>가장 중요한 질문입니다.</b> 이 답에 따라 출원 가능 여부가 갈립니다.</div>
+  <div class="say">「<b>2026년 9월 21일</b>에 공개했습니다. <b>GitHub 공개 저장소</b>에 소스 전문을 올렸고,
+  <b>공개 웹사이트</b>로 앱을 배포했으며, <b>교내 중간발표</b>도 했습니다.
+  <b>공지예외주장을 함께 내 주실 수 있습니까?</b>」</div>
+  <div class="ref">증거는 저장소 커밋 기록(109건)에 일자·작성자까지 전부 있습니다</div>
+</div>
+
+<div class="q b">
+  <div class="ask"><i>Q12</i>발명자가 누구누구입니까? 각자 무슨 일을 했습니까?</div>
+  <div class="why">발명자를 잘못 적으면 <b>나중에 특허가 무효</b>가 될 수 있습니다.</div>
+  <div class="say">「셋입니다. <b>김민종</b>이 전체 설계·구현·알고리즘·임계값 결정을 했고,
+  <b>손의윤·문성일</b>은 사진 촬영과 실기기 시험을 했습니다.
+  <b>촬영·시험만 한 사람도 발명자로 올릴 수 있는지 판단해 주시겠습니까?</b>」</div>
+  <div class="ref">이건 저희가 판단할 수 없는 부분입니다. 반드시 물어보십시오.</div>
+</div>
+
+<div class="q b">
+  <div class="ask"><i>Q13</i>지분은 어떻게 나누시겠습니까?</div>
+  <div class="why">권리승계합의서에 적어야 합니다. 합계 100%.</div>
+  <div class="say">「<b>아직 정하지 못했습니다.</b> Q12의 답을 듣고 셋이 합의하려고 합니다.
+  기준을 알려 주시면 그대로 따르겠습니다.」</div>
+  <div class="ref">「모른다」고 답해도 되는 질문입니다. 억지로 정해 가지 마십시오.</div>
+</div>
+
+<div class="q b">
+  <div class="ask"><i>Q14</i>학교 과제입니까? 정부 지원금을 받았습니까?</div>
+  <div class="why">국가 과제면 <b>과제번호를 반드시 기재</b>해야 합니다. 빠뜨리면 문제가 됩니다.</div>
+  <div class="say">「졸업작품입니다. <b>지원사업 해당 여부는 지도교수님께 확인 중입니다.</b>
+  확인되면 바로 알려 드리겠습니다.」</div>
+  <div class="ref"><b>상담 전에 지도교수님께 먼저 여쭤보시면 가장 좋습니다.</b></div>
+</div>
+
+<div class="q b">
+  <div class="ask"><i>Q15</i>누구 이름으로 출원합니까?</div>
+  <div class="why">출원인을 정하는 질문입니다.</div>
+  <div class="say">「<b>국립군산대학교 산학협력단</b>입니다. 서식에 이미 인쇄되어 있고,
+  권리승계합의서(양도증)도 받았습니다.」</div>
+  <div class="ref">발명신고서 작성본에 이미 채워 두었습니다</div>
+</div>
+
+<div class="q b">
+  <div class="ask"><i>Q16</i>비슷한 기술을 찾아보셨습니까?</div>
+  <div class="why">의뢰인이 얼마나 준비했는지 보는 질문입니다. <b>여기서 자료를 꺼내십시오.</b></div>
+  <div class="say">「했습니다. <b>12쪽짜리 조사서</b>로 정리해 왔습니다.
+  선행문헌 6건을 찾았고, <b>저희 기술 대부분이 이미 존재한다</b>는 결론입니다.
+  다만 <b>KIPRIS 국내 공보 전문 검색은 못 했습니다.</b> 그 부분을 부탁드립니다.」</div>
+  <div class="ref">「선행기술조사_특허성검토.pdf」를 그 자리에서 건네십시오</div>
+</div>
+
+<div class="q b">
+  <div class="ask"><i>Q17</i>(문헌을 하나 보여 주며) 이건 보셨습니까? 이것과 뭐가 다르죠?</div>
+  <div class="why">가장 어려운 질문입니다. 변리사가 직접 찾아온 문헌일 수 있습니다.</div>
+  <div class="say">이미 아는 문헌이면 → 「네, P1으로 정리했습니다. 저희와 다른 건 <b>위치를 확정하지 않는다</b>는 점입니다.」<br>
+  <b>처음 보는 문헌이면</b> → 「<b>처음 봅니다. 읽어 보고 다음에 답변드리겠습니다.</b>」<br>
+  <b class="hl">절대 그 자리에서 추측하지 마십시오.</b></div>
+  <div class="ref">조사서 4.2에 P1~P6 요약이 있습니다</div>
+</div>
+
+<h2>C. 사업과 비용에 관한 질문</h2>
+
+<div class="q g">
+  <div class="ask"><i>Q18</i>이걸로 뭘 하실 생각입니까? 팔 계획이 있습니까?</div>
+  <div class="why">권리범위를 어디까지 넓힐지, 비용을 얼마나 쓸지를 정하는 질문입니다.</div>
+  <div class="say">「<b>지금은 계획이 없습니다.</b> 졸업작품이고 교내에서 무료로 쓰고 있습니다.
+  다만 <b>관공서·병원·전시장처럼 통신이 약한 실내</b>에는 그대로 쓸 수 있다고 봅니다.」</div>
+  <div class="ref">솔직하게 답하십시오. 부풀리면 불필요하게 비싼 전략을 권유받습니다.</div>
+</div>
+
+<div class="q g">
+  <div class="ask"><i>Q19</i>해외 출원도 하실 겁니까?</div>
+  <div class="why">공지예외는 <b>나라마다 요건이 다릅니다.</b> 이미 공개한 게 문제가 됩니다.</div>
+  <div class="say">「<b>계획 없습니다.</b> 이미 공개해서 해외는 어렵다고 들었는데, 맞습니까?」</div>
+  <div class="ref">조사서 3.2 「해외 출원 시에는 국가마다 요건이 다릅니다」</div>
+</div>
+
+<div class="q g">
+  <div class="ask"><i>Q20</i>급하십니까? 비용은 어떻게 하실 겁니까?</div>
+  <div class="why">우선심사 여부와 비용 부담 주체를 정합니다.</div>
+  <div class="say">「<b>출원 기한이 2027년 9월 21일</b>이라 그 안에만 되면 됩니다.
+  비용은 <b>산학협력단 부담</b>으로 신청했습니다.」</div>
+  <div class="ref">발명신고서에 「출원비용부담 ■ 산학협력단」으로 체크해 두었습니다</div>
+</div>
+</section>
+
+<!-- ─────────── 4 ─────────── -->
+<section class="pb">
+<p class="part">3</p>
+<h1>모를 때 어떻게 말하는가</h1>
+<div class="rule"></div>
+
+<div class="note warn" style="font-size:10pt">
+<b>이 장이 이 문서에서 제일 중요합니다.</b> 변리사 상담에서 <b>모르는 것을 지어내는 것</b>이
+가장 큰 사고입니다. 그 말이 명세서에 들어가고, 사실과 다르면 <b>나중에 특허가 무효</b>가 될 수 있습니다.
+</div>
+
+<table>
+<tr><th style="width:36%">이렇게 말하지 마십시오</th><th>이렇게 말하십시오</th></tr>
+<tr><td>「아마 …인 것 같습니다」</td><td><b>「모르겠습니다. 확인해서 알려 드리겠습니다.」</b></td></tr>
+<tr><td>「대충 …정도 됩니다」</td><td><b>「정확한 숫자는 자료에 있습니다. 찾아 드릴까요?」</b></td></tr>
+<tr><td>(모르는 문헌에) 「그건 좀 다릅니다」</td><td><b>「처음 봅니다. 읽어 보고 답변드리겠습니다.」</b></td></tr>
+<tr><td>「제가 다 만들었습니다」 (사실이 아니면)</td><td><b>「설계와 구현은 제가 했고, 촬영과 시험은 조원들이 했습니다.」</b></td></tr>
+<tr><td>「이건 세상에 없는 기술입니다」</td><td><b>「조사해 보니 대부분 이미 있었습니다. 조사서에 정리했습니다.」</b></td></tr>
+</table>
+
+<div class="note good">
+<b>「모릅니다」는 약점이 아닙니다.</b> 변리사는 매일 모르는 분야를 다룹니다.
+정확히 모르는 것을 <b>모른다고 말하는 의뢰인</b>이 일하기 가장 편한 의뢰인입니다.
+</div>
+
+<h2>기술 질문이 깊어지면</h2>
+<p>변리사가 「특징벡터가 몇 차원입니까」, 「코사인 유사도를 쓰신 이유가 있습니까」처럼
+깊게 물을 수 있습니다. 그때는 이렇게 하십시오.</p>
+<div class="note" style="background:#fff; border-left-color:var(--red); font-size:10pt">
+「<b>그 부분은 설명서 15쪽에 수치까지 적어 두었습니다.</b> 지금 펴 드릴까요?」
+</div>
+<p>실제로 <b>부록에 제원표가 있습니다</b> — 1,280차원, 코사인 유사도, 임계값 0.22/0.16/0.15,
+흔들림 45, 밝기 40~218, 최소 480화소. <b>외울 필요 없습니다. 자료를 펴면 됩니다.</b></p>
+
+<h2 class="pb" style="margin-top:0">반대로, 이건 꼭 물어보십시오</h2>
+<p>상담은 일방적으로 답하는 자리가 아닙니다. <b>이 일곱 개는 꼭 여쭤보고 오십시오.</b></p>
+
+<table>
+<tr><th class="c" style="width:7%">번호</th><th>질문</th><th style="width:26%">왜 중요한가</th></tr>
+<tr class="hi"><td class="c"><b>1</b></td><td><b>이미 공개했는데 출원이 가능합니까? 공지예외주장을 함께 내 주실 수 있습니까?</b></td>
+    <td>이 답에 따라 <b>나머지가 다 달라집니다.</b> 제일 먼저 물으십시오</td></tr>
+<tr class="hi"><td class="c"><b>2</b></td><td><b>솔직히, 낼 가치가 있습니까? 「내지 않는 게 낫다」는 의견도 듣고 싶습니다.</b></td>
+    <td>학생이라 비용·시간이 한정됩니다. 솔직한 의견이 필요합니다</td></tr>
+<tr><td class="c">3</td><td>촬영·시험만 한 조원도 발명자로 올려도 됩니까? 지분 기준은요?</td><td>잘못 적으면 특허가 무효가 됩니다</td></tr>
+<tr><td class="c">4</td><td>청구항을 넓게 가는 게 낫습니까, 좁게 가는 게 낫습니까?</td><td>조사서 7.1에 3안을 적어 뒀습니다</td></tr>
+<tr><td class="c">5</td><td>KIPRIS 국내 문헌 중 더 가까운 게 있습니까?</td><td>저희가 못 한 부분입니다</td></tr>
+<tr><td class="c">6</td><td>양도 후에도 지금 공개 중인 앱을 계속 서비스해도 됩니까?</td><td>앱을 내려야 하면 큰일입니다</td></tr>
+<tr><td class="c">7</td><td>신고부터 출원 결정까지 얼마나 걸립니까? 졸업 전에 나옵니까?</td><td>일정을 알아야 합니다</td></tr>
+</table>
+
+<div class="note good">
+<b>2번을 꼭 물으십시오.</b> 「어떻게든 내 드리겠다」는 답과 「이건 어렵겠다」는 답은 완전히 다릅니다.
+<b>솔직한 의견을 구한다고 먼저 말하면</b> 솔직한 답이 돌아옵니다.
+</div>
+</section>
+
+<!-- ─────────── 5 ─────────── -->
+<section class="pb">
+<p class="part">4</p>
+<h1>들고 갈 것</h1>
+<div class="rule"></div>
+
+<table>
+<tr><th class="c" style="width:7%">확인</th><th style="width:34%">무엇</th><th>왜</th></tr>
+<tr class="hi"><td class="c">☐</td><td><b>선행기술조사_특허성검토.pdf</b> (12쪽)</td>
+    <td>Q16에서 바로 꺼냅니다. 선행문헌 6건·측정 데이터·청구항 3안</td></tr>
+<tr class="hi"><td class="c">☐</td><td><b>발명의내용설명서.pdf</b> (15쪽)</td>
+    <td>Q3·Q7의 근거. 청구항 11항과 도면 5도</td></tr>
+<tr><td class="c">☐</td><td>발명신고서_작성본.hwp (채운 것)</td><td>Q15·Q20. 빈칸은 상담 뒤 채웁니다</td></tr>
+<tr><td class="c">☐</td><td>졸업작품_상세설계_발표.pdf (38쪽)</td><td>Q1에서 9쪽 구조도를 펴 보이면 설명이 빨라집니다</td></tr>
+<tr><td class="c">☐</td><td>이 문서 (변리사_상담준비)</td><td>손에 들고 보십시오. 마지막 쪽만 떼어 가셔도 됩니다</td></tr>
+<tr class="hi"><td class="c">☐</td><td><b>앱을 켠 휴대폰</b></td>
+    <td><b>1분만 보여 드리면 설명 열 마디보다 낫습니다.</b> 미리 켜 두십시오</td></tr>
+<tr><td class="c">☐</td><td>필기구와 메모지</td><td>변리사 말을 받아 적으십시오. 나중에 저와 같이 정리하면 됩니다</td></tr>
+</table>
+
+<h2>상담 직전 5분 점검</h2>
+<ul>
+<li>휴대폰에 <b>앱이 켜지는지</b> 확인 (인터넷 없이도 열리는 걸 보여 주면 좋습니다)</li>
+<li>지도교수님께 <b>캡스톤 지원사업 여부</b>를 여쭤봤는지 (Q14)</li>
+<li><b>30초 설명</b>을 한 번 소리 내어 읽어 보기</li>
+<li>외울 숫자 다섯 개 — <b>152 · 5,752 · 55.6% · 92.9% · 2026.9.21</b></li>
+</ul>
+
+<div class="note warn">
+<b>상담이 끝나면</b> 변리사가 한 말을 <b>기억나는 대로 적어</b> 두십시오.
+특히 <b>①번 질문(공지예외)의 답</b>과 <b>②번 질문(낼 가치)의 답</b>은 그대로 적어 오시면,
+그다음에 뭘 할지 같이 정할 수 있습니다.
+</div>
+</section>
+
+<!-- ─────────── 컨닝페이퍼 ─────────── -->
+<section class="pb">
+<p class="part">한 장 요약</p>
+<h1>이 쪽만 떼어 손에 드십시오</h1>
+<div class="rule"></div>
+
+<div class="cheat">
+  <div class="big">정확도를 올리는 대신,<br>틀릴 때를 골라냈습니다.</div>
+
+  <h3>■ 30초 설명</h3>
+  <p style="font-size:10pt; line-height:1.8">
+  건물 안에서 <b>인터넷이 끊겨도</b> 길을 안내하는 앱입니다.
+  출입문 <b>QR을 찍으면 몇 층인지</b> 확정되고, 길을 잃으면 <b>주변을 한 장 찍어</b>
+  폰 안에 저장된 사진들과 맞춰 봅니다.
+  실내는 닮은 곳이 많아 자주 틀리므로, <b>1등과 2등이 얼마나 벌어졌는지</b>를 재서
+  <b>자리 / 층 / 모름</b> 세 단계로 답합니다.
+  <b>AI가 혼자 확정하지 못하게</b> 막았고, 확정은 <b>호실 번호를 읽거나</b> 사람이 고를 때만 됩니다.
+  </p>
+
+  <h3>■ 외울 숫자 다섯</h3>
+  <div class="five">
+    <div><div class="v">152</div><div class="l">아는 장소</div></div>
+    <div><div class="v">5,752</div><div class="l">비교용 자료</div></div>
+    <div><div class="v">55.6%</div><div class="l">전부 답할 때</div></div>
+    <div><div class="v">92.9%</div><div class="l">상위 10%만</div></div>
+    <div><div class="v">2026.9.21</div><div class="l">공개한 날</div></div>
+  </div>
+
+  <h3>■ 먼저 물어볼 것 두 개</h3>
+  <p style="font-size:10pt">
+  ① <b>이미 공개했는데 출원 가능합니까? 공지예외주장을 함께 내 주실 수 있습니까?</b><br>
+  ② <b>솔직히 낼 가치가 있습니까? 「내지 않는 게 낫다」는 의견도 듣고 싶습니다.</b>
+  </p>
+
+  <h3>■ 먼저 고백할 것</h3>
+  <p style="font-size:10pt">
+  「조사해 보니 <b>저희 기술 대부분이 이미 있었습니다.</b>
+  1·2등 격차 기법도 <b>이미 알려진 것</b>이었습니다. 조사서에 그대로 적었습니다.」<br>
+  <span style="color:var(--muted)">— 먼저 말하면 「준비된 의뢰인」이 됩니다.</span>
+  </p>
+
+  <h3>■ 모를 때</h3>
+  <p style="font-size:11pt; font-weight:700; color:var(--red)">
+  「모르겠습니다. 확인해서 알려 드리겠습니다.」<br>
+  <span style="font-weight:400; font-size:9.5pt; color:var(--ink2)">
+  &mdash; 추측해서 답하면 그 추측이 명세서에 들어가고, 나중에 특허가 무효가 될 수 있습니다.</span>
+  </p>
+
+  <h3>■ 깊은 기술 질문이 나오면</h3>
+  <p style="font-size:10pt">「그 부분은 <b>설명서 15쪽에 수치까지 적어</b> 두었습니다. 펴 드릴까요?」</p>
+</div>
+</section>
+
+</body>
+</html>

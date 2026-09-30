@@ -35,14 +35,27 @@ $TITLE = '영상 유사도 격차에 따라 응답 수준을 가변하는 실내
 #   상세한 내용은 별표 2 「발명의 내용 설명서」가 맡는 것이 이 서식의 설계다 — 여기는 짧게 쓴다.
 #   고치면 반드시 맨 끝 쪽 수 검사(2쪽)를 통과시킬 것.
 $SUMMARY = @'
-이용자가 올린 실내 사진이 어느 장소인지 자동 판정한다. 1·2위 격차로 「자리/층/모름」을 가려 답하고 AI 단독 확정은 안 한다. 상세는 별표 2 참조.
+실내 길안내 앱이 보여 주는 안내 사진을 최신으로 유지하는 기술이다. 사진이 실제와 달라지면 이용자가 그 장면을 찍어 올리고, 어느 장소인지 자동으로 판정한다. 다만 실내는 닮은 곳이 많아 자주 틀리므로, 1위와 2위 후보의 유사도 격차를 재어 「자리까지 / 층만 / 모름」으로 나누어 답하고 AI 단독으로는 확정하지 않는다. 잘못 확정하면 그 장소의 안내 사진이 엉뚱하게 바뀌어 모든 이용자에게 퍼지기 때문이다. 상세는 별표 2 참조.
 '@
 
 $FIELD = @'
 대학·관공서·병원·전시장 등 실내 안내 사진을 최신으로 유지해야 하는 공간.
 '@
 
-$NAMES = @('김민종','손의윤','문성일')
+# ── 발명자 정보 ─────────────────────────────────────────────
+# ※ 전화번호·이메일은 개인정보다. 도구\ 는 깃에 올라가 공개 저장소로 나가므로
+#   여기에 적으면 안 된다. 깃이 무시하는 생성물\발명자정보.json 에서 읽는다.
+#   그 파일이 없으면 국문 성명만 채우고 나머지는 비워 둔다.
+$INVFILE = Join-Path (Split-Path $PSScriptRoot -Parent) '생성물\발명자정보.json'
+$INV = @()
+if(Test-Path $INVFILE){
+  try{ $INV = (Get-Content $INVFILE -Raw -Encoding UTF8 | ConvertFrom-Json).발명자 }
+  catch{ Write-Host "  발명자정보.json 을 읽지 못했습니다 — 이름만 채웁니다" }
+}
+if(-not $INV -or $INV.Count -eq 0){
+  $INV = @('김민종','문성일','손의윤') | ForEach-Object {
+    [pscustomobject]@{ 국문=$_; 영문=''; 지분=''; 소속=''; 연락처=''; 이메일='' } }
+}
 
 # ── 한글 열기 ────────────────────────────────────────────────
 # 앞선 실행이 중간에 죽으면 한글이 파일을 붙잡고 있어 사본을 못 덮어쓴다 — 먼저 정리한다
@@ -79,6 +92,7 @@ function PutText([string]$s){
   }
   return $true
 }
+
 function ReplaceAll([string]$from, [string]$to){
   $h.Run('MoveDocBegin') | Out-Null
   $o = $h.HParameterSet.HFindReplace
@@ -126,15 +140,25 @@ ReplaceAll '□ 산학협력단' '■ 산학협력단'; Note '■ 산학협력�
 Write-Host "`n[3] 발명의 공개 여부  ※ 가장 중요"
 # ※ 이 서식은 '□기타' 처럼 네모와 글자 사이에 공백이 없다 (다른 항목은 '□ 국내출원' 처럼 있다).
 #   공백을 넣어 찾으면 못 찾으므로 문서의 실제 글자 그대로 적는다.
-MarkByBack '기타 간행물' 8 '■기타 간행물 (GitHub 공개저장소·공개 웹사이트 배포, 교내 중간발표)'
+MarkByBack '기타 간행물' 8 '■기타 간행물 (저장소·웹사이트 공개, 교내 발표)'
 ReplaceAll '  년   월   일' '2026 년 9 월 21 일'
 Note '공개일 2026-09-21'
 
-Write-Host "`n[4] 발명자 국문 성명"
+Write-Host "`n[4] 발명자"
+# 한 줄의 칸 차례 : 국문 성명 → (영문) → 지분(%) → 소속(학과) → 연락처 → 이메일
+# ※ 「국문」과 「(영문 : )」은 한 칸이 아니라 **두 칸**이다. 이걸 한 칸으로 보고
+#   오른쪽으로 네 번만 옮겼더니 지분이 영문 칸에, 소속이 지분 칸에 들어갔다(2026-10-01).
+#   그래서 영문 칸을 목록 맨 앞에 넣어 다섯 번 옮긴다.
 $first = $true
-foreach($n in $NAMES){
-  if(FindFrom '국문 : ' $first){ $h.Run('Cancel') | Out-Null; [void](PutText $n); Note "발명자 : $n" }
-  else { Note "못 찾음 ★ : 발명자 $n" }
+foreach($p in $INV){
+  if(-not (FindFrom '국문 : ' $first)){ Note ("못 찾음 ★ : 발명자 " + $p.국문); $first = $false; continue }
+  $h.Run('Cancel') | Out-Null
+  [void](PutText ([string]$p.국문))
+  foreach($v in @($p.영문, $p.지분, $p.소속, $p.연락처, $p.이메일)){
+    $h.Run('TableRightCell') | Out-Null
+    if("$v".Trim()){ [void](PutText ([string]$v)) }
+  }
+  Note ("발명자 : {0} · 지분 {1}% · {2}" -f $p.국문, $(if("$($p.지분)".Trim()){$p.지분}else{'—'}), $(if("$($p.소속)".Trim()){$p.소속}else{'—'}))
   $first = $false
 }
 
@@ -167,7 +191,8 @@ $checks = @(
   @{ n='■ 기타 간행물';   c = ([regex]::Matches($txt, '■기타 간행물')).Count;  want = 1 }
   @{ n='공개일';          c = ([regex]::Matches($txt, '2026 년 9 월 21 일')).Count; want = 1 }
   @{ n='■ 산학협력단';    c = ([regex]::Matches($txt, '■ 산학협력단')).Count; want = 1 }
-  @{ n='발명자 3명';      c = (($NAMES | Where-Object { $txt -match [regex]::Escape($_) }).Count); want = 3 }
+  @{ n='발명자 3명';      c = (($INV | Where-Object { $txt -match [regex]::Escape([string]$_.국문) }).Count); want = 3 }
+  @{ n='소속 학과';       c = ([regex]::Matches($txt, 'IT융합통신학과')).Count; want = 3 }
   @{ n='요지 본문';       c = ([regex]::Matches($txt, '별표 2 참조')).Count;       want = 1 }
   @{ n='응용 분야';       c = ([regex]::Matches($txt, '전시장')).Count;   want = 1 }
   @{ n='남은 □ (안 고른 것)'; c = ([regex]::Matches($txt, '□')).Count;        want = -1 }
@@ -186,8 +211,10 @@ Write-Host ""
 # PDF 안의 /Type/Page 를 세는 방법은 한글이 만든 PDF 에서 0 이 나왔다 — 한글에게 직접 묻는다.
 # 실측(2026-10-01) : 3쪽까지는 서식 1호가 1쪽에 온전히 들어가고 각주 한 줄만 넘어간다 — 괜찮다.
 # 4쪽이 되면 그때부터 「예상 실시 시기」 아래 줄들이 인쇄에서 통째로 빠진다.
-Write-Host ("  {0,-22} : {1} (3쪽까지 괜찮음) {2}" -f '쪽 수', $pageCount, $(if($pageCount -le 3){'통과'}else{'실패 ★ — 서술 칸 글을 줄이세요'}))
-if($pageCount -gt 3){ $bad++ }
+# 쪽 수만으로는 잘림을 못 가린다 — 4쪽이어도 서식 1호가 한 쪽에 온전히 들어간 경우가 있었다(실측).
+# 쪽 수는 참고로만 알리고, 마지막에 PDF 로 떠서 눈으로 보라고 안내한다.
+Write-Host ("  {0,-22} : {1}쪽 {2}" -f '쪽 수', $pageCount, $(if($pageCount -le 4){'(참고)'}else{'★ 너무 많다 — 서술 칸을 줄이세요'}))
+if($pageCount -gt 4){ $bad++ }
 
 Write-Host ""
 Write-Host ("글자 확인용 : {0}" -f (Split-Path $dump -Leaf))

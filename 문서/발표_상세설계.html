@@ -111,13 +111,13 @@
 
   <table style="margin-top:2mm">
   <tr><th class="c" style="width:9%">마디</th><th style="width:16%">제목</th><th>내용</th><th class="c" style="width:12%">쪽</th></tr>
-  <tr><td class="c"><b>起</b></td><td><b>문제</b></td><td>길을 잃는 이유 · 기존 방법이 막히는 곳 · <b>아무도 안 다루는 넷째 문제</b> · 목표</td><td class="c">3 – 7</td></tr>
-  <tr><td class="c"><b>承</b></td><td><b>설계</b></td><td>전체 구조 · 설계 판단 넷 · <b>격차란 무엇인가</b> · <b>번호판 읽기(OCR)</b> · 데이터 · 화면</td><td class="c">8 – 16</td></tr>
-  <tr class="hi"><td class="c"><b>轉</b></td><td><b>뒤집힘</b></td><td><b>측정해 보니 우리가 틀렸다</b> — 기능을 없앤 이야기 · 제거 실험 · <b>문서 정정</b></td><td class="c">17 – 23</td></tr>
-  <tr><td class="c"><b>結</b></td><td><b>결과</b></td><td>최종 성능 · 실기기 검증 · 자동 검사</td><td class="c">24 – 27</td></tr>
-  <tr class="hi"><td class="c"><b>結</b></td><td><b>특허</b></td><td><b>선행기술 조사 6장</b> · <b>우리가 낼 기술 3장</b> · 공개 시한</td><td class="c">28 – 38</td></tr>
-  <tr><td class="c"><b>結</b></td><td><b>마무리</b></td><td>한계 · 남은 일 · 배운 것</td><td class="c">39</td></tr>
-  <tr class="hi"><td class="c"><b>附</b></td><td><b>부록</b></td><td><b>서비스로 내보낸다면</b> — 갖출 것 · 비용 · 인수인계 · 확장 · 사고 대비</td><td class="c">40 – 45</td></tr>
+  <tr><td class="c"><b>起</b></td><td><b>문제</b></td><td>길을 잃는 이유 · 기존 방법 셋이 막히는 곳 · <b>아무도 안 다루는 넷째 문제</b></td><td class="c">3 – 5</td></tr>
+  <tr><td class="c"><b>承</b></td><td><b>설계</b></td><td>전체 구조 · 설계 판단 넷(<b>격차란 무엇인가</b> · <b>번호판 읽기</b>) · 데이터와 화면</td><td class="c">6 – 11</td></tr>
+  <tr class="hi"><td class="c"><b>轉</b></td><td><b>뒤집힘</b></td><td><b>측정해 보니 우리가 틀렸다</b> — 기능을 없앤 이야기 · 문서 정정</td><td class="c">12 – 16</td></tr>
+  <tr><td class="c"><b>結</b></td><td><b>결과</b></td><td>최종 성능 · 실기기 검증과 자동 검사</td><td class="c">17 – 19</td></tr>
+  <tr class="hi"><td class="c"><b>結</b></td><td><b>특허</b></td><td><b>선행기술 조사 4장</b> · <b>우리가 낼 기술 2장</b> · 공개 시한</td><td class="c">20 – 27</td></tr>
+  <tr><td class="c"><b>結</b></td><td><b>마무리</b></td><td>한계 · 남은 일 · 배운 것</td><td class="c">28</td></tr>
+  <tr><td class="c"><b>附</b></td><td><b>부록</b></td><td><b>서비스로 내보낸다면</b> — 갖출 것 · 돈과 사람 · 확장과 사고 대비</td><td class="c">29 – 32</td></tr>
   </table>
 
   <div class="note" style="margin-top:6mm">
@@ -136,44 +136,30 @@
 
 <section class="slide">
   <div class="tag">起 · 문제</div>
-  <h1>3호관에서는 길을 잃습니다</h1>
+  <h1>3호관에서는 길을 잃고, 기존 방법은 다 걸립니다</h1>
   <div class="rule"></div>
-  <div class="sub">문이 넷, 층이 여섯. 복도가 서로 닮아서 지금 어디인지 알기 어렵습니다.</div>
+  <div class="sub">문이 넷, 층이 여섯, 복도는 서로 닮았습니다. 그런데 해결책도 하나같이 막힙니다.</div>
 
-  <div class="cols">
-    <div class="card"><div class="h">문이 넷</div>
-      <p>정문·후문·동문·서문. <b>어느 문으로 들어왔는지에 따라</b> 같은 강의실도 가는 길이 전혀 다릅니다.</p></div>
-    <div class="card"><div class="h">층이 여섯</div>
-      <p>지하 1층부터 5층까지. 계단과 복도가 층마다 닮아 있어 <b>몇 층인지조차 헷갈립니다.</b></p></div>
-    <div class="card"><div class="h">신호가 약함</div>
-      <p>건물 안쪽·계단·지하는 <b>통신이 잘 안 됩니다.</b> 정작 길을 잃는 곳이 인터넷이 안 되는 곳입니다.</p></div>
-  </div>
+  <table style="margin-top:2mm">
+  <tr><th style="width:22%">어려움</th><th style="width:36%">왜 어려운가</th><th>기존 방법은</th></tr>
+  <tr><td><b>문이 넷</b></td><td>어느 문으로 들어왔는지에 따라 같은 강의실도 가는 길이 다릅니다</td>
+      <td><b>① Wi-Fi·비콘</b> — 장비를 사서 달아야 하고 전파 지도도 계속 갱신해야 합니다
+      &nbsp;<span class="st no">돈과 관리</span></td></tr>
+  <tr><td><b>층이 여섯</b></td><td>지하 1층~5층. 계단·복도가 층마다 닮아 몇 층인지조차 헷갈립니다</td>
+      <td><b>② 사진을 서버로</b> — 인터넷이 있어야 합니다. 정작 길 잃는 곳이 안 되는 곳입니다
+      &nbsp;<span class="st no">필요한 곳에서 안 됨</span></td></tr>
+  <tr><td><b>신호가 약함</b></td><td>건물 안쪽·계단·지하는 통신이 잘 안 됩니다</td>
+      <td><b>③ QR만 붙이기</b> — 찍은 그 자리에서만 압니다
+      &nbsp;<span class="st no">길 잃은 걸 못 품</span></td></tr>
+  </table>
 
-  <div class="note warn" style="margin-top:8mm">
+  <div class="note warn" style="margin-top:6mm">
   <b>핵심 어려움</b> &mdash; 실내는 <b>닮은 장소가 반복</b>됩니다. 사람도 헷갈리는 곳을 기계가 맞히기는 더 어렵습니다.
-  이 사실을 인정하는 데서 저희 설계가 시작됐습니다.
+  <b>이 사실을 인정하는 데서</b> 저희 설계가 시작됐습니다.
   </div>
   <div class="foot"><span>起 · 문제</span><span class="pg"></span></div>
 </section>
 
-<section class="slide">
-  <div class="tag">起 · 문제</div>
-  <h1>기존 방법 셋, 모두 걸립니다</h1>
-  <div class="rule"></div>
-
-  <div class="cols" style="margin-top:2mm">
-    <div class="card bad"><div class="h">① Wi-Fi · 비콘</div>
-      <p><b>장비를 사서 달아야</b> 합니다. 건물마다 수십 개. 전파 지도도 주기적으로 다시 만들어야 합니다.<br><br>
-      <span class="st no">돈과 관리가 든다</span></p></div>
-    <div class="card bad"><div class="h">② 사진을 서버로 보내기</div>
-      <p>장비는 필요 없지만 <b>인터넷이 있어야</b> 합니다. 그런데 길을 잃는 곳이 바로 인터넷이 안 되는 곳입니다.<br><br>
-      <span class="st no">필요한 곳에서 안 된다</span></p></div>
-    <div class="card bad"><div class="h">③ QR만 여기저기 붙이기</div>
-      <p>QR을 찍은 <b>그 자리에서만</b> 위치를 압니다. 지나쳐 걷다 길을 잃으면 다시 QR을 찾아야 합니다.<br><br>
-      <span class="st no">길 잃은 걸 못 푼다</span></p></div>
-  </div>
-  <div class="foot"><span>起 · 문제</span><span class="pg"></span></div>
-</section>
 
 <section class="slide">
   <div class="tag">起 · 문제</div>
@@ -214,24 +200,6 @@
   <div class="foot"><span>起 · 문제</span><span class="pg"></span></div>
 </section>
 
-<section class="slide">
-  <div class="tag">起 · 문제</div>
-  <h1>그래서 목표를 넷으로 정했습니다</h1>
-  <div class="rule"></div>
-
-  <table style="margin-top:3mm">
-  <tr><th class="c" style="width:8%">번호</th><th style="width:28%">목표</th><th>뜻</th></tr>
-  <tr><td class="c"><b>1</b></td><td><b>장비를 달지 않는다</b></td><td>출입문에 QR 네 장 붙이고 사진만 찍어 두면 끝나게 한다.</td></tr>
-  <tr><td class="c"><b>2</b></td><td><b>안내는 인터넷 없이 된다</b></td><td>길안내·3D·사진 보기를 전부 <b>휴대폰 안에서</b> 끝낸다. (사진 <b>제보</b>는 서버가 필요하다)</td></tr>
-  <tr class="hi"><td class="c"><b>3</b></td><td><b>틀린 답을 단정하지 않는다</b></td><td>확신이 없으면 범위를 넓혀 답하거나 <b>「모른다」고 말한다.</b></td></tr>
-  <tr class="hi"><td class="c"><b>4</b></td><td><b>확신을 제대로 잰다</b></td><td>3번을 하려면 「얼마나 확신하는지」를 <b>올바르게 재는 자</b>가 필요하다.</td></tr>
-  </table>
-
-  <div class="note" style="margin-top:7mm">
-  3번과 4번이 이 작품의 성격을 정했습니다. <b>「더 잘 맞히기」가 아니라 「틀릴 때를 알아채기」</b>가 목표입니다.
-  </div>
-  <div class="foot"><span>起 · 문제</span><span class="pg"></span></div>
-</section>
 
 <!-- 承 -->
 <section class="slide part">
@@ -305,124 +273,61 @@
 </section>
 
 <section class="slide">
-  <div class="tag">承 · 설계 판단 ①</div>
-  <h1>시작점은 「출입문」으로 잡았습니다</h1>
+  <div class="tag">承 · 설계 판단 ① ②</div>
+  <h1>출입문에서 시작하고, 안내는 폰 안에서 끝냅니다</h1>
   <div class="rule"></div>
 
   <div class="cols" style="margin-top:2mm">
-    <div class="card"><div class="h">왜 출입문인가</div>
-      <p><b>모든 사람이 반드시 지나갑니다.</b> 복도 중간에 붙이면 지나치는 사람이 있지만, 문은 100% 지나갑니다.</p></div>
-    <div class="card"><div class="h">무엇이 확정되나</div>
-      <p><b>건물 · 층 · 어느 문으로 들어왔는지</b>가 한 번에 정해집니다. 사진으로 찾을 때 후보가 <b>그 층으로 줄어듭니다.</b></p></div>
-    <div class="card good"><div class="h">쉽게 만든 점</div>
-      <p>앱을 안 깔아도 됩니다. <b>기본 카메라로 찍으면</b> 바로 앱이 열립니다. 주소가 담긴 QR이라서요.</p></div>
+    <div class="card"><div class="h">① 시작점은 출입문</div>
+      <p><b>모든 사람이 반드시 지나갑니다.</b> 복도 중간에 붙이면 지나치는 사람이 있지만 문은 100%입니다.<br><br>
+      <b>건물 · 층 · 들어온 문</b>이 한 번에 정해지고, 후보가 <b>152곳 → 그 층의 30곳 안팎</b>으로 줄어듭니다.<br><br>
+      앱을 안 깔아도 <b>기본 카메라로 찍으면</b> 바로 열립니다. 주소가 담긴 QR이라서요.</p></div>
+    <div class="card good"><div class="h">② 안내는 폰 안에서</div>
+      <p>앱 · 안내사진 · 안내문안 <b>230개 파일 15.6MB</b>를 최초 1회에 저장합니다.<br><br>
+      · 건물 안쪽 · 계단 · 지하에서도 <b>인터넷 없이</b> 동작<br>
+      · <b>서버 비용 0원</b> — 사용자가 몇 명이든 같습니다<br>
+      · 졸업 뒤에도 <b>혼자 살아남습니다</b><br><br>
+      <span style="color:var(--muted)">사진 한 장이 3~5MB이니 사진 네 장을 한 번 받는 셈입니다.</span></p></div>
   </div>
 
-  <table style="margin-top:7mm">
-  <tr><th style="width:28%">후보를 줄이면</th><th>얻는 것</th></tr>
-  <tr><td>152곳 → <b>그 층의 30곳 안팎</b></td><td>맞힐 확률이 올라가고, 계산이 줄어 휴대폰에서도 빠릅니다.</td></tr>
-  <tr><td>3시간 동안 기억</td><td>수업 한 번 듣는 동안은 다시 찍지 않아도 됩니다.</td></tr>
-  </table>
-  <div class="foot"><span>承 · 설계</span><span class="pg"></span></div>
-</section>
-
-<section class="slide">
-  <div class="tag">承 · 설계 판단 ②</div>
-  <h1>전부 휴대폰 안에서 끝냅니다</h1>
-  <div class="rule"></div>
-  <div class="sub">서버에 사진을 보내지 않습니다. 보낼 수도 없고, 보내서도 안 되기 때문입니다.</div>
-
-  <div class="cols">
-    <div style="flex:1.15">
-      <table>
-      <tr><th style="width:56%">한 번만 받는 것</th><th class="n">크기</th></tr>
-      <tr><td>앱 화면 · 3D · 안내 문구</td><td class="n">—</td></tr>
-      <tr><td>안내용 사진 174장</td><td class="n">—</td></tr>
-      <tr><td>비교용 자료 5,752개</td><td class="n">—</td></tr>
-      <tr class="hi"><td><b>합계 (파일 230개)</b></td><td class="n"><b>15.6 MB</b></td></tr>
-      </table>
-      <div class="note" style="margin-top:4mm">사진 한 장이 보통 3~5MB 이니, <b>사진 네 장 정도</b>를 한 번 받는 셈입니다.</div>
-    </div>
-    <div style="flex:1">
-      <div class="card good" style="margin-bottom:4mm"><div class="h">인터넷이 끊겨도 됩니다</div>
-        <p>건물 안쪽·계단·지하에서도 똑같이 동작합니다.</p></div>
-      <div class="card" style="margin-bottom:4mm"><div class="h">제보 사진만 서버로 갑니다</div>
-        <p>길안내·3D·사진 보기는 전부 폰 안에서 끝납니다. <b>건의함에 올린 사진만</b> 서버로 가고,
-        그건 <b>관리자가 확인해 앱에 반영하기 위해</b> 꼭 필요합니다.</p></div>
-      <div class="card good"><div class="h">서버 비용이 0원입니다</div>
-        <p>학생 작품이 <b>졸업 뒤에도 살아 있으려면</b> 중요한 조건이었습니다.</p></div>
-    </div>
+  <div class="note" style="margin-top:7mm">
+  <b>다만 사진 제보와 장소 판정은 서버를 씁니다</b> &mdash; 제보 사진을 관리자가 확인하고
+  다른 이용자에게 배포해야 하므로, 그 부분은 통신이 필요합니다.
   </div>
   <div class="foot"><span>承 · 설계</span><span class="pg"></span></div>
 </section>
+
 
 <section class="slide">
   <div class="tag">承 · 설계 판단 ③ — 이 작품의 핵심</div>
-  <h1>「확신」을 어떻게 잴 것인가</h1>
+  <h1>「확신」을 1등 점수가 아니라 1·2등 차이로 잽니다</h1>
   <div class="rule"></div>
+  <div class="sub">사진을 찍으면 152곳과 대조해 <b>점수순으로 줄을 세웁니다.</b> 두 경우를 보십시오.</div>
 
   <div class="cols" style="margin-top:1mm">
-    <div class="card bad"><div class="h">보통 하는 방법 — 「가장 닮은 정도」</div>
-      <p>1등 사진이 얼마나 닮았는지를 확신으로 삼습니다.<br><br>
-      <b>문제 :</b> 실내는 닮은 곳이 많아 <b>여러 곳이 동시에 많이 닮습니다.</b>
-      「많이 닮았다」는 「여기가 맞다」를 뜻하지 못합니다.</p></div>
-    <div class="card hi"><div class="h">우리 방법 — 「1등과 2등의 차이」</div>
-      <p>1등과 2등이 <b>얼마나 벌어졌는지</b>를 확신으로 삼습니다.<br><br>
-      <b>뜻 :</b> 차이가 크다 = <b>헷갈리지 않았다.</b><br>
-      차이가 작다 = 비슷한 데가 또 있다 = <b>믿으면 안 된다.</b></p></div>
-  </div>
-
-  <svg viewBox="0 0 1000 150" width="100%" style="margin-top:7mm; max-height:38mm">
-    <line x1="60" y1="70" x2="940" y2="70" stroke="#1F1D1A" stroke-width="1.8"/>
-    <polygon points="940,70 928,64 928,76" fill="#1F1D1A"/>
-    <line x1="360" y1="48" x2="360" y2="92" stroke="#1F1D1A" stroke-width="1.8"/>
-    <line x1="620" y1="48" x2="620" y2="92" stroke="#1F1D1A" stroke-width="1.8"/>
-    <text x="500" y="28" font-size="16" font-weight="700" text-anchor="middle" fill="#1F1D1A">1등과 2등의 차이 (격차)</text>
-    <text x="75" y="62" font-size="12.5" fill="#8A837A">작다</text>
-    <text x="925" y="62" font-size="12.5" text-anchor="end" fill="#8A837A">크다</text>
-    <rect x="60" y="100" width="300" height="42" rx="4" fill="#FAF1EE" stroke="#D8B2A8" stroke-width="1.4"/>
-    <text x="210" y="127" font-size="14" font-weight="700" text-anchor="middle" fill="#8C2F1E">모르겠습니다</text>
-    <rect x="360" y="100" width="260" height="42" rx="4" fill="#FAF5E8" stroke="#DCC99A" stroke-width="1.4"/>
-    <text x="490" y="127" font-size="14" font-weight="700" text-anchor="middle" fill="#8A6200">층만 알려줌</text>
-    <rect x="620" y="100" width="320" height="42" rx="4" fill="#EEF4F0" stroke="#BCD3C5" stroke-width="1.8"/>
-    <text x="780" y="127" font-size="14" font-weight="700" text-anchor="middle" fill="#2D6A4F">자리까지 알려줌</text>
-  </svg>
-  <div class="foot"><span>承 · 설계</span><span class="pg"></span></div>
-</section>
-
-<section class="slide">
-  <div class="tag">承 · 설계 판단 ③ — 예로 보면</div>
-  <h1>「1등과 2등의 차이」가 무슨 뜻인가</h1>
-  <div class="rule"></div>
-  <div class="sub">사진을 찍으면 152곳과 하나하나 비교해 <b>점수순으로 줄을 세웁니다.</b> 두 경우를 보십시오.</div>
-
-  <div class="cols" style="margin-top:2mm">
     <div class="card good"><div class="h">「가」 — 믿어도 되는 경우</div>
-      <p style="font-variant-numeric:tabular-nums; line-height:2">
-      1등 &nbsp;4층 복도 우측 &nbsp;<b>0.71</b><br>
-      2등 &nbsp;3층 복도 우측 &nbsp;0.45<br>
-      3등 &nbsp;5층 복도 우측 &nbsp;0.41<br>
-      <b style="color:#2D6A4F">격차 = 0.71 − 0.45 = 0.26 (크다)</b></p></div>
+      <p style="font-variant-numeric:tabular-nums; line-height:1.9">
+      1등 4층 복도 우측 <b>0.71</b><br>2등 3층 복도 우측 0.45<br>3등 5층 복도 우측 0.41<br>
+      <b style="color:#2D6A4F">격차 = 0.26 (크다) → 「4층 복도 우측」</b></p></div>
     <div class="card bad"><div class="h">「나」 — 믿으면 안 되는 경우</div>
-      <p style="font-variant-numeric:tabular-nums; line-height:2">
-      1등 &nbsp;4층 복도 우측 &nbsp;<b>0.82</b><br>
-      2등 &nbsp;3층 복도 우측 &nbsp;0.80<br>
-      3등 &nbsp;5층 복도 우측 &nbsp;0.79<br>
-      <b style="color:#8C2F1E">격차 = 0.82 − 0.80 = 0.02 (작다)</b></p></div>
+      <p style="font-variant-numeric:tabular-nums; line-height:1.9">
+      1등 4층 복도 우측 <b>0.82</b><br>2등 3층 복도 우측 0.80<br>3등 5층 복도 우측 0.79<br>
+      <b style="color:#8C2F1E">격차 = 0.02 (작다) → 「모르겠습니다」</b></p></div>
   </div>
 
-  <div class="note warn" style="margin-top:6mm">
+  <div class="note warn" style="margin-top:5mm">
   <b class="hl">「나」의 1등 점수(0.82)가 「가」(0.71)보다 높습니다.</b>
-  <b>점수로 판단하면</b> 「나」를 더 믿게 되는데 &mdash; 3·4·5층 복도가 다 똑같이 닮아서
-  1등이 진짜일 확률은 <b>1/3쯤</b>입니다. <b>격차로 판단하면</b> 「나」는 「모르겠다」고 답합니다.
+  <b>점수로 판단하면</b> 「나」를 더 믿게 되는데, 3·4·5층 복도가 다 닮아서 1등이 진짜일 확률은 <b>1/3쯤</b>입니다.
+  「많이 닮았다」는 <b>「여기가 맞다」를 뜻하지 못합니다.</b>
   </div>
 
   <div class="note good" style="margin-top:4mm">
   <b>쌍둥이로 비유하면</b> &mdash; 「김씨와 80% 닮았다」는 <b>쌍둥이 형이 있으면 소용없습니다.</b>
-  「김씨와 70% 닮았고 나머지는 전부 40%대」가 확실합니다. <b>복도 사진은 층마다 쌍둥이입니다.</b>
+  「김씨와 70%, 나머지는 전부 40%대」가 확실합니다. <b>복도 사진은 층마다 쌍둥이입니다.</b>
   </div>
   <div class="foot"><span>承 · 설계</span><span class="pg"></span></div>
 </section>
+
 
 <section class="slide">
   <div class="tag">承 · 설계 판단 ④</div>
@@ -474,46 +379,32 @@
 
 <section class="slide">
   <div class="tag">承 · 설계</div>
-  <h1>무엇을 모아 두었나</h1>
+  <h1>무엇을 모았고, 어떻게 보여 주나</h1>
   <div class="rule"></div>
 
-  <div class="cols" style="margin-top:2mm">
-    <div class="center"><div class="big-num">152<small>곳</small></div><div class="lbl">앱이 아는 장소</div></div>
-    <div class="center"><div class="big-num">5,752<small>개</small></div><div class="lbl">비교용 자료<br>(장소마다 여러 방향)</div></div>
-    <div class="center"><div class="big-num">174<small>장</small></div><div class="lbl">안내에 쓰는 사진</div></div>
+  <div class="cols" style="margin-top:1mm">
+    <div class="center"><div class="big-num">152<small>곳</small></div><div class="lbl">아는 장소</div></div>
+    <div class="center"><div class="big-num">5,752<small>개</small></div><div class="lbl">비교용 자료</div></div>
+    <div class="center"><div class="big-num">174<small>장</small></div><div class="lbl">안내 사진</div></div>
     <div class="center"><div class="big-num">4<small>곳</small></div><div class="lbl">출입문 QR</div></div>
   </div>
 
-  <table style="margin-top:9mm">
-  <tr><th style="width:24%">무엇</th><th>어떻게 만들었나</th></tr>
-  <tr><td><b>비교용 자료</b></td><td>각 장소를 <b>여러 방향에서</b> 찍고, 사진 한 장을 숫자 1,280개로 바꿔 저장했습니다.</td></tr>
-  <tr><td><b>길 설명</b></td><td>문 4개 × 층 6개 조합마다 <b>사람이 말로 하듯</b> 단계를 적었습니다. (「엘리베이터 정면에서 좌측으로」)</td></tr>
-  <tr><td><b>방 이름</b></td><td>사진 파일 이름에서 자동으로 뽑습니다. 사진을 바꾸면 이름도 따라옵니다.</td></tr>
-  </table>
-  <div class="foot"><span>承 · 설계</span><span class="pg"></span></div>
-</section>
-
-<section class="slide">
-  <div class="tag">承 · 설계</div>
-  <h1>화면은 세 가지로 보여 줍니다</h1>
-  <div class="rule"></div>
-
-  <div class="cols" style="margin-top:3mm">
+  <div class="cols" style="margin-top:8mm">
     <div class="card"><div class="h">① 글로 된 단계 안내</div>
-      <p>「① 동문으로 들어오세요 → ② 복도를 따라 직진 → ③ 오른쪽 세 번째 문」<br><br>
-      문과 층에 따라 <b>문장이 통째로 달라집니다.</b> 네 문 × 여섯 층을 전부 따로 적었습니다.</p></div>
+      <p>「① 동문으로 들어오세요 → ② 복도 직진 → ③ 오른쪽 세 번째 문」<br><br>
+      문과 층에 따라 <b>문장이 통째로 달라집니다.</b> 네 문 × 여섯 층을 전부 <b>사람이 직접</b> 썼습니다.</p></div>
     <div class="card"><div class="h">② 3D 조감도</div>
       <p>건물을 위에서 내려다보며 <b>어느 층 어디인지</b>를 한눈에 봅니다.</p></div>
     <div class="card"><div class="h">③ 직접 걸어보기</div>
       <p>1인칭으로 복도를 <b>실제로 걸어 보는</b> 화면입니다. 가기 전에 미리 익힐 수 있습니다.</p></div>
   </div>
 
-  <div class="note" style="margin-top:8mm">
+  <div class="note" style="margin-top:6mm">
   <b>설계 원칙</b> &mdash; 화면을 늘리기보다 <b>「휴대폰을 잘 못 쓰는 분도 되게」</b>를 기준으로 삼았습니다.
-  앱 설치 안내도 삼성·아이폰을 갈라 각각 세 단계로만 적었습니다.
   </div>
   <div class="foot"><span>承 · 설계</span><span class="pg"></span></div>
 </section>
+
 
 <!-- 轉 -->
 <section class="slide part">
@@ -524,56 +415,42 @@
 
 <section class="slide">
   <div class="tag">轉 · 뒤집힘</div>
-  <h1>처음엔 「정답률 100%」였습니다</h1>
-  <div class="rule"></div>
-  <div class="sub">앱이 알아서 위치를 확정해 주는 기능을 만들었고, 시험해 보니 100% 맞았습니다.</div>
-
-  <div class="center" style="margin-top:12mm">
-    <div class="big-num" style="font-size:80pt; color:var(--ok)">100%</div>
-    <div class="lbl" style="font-size:13pt; margin-top:4mm">자동 확정 정답률 (초기 측정)</div>
-  </div>
-
-  <div class="note" style="margin-top:13mm">
-  이때는 <b>정말 잘 만들었다고 생각했습니다.</b> 발표에도 이 숫자를 쓸 생각이었습니다.
-  </div>
-  <div class="foot"><span>轉 · 뒤집힘</span><span class="pg"></span></div>
-</section>
-
-<section class="slide">
-  <div class="tag">轉 · 뒤집힘</div>
-  <h1>그런데 측정 방법이 틀렸습니다</h1>
+  <h1>정답률 100%였는데, 측정이 틀렸습니다</h1>
   <div class="rule"></div>
   <div class="sub">시험에 쓴 사진이 <b>비교용 자료 안에 그대로 들어 있었습니다.</b></div>
 
-  <svg viewBox="0 0 1000 200" width="100%" style="max-height:54mm">
-    <rect x="40" y="26" width="400" height="148" rx="6" fill="#FAF1EE" stroke="#D8B2A8" stroke-width="1.6"/>
-    <text x="240" y="58" font-size="15" font-weight="700" text-anchor="middle" fill="#8C2F1E">잘못된 측정</text>
-    <rect x="70" y="78" width="150" height="34" rx="4" fill="#fff" stroke="#DAD4C9"/>
-    <text x="145" y="100" font-size="12" text-anchor="middle" fill="#55504A">시험 사진 A</text>
-    <rect x="260" y="78" width="150" height="34" rx="4" fill="#fff" stroke="#DAD4C9"/>
-    <text x="335" y="100" font-size="12" text-anchor="middle" fill="#55504A">자료 안의 A</text>
-    <path d="M220 95 L 260 95" stroke="#8C2F1E" stroke-width="2"/>
-    <text x="240" y="145" font-size="13" text-anchor="middle" fill="#8C2F1E">같은 사진끼리 비교 → 당연히 100%</text>
+  <svg viewBox="0 0 1000 190" width="100%" style="max-height:50mm">
+    <rect x="40" y="20" width="400" height="148" rx="6" fill="#FAF1EE" stroke="#D8B2A8" stroke-width="1.6"/>
+    <text x="240" y="52" font-size="15" font-weight="700" text-anchor="middle" fill="#8C2F1E">잘못된 측정</text>
+    <rect x="70" y="72" width="150" height="34" rx="4" fill="#fff" stroke="#DAD4C9"/>
+    <text x="145" y="94" font-size="12" text-anchor="middle" fill="#55504A">시험 사진 A</text>
+    <rect x="260" y="72" width="150" height="34" rx="4" fill="#fff" stroke="#DAD4C9"/>
+    <text x="335" y="94" font-size="12" text-anchor="middle" fill="#55504A">자료 안의 A</text>
+    <path d="M220 89 L 260 89" stroke="#8C2F1E" stroke-width="2"/>
+    <text x="240" y="139" font-size="13" text-anchor="middle" fill="#8C2F1E">같은 사진끼리 비교 → 당연히 100%</text>
 
-    <rect x="560" y="26" width="400" height="148" rx="6" fill="#EEF4F0" stroke="#BCD3C5" stroke-width="1.6"/>
-    <text x="760" y="58" font-size="15" font-weight="700" text-anchor="middle" fill="#2D6A4F">바른 측정</text>
-    <rect x="590" y="78" width="150" height="34" rx="4" fill="#fff" stroke="#DAD4C9"/>
-    <text x="665" y="100" font-size="12" text-anchor="middle" fill="#55504A">시험 사진 A</text>
-    <rect x="780" y="78" width="150" height="34" rx="4" fill="#fff" stroke="#DAD4C9" stroke-dasharray="4 3"/>
-    <text x="855" y="100" font-size="12" text-anchor="middle" fill="#8A837A">A 를 빼고</text>
-    <path d="M740 95 L 780 95" stroke="#2D6A4F" stroke-width="2"/>
-    <text x="760" y="145" font-size="13" text-anchor="middle" fill="#2D6A4F">자기 사진을 빼고 다시 측정</text>
+    <rect x="560" y="20" width="400" height="148" rx="6" fill="#EEF4F0" stroke="#BCD3C5" stroke-width="1.6"/>
+    <text x="760" y="52" font-size="15" font-weight="700" text-anchor="middle" fill="#2D6A4F">바른 측정</text>
+    <rect x="590" y="72" width="150" height="34" rx="4" fill="#fff" stroke="#DAD4C9"/>
+    <text x="665" y="94" font-size="12" text-anchor="middle" fill="#55504A">시험 사진 A</text>
+    <rect x="780" y="72" width="150" height="34" rx="4" fill="#fff" stroke="#DAD4C9" stroke-dasharray="4 3"/>
+    <text x="855" y="94" font-size="12" text-anchor="middle" fill="#8A837A">A 를 빼고</text>
+    <path d="M740 89 L 780 89" stroke="#2D6A4F" stroke-width="2"/>
+    <text x="760" y="139" font-size="13" text-anchor="middle" fill="#2D6A4F">자기 사진을 빼고 다시 측정</text>
   </svg>
 
-  <div class="cols" style="margin-top:6mm">
-    <div class="center"><div class="big-num" style="color:var(--red)">100% → 0%</div><div class="lbl">다시 재니 자동 확정 정답률</div></div>
-    <div class="note warn" style="flex:1.4">
+  <div class="cols" style="margin-top:5mm">
+    <div class="center"><div class="big-num" style="color:var(--red)">100% → 0%</div>
+      <div class="lbl">다시 재니 자동 확정 정답률</div></div>
+    <div class="note warn" style="flex:1.5">
     100%는 <b>「사진이 자기 자신과 같다」</b>를 확인한 것에 불과했습니다.
-    새로 찍은 사진으로 다시 재니 <b>한 번도 못 맞혔습니다.</b>
+    새로 찍은 사진으로 다시 재니 <b>한 번도 못 맞혔습니다.</b><br>
+    <span style="color:var(--muted)">이때까지는 이 숫자를 발표에 쓸 생각이었습니다.</span>
     </div>
   </div>
   <div class="foot"><span>轉 · 뒤집힘</span><span class="pg"></span></div>
 </section>
+
 
 <section class="slide">
   <div class="tag">轉 · 뒤집힘</div>
@@ -647,29 +524,6 @@
   <div class="foot"><span>轉 · 뒤집힘</span><span class="pg"></span></div>
 </section>
 
-<section class="slide">
-  <div class="tag">轉 · 뒤집힘</div>
-  <h1>무엇이 실제로 기여했는지도 쟀습니다</h1>
-  <div class="rule"></div>
-  <div class="sub">부품을 하나씩 빼 보면서 <b>정말로 필요한 것</b>만 남겼습니다. (같은 사진 1,844장)</div>
-
-  <table style="margin-top:2mm">
-  <tr><th style="width:40%">조건</th><th class="n" style="width:16%">자리 정확도</th><th>현재 방식과 비교</th></tr>
-  <tr class="hi"><td><b>현재 방식</b></td><td class="n"><b>55.6%</b></td><td>—</td></tr>
-  <tr><td>신경망 대신 작게 줄인 그림 비교</td><td class="n">20.4%</td><td>−35.2%p <span class="st ok">의미 있음</span></td></tr>
-  <tr><td>신경망 대신 색 분포 비교</td><td class="n">10.7%</td><td>−44.9%p <span class="st ok">의미 있음</span></td></tr>
-  <tr><td>늘 가장 흔한 답을 내는 경우</td><td class="n">10.7%</td><td>−44.9%p <span class="st ok">의미 있음</span></td></tr>
-  <tr><td>아무렇게나 찍는 경우 (152곳 중)</td><td class="n">0.7%</td><td>−54.9%p</td></tr>
-  <tr><td>장소당 기준 사진 1개만</td><td class="n">54.1%</td><td>−1.5%p <span class="st ok">의미 있음</span></td></tr>
-  <tr><td>장소당 기준 사진 5개로 늘림</td><td class="n">56.8%</td><td>+1.1%p <span class="st w">의미 없음 → 2개로 고정</span></td></tr>
-  </table>
-
-  <div class="note" style="margin-top:5mm">
-  <b>정직하게 말씀드리면</b> 이 표가 보여 주는 건 <b>예상 가능한</b> 사실입니다.
-  다만 <b>기준 사진을 5개로 늘려도 나아지지 않는다</b>는 걸 확인하고 2개로 고정한 것은, 감이 아니라 측정으로 정한 결정입니다.
-  </div>
-  <div class="foot"><span>轉 · 뒤집힘</span><span class="pg"></span></div>
-</section>
 
 <section class="slide">
   <div class="tag">轉 · 뒤집힘</div>
@@ -735,51 +589,33 @@
 
 <section class="slide">
   <div class="tag">結 · 결과</div>
-  <h1>실제 휴대폰에서 확인했습니다</h1>
+  <h1>실기기에서 잡고, 고칠 때마다 자동 검사합니다</h1>
   <div class="rule"></div>
 
-  <table style="margin-top:2mm">
-  <tr><th style="width:16%">기기</th><th style="width:26%">나온 문제</th><th style="width:30%">원인</th><th>결과</th></tr>
+  <table style="margin-top:1mm">
+  <tr><th style="width:15%">기기</th><th style="width:25%">나온 문제</th><th style="width:28%">원인</th><th>결과</th></tr>
   <tr><td><b>갤럭시 S20</b></td><td>직접 걸어보기에서 <b>벽이 전부 노란색</b></td>
       <td>특정 GPU에서 그림자 계산이 실패 → 마지막 화면이 얼어붙음</td>
-      <td><span class="st ok">해결</span> 재질을 단순한 방식으로 바꿈</td></tr>
+      <td><span class="st ok">해결</span> 재질을 단순한 방식으로</td></tr>
   <tr><td><b>갤럭시 S20</b></td><td>걸을 때 <b>끊김</b></td>
       <td>안 보이는 것까지 전부 그림 (879번/프레임)</td>
-      <td><span class="st ok">해결</span> 13.4ms → 8.4ms, 632번</td></tr>
-  <tr><td><b>아이폰</b></td><td>—</td><td>—</td><td><span class="st ok">이상 없음</span> 실기기 확인 완료</td></tr>
+      <td><span class="st ok">해결</span> 13.4ms → 8.4ms</td></tr>
+  <tr><td><b>아이폰</b></td><td>—</td><td>—</td><td><span class="st ok">이상 없음</span> 실기기 확인</td></tr>
   </table>
 
-  <div class="cols" style="margin-top:7mm">
+  <div class="cols" style="margin-top:6mm">
     <div class="card"><div class="h">어떻게 잡았나</div>
       <p>말로는 안 갈렸습니다. <b>화면 사진의 픽셀 색을 숫자로 재서</b> 원인을 좁혔습니다.
       지금은 앱이 스스로 재서 기록에 남깁니다.</p></div>
-    <div class="card"><div class="h">사용자가 보내는 기록</div>
-      <p>설정 → 문제 기록을 누르면 <b>기기·화면·오류가 한 번에 복사</b>됩니다.
-      화면에는 「이상 없음」만 보여 어렵지 않게 했습니다.</p></div>
-  </div>
-  <div class="foot"><span>結 · 결과</span><span class="pg"></span></div>
-</section>
-
-<section class="slide">
-  <div class="tag">結 · 결과</div>
-  <h1>고칠 때마다 자동으로 검사합니다</h1>
-  <div class="rule"></div>
-
-  <div class="cols" style="margin-top:3mm">
-    <div class="card"><div class="h">파일 검사 15가지</div>
-      <p>사진이 빠졌는지, 읽는 순서가 맞는지, 첫 화면이 너무 무겁지 않은지 등을 자동으로 봅니다.</p></div>
-    <div class="card"><div class="h">브라우저 검사</div>
-      <p>실제로 앱을 열어 길안내·설치·QR이 되는지 확인합니다.</p></div>
+    <div class="card"><div class="h">검사 18가지</div>
+      <p>파일 검사 15가지 + 브라우저 검사 3가지. <b>올릴 때마다 통과해야만</b> 배포됩니다.</p></div>
     <div class="card hi"><div class="h">안전망 (화면 비교)</div>
-      <p>고치기 전 화면과 <b>한 글자씩 비교</b>해, 엉뚱한 곳이 바뀌면 바로 알려 줍니다.</p></div>
-  </div>
-
-  <div class="note" style="margin-top:8mm">
-  <b>실제로 여러 번 살았습니다.</b> 「후문 → 크리에이티브 존」 안내가 조용히 망가진 적이 있는데,
-  안전망이 잡아 냈습니다. <b>올릴 때마다 검사가 통과해야만</b> 배포됩니다.
+      <p>고치기 전 화면과 <b>한 글자씩 비교</b>합니다. 「후문 → 크리에이티브 존」 안내가
+      조용히 망가진 적이 있는데 이게 잡아 냈습니다.</p></div>
   </div>
   <div class="foot"><span>結 · 결과</span><span class="pg"></span></div>
 </section>
+
 
 <!-- 結 · 특허 -->
 <section class="slide part">
@@ -789,73 +625,43 @@
 </section>
 
 <section class="slide">
-  <div class="tag">結 · 특허</div>
-  <h1>특허는 두 가지를 따집니다</h1>
+  <div class="tag">結 · 특허 — 선행기술 조사 ①</div>
+  <h1>특허는 두 문을 지나야 하고, 우리는 먼저 찾아봤습니다</h1>
   <div class="rule"></div>
-  <div class="sub">이 두 문을 다 지나야 등록됩니다. 그래서 <b>남의 것을 먼저 찾아봤습니다.</b></div>
 
-  <svg viewBox="0 0 1040 200" width="100%" style="max-height:50mm; margin-top:2mm">
+  <svg viewBox="0 0 1040 150" width="100%" style="max-height:38mm; margin-top:1mm">
     <defs><marker id="a3" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
       <polygon points="0 0, 9 3.5, 0 7" fill="#55504A"/></marker></defs>
-    <rect x="20" y="66" width="170" height="68" rx="5" fill="#F3EFE8" stroke="#DAD4C9" stroke-width="1.4"/>
-    <text x="105" y="96" font-size="14" font-weight="700" text-anchor="middle" fill="#1F1D1A">우리 발명</text>
-    <text x="105" y="118" font-size="12" text-anchor="middle" fill="#55504A">출원</text>
-
-    <rect x="255" y="40" width="250" height="120" rx="5" fill="#fff" stroke="#2C5F6B" stroke-width="2"/>
-    <text x="380" y="74" font-size="15" font-weight="700" text-anchor="middle" fill="#2C5F6B">첫째 문 — 신규성</text>
-    <text x="380" y="102" font-size="12.5" text-anchor="middle" fill="#55504A">똑같은 게 이미 있나?</text>
-    <text x="380" y="130" font-size="12.5" text-anchor="middle" fill="#8C2F1E">있으면 그 자리에서 탈락</text>
-
-    <rect x="570" y="40" width="250" height="120" rx="5" fill="#fff" stroke="#8C2F1E" stroke-width="2"/>
-    <text x="695" y="74" font-size="15" font-weight="700" text-anchor="middle" fill="#8C2F1E">둘째 문 — 진보성</text>
-    <text x="695" y="102" font-size="12.5" text-anchor="middle" fill="#55504A">있는 것들을 그냥 붙인 건 아닌가?</text>
-    <text x="695" y="130" font-size="12.5" text-anchor="middle" fill="#8C2F1E">여기가 진짜 관문</text>
-
-    <rect x="880" y="66" width="140" height="68" rx="5" fill="#EEF4F0" stroke="#BCD3C5" stroke-width="1.6"/>
-    <text x="950" y="105" font-size="14" font-weight="700" text-anchor="middle" fill="#2D6A4F">등록</text>
-
+    <rect x="20" y="42" width="160" height="62" rx="5" fill="#F3EFE8" stroke="#DAD4C9" stroke-width="1.4"/>
+    <text x="100" y="80" font-size="14" font-weight="700" text-anchor="middle" fill="#1F1D1A">우리 발명</text>
+    <rect x="245" y="24" width="250" height="98" rx="5" fill="#fff" stroke="#2C5F6B" stroke-width="2"/>
+    <text x="370" y="56" font-size="15" font-weight="700" text-anchor="middle" fill="#2C5F6B">첫째 문 — 신규성</text>
+    <text x="370" y="82" font-size="12.5" text-anchor="middle" fill="#55504A">똑같은 게 이미 있나?</text>
+    <text x="370" y="104" font-size="12.5" text-anchor="middle" fill="#8C2F1E">있으면 그 자리에서 탈락</text>
+    <rect x="560" y="24" width="250" height="98" rx="5" fill="#fff" stroke="#8C2F1E" stroke-width="2"/>
+    <text x="685" y="56" font-size="15" font-weight="700" text-anchor="middle" fill="#8C2F1E">둘째 문 — 진보성</text>
+    <text x="685" y="82" font-size="12.5" text-anchor="middle" fill="#55504A">있는 것들을 그냥 붙인 건 아닌가?</text>
+    <text x="685" y="104" font-size="12.5" text-anchor="middle" fill="#8C2F1E">여기가 진짜 관문</text>
+    <rect x="875" y="42" width="145" height="62" rx="5" fill="#EEF4F0" stroke="#BCD3C5" stroke-width="1.6"/>
+    <text x="947" y="80" font-size="14" font-weight="700" text-anchor="middle" fill="#2D6A4F">등록</text>
     <g stroke="#55504A" stroke-width="1.6" fill="none" marker-end="url(#a3)">
-      <path d="M190 100 L 251 100"/><path d="M505 100 L 566 100"/><path d="M820 100 L 876 100"/>
+      <path d="M180 73 L 241 73"/><path d="M495 73 L 556 73"/><path d="M810 73 L 871 73"/>
     </g>
   </svg>
 
-  <div class="note warn" style="margin-top:6mm">
-  <b>미리 말씀드립니다</b> &mdash; 저희 조사 결과는 <b>낙관적이지 않습니다.</b>
-  첫째 문에서 걸리는 것이 많았고, 둘째 문도 쉽지 않습니다. <b>그 사실을 그대로 보고드리겠습니다.</b>
+  <table style="margin-top:4mm">
+  <tr><th style="width:18%">조사 항목</th><th>내용</th></tr>
+  <tr><td>본 곳</td><td>Google Patents (미국·한국·국제 공보) · 공개 논문(arXiv·MDPI·PMC) · 국문/영문 검색 <b>8회</b></td></tr>
+  <tr class="hi"><td><b>못 한 것</b></td><td><b>KIPRIS 국내 공보 전문 검색</b> · 분류(IPC/CPC) 망라 검색 · 아직 공개 안 된 출원</td></tr>
+  </table>
+
+  <div class="note warn" style="margin-top:4mm">
+  <b>미리 말씀드립니다</b> &mdash; 조사 결과는 <b>낙관적이지 않습니다.</b> 첫째 문에서 걸리는 것이 많았습니다.
+  <b>한계도 조사서 4.1항에 그대로 적었습니다</b> — 부풀린 조사서는 변리사 상담 시간을 깎는 데만 씁니다.
   </div>
   <div class="foot"><span>結 · 특허</span><span class="pg"></span></div>
 </section>
 
-<section class="slide">
-  <div class="tag">結 · 특허 — 선행기술 조사 ①</div>
-  <h1>어떻게 찾았고, 무엇을 못 했나</h1>
-  <div class="rule"></div>
-
-  <div class="cols" style="margin-top:2mm">
-    <div style="flex:1.25">
-      <table>
-      <tr><th style="width:24%">항목</th><th>내용</th></tr>
-      <tr><td>수행일</td><td>2026. 9. 29.</td></tr>
-      <tr><td>본 곳</td><td>Google Patents (미국·한국·국제 공보) · 공개 논문 (arXiv · MDPI · PMC) · 특허청 제도 안내</td></tr>
-      <tr><td>검색어</td><td>실내 측위 / 실내 길안내 / QR 초기위치 / image retrieval indoor localization /
-          top-1 top-2 confidence margin / abstain rejection localization 등 <b>국문·영문 8회</b></td></tr>
-      <tr class="hi"><td><b>못 한 것</b></td><td><b>KIPRIS 국내 공보 전문 검색</b> · 분류(IPC/CPC) 기반 망라 검색 ·
-          아직 공개 안 된 출원(18개월 미경과)</td></tr>
-      </table>
-    </div>
-    <div style="flex:.75">
-      <div class="card bad"><div class="h">그래서 이렇게 적었습니다</div>
-        <p>「본 조사는 <b>망라적이지 않으며</b>, 더 가까운 국내 선행문헌이 존재할 가능성이 있습니다」<br><br>
-        조사 보고서 4.1항에 <b>한계를 명시</b>했습니다. 이 부분은 변리사께서 채워 주셔야 합니다.</p></div>
-    </div>
-  </div>
-
-  <div class="note" style="margin-top:6mm">
-  <b>왜 한계를 적었나</b> &mdash; 부풀린 조사서를 들고 가면 변리사 상담 시간을 <b>그걸 깎는 데</b> 씁니다.
-  「여기까지 봤고 여기부터는 못 봤다」를 분명히 하는 편이 실제로 도움이 됩니다.
-  </div>
-  <div class="foot"><span>結 · 특허</span><span class="pg"></span></div>
-</section>
 
 <section class="slide">
   <div class="tag">結 · 특허 — 선행기술 조사 ②</div>
@@ -904,77 +710,30 @@
 
 <section class="slide">
   <div class="tag">結 · 특허 — 선행기술 조사 ③</div>
-  <h1>가장 위협적인 문헌 — P1</h1>
-  <div class="rule"></div>
-  <div class="sub"><b>US10592536B2</b> · Hand Held Products, Inc. · 2017년 출원 — 우리 ②③단계와 거의 같습니다.</div>
-
-  <svg viewBox="0 0 1040 200" width="100%" style="max-height:50mm; margin-top:1mm">
-    <defs><marker id="a4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#55504A"/></marker></defs>
-    <rect x="18" y="34" width="890" height="60" rx="4" fill="none" stroke="#D8B2A8" stroke-width="1.2" stroke-dasharray="5 4"/>
-    <text x="24" y="26" font-size="13" font-weight="700" fill="#8C2F1E">P1 (남의 특허)</text>
-    <rect x="28" y="42" width="190" height="44" rx="4" fill="#FAF1EE" stroke="#D8B2A8"/>
-    <text x="123" y="69" font-size="12" text-anchor="middle" fill="#55504A">기준 영상 DB 구축</text>
-    <rect x="250" y="42" width="190" height="44" rx="4" fill="#FAF1EE" stroke="#D8B2A8"/>
-    <text x="345" y="69" font-size="12" text-anchor="middle" fill="#55504A">촬영 영상과 대조</text>
-    <rect x="472" y="42" width="190" height="44" rx="4" fill="#FAF1EE" stroke="#D8B2A8"/>
-    <text x="567" y="69" font-size="12" text-anchor="middle" fill="#55504A">위치 결정</text>
-    <rect x="694" y="42" width="200" height="44" rx="4" fill="#FAF1EE" stroke="#D8B2A8"/>
-    <text x="794" y="63" font-size="11.5" text-anchor="middle" fill="#55504A">라벨 왜곡으로</text>
-    <text x="794" y="79" font-size="11.5" text-anchor="middle" fill="#55504A">거리·방향까지</text>
-    <g stroke="#55504A" stroke-width="1.4" fill="none" marker-end="url(#a4)">
-      <path d="M218 64 L 246 64"/><path d="M440 64 L 468 64"/><path d="M662 64 L 690 64"/>
-    </g>
-
-    <rect x="18" y="138" width="446" height="54" rx="4" fill="none" stroke="#D8B2A8" stroke-width="1.2" stroke-dasharray="5 4"/>
-    <text x="24" y="130" font-size="13" font-weight="700" fill="#2C5F6B">우리 방식</text>
-    <rect x="28" y="146" width="190" height="40" rx="4" fill="#EFF4F5" stroke="#B9CDD2"/>
-    <text x="123" y="171" font-size="12" text-anchor="middle" fill="#55504A">기준 사진 자료 구축</text>
-    <rect x="250" y="146" width="190" height="40" rx="4" fill="#EFF4F5" stroke="#B9CDD2"/>
-    <text x="345" y="171" font-size="12" text-anchor="middle" fill="#55504A">촬영 영상과 대조</text>
-    <rect x="472" y="146" width="422" height="40" rx="4" fill="#fff" stroke="#8C2F1E" stroke-width="1.8"/>
-    <text x="683" y="171" font-size="12.5" font-weight="700" text-anchor="middle" fill="#8C2F1E">위치를 결정하지 않는다 — 확신을 재서 답의 수준을 가른다</text>
-    <g stroke="#55504A" stroke-width="1.4" fill="none" marker-end="url(#a4)">
-      <path d="M218 166 L 246 166"/><path d="M440 166 L 468 166"/>
-    </g>
-    <text x="930" y="118" font-size="12" font-weight="700" fill="#8C2F1E">점선 안은</text>
-    <text x="930" y="136" font-size="12" font-weight="700" fill="#8C2F1E">사실상 같다</text>
-  </svg>
-
-  <div class="note warn" style="margin-top:5mm">
-  <b>「사진을 저장된 사진과 맞춰 위치를 찾는다」는 착상 자체로는 신규성을 주장할 수 없습니다.</b>
-  저희가 다른 곳은 <b>마지막 칸</b> &mdash; 위치를 결정하지 <b>않는</b> 부분뿐입니다.
-  </div>
-  <div class="foot"><span>結 · 특허</span><span class="pg"></span></div>
-</section>
-
-<section class="slide">
-  <div class="tag">結 · 특허 — 선행기술 조사 ④</div>
-  <h1>나머지 문헌과, 가장 아팠던 발견</h1>
+  <h1>찾은 문헌 여섯 건, 그중 가장 아팠던 것</h1>
   <div class="rule"></div>
 
-  <table style="margin-top:2mm">
-  <tr><th class="c" style="width:7%">번호</th><th style="width:24%">문헌</th><th style="width:32%">요지</th><th>우리와의 관계</th></tr>
-  <tr><td class="c"><b>P2</b></td><td>US2016/0146614<br><span style="font-size:9.5pt;color:#8A837A">Computer vision navigation</span></td>
-      <td>컴퓨터 비전으로 실내 내비게이션</td><td>영상 기반 위치 추정·경로 안내와 중첩</td></tr>
-  <tr><td class="c"><b>P3</b></td><td>US2015/0010241<br><span style="font-size:9.5pt;color:#8A837A">Camera and optical signal</span></td>
-      <td>카메라 + 광학 신호로 실내 측위</td><td>광학 마커로 위치 확정하는 부분과 중첩</td></tr>
-  <tr><td class="c"><b>P4</b></td><td>KR 10-1217870<br><span style="font-size:9.5pt;color:#8A837A">경로정보 QR 제공</span></td>
-      <td>경로를 QR로 제공. <b>실내는 Wi-Fi</b>로 측위</td>
-      <td>QR 부분은 겹치나 <b>실내 측위 수단이 다릅니다</b> (Wi-Fi ↔ 영상)</td></tr>
-  <tr><td class="c"><b>P5</b></td><td>KR2019/0003214 · KR2019/0121275 · KR2015/0081029 외</td>
-      <td>QR 위치관리 · 실내 측위 · 전파지도</td><td>주변을 두껍게 둘러싸고 있음</td></tr>
+  <table style="margin-top:1mm">
+  <tr><th class="c" style="width:7%">번호</th><th style="width:24%">문헌</th><th style="width:33%">요지</th><th>우리와의 관계</th></tr>
+  <tr class="hi"><td class="c"><b>P1</b></td><td>US10592536B2<br><span style="font-size:9.5pt;color:#8A837A">Hand Held Products · 2017</span></td>
+      <td>기준 영상 DB를 만들고 <b>촬영 영상을 대조해 위치를 결정</b></td>
+      <td><b>가장 위협적.</b> 「사진을 저장된 사진과 맞춰 위치를 찾는다」는 착상 자체로는 신규성을 못 주장합니다</td></tr>
+  <tr><td class="c"><b>P2</b></td><td>US2016/0146614</td><td>컴퓨터 비전 실내 내비게이션</td><td>영상 기반 위치 추정과 중첩</td></tr>
+  <tr><td class="c"><b>P3</b></td><td>US2015/0010241</td><td>카메라 + 광학 신호 실내 측위</td><td>광학 마커 부분과 중첩</td></tr>
+  <tr><td class="c"><b>P4</b></td><td>KR 10-1217870</td><td>경로를 QR로 제공. <b>실내는 Wi-Fi</b></td><td>QR은 겹치나 <b>측위 수단이 다릅니다</b></td></tr>
+  <tr><td class="c"><b>P5</b></td><td>KR2019/0003214 외 국내 출원군</td><td>QR 위치관리 · 실내 측위 · 전파지도</td><td>주변을 두껍게 둘러쌈</td></tr>
   <tr class="hi"><td class="c"><b>P6</b></td><td><b>학술 문헌군</b></td>
-      <td><b>1·2등 점수 차이를 신뢰도로 쓰는 것</b>이 시각 측위에서 <b>이미 알려진 기법</b></td>
+      <td><b>1·2등 점수 차이를 신뢰도로 쓰는 것</b>이 이미 알려진 기법</td>
       <td><b>가장 아팠던 발견.</b> 제일 기대한 부분이 새롭지 않았습니다</td></tr>
   </table>
 
   <div class="note warn" style="margin-top:5mm">
-  <b>P6 를 찾았을 때 솔직히 당황했습니다.</b> 저희만의 착상이라고 생각했던 「격차」가 이미 알려진 기법이었습니다.
-  그래도 <b>이 사실을 조사서에 그대로 적었습니다.</b> 심사에서 나올 일을 미리 아는 편이 낫습니다.
+  <b>P6 를 찾았을 때 솔직히 당황했습니다.</b> 저희만의 착상이라고 생각했던 「격차」가 이미 알려진 것이었습니다.
+  그래도 <b>조사서에 그대로 적었습니다.</b> 심사에서 나올 일을 미리 아는 편이 낫습니다.
   </div>
   <div class="foot"><span>結 · 특허</span><span class="pg"></span></div>
 </section>
+
 
 <section class="slide">
   <div class="tag">結 · 특허 — 선행기술 조사 ⑤</div>
@@ -1086,33 +845,6 @@
   <div class="foot"><span>結 · 특허</span><span class="pg"></span></div>
 </section>
 
-<section class="slide">
-  <div class="tag">結 · 특허 — 우리가 낼 기술 ③</div>
-  <h1>설명서에 담은 것 · 도면 다섯 장</h1>
-  <div class="rule"></div>
-
-  <div class="cols" style="margin-top:2mm">
-    <div style="flex:1.1">
-      <table>
-      <tr><th style="width:32%">항목</th><th>내용</th></tr>
-      <tr><td>1. 발명의 명칭</td><td>영상 유사도 격차에 따라 응답 수준을 가변하는 <b>실내 장소 판정</b> 방법 및 시스템</td></tr>
-      <tr><td>2. 도면 설명</td><td>도 1 ~ 도 5</td></tr>
-      <tr><td>3. 상세한 설명</td><td>기술분야 · <b>종래기술 문제점 4가지</b> · 목적 · 구성(부호 100~300) · 효과</td></tr>
-      <tr class="hi"><td>4. 특허청구범위</td><td><b>11항</b> — 방법 1항 · 시스템 9항 · 기록매체 10항 · 종속항 7개</td></tr>
-      <tr><td>5. 도면</td><td><b>5도를 직접 그렸습니다</b></td></tr>
-      </table>
-      <div class="note" style="margin-top:4mm">전체 <b>15쪽</b>. 변리사께서 다시 쓰실 것을 전제로 한 초안이라고 명시했습니다.</div>
-    </div>
-    <div style="flex:1">
-      <div class="card" style="margin-bottom:3mm"><div class="h">도 1 · 시스템 구성도</div><p>부품마다 번호(100~300)를 붙여 표시</p></div>
-      <div class="card" style="margin-bottom:3mm"><div class="h">도 2 · 순서도</div><p>S10 ~ S90 단계</p></div>
-      <div class="card" style="margin-bottom:3mm"><div class="h">도 3 · 격차 3단계</div><p>자리 / 층 / 보류</p></div>
-      <div class="card hi" style="margin-bottom:3mm"><div class="h">도 4 · 자 비교 그래프</div><p>64.7% vs 92.9%</p></div>
-      <div class="card"><div class="h">도 5 · 자료 만드는 과정</div><p>자기 사진 빼고 재는 방법 포함</p></div>
-    </div>
-  </div>
-  <div class="foot"><span>結 · 특허</span><span class="pg"></span></div>
-</section>
 
 <section class="slide">
   <div class="tag">結 · 특허 — 시한</div>
@@ -1221,104 +953,68 @@
 
 <section class="slide">
   <div class="tag">부록 ②</div>
-  <h1>돈이 얼마나 드나</h1>
+  <h1>돈과 사람 — 거의 안 듭니다</h1>
   <div class="rule"></div>
-  <div class="sub">이 앱은 구조상 <b>돈이 거의 안 듭니다.</b> 이유가 있습니다.</div>
 
-  <div class="cols" style="margin-top:2mm">
-    <div class="card good"><div class="h">안내 기능 — 서버가 없습니다</div>
-      <p>앱·사진·안내문을 <b>통째로 폰에 저장</b>하므로, 길을 안내할 때 서버를 한 번도 안 씁니다.<br><br>
-      <b>사용자가 1명이든 1만 명이든 서버 비용이 같습니다 — 0원.</b><br>
-      정적 파일 배포는 월 100GB까지 무료이고, 한 사람이 <b>처음 한 번 15.6MB</b>만 받습니다.
-      → 대략 <b>월 6,000명</b>까지 무료입니다. (재방문은 저장된 것을 쓰므로 0)</p></div>
-    <div class="card"><div class="h">제보 기능 — 여기만 서버를 씁니다</div>
-      <p>제보 사진 한 장이 <b>최대 0.9MB</b>입니다.<br><br>
-      무료 저장 한도(1GB)로 <b>약 1,000건</b>을 받을 수 있고,
-      관리자가 승인·정리하면 계속 비워집니다.<br><br>
-      <b>3호관 규모에서는 무료 한도를 넘길 일이 거의 없습니다.</b></p></div>
+  <div class="cols" style="margin-top:1mm">
+    <div class="card good"><div class="h">돈 — 안내에는 서버가 없습니다</div>
+      <p>앱·사진·안내문을 <b>통째로 폰에 저장</b>하므로 길을 안내할 때 서버를 한 번도 안 씁니다.
+      <b>사용자가 1명이든 1만 명이든 0원.</b><br><br>
+      정적 배포는 월 100GB 무료이고 1인당 <b>처음 한 번 15.6MB</b>만 받으니 <b>월 6,000명</b>쯤까지 무료입니다.<br><br>
+      제보만 서버를 쓰는데, 사진 한 장이 최대 0.9MB라 무료 저장(1GB)으로 <b>약 1,000건</b>입니다.</p></div>
+    <div class="card"><div class="h">사람 — 없어도 안 죽습니다</div>
+      <p>· 앱은 <b>정적 파일</b>이라 놔둬도 돌아갑니다<br>
+      · <b>고장 날 서버가 없습니다</b><br>
+      · 관리자는 <b>명단에 등록된 사람</b>만 (계정만 만들면 되는 게 아닙니다)<br><br>
+      넘길 때 필요한 것 : 콘솔 계정 이관 · 관리자 명단에 후임 추가 · 저장소 권한<br><br>
+      <b>관리자가 아무도 없어도 길안내는 계속됩니다.</b> 멈추는 건 제보 승인뿐입니다.</p></div>
   </div>
 
-  <div class="note warn" style="margin-top:5mm">
-  <b>다만 대비는 필요합니다</b> &mdash; 장난 제보가 쏟아지면 한도를 넘길 수 있습니다.
-  지금은 <b>서버 규칙이 사진 크기·형식·칸을 검사</b>해 막고 있고, 필요하면 <b>요금 상한</b>을 걸면 됩니다.
+  <div class="note warn" style="margin-top:6mm">
+  <b>대비도 해 뒀습니다</b> &mdash; 장난 제보가 쏟아지면 한도를 넘길 수 있어,
+  <b>서버 규칙이 사진 크기·형식·칸을 검사</b>해 막고 있습니다. 필요하면 요금 상한을 겁니다.<br>
+  <b>설계할 때부터 이걸 생각했습니다</b> — 서버에 의존했다면 돈이 끊기는 순간 앱이 죽습니다.
   </div>
   <div class="foot"><span>부록 · 서비스 배포</span><span class="pg"></span></div>
 </section>
+
 
 <section class="slide">
   <div class="tag">부록 ③</div>
-  <h1>졸업하면 누가 관리하나</h1>
+  <h1>확장과 사고 대비</h1>
   <div class="rule"></div>
 
-  <div class="cols" style="margin-top:2mm">
-    <div class="card"><div class="h">지금 구조</div>
-      <p>· 앱은 <b>정적 파일</b>이라 놔둬도 계속 돌아갑니다<br>
-      · 고장 날 서버가 <b>없습니다</b><br>
-      · 관리자는 <b>명단에 등록된 사람</b>만 (계정만 만들면 되는 게 아닙니다)</p></div>
-    <div class="card"><div class="h">넘길 때 필요한 것</div>
-      <p>· Firebase 콘솔 <b>계정 이관</b><br>
-      · 관리자 명단에 후임 <b>추가</b><br>
-      · 저장소 권한 이전<br>
-      · <b>사진 다시 찍는 방법</b> 문서 (이미 있음)</p></div>
-    <div class="card good"><div class="h">최악의 경우</div>
-      <p>관리자가 아무도 없어도 <b>길안내는 계속 됩니다.</b><br>
-      멈추는 것은 <b>제보 승인</b>뿐이고, 사진이 낡을 뿐 앱이 죽지는 않습니다.</p></div>
-  </div>
-
-  <div class="note" style="margin-top:6mm">
-  <b>설계할 때부터 이걸 생각했습니다.</b> 서버에 의존하는 구조였다면
-  <b>돈이 끊기는 순간 앱이 죽습니다.</b> 그래서 안내에 필요한 것은 전부 폰에 넣었습니다.
+  <div class="cols" style="margin-top:1mm">
+    <div style="flex:1">
+      <div class="card" style="margin-bottom:4mm"><div class="h">다른 건물로 넓히려면</div>
+        <p>3호관 실적 : 장소 <b>152곳</b> · 사진 <b>2,075장</b> · 기준자료 5,752개 · QR 4장<br><br>
+        · 기준자료는 <b>자동</b> — 사진만 있으면 계산으로 만들어집니다<br>
+        · 장비 설치 <b>없음</b> — 비콘·Wi-Fi 공사가 필요 없습니다<br>
+        · <b>길안내 문장은 사람이 직접</b> 씁니다 (자동이 안 됩니다)</p></div>
+      <div class="note warn">
+      <b>병목은 기술이 아닙니다</b> &mdash; <b>「사람이 돌아다니며 찍고 쓰는 일」</b>입니다.
+      이걸 줄이는 것이 다음 과제이고, 제보 기능이 그 첫걸음입니다.
+      </div>
+    </div>
+    <div style="flex:1.15">
+      <table>
+      <tr><th style="width:36%">생길 수 있는 일</th><th>막고 있는 방법</th></tr>
+      <tr class="hi"><td><b>AI가 장소를 잘못 판정</b></td>
+          <td><b>자동 확정을 없앴습니다.</b> 사람이나 번호판 인식이 확정해야만 반영</td></tr>
+      <tr><td>장난·엉뚱한 사진 제보</td><td>서버 규칙이 형식·크기 검사 + 범위 밖 자동 반려</td></tr>
+      <tr><td>사진이 실제와 달라짐</td><td>제보로 갱신 (없으면 낡은 채로 남음)</td></tr>
+      <tr><td>특정 기기에서만 깨짐</td><td>설정 → 문제 기록으로 기기·오류를 한 번에 받음</td></tr>
+      <tr><td>고치다 다른 곳이 망가짐</td><td><b>안전망</b>이 화면을 한 글자씩 비교</td></tr>
+      </table>
+      <div class="note good" style="margin-top:3mm">
+      <b>가장 큰 위험을 구조로 막았습니다.</b> 「AI가 틀리면?」에 대한 답은
+      <b>「AI는 확정할 권한이 없습니다」</b>입니다. 성능이 아니라 <b>권한으로</b> 막았습니다.
+      </div>
+    </div>
   </div>
   <div class="foot"><span>부록 · 서비스 배포</span><span class="pg"></span></div>
 </section>
 
-<section class="slide">
-  <div class="tag">부록 ④</div>
-  <h1>다른 건물로 넓히려면</h1>
-  <div class="rule"></div>
-  <div class="sub">3호관에 들인 실제 작업량으로 계산했습니다.</div>
-
-  <table style="margin-top:2mm">
-  <tr><th style="width:30%">해야 할 일</th><th style="width:22%">3호관 실적</th><th>다른 건물이라면</th></tr>
-  <tr><td>장소 정하기</td><td class="n">152곳</td><td>건물 크기에 비례</td></tr>
-  <tr><td>사진 촬영</td><td class="n">2,075장</td><td><b>가장 오래 걸리는 일.</b> 사람이 직접 돌아야 합니다</td></tr>
-  <tr><td>기준자료 만들기</td><td class="n">5,752개</td><td>자동 — 사진만 있으면 계산으로 만들어집니다</td></tr>
-  <tr><td>출입문 QR</td><td class="n">4장</td><td>인쇄해 붙이면 끝</td></tr>
-  <tr class="hi"><td><b>길안내 문장</b></td><td class="n">문 4 × 층 6</td>
-      <td><b>사람이 직접 씁니다.</b> 「엘리베이터 정면에서 좌측으로」처럼 말로 풀어야 해서 자동이 안 됩니다</td></tr>
-  <tr><td>장비 설치</td><td class="n">없음</td><td><b>없음</b> — 비콘·Wi-Fi 공사가 필요 없습니다</td></tr>
-  </table>
-
-  <div class="note warn" style="margin-top:5mm">
-  <b>정직하게 말씀드리면</b> &mdash; 확장의 병목은 기술이 아니라 <b>「사람이 돌아다니며 찍고 쓰는 일」</b>입니다.
-  이걸 줄이는 것이 <b>다음 과제</b>이고, 제보 기능이 그 첫걸음입니다.
-  </div>
-  <div class="foot"><span>부록 · 서비스 배포</span><span class="pg"></span></div>
-</section>
-
-<section class="slide">
-  <div class="tag">부록 ⑤</div>
-  <h1>사고가 나면</h1>
-  <div class="rule"></div>
-  <div class="sub">길안내 앱에서 「사고」란 <b>틀린 길을 알려 주는 것</b>입니다.</div>
-
-  <table style="margin-top:2mm">
-  <tr><th style="width:26%">생길 수 있는 일</th><th style="width:34%">지금 막고 있는 방법</th><th>남은 위험</th></tr>
-  <tr class="hi"><td><b>AI가 장소를 잘못 판정</b></td>
-      <td><b>자동 확정을 없앴습니다.</b> 사람이나 번호판 인식이 확정해야만 반영됩니다</td>
-      <td>관리자가 잘못 승인하면 반영됩니다</td></tr>
-  <tr><td>장난·엉뚱한 사진 제보</td><td>서버 규칙이 형식·크기를 검사 + 범위 밖 사진은 자동 반려</td><td>사람이 최종 확인</td></tr>
-  <tr><td>사진이 실제와 달라짐</td><td>제보로 갱신</td><td>제보가 없으면 낡은 채로 남습니다</td></tr>
-  <tr><td>특정 기기에서만 화면이 깨짐</td><td>설정 → 문제 기록으로 기기·오류를 한 번에 받습니다</td><td>이용자가 보내 줘야 압니다</td></tr>
-  <tr><td>고치다가 다른 곳이 망가짐</td><td><b>안전망</b>이 화면을 한 글자씩 비교해 막습니다</td><td>—</td></tr>
-  </table>
-
-  <div class="note good" style="margin-top:5mm">
-  <b>가장 큰 위험을 구조로 막았습니다.</b> 「AI가 틀리면 어떻게 하나」라는 질문에
-  <b>「AI는 확정할 권한이 없습니다」</b>가 저희 답입니다. 성능으로 막은 게 아니라 <b>권한으로 막았습니다.</b>
-  </div>
-  <div class="foot"><span>부록 · 서비스 배포</span><span class="pg"></span></div>
-</section>
 
 <section class="slide cover">
   <div class="in">

@@ -165,6 +165,26 @@ if(Test-Path $docDir){
 $swTxt = [IO.File]::ReadAllText((Join-Path $SITE 'sw.js'), [Text.Encoding]::UTF8)
 $aiCached = ($swTxt -match "'data/aivec\.js'")
 if($aiCached){ $docBad += 'sw.js 가 이제 AI 자료를 저장한다 — 문서의 「통신 필요」 설명을 다시 볼 것' }
+# ── 문서끼리 가리키는 쪽 번호가 맞는지 ──────────────────────
+# 2026-10-01 : 발표 자료를 46 → 33장으로 줄였더니 변리사_상담준비 의 「발표자료 N쪽」
+#   참조 열두 곳이 한꺼번에 어긋났다. 장 수는 HTML 에서 셀 수 있으므로 여기서 막는다.
+$deckFile = Join-Path $docDir '발표_상세설계.html'
+if(Test-Path $deckFile){
+  $deckTxt = [IO.File]::ReadAllText($deckFile, [Text.Encoding]::UTF8)
+  $deckN   = ([regex]::Matches($deckTxt, '<section class="slide')).Count
+  foreach($d in (Get-ChildItem $docDir -Filter *.html -File)){
+    $t = [IO.File]::ReadAllText($d.FullName, [Text.Encoding]::UTF8)
+    foreach($m in [regex]::Matches($t, '발표자료\s*<?b?>?(\d+)쪽')){
+      $p = [int]$m.Groups[1].Value
+      if($p -lt 1 -or $p -gt $deckN){ $docBad += ('{0} : 「발표자료 {1}쪽」 — 발표 자료는 {2}장뿐' -f $d.Name, $p, $deckN) }
+    }
+    foreach($m in [regex]::Matches($t, '졸업작품_상세설계_발표\.pdf\s*\((\d+)쪽\)')){
+      $p = [int]$m.Groups[1].Value
+      if($p -ne $deckN){ $docBad += ('{0} : 발표 자료를 {1}쪽이라 했는데 실제는 {2}장' -f $d.Name, $p, $deckN) }
+    }
+  }
+}
+
 if($docBad.Count){ Bad ('문서가 앱과 어긋남 : ' + ($docBad -join ' / ')) }
 else { Ok '문서가 앱과 어긋나지 않음 (하지 않는 일을 했다고 적지 않았는지)' }
 

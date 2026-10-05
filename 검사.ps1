@@ -154,8 +154,12 @@ if(Test-Path $docDir){
     @{ t = '길을 잃으면 주변을';   why = '사진 기능은 제보(건의함)다' },
     @{ t = '현재 위치를 좁혀 주는'; why = '사진 기능은 제보(건의함)다' }
   )
+  # ※ 구조도.html 은 소스 36개를 통째로 품고 있다(검사.ps1 자신까지). 그 안에는
+  #   바로 위 금지 목록 글자가 그대로 들어 있으므로, 넣은 소스 부분은 빼고 글만 본다.
+  #   (2026-10-06 : 안 빼서 거짓 [실패]가 났다)
   foreach($d in (Get-ChildItem $docDir -Filter *.html -File)){
     $t = [IO.File]::ReadAllText($d.FullName, [Text.Encoding]::UTF8)
+    $t = [regex]::Replace($t, '(?s)<script type="application/json" id="SRCDATA">.*?</script>', '')
     foreach($p in $forbidden){
       if($t.Contains($p.t)){ $docBad += ('{0} : 「{1}」 — {2}' -f $d.Name, $p.t, $p.why) }
     }
@@ -187,6 +191,35 @@ if(Test-Path $deckFile){
 
 if($docBad.Count){ Bad ('문서가 앱과 어긋남 : ' + ($docBad -join ' / ')) }
 else { Ok '문서가 앱과 어긋나지 않음 (하지 않는 일을 했다고 적지 않았는지)' }
+
+# ── 구조도가 소스보다 오래되지 않았는지 ────────────────────
+# 문서\구조도.html 은 소스 36개를 통째로 넣어 만든 생성물이다(도구\구조도_만들기.ps1).
+# 소스를 고치고 다시 만들지 않으면, 교수님께 보여 주는 코드가 실제와 달라진다.
+# 만들 때 심어 둔 지문과 지금 소스의 지문을 견줘 본다.
+$strFile = Join-Path $docDir '구조도.html'
+if(Test-Path $strFile){
+  $strTxt = [IO.File]::ReadAllText($strFile, [Text.Encoding]::UTF8)
+  $m = [regex]::Match($strTxt, '<!-- SRC-STAMP:([0-9a-f]+) FILES:([^>]+?) -->')
+  if(-not $m.Success){ Warn '구조도에 지문이 없습니다 — 도구\구조도_만들기.ps1 을 돌리세요' }
+  else {
+    $want  = $m.Groups[1].Value
+    $flist = $m.Groups[2].Value.Trim() -split '\|'
+    $sb = [Text.StringBuilder]::new(); $gone = @()
+    foreach($k in $flist){
+      $p = Join-Path $ROOT ($k -replace '/', '\')
+      if(-not (Test-Path $p)){ $gone += $k; continue }
+      $t = [IO.File]::ReadAllText($p, [Text.Encoding]::UTF8) -replace "`r`n", "`n"
+      [void]$sb.Append($k); [void]$sb.Append("`0"); [void]$sb.Append($t); [void]$sb.Append("`0")
+    }
+    if($gone.Count){ Warn ('구조도가 넣은 파일이 없어졌습니다 : ' + ($gone -join ' / ')) }
+    else {
+      $sha  = [Security.Cryptography.SHA256]::Create()
+      $have = (-join ($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($sb.ToString())) | ForEach-Object { $_.ToString('x2') })).Substring(0,16)
+      if($have -ne $want){ Warn ('구조도가 소스보다 오래됐습니다 — 도구\구조도_만들기.ps1 을 다시 돌리세요 (문서 ' + $want + ' / 지금 ' + $have + ')') }
+      else { Ok ('구조도의 소스 {0}개가 지금 코드와 같습니다' -f $flist.Count) }
+    }
+  }
+}
 
 $ol = & pwsh -NoProfile -File (Join-Path $ROOT '도구\오프라인목록.ps1') -Check 2>&1 | Out-String
 if($LASTEXITCODE -eq 0){ Ok ('인터넷 없이 열기(sw.js) ' + $ol.Trim()) } else { Bad ('인터넷 없이 열기(sw.js) ' + $ol.Trim()) }

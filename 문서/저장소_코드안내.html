@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>깃허브 저장소 코드 안내 — 어떤 코드가 어디에 쓰이는가</title>
+<style>
+  @page {
+    size: A4; margin: 16mm 14mm 16mm 14mm;
+    @top-right { content: "3호관 길안내 · 깃허브 저장소 코드 안내 (발표 준비용)"; font: 7.5pt "Malgun Gothic"; color: #9AA7B6; }
+    @bottom-center { content: counter(page) " / " counter(pages); font: 8pt "Malgun Gothic"; color: #7C8AA0; }
+  }
+  @page :first { margin-top: 0; @top-right { content: none; } @bottom-center { content: none; } }
+  :root {
+    --ink: #16202B; --ink2: #52514e; --muted: #7C8AA0;
+    --navy: #10345E; --blue: #1B4F8C; --line: #C9D3DF; --soft: #EEF2F7; --soft2: #F5F8FB;
+    --grid: #E4E7EC; --ok: #1F7A45; --no: #A33A3A;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: #fff; }
+  body { font-family: "Malgun Gothic","맑은 고딕",sans-serif; font-size: 9.3pt; line-height: 1.58; color: var(--ink);
+         margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  h1 { font-size: 16pt; color: var(--navy); margin: 0 0 4px; letter-spacing: -0.3px; }
+  h2 { font-size: 11.8pt; color: var(--navy); margin: 15px 0 7px; padding-bottom: 4px;
+       border-bottom: 2px solid #C9D9EA; page-break-after: avoid; break-after: avoid; }
+  h3 { font-size: 10pt; color: var(--blue); margin: 11px 0 5px; page-break-after: avoid; break-after: avoid; }
+  p { margin: 0 0 6px; }
+  ul, ol { margin: 0 0 7px; padding-left: 18px; }
+  li { margin-bottom: 3px; }
+  code { font-family: Consolas,"D2Coding",monospace; font-size: 8.6pt; background: var(--soft2);
+         border: 1px solid var(--grid); border-radius: 3px; padding: 0 3px; }
+  b.hl { background: #FFF2C4; padding: 0 2px; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 8px; font-size: 8.6pt; page-break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 4px 7px; text-align: left; vertical-align: top; }
+  th { background: var(--soft); font-weight: 700; }
+  td.n, th.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.c, th.c { text-align: center; white-space: nowrap; }
+  td.f { font-family: Consolas,"D2Coding",monospace; font-size: 8.3pt; white-space: nowrap; }
+  tr.tot td { background: #E6EEF8; font-weight: 700; }
+  tr.hi td { background: #FFF8E6; }
+  .note { color: #4E5C6B; font-size: 8.5pt; background: var(--soft2); border-left: 3px solid #9FC0E0;
+          padding: 6px 9px; margin: 7px 0; page-break-inside: avoid; }
+  .warn { border-left-color: #D99A9A; background: #FCF5F5; }
+  .good { border-left-color: #8CC5A0; background: #F2F9F4; }
+  .say  { border-left-color: #C7B07E; background: #FFFBF0; }
+  .say b.q { color: var(--navy); }
+  .pb { page-break-before: always; }
+  .part { font-size: 9pt; color: var(--muted); letter-spacing: 1px; margin: 0 0 2px; }
+  .lead { font-size: 10.4pt; line-height: 1.7; }
+
+  .cover { height: 263mm; position: relative; padding-top: 26mm; }
+  .cover .band { background: var(--navy); color: #fff; padding: 14mm 12mm 12mm; border-radius: 4px; }
+  .cover .kicker { font-size: 10pt; opacity: .8; letter-spacing: 2px; margin-bottom: 8px; }
+  .cover .title { font-size: 23pt; font-weight: 700; line-height: 1.32; letter-spacing: -0.5px; }
+  .cover .subt { font-size: 11pt; margin-top: 8px; opacity: .92; }
+  .cover .meta { margin-top: 10mm; font-size: 10pt; color: var(--ink2); line-height: 1.9; }
+  .cover .meta b { color: var(--ink); }
+  .kpis { display: table; width: 100%; table-layout: fixed; margin-top: 8mm;
+          border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .kpis > div { display: table-cell; text-align: center; padding: 9px 4px; border-right: 1px solid var(--grid); }
+  .kpis > div:last-child { border-right: 0; }
+  .kpis .v { font-size: 14pt; font-weight: 700; color: var(--navy); }
+  .kpis .k { font-size: 8pt; color: var(--muted); }
+  .toc { margin-top: 9mm; font-size: 9.6pt; }
+  .toc div { display: flex; align-items: baseline; gap: 6px; padding: 3px 0; border-bottom: 1px dotted var(--grid); }
+  .toc .no { width: 18px; color: var(--blue); font-weight: 700; }
+  .toc .t { flex: 1; }
+  .toc .p { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .cover .foot { position: absolute; bottom: 0; left: 0; right: 0; font-size: 8pt; color: var(--muted);
+                 border-top: 1px solid var(--line); padding-top: 6px; }
+
+  /* ※ 줄바꿈을 그대로 살려야 한다 — 안 주면 그림이 한 문단으로 뭉개진다(2026-10-06 실측) */
+  .tree { font-family: Consolas,"D2Coding",monospace; font-size: 8.6pt; line-height: 1.75;
+          white-space: pre-wrap;
+          background: var(--soft2); border: 1px solid var(--line); border-radius: 4px; padding: 9px 12px; margin: 7px 0;
+          page-break-inside: avoid; }
+  .tree b { color: var(--navy); }
+  .tree .x { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ 표지 ══════════════ -->
+<section class="cover">
+  <div class="band">
+    <div class="kicker">발표 준비용 · 코드 안내</div>
+    <div class="title">깃허브 저장소에 무엇이 들어 있고<br>어떤 코드가 어디에 쓰이는가</div>
+    <div class="subt">군산대학교 공과대학 3호관 실내 길안내 (졸업작품)</div>
+  </div>
+  <div class="meta">
+    <b>저장소</b> &nbsp;&nbsp;github.com/minjong0910/minjong0910.github.io<br>
+    <b>배포</b> &nbsp;&nbsp;&nbsp;&nbsp;https://minjong0910.github.io/ (GitHub Pages)<br>
+    <b>만든 이</b> &nbsp;김민종 · 손의윤 · 문성일<br>
+    <b>작성일</b> &nbsp;&nbsp;2026-10-06
+  </div>
+  <div class="kpis">
+    <div><div class="v">1,153</div><div class="k">저장소 전체 파일</div></div>
+    <div><div class="v">240</div><div class="k">앱(site/) 파일</div></div>
+    <div><div class="v">36</div><div class="k">직접 쓴 코드 파일</div></div>
+    <div><div class="v">24,798</div><div class="k">직접 쓴 줄 수</div></div>
+    <div><div class="v">0원</div><div class="k">서버 비용</div></div>
+  </div>
+  <div class="toc">
+    <div><span class="no">1</span><span class="t">먼저 알아야 할 것 — 저장소에 있는 것 ≠ 배포되는 것</span><span class="p">2</span></div>
+    <div><span class="no">2</span><span class="t">site/ — 앱 본체 240개</span><span class="p">3</span></div>
+    <div><span class="no">3</span><span class="t">tests/ — 자동 시험과 안전망 826개</span><span class="p">7</span></div>
+    <div><span class="no">4</span><span class="t">루트 — 측정 도구 16개</span><span class="p">8</span></div>
+    <div><span class="no">5</span><span class="t">도구/ — 자료를 만드는 기계 24개</span><span class="p">9</span></div>
+    <div><span class="no">6</span><span class="t">문서/ · 서버/ · QR인쇄/ · .github/</span><span class="p">10</span></div>
+    <div><span class="no">7</span><span class="t">연결 관계 — 누가 누구를 부르는가</span><span class="p">11</span></div>
+    <div><span class="no">8</span><span class="t">교수님 질문에 그대로 쓸 답</span><span class="p">12</span></div>
+  </div>
+  <div class="foot">
+    이 문서는 발표 준비를 위해 저장소를 직접 세어 정리한 것입니다. 수치는 2026-10-06 기준이며
+    <code>검사.ps1</code> 과 <code>문서\구조도.html</code> 의 숫자와 같습니다.
+  </div>
+</section>
+
+<!-- ══════════════ 1 ══════════════ -->
+<section class="pb">
+<p class="part">1</p>
+<h1>먼저 알아야 할 것</h1>
+<p class="lead">저장소에 있는 것과 실제로 배포되는 것은 다릅니다. 이것부터 알고 말씀하셔야 합니다.</p>
+
+<h2>1.1 배포되는 것은 site/ 하나뿐</h2>
+<p>깃허브에는 폴더가 7개 있지만, <b class="hl">사용자에게 가는 것은 <code>site/</code> 폴더 하나</b>입니다.
+나머지는 만들고·검사하고·기록한 것들로 저장소에만 남습니다.</p>
+
+<table>
+<tr><th style="width:17%">폴더</th><th class="n" style="width:11%">파일 수</th><th>무엇인가</th><th class="c" style="width:12%">배포되나</th></tr>
+<tr class="hi"><td class="f">site/</td><td class="n"><b>240</b></td><td><b>앱 본체</b> — 화면·코드·사진·3D·AI 자료</td><td class="c"><b>예</b></td></tr>
+<tr><td class="f">tests/</td><td class="n">826</td><td>자동 시험과 비교 기준(안전망)</td><td class="c">아니오</td></tr>
+<tr><td class="f">문서/</td><td class="n">37</td><td>측정 기록 · 특허 서류 · 발표 자료</td><td class="c">아니오</td></tr>
+<tr><td class="f">도구/</td><td class="n">24</td><td>자료를 만드는 PowerShell 스크립트</td><td class="c">아니오</td></tr>
+<tr><td class="f">(루트)</td><td class="n">16</td><td>검사 · 미리보기 · 정확도 측정 도구</td><td class="c">아니오</td></tr>
+<tr><td class="f">QR인쇄/</td><td class="n">6</td><td>문에 붙이는 QR 인쇄물</td><td class="c">아니오</td></tr>
+<tr><td class="f">서버/</td><td class="n">3</td><td>Firebase 보안 규칙 (콘솔에 붙여넣음)</td><td class="c">아니오</td></tr>
+<tr><td class="f">.github/</td><td class="n">1</td><td>자동 배포 설정</td><td class="c">아니오</td></tr>
+<tr class="tot"><td>합계</td><td class="n">1,153</td><td>34MB</td><td class="c">—</td></tr>
+</table>
+
+<div class="say"><b class="q">교수님 : 「이 많은 게 다 앱인가요?」</b><br>
+→ 「<b>아닙니다. 앱은 <code>site/</code> 폴더 하나고 240개 파일입니다.</b>
+나머지 900여 개는 자료를 만들고, 검사하고, 측정 결과를 기록한 것들입니다.
+배포 설정에서 <code>site/</code> 만 내보내도록 해 두었습니다.」</div>
+
+<h2>1.2 직접 쓴 코드와 빌려 온 것</h2>
+<p>240개 파일이 전부 우리가 쓴 코드는 아닙니다. 나눠 보면 이렇습니다.</p>
+<table>
+<tr><th style="width:30%">구분</th><th class="n" style="width:12%">파일</th><th>내용</th></tr>
+<tr class="hi"><td><b>직접 쓴 코드</b></td><td class="n"><b>36</b></td><td>JavaScript 25 · HTML 2 · CSS 2 · 자료 2 · 보안 규칙 1 · 배포 설정 1 · PowerShell 3 — <b>24,798줄</b></td></tr>
+<tr><td>빌려 온 라이브러리</td><td class="n">10</td><td>Three.js · TensorFlow.js · MobileNet · jsQR · JSZip · Tesseract(5개)</td></tr>
+<tr><td>자료 (사람이 안 씀)</td><td class="n">173</td><td>AI 기준 벡터 10MB · 자료집 2MB · 사진 169장</td></tr>
+<tr><td>그림 · 3D 재질</td><td class="n">26</td><td>아이콘 5 · 실사 3D 페이지 1 · 텍스처 21</td></tr>
+</table>
+
+<div class="note"><b>「직접 쓴 코드 36개」가 발표에서 가장 쓸모 있는 숫자</b>입니다.
+<code>문서\구조도.html</code> 의 「소스 코드」 탭에서 이 36개를 한 줄도 빠짐없이 보여 드릴 수 있습니다.</div>
+</section>
+
+<!-- ══════════════ 2 ══════════════ -->
+<section class="pb">
+<p class="part">2</p>
+<h1>site/ — 앱 본체</h1>
+<p class="lead">앱은 묶음 도구(webpack 같은 것)를 쓰지 않습니다.
+그래서 <b><code>index.html</code> 에 적힌 순서가 곧 실행 순서</b>입니다 —
+자료를 먼저 읽고, 그 자료를 쓰는 코드를 나중에 읽습니다.</p>
+
+<div class="tree">
+site/
+ ├ <b>index.html</b> &nbsp;&nbsp;화면 23개가 전부 여기 (696줄)
+ ├ <b>sw.js</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;인터넷 없이 열기 — 230개 15.6MB 저장 (408줄)
+ ├ manifest.webmanifest &nbsp;<span class="x">앱 이름·아이콘</span>
+ ├ css/ &nbsp;&nbsp;&nbsp;app.css (1,062줄) · boot.css (18줄)
+ ├ js/app/ &nbsp;<b>우리가 쓴 코드 25개</b>
+ ├ js/vendor/ &nbsp;<span class="x">three · jszip · jsqr (빌림)</span>
+ ├ lib/ &nbsp;&nbsp;&nbsp;&nbsp;<span class="x">tf · mobilenet · tess 5개 (빌림, AI)</span>
+ ├ data/ &nbsp;&nbsp;&nbsp;aivec.js 10MB · ailib.js 2MB · photos/ 169장
+ ├ img/ &nbsp;&nbsp;&nbsp;&nbsp;<span class="x">아이콘 3 + SVG + 비상구 표지</span>
+ └ 3d/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;realistic.html + 재질 그림 21장
+</div>
+
+<h2>2.1 읽는 순서 — 왜 이 순서인가</h2>
+<table>
+<tr><th class="c" style="width:7%">순서</th><th style="width:30%">파일</th><th>왜 여기인가</th></tr>
+<tr class="hi"><td class="c">1</td><td class="f">data/photos.js · places.js</td><td><b>자료가 맨 먼저</b> — 뒤의 코드가 이 자료를 바로 씁니다</td></tr>
+<tr class="hi"><td class="c">2</td><td class="f">js/app/pwa.js</td><td><b>오류 감시를 가장 먼저 건다</b> — 뒤에 두면 앱이 켜지는 동안 난 오류를 놓칩니다</td></tr>
+<tr><td class="c">3</td><td class="f">js/vendor/three · jszip</td><td>3D 와 압축 — 아래 코드가 이것을 씁니다</td></tr>
+<tr><td class="c">4</td><td class="f">building.js</td><td><b>건물 자료표</b> — 3D·길안내가 전부 이것을 봅니다</td></tr>
+<tr><td class="c">5</td><td class="f">shell · suggest · ui</td><td>화면 전환·상태·건의함·검색</td></tr>
+<tr><td class="c">6</td><td class="f">view3d · roadview 8개 · overview3d · floor-detail</td><td>3D 와 1인칭 — 가장 큰 덩어리</td></tr>
+<tr><td class="c">7</td><td class="f">photos · guide</td><td>사진과 길 만들기</td></tr>
+<tr><td class="c">8</td><td class="f">start.js → boot.js</td><td><b>여기서 앱이 켜진다</b> — 글꼴을 기다렸다 시작</td></tr>
+<tr><td class="c">9</td><td class="f">jsqr → qrnav.js</td><td>QR (라이브러리 다음에 그것을 쓰는 코드)</td></tr>
+<tr><td class="c">10</td><td class="f">sugai → sugdb → aid → zoom</td><td>AI · 서버 통신 · 자료집 · 사진 확대</td></tr>
+</table>
+<div class="note">이 순서가 틀리면 앱이 켜지다 멈춥니다. 그래서 <code>검사.ps1</code> 에
+<b>「읽는 순서 (자료 → 그것을 쓰는 코드)」</b> 검사가 따로 있습니다.</div>
+
+<h2 class="pb">2.2 파일 하나하나 — 무엇을 하고 어디에 쓰이는가</h2>
+
+<h3>① 앱을 켜는 코드</h3>
+<table>
+<tr><th style="width:24%">파일</th><th class="n" style="width:8%">줄</th><th>하는 일 · 어디에 쓰이나</th></tr>
+<tr><td class="f">pwa.js</td><td class="n">563</td><td><b>앱 설치 안내 + 문제 기록.</b> 아이폰·안드로이드 설치 방법이 달라 기기에 맞는 안내만 보여 줍니다. 가장 먼저 읽히므로 앱 전체의 오류를 잡아 설정 화면의 「문제 기록」에 모읍니다. <code>PWA</code>·<code>DIAG</code> 를 만들어 다른 파일에 제공합니다.</td></tr>
+<tr><td class="f">boot.js</td><td class="n">150</td><td><b>첫 화면 연출.</b> 기대한 구조가 없으면 아무것도 안 하고 조용히 빠집니다(연출 때문에 앱이 안 켜지는 것을 막음).</td></tr>
+<tr><td class="f">start.js</td><td class="n">32</td><td><b>글꼴을 기다렸다 시작.</b> 3D 글씨는 그림으로 구워 붙이므로 글꼴이 늦게 오면 옛 글씨체로 굳습니다. 1.5초만 기다리고 그냥 시작합니다.</td></tr>
+<tr><td class="f">sw.js</td><td class="n">408</td><td><b>인터넷 없이 열기.</b> 230개 15.6MB 를 폰에 저장합니다. 파일마다 SHA-256 지문을 확인해 옛 파일이 섞여 오면 다시 받습니다. <b>도구가 자동으로 채우는 파일</b>입니다.</td></tr>
+</table>
+
+<h3>② 화면과 상태</h3>
+<table>
+<tr><th style="width:24%">파일</th><th class="n" style="width:8%">줄</th><th>하는 일 · 어디에 쓰이나</th></tr>
+<tr><td class="f">index.html</td><td class="n">696</td><td><b>화면 23개가 전부 여기.</b> 화면마다 파일을 나누지 않은 이유는 <b>화면 전환에 네트워크를 안 쓰기 위해서</b>입니다 — 오프라인에서 즉시 바뀝니다.</td></tr>
+<tr><td class="f">shell.js</td><td class="n">367</td><td><b>화면 전환 <code>go()</code>.</b> 라우터가 없습니다. 앱 전체의 상태가 <b>변수 네 개</b>(목적지·현재층·안내단계·단계번호)뿐입니다. 실사 3D 를 iframe 으로 띄우는 것도 여기입니다.</td></tr>
+<tr><td class="f">ui.js</td><td class="n">427</td><td><b>한/영 전환 · 검색 · 카테고리 · 층 버튼.</b> 번역 라이브러리 없이 <code>data-ko</code>/<code>data-en</code> 속성으로 처리합니다. 검색은 장소가 152곳뿐이라 색인 없이 훑습니다.</td></tr>
+<tr><td class="f">zoom.js</td><td class="n">185</td><td><b>사진 확대.</b> 브라우저 기본 확대를 쓰면 화면 전체가 커져 UI 가 깨지므로, 사진에만 적용되는 확대를 직접 만들었습니다.</td></tr>
+<tr><td class="f">css/app.css</td><td class="n">1,062</td><td>앱 디자인 전부</td></tr>
+<tr><td class="f">css/boot.css</td><td class="n">18</td><td>첫 화면 연출용</td></tr>
+</table>
+
+<h3>③ 건물과 3D — 앱의 절반</h3>
+<table>
+<tr><th style="width:24%">파일</th><th class="n" style="width:8%">줄</th><th>하는 일 · 어디에 쓰이나</th></tr>
+<tr class="hi"><td class="f">building.js</td><td class="n">429</td><td><b>건물 자료표.</b> 실제 평면도 PDF 를 보고 옮긴 좌표입니다. <b>3D·길안내·층 평면도가 모두 이 한 파일을 봅니다</b> — 숫자만 고치면 전부 따라 바뀝니다.</td></tr>
+<tr><td class="f">view3d.js</td><td class="n">722</td><td>3D 공통 + <b><code>NAVGRAPH</code></b>(경로 그래프) — 어느 지점에서 어디로 갈 수 있는지</td></tr>
+<tr><td class="f">overview3d.js</td><td class="n">1,576</td><td><b>건물 전체 3D.</b> 층을 쌓아 그리고 목적지에 불을 켭니다. 모델 파일 없이 좌표에서 매번 생성합니다.</td></tr>
+<tr><td class="f">floor-detail.js</td><td class="n">322</td><td>층 평면도(위에서 내려다본 그림)</td></tr>
+<tr><td class="f">3d/realistic.html</td><td class="n">—</td><td><b>실사 3D — 별도 페이지.</b> <code>shell.js</code> 가 iframe 으로 띄웁니다. 재질 그림 21장을 씁니다.</td></tr>
+</table>
+
+<h3>④ 1인칭 로드뷰 — 8개 파일 10,795줄 (전체의 45%)</h3>
+<table>
+<tr><th style="width:24%">파일</th><th class="n" style="width:8%">줄</th><th>어느 공간을 짓는가</th></tr>
+<tr><td class="f">roadview.js</td><td class="n">2,399</td><td>기본값 · 그림(텍스처) · 소품 만들기 — 나머지 7개가 이것을 씁니다</td></tr>
+<tr><td class="f">roadview-b1.js</td><td class="n">2,401</td><td>지하 1층 크리에이티브 존 · 트인 공간</td></tr>
+<tr><td class="f">roadview-roof.js</td><td class="n">1,691</td><td>옥상 · 복층</td></tr>
+<tr><td class="f">roadview-free.js</td><td class="n">1,546</td><td><b>자유 탐색</b> — 바닥을 눌러 이동, 엘리베이터·계단으로 층 이동</td></tr>
+<tr><td class="f">roadview-stairs.js</td><td class="n">924</td><td>계단실</td></tr>
+<tr><td class="f">roadview-corr.js</td><td class="n">768</td><td>복도 · 엘리베이터 홀</td></tr>
+<tr><td class="f">roadview-1f.js</td><td class="n">654</td><td>1층 출입문 · 중앙계단 홀</td></tr>
+<tr><td class="f">roadview-play.js</td><td class="n">412</td><td><b>자동 재생</b> — 안내 경로를 대본대로 걸어감</td></tr>
+<tr class="tot"><td>합계</td><td class="n">10,795</td><td>자동 재생과 자유 탐색이 카메라·문 갱신에 <b>같은 함수</b>를 씁니다</td></tr>
+</table>
+
+<h3>⑤ 길안내와 사진</h3>
+<table>
+<tr><th style="width:24%">파일</th><th class="n" style="width:8%">줄</th><th>하는 일 · 어디에 쓰이나</th></tr>
+<tr class="hi"><td class="f">guide.js</td><td class="n">630</td><td><b>길 만들기 <code>buildSteps()</code>.</b> 경로 탐색 알고리즘을 쓰지 않습니다 — 표 네 개(출발·수직이동·복도·도착)의 조합입니다. <b>「왼쪽에서 세 번째 방」처럼 방 개수를 세어 주는 것</b>이 특징입니다.</td></tr>
+<tr><td class="f">photos.js</td><td class="n">1,064</td><td><b>사진 목록 · 사진 상자 · 관리자 사진 넣기.</b> <b>방 이름이 사진 파일 이름에서 나옵니다</b> — 파일명의 5자리 호실번호로 자동 분류합니다. <code>PHFIX</code> 를 만듭니다.</td></tr>
+<tr><td class="f">qrnav.js</td><td class="n">434</td><td><b>출입문 QR.</b> 인쇄물이 주소 형식이라 <b>기본 카메라로 찍어도</b> 앱이 열립니다. <code>QRNAV</code> 를 만들고 <b>11개 파일이 이것을 씁니다.</b></td></tr>
+</table>
+
+<h3>⑥ AI 와 제보 — 특허로 내려는 부분</h3>
+<table>
+<tr><th style="width:24%">파일</th><th class="n" style="width:8%">줄</th><th>하는 일 · 어디에 쓰이나</th></tr>
+<tr class="hi"><td class="f">sugai.js</td><td class="n">2,340</td><td><b>AI 장소 판정.</b> ①품질검사(흔들림·밝기) ②MobileNet 으로 사진을 숫자 1,280개로 ③기준 벡터 5,752개와 대조 ④<b>1·2등 격차로 「자리/층/모름」</b> ⑤번호판 OCR. <code>SUGAI</code> 를 만들고 <b>9개 파일이 씁니다.</b></td></tr>
+<tr><td class="f">suggest.js</td><td class="n">947</td><td><b>건의함 · 관리자 검토 화면.</b> 제보를 먼저 폰 안 대기열에 저장했다가 연결되면 보냅니다.</td></tr>
+<tr class="hi"><td class="f">sugdb.js</td><td class="n">379</td><td><b>서버와 통신하는 유일한 파일.</b> Firebase SDK 를 필요할 때만 받습니다. 사진을 900KB 이하로 줄여 보냅니다. <b>「사진이 어디로 가나」는 이 파일만 보면 됩니다.</b></td></tr>
+<tr><td class="f">aid.js</td><td class="n">641</td><td>AI 자료집 화면(관리자) — 어느 장소에 기준 사진이 몇 장 있는지</td></tr>
+</table>
+
+<h2 class="pb">2.3 자료 파일 — 코드가 아니라 도구가 만든 것</h2>
+<table>
+<tr><th style="width:24%">파일</th><th class="n" style="width:10%">크기</th><th>무엇 · 누가 만드나</th></tr>
+<tr><td class="f">data/aivec.js</td><td class="n">10.0MB</td><td><b>AI 기준 벡터 5,752개</b> (숫자 736만 개). 장소 152곳의 사진을 미리 계산해 둔 것. <code>도구\AI자료_넣기.ps1</code> 이 만듭니다. <b>오프라인 저장에서 제외</b> — 그래서 AI 는 인터넷이 필요합니다.</td></tr>
+<tr><td class="f">data/ailib.js</td><td class="n">2.0MB</td><td>기준 사진 239장의 이름표(장소·파일명·시점)</td></tr>
+<tr><td class="f">data/photos.js</td><td class="n">16KB</td><td>사진 색인 167곳. <code>도구\고른사진_넣기.ps1</code> 이 만듭니다.</td></tr>
+<tr><td class="f">data/places.js</td><td class="n">1.5KB</td><td>장소 152곳. 호실 외에 <code>EV1</code>(엘리베이터 1층)·<code>WC3</code>(3층 화장실)·<code>HALL4L</code>(4층 왼쪽 복도) 같은 <b>복도·시설 코드</b>도 있습니다.</td></tr>
+<tr><td class="f">data/photos/</td><td class="n">169장</td><td>안내 사진. <b>파일은 169개인데 안내에는 174곳에 쓰입니다</b> — 한 사진을 여러 자리에서 돌려 쓰기 때문입니다.</td></tr>
+</table>
+<div class="note">생성된 파일에는 <b>「손으로 고치지 않는다」</b>가 주석으로 박혀 있습니다.
+손으로 고치면 도구를 다음에 돌릴 때 날아갑니다.</div>
+
+<h2>2.4 빌려 온 라이브러리 10개</h2>
+<table>
+<tr><th style="width:30%">파일</th><th class="n" style="width:10%">크기</th><th>무엇에 쓰나</th><th class="c" style="width:14%">오프라인 저장</th></tr>
+<tr><td class="f">vendor/three.min.js</td><td class="n">—</td><td>3D 그리기 — 모든 3D 화면</td><td class="c">저장함</td></tr>
+<tr><td class="f">vendor/jsqr.min.js</td><td class="n">—</td><td>앱 안에서 QR 읽기</td><td class="c">저장함</td></tr>
+<tr><td class="f">vendor/jszip.min.js</td><td class="n">—</td><td>사진 묶음 내려받기(관리자)</td><td class="c">저장함</td></tr>
+<tr><td class="f">lib/tf.min.js</td><td class="n">1.5MB</td><td>AI 계산 엔진</td><td class="c"><b>안 함</b></td></tr>
+<tr><td class="f">lib/mobilenet.min.js</td><td class="n">34KB</td><td>사진 → 숫자 1,280개</td><td class="c"><b>안 함</b></td></tr>
+<tr><td class="f">lib/tess/ (5개)</td><td class="n">—</td><td>호실 번호판 글자 읽기(OCR)</td><td class="c"><b>안 함</b></td></tr>
+</table>
+<div class="note"><b>AI 쪽 라이브러리를 오프라인 저장에서 뺀 이유</b>는 합쳐서 약 12MB 이기 때문입니다.
+그래서 <b>길안내는 인터넷 없이, AI 판정은 인터넷이 있어야</b> 됩니다.
+<code>lib/</code> 에 사본을 두고 없으면 외부 CDN 으로 받게 이중으로 해 두었습니다 — 학교 인터넷이 막힐 때 대비입니다.</div>
+</section>
+
+<!-- ══════════════ 3 ══════════════ -->
+<section class="pb">
+<p class="part">3</p>
+<h1>tests/ — 자동 시험과 안전망</h1>
+<p class="lead">파일이 826개로 가장 많습니다. 그중 816개가 <b>「고치기 전 결과를 기록해 둔 것」</b>입니다.</p>
+
+<table>
+<tr><th style="width:24%">파일</th><th>무엇</th></tr>
+<tr><td class="f">check.html</td><td>빌드 검사 — 앱이 제대로 켜지는지, 화면이 다 있는지</td></tr>
+<tr><td class="f">pwa.html</td><td>앱 설치 · 인터넷 없이 열기 · 출입문 QR 검사</td></tr>
+<tr><td class="f">roadview.html</td><td>1인칭 로드뷰 점검</td></tr>
+<tr><td class="f">boot_time.html</td><td>부팅 시간 측정</td></tr>
+<tr class="hi"><td class="f">golden.js · golden.html</td><td><b>안전망</b> — 아래 설명</td></tr>
+<tr class="hi"><td class="f">golden/ (816개)</td><td><b>비교 기준</b> — JSON 기록 + 화면 그림 PNG</td></tr>
+<tr><td class="f">run_*.ps1 (4개)</td><td>명령으로 돌리는 실행기 — <code>검사.ps1</code> 이 이것을 부릅니다</td></tr>
+</table>
+
+<h2>3.1 안전망(golden)이 무엇인가</h2>
+<p>앱을 크게 고치기 전에 <b>지금 앱이 내는 결과를 전부 기록</b>해 두고, 고친 뒤 같은 방법으로 돌려
+<b class="hl">한 글자·한 점까지 비교</b>합니다. 기록하는 것은 세 가지입니다.</p>
+<table>
+<tr><th class="c" style="width:12%">무엇</th><th>기록하는 내용</th></tr>
+<tr><td class="c"><b>logic</b></td><td>모든 목적지 × 출발층의 <b>길안내 문장(한/영)</b>, 152곳의 3D 위치·이름·층·접수 범위, 관리자 장소 목록, 사진 설명, 층 배치, 길찾기 경로, 코드 읽기 함수</td></tr>
+<tr><td class="c"><b>photos</b></td><td>앱에 들어 있는 <b>사진 파일의 바이트 지문</b> — 사진을 파일로 빼내도 같은 사진인지 확인</td></tr>
+<tr><td class="c"><b>dom</b></td><td>화면의 모든 id, 글자, 요소마다의 <b>계산된 CSS 값</b></td></tr>
+</table>
+
+<div class="good"><b>왜 만들었나</b> — 코드가 24,000줄이 되니 어디를 고치면 어디가 깨지는지 알 수 없게 되었습니다.
+실제로 길안내 문장 하나가 조용히 바뀐 적이 있었습니다. 글자는 눈으로 못 잡습니다.
+그래서 <b>기계가 전부 대조</b>하게 만들었습니다.</div>
+
+<div class="say"><b class="q">교수님 : 「시험은 어떻게 하셨나요?」</b><br>
+→ 「<b>자동 검사 19가지와 안전망이 있습니다.</b> 안전망은 고치기 전 결과를 816개 파일로 기록해 두고,
+고친 뒤 한 글자·한 점까지 비교합니다. 그리고 <b>검사를 통과하지 못하면 사이트가 바뀌지 않도록</b> 배포 길목에 박아 두었습니다.」</div>
+</section>
+
+<!-- ══════════════ 4 ══════════════ -->
+<section class="pb">
+<p class="part">4</p>
+<h1>루트 — 측정 도구 16개</h1>
+<p class="lead">저장소 맨 위에 있는 파일들입니다. <b>정확도를 어떻게 쟀는지</b>를 보여 주는 자리입니다.</p>
+
+<h2>4.1 검사와 실행</h2>
+<table>
+<tr><th style="width:26%">파일</th><th>무엇</th></tr>
+<tr class="hi"><td class="f">검사.ps1</td><td><b>자동 검사 19가지</b> — 파일 검사 16 + 진짜 브라우저(Edge) 검사 3. 올리기 전에 돌립니다.</td></tr>
+<tr><td class="f">검사_실행.bat</td><td>더블클릭으로 검사</td></tr>
+<tr><td class="f">preview.ps1 · 미리보기_실행.bat</td><td>로컬 미리보기 서버(8080) — 브라우저 검사가 이것을 씁니다</td></tr>
+<tr><td class="f">README.md</td><td>저장소 설명</td></tr>
+<tr><td class="f">.gitignore · .gitattributes</td><td>깃 설정 — 올리지 않을 것, 줄바꿈 보호</td></tr>
+</table>
+
+<h2>4.2 정확도 측정 도구 — 숫자가 나온 곳</h2>
+<table>
+<tr><th style="width:26%">파일</th><th>무엇을 쟀나</th></tr>
+<tr><td class="f">eval.html</td><td>사진 위치판별 정확도 — <b>1차 측정</b></td></tr>
+<tr><td class="f">eval2.html</td><td>2차 — 표지판 크롭 · 배율 · 주성분 제거를 시험</td></tr>
+<tr class="hi"><td class="f">eval_all.html</td><td><b>정확도 측정 한 번에</b> — <b>55.6% · 92.9% · 28.2%p</b> 가 나온 도구</td></tr>
+<tr><td class="f">eval_ablation.html</td><td>기준선과 제거 실험 — 어느 요소가 성능에 기여했는지</td></tr>
+<tr><td class="f">eval_audit.html</td><td>사진 배치 감사 — 「이 사진이 이 폴더에 맞나」</td></tr>
+<tr><td class="f">gen.html</td><td>새 기준 데이터 생성 — 사진에서 벡터를 뽑습니다</td></tr>
+<tr><td class="f">ocrtest.html</td><td>번호판 읽기 시험 — OCR 설정을 맞춘 곳</td></tr>
+<tr><td class="f">sheet.html · batches.json</td><td>사진 작업 목록 — 어느 장소를 찍었고 남았는지</td></tr>
+</table>
+
+<div class="say"><b class="q">교수님 : 「정확도는 어떻게 측정하셨나요?」</b><br>
+→ 「<code>eval_all.html</code> 로 측정했습니다. <b>조원이 찍은 사진 1,844장</b>을 넣고,
+<b>문턱을 정한 사진과 평가한 사진을 나눠서</b> 쟀습니다 — 문턱을 맞춘 데이터로 다시 재면 좋은 값이 나오니까요.
+측정 원본 JSON 도 저장소에 남아 있습니다.」</div>
+
+<div class="warn"><b>솔직히 말해야 할 것</b> — 처음에는 시험 사진이 이미 AI 자료집에 들어 있는 상태로 측정해
+「정답 100%」가 나왔습니다. <b>자기 사진을 자기가 알아본 것</b>이었습니다.
+새로 찍은 사진으로 다시 재니 자동 확정의 정답률은 <b>0%</b> 였습니다.
+그래서 <b>AI 단독 확정을 코드에서 없앴습니다.</b> 이 과정이 <code>문서/</code> 의 .txt 기록에 남아 있습니다.</div>
+</section>
+
+<!-- ══════════════ 5 ══════════════ -->
+<section class="pb">
+<p class="part">5</p>
+<h1>도구/ — 자료를 만드는 기계 24개</h1>
+<p class="lead">앱이 읽는 자료는 사람이 손으로 쓸 수 없는 크기입니다(AI 벡터만 숫자 736만 개).
+그래서 <b>스크립트가 만듭니다.</b> 사람은 사진만 고르면 됩니다.</p>
+
+<table>
+<tr><th style="width:30%">스크립트</th><th>무엇을 만드나</th></tr>
+<tr class="hi"><td class="f">AI자료_넣기.ps1</td><td>사진 → <code>data/aivec.js</code> · <code>places.js</code></td></tr>
+<tr class="hi"><td class="f">고른사진_넣기.ps1</td><td>원본 사진 → <code>data/photos/</code> · <code>photos.js</code></td></tr>
+<tr class="hi"><td class="f">오프라인목록.ps1</td><td><code>sw.js</code> 의 파일 목록 + SHA-256 지문 — <b>site/ 를 고치면 반드시 다시 돌려야 합니다</b></td></tr>
+<tr><td class="f">QR_만들기.ps1 · .html<br>QR_encode.js · make_qr.py</td><td>출입문 QR 인쇄물 4장</td></tr>
+<tr><td class="f">사진고르기_만들기.ps1<br>사진고르기_틀.html</td><td>사진 고르는 화면 — 장소마다 가장 잘 나온 사진을 고르는 데 썼습니다</td></tr>
+<tr><td class="f">라운지_분리.ps1 + 기록 6개</td><td>라운지와 엘리베이터를 다른 장소로 나눈 작업과 그 기록</td></tr>
+<tr><td class="f">발표PDF_만들기.ps1<br>특허PDF_만들기.ps1<br>PDF_쪽그림.ps1</td><td>문서(HTML) → PDF. 쪽그림은 만든 PDF 를 그림으로 떠서 <b>눈으로 확인</b>하는 도구입니다.</td></tr>
+<tr><td class="f">발명신고서_채우기.ps1</td><td>한글(HWP)을 자동으로 채웁니다 — 산학협력단 제출 서식</td></tr>
+<tr><td class="f">구조도_만들기.ps1<br>구조도_틀.html</td><td><b>발표용 구조도</b> — 소스 36개를 통째로 넣어 <code>문서\구조도.html</code> 을 만듭니다</td></tr>
+<tr><td class="f">방이름.json<br>BLD_사진목록.json</td><td>방 이름 · 건물 외부 사진 목록 (자료)</td></tr>
+</table>
+
+<div class="note"><b>왜 PowerShell 인가</b> — 개발 PC 가 윈도우이고, 추가로 설치할 것 없이 바로 돌아갑니다.
+사용자 폰에는 들어가지 않으므로 무엇으로 만들든 상관없습니다.</div>
+</section>
+
+<!-- ══════════════ 6 ══════════════ -->
+<section class="pb">
+<p class="part">6</p>
+<h1>문서/ · 서버/ · QR인쇄/ · .github/</h1>
+
+<h2>6.1 문서/ — 37개</h2>
+<table>
+<tr><th style="width:30%">묶음</th><th>내용</th></tr>
+<tr><td><b>특허 서류 4</b></td><td>선행기술조사 · 발명의내용설명서 · 발명신고서 작성안내 · 변리사 상담준비 (HTML → PDF)</td></tr>
+<tr><td><b>발표 자료 4</b></td><td>상세설계 발표(33장) · 중간발표 · 시스템과 과정 · 예상질문</td></tr>
+<tr><td><b>구조도 1</b></td><td><code>구조도.html</code> — 블록을 누르면 소스가 뜨는 발표용 (이 문서와 짝)</td></tr>
+<tr class="hi"><td><b>측정·작업 기록 28 (.txt)</b></td><td>AI정확도 측정결과(1·2차) · v58 적용결과 · 글자읽기 개선결과 · 사진배치 감사결과 ·
+<b>한계와 대응</b> · 사진촬영 안내(층별·조원용) · 3D 성능 재는 법 · 폰 속도측정 방법 · 졸업작품 계획 등</td></tr>
+</table>
+
+<div class="good">이 <b>.txt 기록 28개가 「실패도 기록했다」는 증거</b>입니다.
+무엇을 시도했고 왜 안 됐는지가 날짜와 함께 남아 있습니다. 발표에서 강점이 됩니다.</div>
+
+<h2>6.2 서버/ — 3개</h2>
+<table>
+<tr><th style="width:30%">파일</th><th class="n" style="width:8%">줄</th><th>무엇</th></tr>
+<tr class="hi"><td class="f">firestore.rules</td><td class="n">61</td><td><b>서버에서 도는 유일한 우리 코드.</b> 제보는 로그인 없이 올리되 모양이 정확히 맞는 것만 통과시킵니다(칸 8개 · 950KB 미만 · 사진 형식). 관리자는 「로그인한 사람」이 아니라 <b>「명단에 있는 사람」</b>입니다.</td></tr>
+<tr><td class="f">규칙_붙여넣기용.txt</td><td class="n">—</td><td>Firebase 콘솔에 붙여넣을 내용</td></tr>
+<tr><td class="f">보안_설정_안내.txt</td><td class="n">—</td><td>콘솔에서 설정하는 순서 · 규칙 시험 방법</td></tr>
+</table>
+<div class="note">이 파일은 저장소에 있지만 <b>깃허브가 서버에 올려 주지 않습니다.</b>
+Firebase 콘솔에 사람이 붙여넣어야 적용됩니다. 저장소에 둔 이유는 <b>기록과 검토를 위해서</b>입니다.</div>
+
+<h2>6.3 QR인쇄/ — 6개</h2>
+<table>
+<tr><th style="width:30%">파일</th><th>무엇</th></tr>
+<tr><td class="f">정문_MAIN.png · 후문_BACK.png<br>동문_EAST.png · 서문_WEST.png</td><td>문마다 다른 QR 그림. 각각 <code>?gate=MAIN</code> 같은 주소가 들어 있습니다.</td></tr>
+<tr><td class="f">출입문QR_4장_A4.pdf</td><td>A4 한 장에 4개 — <b>바로 인쇄해서 붙이면 됩니다</b></td></tr>
+<tr><td class="f">인쇄_안내.txt</td><td>어디에 어떻게 붙이는지</td></tr>
+</table>
+
+<h2>6.4 .github/ — 1개</h2>
+<table>
+<tr><th style="width:30%">파일</th><th>무엇</th></tr>
+<tr class="hi"><td class="f">workflows/check-and-deploy.yml</td><td><b>검사 후 배포.</b> <code>main</code> 에 올리면 윈도우 컴퓨터에서 미리보기 서버를 띄우고 검사 19가지를 다시 돌립니다. <b>통과해야만</b> <code>site/</code> 가 사이트로 나갑니다.</td></tr>
+</table>
+<div class="good"><b>왜 서버에서 또 검사하나</b> — 내 PC 에서 검사를 돌리는 건 깜빡할 수 있습니다.
+급할 때 건너뛰고 올리면 망가진 앱이 그대로 나갑니다. <b>올리는 길목에 박아 두면 사람이 깜빡해도 막힙니다.</b></div>
+</section>
+
+<!-- ══════════════ 7 ══════════════ -->
+<section class="pb">
+<p class="part">7</p>
+<h1>연결 관계 — 누가 누구를 부르는가</h1>
+<p class="lead">파일 사이를 잇는 것은 <b>전역 묶음 7개</b>입니다. 이름만 알면 어디서 무엇을 쓰는지 따라갈 수 있습니다.</p>
+
+<table>
+<tr><th style="width:14%">묶음</th><th style="width:20%">만드는 파일</th><th class="c" style="width:10%">쓰는 곳</th><th>무엇을 제공하나</th></tr>
+<tr class="hi"><td class="f"><b>QRNAV</b></td><td class="f">qrnav.js</td><td class="c"><b>11곳</b></td><td>어느 문으로 들어왔는지 · QR 찍기 화면 — shell · ui · boot · start · sugai · suggest · view3d · roadview-play 등</td></tr>
+<tr class="hi"><td class="f"><b>SUGAI</b></td><td class="f">sugai.js</td><td class="c"><b>9곳</b></td><td>AI 판정 · 격차 · 장소 이름 · 접수 범위 — suggest · sugdb · photos · aid · shell · zoom · boot 등</td></tr>
+<tr><td class="f"><b>SUGDB</b></td><td class="f">sugdb.js</td><td class="c">2곳</td><td>서버 통신 — shell · suggest <b>만</b> 씁니다</td></tr>
+<tr><td class="f"><b>PWA</b></td><td class="f">pwa.js</td><td class="c">4곳</td><td>앱 설치 안내</td></tr>
+<tr><td class="f"><b>DIAG</b></td><td class="f">pwa.js</td><td class="c">4곳</td><td>문제 기록 — 오류를 모아 둡니다</td></tr>
+<tr><td class="f"><b>NAVGRAPH</b></td><td class="f">view3d.js</td><td class="c">—</td><td>경로 그래프 — 어느 지점에서 어디로 갈 수 있는지</td></tr>
+<tr><td class="f"><b>PHFIX</b></td><td class="f">photos.js</td><td class="c">—</td><td>사진 보정</td></tr>
+</table>
+
+<h2>7.1 자료가 흐르는 길</h2>
+<div class="tree">
+<b>[자료]</b>  data/photos.js · places.js · aivec.js
+      ↓
+<b>[건물]</b>  building.js  (좌표표 — 아래 셋이 전부 이것을 본다)
+      ├──→ overview3d.js · floor-detail.js   <span class="x">3D 그림</span>
+      ├──→ roadview*.js (8개)                <span class="x">1인칭 걷기</span>
+      └──→ guide.js                          <span class="x">안내 단계</span>
+      ↓
+<b>[화면]</b>  shell.js (go) · ui.js · index.html
+      ↓
+<b>[입력]</b>  qrnav.js (QRNAV)  ←  출입문 QR
+      ↓
+<b>[AI]</b>    sugai.js (SUGAI)  ←  사진 + aivec.js
+      ↓
+<b>[제보]</b>  suggest.js  →  <b>sugdb.js (SUGDB)</b>  →  <span class="x">서버(Firestore)</span>
+                                   ↑
+                              <b>서버로 나가는 유일한 길</b>
+</div>
+
+<h2>7.2 이것만 기억하시면 됩니다</h2>
+<table>
+<tr><th class="c" style="width:7%">#</th><th>한 줄</th></tr>
+<tr><td class="c">1</td><td><b><code>index.html</code> 의 순서가 곧 실행 순서</b>입니다 — 묶음 도구를 안 씁니다.</td></tr>
+<tr><td class="c">2</td><td><b><code>building.js</code> 하나가 건물의 전부</b>입니다 — 3D·길안내·평면도가 모두 이것을 봅니다.</td></tr>
+<tr><td class="c">3</td><td><b><code>sugdb.js</code> 하나만 서버와 통신</b>합니다 — 사진이 어디로 가는지는 이 파일만 보면 됩니다.</td></tr>
+<tr><td class="c">4</td><td><b>로드뷰 8개가 전체의 45%</b> 입니다 — 제일 품이 많이 든 부분입니다.</td></tr>
+<tr><td class="c">5</td><td><b>서버에서 도는 우리 코드는 <code>firestore.rules</code> 61줄</b>뿐입니다.</td></tr>
+</table>
+</section>
+
+<!-- ══════════════ 8 ══════════════ -->
+<section class="pb">
+<p class="part">8</p>
+<h1>교수님 질문에 그대로 쓸 답</h1>
+
+<h2>8.1 규모</h2>
+<div class="say"><b class="q">「전체 규모가 얼마나 되나요?」</b><br>
+→ 「저장소는 <b>1,153개 파일 34MB</b> 인데, <b>앱은 240개</b>입니다.
+그중 <b>직접 쓴 코드는 36개 파일 24,798줄</b>이고, 나머지는 자료·시험 기준·기록입니다.」</div>
+
+<div class="say"><b class="q">「제일 큰 부분은 어디인가요?」</b><br>
+→ 「<b>1인칭 로드뷰입니다. 8개 파일 10,795줄로 전체의 45%</b> 입니다.
+복도·계단·엘리베이터 홀·지하·옥상을 전부 코드로 지었습니다.
+3D 모델 파일을 쓰지 않고 좌표에서 매번 만들기 때문에, <b>건물 자료만 고치면 3D 가 따라 바뀝니다.</b>」</div>
+
+<h2>8.2 구조</h2>
+<div class="say"><b class="q">「서버는 어떻게 만드셨나요?」</b><br>
+→ 「<b>안 만들었습니다.</b> GitHub Pages 와 Firebase 를 빌려 씁니다.
+<b>서버에서 도는 우리 코드는 보안 규칙 61줄 하나</b>뿐이고, 계산은 전부 폰이 합니다. 서버 비용은 0원입니다.」</div>
+
+<div class="say"><b class="q">「폰에서만 도는 건 뭐고, 서버에만 있는 건 뭔가요?」</b><br>
+→ 「<b>길안내는 전부 폰</b>입니다 — 인터넷 없이 됩니다.
+<b>AI 추론도 폰</b>에서 합니다. 모델을 내려받아 폰이 계산하므로 <b>사진을 판정하러 서버에 보내지 않습니다.</b><br>
+서버에는 <b>제보함·사진 창고·관리자 명단·보안 규칙</b>만 있습니다.
+폰과 서버가 만나는 곳은 <b>제보를 올릴 때와 승인된 사진을 받아올 때, 두 번</b>뿐입니다.」</div>
+
+<div class="say"><b class="q">「측위는 어떻게 하나요?」</b> <span style="color:var(--no)">← 가장 날카로운 질문</span><br>
+→ 「<b>측위를 하지 않습니다.</b> Wi-Fi·비콘·관성센서를 안 씁니다.
+출발점은 <b>출입문 QR 로 선언</b>하거나 사용자가 고르고, 그 뒤는 정해진 경로 표를 따라갑니다.
+그래서 센서 오차 문제가 없는 대신, <b>「지금 어디인지」는 모릅니다.</b>
+아는 척하지 않으려고 일부러 그렇게 설계했습니다.」</div>
+
+<h2>8.3 품질</h2>
+<div class="say"><b class="q">「시험은 하셨나요?」</b><br>
+→ 「<b>자동 검사 19가지</b>와 <b>안전망</b>이 있습니다.
+안전망은 고치기 전 결과를 <b>816개 파일</b>로 기록해 두고, 고친 뒤 <b>한 글자·한 점까지</b> 비교합니다.
+그리고 <b>검사를 통과하지 못하면 사이트가 바뀌지 않도록</b> 배포 길목에 박아 두었습니다.」</div>
+
+<div class="say"><b class="q">「AI 정확도는 얼마인가요?」</b><br>
+→ 「<b>전부 답하게 하면 55.6%</b> 입니다. 낮습니다.
+그런데 <b>1등과 2등의 격차</b>로 확신을 재서 <b>확신 상위 10%만 답하게 하면 92.9%</b> 가 됩니다.
+<b>모델도 자료도 그대로인데 자를 바꾼 것만으로 28.2%p</b> 가 올랐습니다.
+이것이 저희가 주장할 수 있는 <b>유일한 효과</b>이고, 특허로 내려는 부분입니다.」</div>
+
+<div class="say"><b class="q">「AI 가 틀리면 어떻게 하나요?」</b><br>
+→ 「<b>AI 가 혼자 확정하지 못하게 코드에서 막았습니다.</b>
+잘못 확정하면 엉뚱한 장소의 안내 사진이 바뀌어 <b>모든 이용자에게 퍼지기</b> 때문입니다.
+확정은 <b>호실 번호판을 읽거나 사람이 고를 때만</b> 되고, 마지막으로 <b>관리자가 승인</b>해야 반영됩니다.」</div>
+
+<h2>8.4 솔직하게 말해야 좋은 것</h2>
+<div class="warn"><b class="q">「처음부터 이렇게 설계하셨나요?」</b><br>
+→ 「<b>아닙니다.</b> 처음에는 유사도가 높으면 자동으로 확정했고 정답률 100% 가 나왔습니다.
+그런데 <b>시험 사진이 이미 AI 자료집에 들어 있었습니다.</b> 자기 사진을 자기가 알아본 것이었습니다.
+새로 찍은 사진으로 다시 재니 <b>0%</b> 였습니다. 그래서 자동 확정 기능을 <b>없앴습니다.</b>
+이 과정이 저장소의 측정 기록에 날짜와 함께 남아 있습니다.」
+<br><br>
+<b>이 답이 가장 강합니다.</b> 「측정할 줄 알고, 틀린 걸 인정하고, 기능을 덜어낼 줄 안다」가 한 번에 전달됩니다.</div>
+
+<h2>8.5 보여 드릴 것</h2>
+<table>
+<tr><th class="c" style="width:7%">☐</th><th style="width:34%">무엇</th><th>언제 꺼내나</th></tr>
+<tr class="hi"><td class="c">☐</td><td><b>구조도.html</b> (노트북)</td><td>구조 질문 전부. 블록을 누르면 <b>소스 36개 전문</b>이 그 자리에서 뜹니다</td></tr>
+<tr><td class="c">☐</td><td>이 문서 (저장소 코드 안내)</td><td>「어떤 파일이 있나요」 — 손에 들고 보십시오</td></tr>
+<tr class="hi"><td class="c">☐</td><td><b>앱을 켠 휴대폰</b></td><td><b>1분 시연이 설명 열 마디보다 낫습니다.</b> 미리 켜 두십시오</td></tr>
+<tr><td class="c">☐</td><td>졸업작품_상세설계_발표.pdf (33쪽)</td><td>기승전결 발표 본문</td></tr>
+<tr><td class="c">☐</td><td>깃허브 저장소 화면</td><td>「코드를 보여 주세요」 — Actions 탭에서 검사 통과 이력도 보입니다</td></tr>
+</table>
+
+<div class="note" style="margin-top:12px">외울 숫자 다섯 개 — <b>1,153(저장소 파일) · 240(앱 파일) · 24,798(직접 쓴 줄) ·
+55.6%→92.9%(정확도) · 0원(서버 비용)</b></div>
+</section>
+
+</body>
+</html>

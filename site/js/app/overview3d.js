@@ -1389,7 +1389,11 @@ function animate(){
         var it = fpCullList[ki];
         var dx = it.x-fpCullEye.x, dy = it.y-fpCullEye.y, dz = it.z-fpCullEye.z;
         var d2 = dx*dx + dy*dy + dz*dz;
-        it.o.visible = (it.r < 0.5) ? (d2 < 196) : (d2 < 1600);   // 14m · 40m
+        /* ★ 2026-10-06 : 한계는 fpCullList 를 만들 때 **물체 크기까지 더해** 미리 재 뒀다
+           (roadview-corr.js 참고). 중심까지의 거리로만 자르면 길이 100m 짜리 복도 바닥이
+           복도 끝에서 통째로 꺼진다. 옛 판으로 돌아가면 그 버그가 되살아난다. */
+        it.o.visible = (d2 < (it.lim2 !== undefined ? it.lim2
+                              : ((it.r < 0.5 ? 14 : 40) + it.r) * ((it.r < 0.5 ? 14 : 40) + it.r)));
       }
     }
   }else if(typeof fpCullEye !== 'undefined' && fpCullEye){

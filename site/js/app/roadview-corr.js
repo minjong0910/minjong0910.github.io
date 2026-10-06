@@ -759,7 +759,17 @@ function fpBuildCorr(levels){
       var bs = o.geometry.boundingSphere; if(!bs) return;
       _c.copy(bs.center).applyMatrix4(o.matrixWorld);
       var sc = o.matrixWorld.getMaxScaleOnAxis();
-      fpCullList.push({o:o, x:_c.x, y:_c.y, z:_c.z, r:bs.radius*sc});
+      /* ★ 2026-10-06 버그 수정 : 한계거리에 **물체 반지름을 더해** 둔다.
+         예전에는 걸을 때 「눈 ~ 물체 중심」 거리만 보고 잘랐는데, 복도 바닥·천장은
+         길이 100m 짜리 판 한 장이라 중심이 복도 한가운데에 있다. 그래서 복도 끝에
+         서면 중심까지 40m 가 넘어 **내가 밟고 선 바닥이 통째로 꺼졌다**(1층~옥상 모두,
+         복도 양쪽 끝. 2026-10-06 제보 사진). 벽·문은 조각조각이라 멀쩡해서,
+         바닥·천장만 사라지고 그 자리에 허공이 보였다.
+         물체의 **표면**까지의 거리로 재야 맞다 — 중심거리 < 한계+반지름 과 같은 말이다.
+         제곱으로 미리 재 두면 걸을 때는 곱셈도 분기도 없이 비교 한 번이라 예전보다 싸다. */
+      var _r   = bs.radius*sc;
+      var _lim = (_r < 0.5 ? 14 : 40) + _r;          // 작은 장식 14m · 그 밖 40m
+      fpCullList.push({o:o, x:_c.x, y:_c.y, z:_c.z, r:_r, lim2:_lim*_lim});
     });
   }catch(e){ fpCullList = []; }
   fpCorrG.visible=false;

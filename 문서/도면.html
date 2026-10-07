@@ -20,7 +20,7 @@
   svg { display:block; width:100%; height:auto; }
   svg text { font-family:"Malgun Gothic","맑은 고딕",sans-serif; fill:#111; }
   svg .lbl { font-size:19px; }
-  svg .sm  { font-size:16px; fill:#333; }
+  svg .sm  { font-size:15px; fill:#333; }
   svg .big { font-size:23px; font-weight:700; }
   svg .dat { font-size:17px; }
   svg .zon { font-size:17px; fill:#555; }
@@ -51,76 +51,63 @@
 <section class="page">
   <div class="ttl">구조도</div>
   <div class="sub">전체 구성 — 휴대폰과 서버가 만나는 곳은 두 줄뿐이다</div>
-  <svg viewBox="0 0 820 940">
+  <svg viewBox="0 0 900 880">
     <defs><marker id="A" markerWidth="12" markerHeight="10" refX="11.5" refY="5" orient="auto">
       <polygon points="0 0, 12 5, 0 10" fill="#111"/></marker></defs>
 
-    <!-- 문 QR -->
-    <rect x="16" y="140" width="112" height="86" fill="none" stroke="#111" stroke-width="2.2"/>
-    <text class="lbl" x="72" y="176" text-anchor="middle">문에 붙인</text>
-    <text class="lbl" x="72" y="202" text-anchor="middle">QR 4장</text>
-
     <!-- 휴대폰 -->
-    <rect x="150" y="60" width="300" height="712" fill="none" stroke="#111" stroke-width="3"/>
-    <text class="big" x="300" y="98" text-anchor="middle">휴대폰</text>
+    <rect x="20" y="60" width="340" height="778" fill="none" stroke="#111" stroke-width="3"/>
+    <text class="big" x="190" y="100" text-anchor="middle">휴대폰</text>
     <g fill="none" stroke="#111" stroke-width="1.8">
-      <rect x="175" y="120" width="250" height="68"/>
-      <rect x="175" y="206" width="250" height="68"/>
-      <rect x="175" y="292" width="250" height="68"/>
-      <rect x="175" y="378" width="250" height="78"/>
-      <rect x="175" y="474" width="250" height="68"/>
-      <rect x="175" y="560" width="250" height="78" stroke-width="3"/>
-      <rect x="175" y="656" width="250" height="68"/>
+      <rect x="45" y="130" width="290" height="72"/>
+      <rect x="45" y="218" width="290" height="72"/>
+      <rect x="45" y="306" width="290" height="72"/>
+      <rect x="45" y="394" width="290" height="72"/>
+      <rect x="45" y="482" width="290" height="72"/>
+      <rect x="45" y="570" width="290" height="72"/>
+      <rect x="45" y="658" width="290" height="72" stroke-width="3"/>
+      <rect x="45" y="746" width="290" height="72"/>
     </g>
     <g class="lbl" text-anchor="middle">
-      <text x="300" y="161">QR 읽기</text>
-      <text x="300" y="247">목적지 찾기</text>
-      <text x="300" y="333">길 만들기</text>
-      <text x="300" y="410">보여 주기</text>
-      <text x="300" y="440" class="sm">3D 건물 · 실제 사진 · 1인칭 걷기</text>
-      <text x="300" y="515">사진 찍기</text>
-      <text x="300" y="592">AI 가 어디인지</text>
-      <text x="300" y="616">판단</text>
-      <text x="300" y="697">받아 둔 자료 저장</text>
+      <text x="190" y="162">문에 붙인 QR</text>
+      <text x="190" y="186">4장 찍기</text>
+      <text x="190" y="261">QR 읽기</text>
+      <text x="190" y="349">목적지 찾기</text>
+      <text x="190" y="437">길 만들기</text>
+      <text x="190" y="513">보여 주기</text>
+      <text x="190" y="538" class="sm">3D 건물 · 실제 사진 · 1인칭 걷기</text>
+      <text x="190" y="613">사진 찍기</text>
+      <text x="190" y="689">AI 가 어디인지</text>
+      <text x="190" y="713">판단</text>
+      <text x="190" y="789">받아 둔 자료 저장</text>
     </g>
 
-    <!-- 서버 -->
-    <rect x="560" y="280" width="232" height="520" fill="none" stroke="#111" stroke-width="3"/>
-    <text class="big" x="676" y="318" text-anchor="middle">서버</text>
+    <!-- 서버 : 블록 크기를 휴대폰과 똑같이, 세로로 가운데 맞춤 -->
+    <rect x="540" y="192" width="340" height="514" fill="none" stroke="#111" stroke-width="3"/>
+    <text class="big" x="710" y="232" text-anchor="middle">서버</text>
     <g fill="none" stroke="#111" stroke-width="1.8">
-      <rect x="582" y="340" width="188" height="66"/>
-      <rect x="582" y="426" width="188" height="66"/>
-      <rect x="582" y="512" width="188" height="66"/>
-      <rect x="582" y="598" width="188" height="66"/>
-      <rect x="582" y="684" width="188" height="66"/>
+      <rect x="565" y="262" width="290" height="72"/>
+      <rect x="565" y="350" width="290" height="72"/>
+      <rect x="565" y="438" width="290" height="72"/>
+      <rect x="565" y="526" width="290" height="72"/>
+      <rect x="565" y="614" width="290" height="72"/>
     </g>
     <g class="lbl" text-anchor="middle">
-      <text x="676" y="380">문지기</text>
-      <text x="676" y="466">제보 대기함</text>
-      <text x="676" y="552">관리자 명부</text>
-      <text x="676" y="638">승인 사진 창고</text>
-      <text x="676" y="724">나눠 주기</text>
+      <text x="710" y="305">문지기</text>
+      <text x="710" y="393">제보 대기함</text>
+      <text x="710" y="481">관리자 명부</text>
+      <text x="710" y="569">승인 사진 창고</text>
+      <text x="710" y="657">나눠 주기</text>
     </g>
 
-    <!-- 관리자 -->
-    <rect x="582" y="848" width="188" height="70" fill="none" stroke="#111" stroke-width="2.2"/>
-    <text class="lbl" x="676" y="890" text-anchor="middle">관리자</text>
+    <!-- 두 줄 -->
+    <path d="M360 694 L 540 298" stroke="#111" stroke-width="2" fill="none" marker-end="url(#A)"/>
+    <text class="dat" x="450" y="322" text-anchor="middle">제보한</text>
+    <text class="dat" x="450" y="344" text-anchor="middle">사진</text>
 
-    <!-- 화살표 -->
-    <path d="M128 176 L 175 158" stroke="#111" stroke-width="2" fill="none" marker-end="url(#A)"/>
-    <text class="dat" x="16" y="262" text-anchor="start">어느 문으로</text>
-    <text class="dat" x="16" y="284" text-anchor="start">들어왔는지</text>
-
-    <path d="M425 596 L 560 380" stroke="#111" stroke-width="2" fill="none" marker-end="url(#A)"/>
-    <text class="dat" x="505" y="520" text-anchor="middle">제보한</text>
-    <text class="dat" x="505" y="542" text-anchor="middle">사진</text>
-
-    <path d="M560 710 L 425 692" stroke="#111" stroke-width="2" fill="none" marker-end="url(#A)"/>
-    <text class="dat" x="508" y="768" text-anchor="middle">안내 사진 ·</text>
-    <text class="dat" x="508" y="790" text-anchor="middle">앱 자료</text>
-
-    <path d="M770 883 L 806 883 L 806 545 L 770 545" stroke="#111" stroke-width="2" fill="none" marker-end="url(#A)"/>
-    <text class="dat" x="676" y="832" text-anchor="middle">승인 / 반려</text>
+    <path d="M540 650 L 360 782" stroke="#111" stroke-width="2" fill="none" marker-end="url(#A)"/>
+    <text class="dat" x="445" y="800" text-anchor="middle">안내 사진 ·</text>
+    <text class="dat" x="445" y="822" text-anchor="middle">앱 자료</text>
   </svg>
 </section>
 
@@ -128,65 +115,66 @@
 <section class="page">
   <div class="ttl">블록도 — 휴대폰 안</div>
   <div class="sub">왼쪽은 길안내, 오른쪽은 사진 판정</div>
-  <svg viewBox="0 0 820 830">
+  <svg viewBox="0 0 900 840">
     <defs><marker id="B" markerWidth="12" markerHeight="10" refX="11.5" refY="5" orient="auto">
       <polygon points="0 0, 12 5, 0 10" fill="#111"/></marker></defs>
 
-    <rect x="14" y="14" width="792" height="800" fill="none" stroke="#111" stroke-width="3"/>
-    <text class="big" x="108" y="54" text-anchor="middle">휴대폰</text>
+    <rect x="10" y="14" width="880" height="810" fill="none" stroke="#111" stroke-width="3"/>
+    <text class="big" x="98" y="54" text-anchor="middle">휴대폰</text>
 
-    <text class="zon" x="215" y="96" text-anchor="middle">［ 길안내 ］</text>
-    <text class="zon" x="605" y="96" text-anchor="middle">［ 사진 판정 ］</text>
+    <text class="zon" x="175" y="96" text-anchor="middle">［ 길안내 ］</text>
+    <text class="zon" x="725" y="96" text-anchor="middle">［ 사진 판정 ］</text>
 
     <g fill="none" stroke="#111" stroke-width="1.8">
-      <rect x="50" y="112" width="330" height="64"/>
-      <rect x="50" y="196" width="330" height="64"/>
-      <rect x="50" y="280" width="330" height="64"/>
-      <rect x="50" y="364" width="330" height="64"/>
-      <rect x="50" y="448" width="330" height="86"/>
-      <rect x="50" y="554" width="330" height="64"/>
+      <rect x="40" y="112" width="270" height="64"/>
+      <rect x="40" y="196" width="270" height="64"/>
+      <rect x="40" y="280" width="270" height="64"/>
+      <rect x="40" y="364" width="270" height="64"/>
+      <rect x="40" y="448" width="270" height="86"/>
+      <rect x="40" y="554" width="270" height="64"/>
 
-      <rect x="440" y="112" width="330" height="64"/>
-      <rect x="440" y="196" width="330" height="64"/>
-      <rect x="440" y="280" width="330" height="64"/>
-      <rect x="440" y="364" width="330" height="64"/>
-      <rect x="440" y="448" width="330" height="86" stroke-width="3"/>
-      <rect x="440" y="554" width="330" height="64"/>
+      <rect x="590" y="112" width="270" height="64"/>
+      <rect x="590" y="196" width="270" height="64"/>
+      <rect x="590" y="280" width="270" height="64"/>
+      <rect x="590" y="364" width="270" height="64"/>
+      <rect x="590" y="448" width="270" height="86" stroke-width="3"/>
+      <rect x="590" y="554" width="270" height="64"/>
 
-      <rect x="50" y="690" width="720" height="64"/>
+      <rect x="40" y="700" width="820" height="64"/>
     </g>
     <g class="lbl" text-anchor="middle">
-      <text x="215" y="151">문 QR 읽기</text>
-      <text x="215" y="235">목적지 찾기</text>
-      <text x="215" y="319">길 만들기</text>
-      <text x="215" y="403">한 단계씩 안내</text>
-      <text x="215" y="483">보여 주기</text>
-      <text x="215" y="511" class="sm">3D 건물 · 실제 사진 · 1인칭 걷기</text>
-      <text x="215" y="593">받아 둔 자료 저장</text>
+      <text x="175" y="151">문 QR 읽기</text>
+      <text x="175" y="235">목적지 찾기</text>
+      <text x="175" y="319">길 만들기</text>
+      <text x="175" y="403">한 단계씩 안내</text>
+      <text x="175" y="480">보여 주기</text>
+      <text x="175" y="508" class="sm">3D 건물 · 실제 사진 · 1인칭 걷기</text>
+      <text x="175" y="593">받아 둔 자료 저장</text>
 
-      <text x="605" y="151">사진 찍기</text>
-      <text x="605" y="235">흔들림 · 밝기 검사</text>
-      <text x="605" y="319">사진을 숫자로</text>
-      <text x="605" y="403">미리 외워 둔 것과 대조</text>
-      <text x="605" y="483">★ 1등과 2등의</text>
-      <text x="605" y="511">차이를 잰다</text>
-      <text x="605" y="593">번호판 읽기 · 사람이 고르기</text>
+      <text x="725" y="151">사진 찍기</text>
+      <text x="725" y="235">흔들림 · 밝기 검사</text>
+      <text x="725" y="319">사진을 숫자로</text>
+      <text x="725" y="403">미리 외워 둔 것과 대조</text>
+      <text x="725" y="480">★ 1등과 2등의</text>
+      <text x="725" y="508">차이를 잰다</text>
+      <text x="725" y="593">번호판 읽기 · 사람이 고르기</text>
 
-      <text x="410" y="729">서버와 주고받기</text>
+      <text x="450" y="739">서버와 주고받기</text>
     </g>
 
     <g stroke="#111" stroke-width="2" fill="none" marker-end="url(#B)">
-      <path d="M215 176 L 215 196"/><path d="M215 260 L 215 280"/>
-      <path d="M215 344 L 215 364"/><path d="M215 428 L 215 448"/>
-      <path d="M605 176 L 605 196"/><path d="M605 260 L 605 280"/>
-      <path d="M605 344 L 605 364"/><path d="M605 428 L 605 448"/>
-      <path d="M605 534 L 605 554"/>
-      <path d="M160 554 L 160 428"/>
-      <path d="M605 618 L 605 690"/>
+      <path d="M175 176 L 175 196"/><path d="M175 260 L 175 280"/>
+      <path d="M175 344 L 175 364"/><path d="M175 428 L 175 448"/>
+      <path d="M725 176 L 725 196"/><path d="M725 260 L 725 280"/>
+      <path d="M725 344 L 725 364"/><path d="M725 428 L 725 448"/>
+      <path d="M725 534 L 725 554"/>
+      <path d="M100 554 L 100 428"/>
+      <path d="M725 618 L 725 700"/>
     </g>
-    <path d="M380 144 L 440 400" stroke="#111" stroke-width="1.8" stroke-dasharray="7 5" fill="none" marker-end="url(#B)"/>
-    <text class="dat" x="392" y="258" text-anchor="start">들어온 층으로</text>
-    <text class="dat" x="392" y="280" text-anchor="start">후보 좁히기</text>
+    <!-- 가운데 빈 자리에 글씨를 두고, 화살표는 그 아래로 지나간다 -->
+    <path d="M310 144 L 590 404" stroke="#111" stroke-width="1.8" stroke-dasharray="7 5" fill="none" marker-end="url(#B)"/>
+    <text class="dat" x="450" y="200" text-anchor="middle">들어온 층으로</text>
+    <text class="dat" x="450" y="224" text-anchor="middle">후보 좁히기</text>
   </svg>
 </section>
 
@@ -194,49 +182,53 @@
 <section class="page">
   <div class="ttl">블록도 — 서버 안</div>
   <div class="sub">검사하고, 담아 두고, 나눠 준다 — 계산은 하지 않는다</div>
-  <svg viewBox="0 0 820 760">
+  <svg viewBox="0 0 900 790">
     <defs><marker id="C" markerWidth="12" markerHeight="10" refX="11.5" refY="5" orient="auto">
       <polygon points="0 0, 12 5, 0 10" fill="#111"/></marker></defs>
 
-    <rect x="150" y="40" width="520" height="690" fill="none" stroke="#111" stroke-width="3"/>
-    <text class="big" x="230" y="80" text-anchor="middle">서버</text>
+    <rect x="240" y="60" width="480" height="690" fill="none" stroke="#111" stroke-width="3"/>
+    <text class="big" x="318" y="100" text-anchor="middle">서버</text>
 
     <g fill="none" stroke="#111" stroke-width="1.8">
-      <rect x="190" y="104" width="440" height="88" stroke-width="3"/>
-      <rect x="190" y="228" width="200" height="88"/>
-      <rect x="430" y="228" width="200" height="88"/>
-      <rect x="190" y="352" width="440" height="88"/>
-      <rect x="190" y="476" width="440" height="88"/>
-      <rect x="190" y="600" width="440" height="88"/>
+      <rect x="275" y="124" width="410" height="88" stroke-width="3"/>
+      <rect x="275" y="248" width="185" height="88"/>
+      <rect x="500" y="248" width="185" height="88"/>
+      <rect x="275" y="372" width="410" height="88"/>
+      <rect x="275" y="496" width="410" height="88"/>
+      <rect x="275" y="620" width="410" height="88"/>
     </g>
     <g class="lbl" text-anchor="middle">
-      <text x="410" y="142">문지기</text>
-      <text x="410" y="170" class="sm">모양 · 크기가 맞는 것만 받는다</text>
-      <text x="290" y="280">제보 대기함</text>
-      <text x="530" y="266">관리자 명부</text>
-      <text x="530" y="294" class="sm">이름이 있어야 권한</text>
-      <text x="410" y="390">사람이 보고 승인</text>
-      <text x="410" y="514">승인 사진 창고</text>
-      <text x="410" y="638">나눠 주기</text>
-      <text x="410" y="666" class="sm">앱 · 안내 사진 · AI 자료</text>
+      <text x="480" y="162">문지기</text>
+      <text x="480" y="188" class="sm">모양 · 크기가 맞는 것만 받는다</text>
+      <text x="367" y="300">제보 대기함</text>
+      <text x="592" y="286">관리자 명부</text>
+      <text x="592" y="312" class="sm">이름이 있어야 권한</text>
+      <text x="480" y="424">사람이 보고 승인</text>
+      <text x="480" y="548">승인 사진 창고</text>
+      <text x="480" y="658">나눠 주기</text>
+      <text x="480" y="684" class="sm">앱 · 안내 사진 · AI 자료</text>
     </g>
 
     <g stroke="#111" stroke-width="2" fill="none" marker-end="url(#C)">
-      <path d="M290 192 L 290 228"/>
-      <path d="M290 316 L 290 352"/>
-      <path d="M530 316 L 470 352"/>
-      <path d="M410 440 L 410 476"/>
-      <path d="M410 564 L 410 600"/>
+      <path d="M367 212 L 367 248"/>
+      <path d="M367 336 L 367 372"/>
+      <path d="M592 336 L 530 372"/>
+      <path d="M480 460 L 480 496"/>
+      <path d="M480 584 L 480 620"/>
     </g>
 
-    <path d="M20 148 L 190 148" stroke="#111" stroke-width="2" fill="none" marker-end="url(#C)"/>
-    <text class="dat" x="20" y="126" text-anchor="start">휴대폰에서 — 제보한 사진</text>
+    <!-- 바깥 화살표 : 글씨는 박스 밖 빈 자리에 둔다 -->
+    <path d="M60 168 L 240 168" stroke="#111" stroke-width="2" fill="none" marker-end="url(#C)"/>
+    <text class="dat" x="20" y="126" text-anchor="start">휴대폰에서 —</text>
+    <text class="dat" x="20" y="148" text-anchor="start">제보한 사진</text>
 
-    <path d="M800 272 L 630 272" stroke="#111" stroke-width="2" fill="none" marker-end="url(#C)"/>
-    <text class="dat" x="800" y="250" text-anchor="end">관리자</text>
+    <path d="M860 292 L 720 292" stroke="#111" stroke-width="2" fill="none" marker-end="url(#C)"/>
+    <text class="dat" x="880" y="250" text-anchor="end">관리자가</text>
+    <text class="dat" x="880" y="272" text-anchor="end">승인 / 반려</text>
 
-    <path d="M630 644 L 800 644" stroke="#111" stroke-width="2" fill="none" marker-end="url(#C)"/>
-    <text class="dat" x="800" y="622" text-anchor="end">휴대폰으로</text>
+    <path d="M720 664 L 860 664" stroke="#111" stroke-width="2" fill="none" marker-end="url(#C)"/>
+    <text class="dat" x="880" y="622" text-anchor="end">휴대폰으로</text>
+    <text class="dat" x="880" y="644" text-anchor="end">내려 보냄</text>
   </svg>
 </section>
 
@@ -244,47 +236,46 @@
 <section class="page">
   <div class="ttl">흐름도 — 길안내</div>
   <div class="sub">점선으로 묶은 구간은 인터넷 없이 된다</div>
-  <svg viewBox="0 0 700 940">
+  <svg viewBox="0 0 860 940">
     <defs><marker id="D" markerWidth="12" markerHeight="10" refX="11.5" refY="5" orient="auto">
       <polygon points="0 0, 12 5, 0 10" fill="#111"/></marker></defs>
     <g fill="none" stroke="#111" stroke-width="2">
-      <rect x="190" y="14"  width="320" height="60" rx="30"/>
-      <rect x="190" y="104" width="320" height="60"/>
-      <rect x="190" y="194" width="320" height="60"/>
-      <rect x="190" y="284" width="320" height="60"/>
-      <rect x="190" y="374" width="320" height="60"/>
-      <rect x="190" y="464" width="320" height="60"/>
-      <rect x="190" y="554" width="320" height="76"/>
-      <path d="M350 666 L 510 714 L 350 762 L 190 714 Z"/>
-      <rect x="190" y="852" width="320" height="60" rx="30"/>
+      <rect x="230" y="14"  width="330" height="60" rx="30"/>
+      <rect x="230" y="104" width="330" height="60"/>
+      <rect x="230" y="194" width="330" height="60"/>
+      <rect x="230" y="284" width="330" height="60"/>
+      <rect x="230" y="374" width="330" height="60"/>
+      <rect x="230" y="464" width="330" height="60"/>
+      <rect x="230" y="554" width="330" height="76"/>
+      <path d="M395 666 L 560 714 L 395 762 L 230 714 Z"/>
+      <rect x="230" y="852" width="330" height="60" rx="30"/>
     </g>
     <g stroke="#111" stroke-width="2" fill="none" marker-end="url(#D)">
-      <path d="M350 74 L 350 104"/><path d="M350 164 L 350 194"/>
-      <path d="M350 254 L 350 284"/><path d="M350 344 L 350 374"/>
-      <path d="M350 434 L 350 464"/><path d="M350 524 L 350 554"/>
-      <path d="M350 630 L 350 666"/><path d="M350 762 L 350 852"/>
+      <path d="M395 74 L 395 104"/><path d="M395 164 L 395 194"/>
+      <path d="M395 254 L 395 284"/><path d="M395 344 L 395 374"/>
+      <path d="M395 434 L 395 464"/><path d="M395 524 L 395 554"/>
+      <path d="M395 630 L 395 666"/><path d="M395 762 L 395 852"/>
     </g>
-    <!-- 되돌림 : 아직 안 왔으면 다음 단계 -->
-    <path d="M510 714 L 600 714 L 600 592 L 510 592" stroke="#111" stroke-width="2" fill="none" marker-end="url(#D)"/>
-    <text class="dat" x="612" y="648" text-anchor="start">아니오</text>
-    <text class="dat" x="612" y="670" text-anchor="start">— 다음 단계</text>
-    <text class="dat" x="362" y="800" text-anchor="start">예</text>
+    <path d="M560 714 L 630 714 L 630 592 L 560 592" stroke="#111" stroke-width="2" fill="none" marker-end="url(#D)"/>
+    <text class="dat" x="644" y="648" text-anchor="start">아니오 —</text>
+    <text class="dat" x="644" y="670" text-anchor="start">다음 단계</text>
+    <text class="dat" x="408" y="800" text-anchor="start">예</text>
 
     <g class="lbl" text-anchor="middle">
-      <text x="350" y="51">시작</text>
-      <text x="350" y="141">앱 열기 — 저장해 둔 것으로</text>
-      <text x="350" y="231">문 QR 찍기</text>
-      <text x="350" y="321">어느 문 · 몇 층인지 확정</text>
-      <text x="350" y="411">목적지 고르기</text>
-      <text x="350" y="501">길 단계 만들기</text>
-      <text x="350" y="586">한 단계 보여 주기</text>
-      <text x="350" y="612" class="sm">3D 건물 · 실제 사진 · 1인칭 걷기</text>
-      <text x="350" y="722">도착했나</text>
-      <text x="350" y="889">끝</text>
+      <text x="395" y="51">시작</text>
+      <text x="395" y="141">앱 열기 — 저장해 둔 것으로</text>
+      <text x="395" y="231">문 QR 찍기</text>
+      <text x="395" y="321">어느 문 · 몇 층인지 확정</text>
+      <text x="395" y="411">목적지 고르기</text>
+      <text x="395" y="501">길 단계 만들기</text>
+      <text x="395" y="586">한 단계 보여 주기</text>
+      <text x="395" y="612" class="sm">3D 건물 · 실제 사진 · 1인칭 걷기</text>
+      <text x="395" y="722">도착했나</text>
+      <text x="395" y="889">끝</text>
     </g>
-    <path d="M140 112 L 140 854" stroke="#111" stroke-width="1.8" stroke-dasharray="7 5" fill="none"/>
-    <path d="M140 112 L 164 112 M140 854 L 164 854" stroke="#111" stroke-width="1.8" fill="none"/>
-    <text class="dat" x="126" y="483" text-anchor="middle" transform="rotate(-90 126 483)">인터넷 없이</text>
+    <path d="M170 112 L 170 854" stroke="#111" stroke-width="1.8" stroke-dasharray="7 5" fill="none"/>
+    <path d="M170 112 L 194 112 M170 854 L 194 854" stroke="#111" stroke-width="1.8" fill="none"/>
+    <text class="dat" x="156" y="483" text-anchor="middle" transform="rotate(-90 156 483)">인터넷 없이</text>
   </svg>
 </section>
 
@@ -318,11 +309,9 @@
       <path d="M365 710 L 365 732"/><path d="M365 786 L 365 808"/>
       <path d="M365 884 L 365 906"/><path d="M365 960 L 365 982"/>
     </g>
-    <!-- 흔들림 되돌림 -->
     <path d="M530 200 L 620 200 L 620 113 L 530 113" stroke="#111" stroke-width="2" fill="none" marker-end="url(#E)"/>
     <text class="dat" x="632" y="150" text-anchor="start">흔들렸으면</text>
     <text class="dat" x="632" y="172" text-anchor="start">다시 찍기</text>
-    <!-- 승인 반려 -->
     <path d="M200 846 L 110 846 L 110 759 L 200 759" stroke="#111" stroke-width="2" fill="none" marker-end="url(#E)"/>
     <text class="dat" x="98" y="796" text-anchor="end">반려</text>
 

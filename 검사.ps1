@@ -28,7 +28,8 @@ $ErrorActionPreference = 'Stop'
 $ROOT = $PSScriptRoot
 $SITE = Join-Path $ROOT 'site'
 $fails = New-Object System.Collections.ArrayList; $warns = New-Object System.Collections.ArrayList
-function Ok($m)   { Write-Host "    [통과] $m" -ForegroundColor Green }
+$oks = 0
+function Ok($m)   { Write-Host "    [통과] $m" -ForegroundColor Green; $script:oks++ }
 function Bad($m)  {
   Write-Host "    [실패] $m" -ForegroundColor Red; [void]$fails.Add($m)
   # GitHub 자동 검사에서는 실패 이유를 요약(annotation)에 남긴다 — 로그를 열지 않아도 보이게
@@ -221,6 +222,30 @@ if(Test-Path $strFile){
   }
 }
 
+# ── 구조도 블록도에 적힌 줄 수가 실제와 같은지 ──────────────
+# 2026-10-07 : 블록도 라벨(「pwa.js 562줄」)이 소스 탭(563줄)과 1씩 어긋나 있었다.
+#   코드를 고치면 줄 수가 바뀌는데 라벨은 손으로 적어 둔 것이라 같이 안 따라온다.
+#   엔지니어·교수님께 보여 주는 숫자라 틀리면 곤란하다 — 여기서 대조한다.
+#   (여러 파일을 묶은 라벨(view3d · floor-detail, roadview*.js)은 건너뛴다)
+$tplFile = Join-Path $ROOT '도구\구조도_틀.html'
+if(Test-Path $tplFile){
+  $tplTxt = [IO.File]::ReadAllText($tplFile, [Text.Encoding]::UTF8)
+  $where  = @('site\js\app', 'site', 'site\css', '서버', '.')
+  $lineBad = @(); $lineOk = 0
+  foreach($m in [regex]::Matches($tplTxt, '<span class="n">([^<]+)</span><span class="d">([\d,]+)줄')){
+    $nm = $m.Groups[1].Value.Trim()
+    if($nm -match '[*·]') { continue }                      # 여러 파일을 묶은 라벨
+    $said = [int]($m.Groups[2].Value -replace ',','')
+    $hit = $null
+    foreach($w in $where){ $p = Join-Path $ROOT (Join-Path $w $nm); if(Test-Path $p){ $hit = $p; break } }
+    if(-not $hit){ continue }
+    $real = ((([IO.File]::ReadAllText($hit, [Text.Encoding]::UTF8)) -replace "`r`n", "`n") -split "`n").Count
+    if($real -ne $said){ $lineBad += ('{0} : 구조도 {1}줄 / 실제 {2}줄' -f $nm, $said, $real) } else { $lineOk++ }
+  }
+  if($lineBad.Count){ Bad ('구조도의 줄 수가 실제와 다름 — 도구\구조도_틀.html 을 고치고 다시 만드세요 : ' + ($lineBad -join ' / ')) }
+  elseif($lineOk){ Ok ('구조도에 적은 줄 수 {0}개가 실제와 같습니다' -f $lineOk) }
+}
+
 $ol = & pwsh -NoProfile -File (Join-Path $ROOT '도구\오프라인목록.ps1') -Check 2>&1 | Out-String
 if($LASTEXITCODE -eq 0){ Ok ('인터넷 없이 열기(sw.js) ' + $ol.Trim()) } else { Bad ('인터넷 없이 열기(sw.js) ' + $ol.Trim()) }
 $qrUrl = [regex]::Match($src['js/app/qrnav.js'], "var SITE_URL = '([^']+)'").Groups[1].Value
@@ -258,6 +283,28 @@ if(-not $Quick){
       }
     }
   }
+}
+
+# ── 문서가 말하는 「검사 N가지」가 실제와 같은지 ─────────────
+# 2026-10-07 : 검사를 하나 늘릴 때마다 구조도·코드안내의 숫자를 손으로 고쳐야 했고
+#   한 번에 두 번이나 어긋났다. 이제 **검사가 스스로 세어** 대조한다.
+#   +1 은 이 검사 자신 — 아래 Ok/Bad 도 한 줄 찍히므로 센 수에 들어가야 맞다.
+#   파일 검사만 돌린 -Quick 에서는 브라우저 검사가 빠지므로 건너뛴다.
+if(-not $Quick){
+  $ran = $oks + $warns.Count + $fails.Count + 1
+  $cntBad = @()
+  foreach($d in @('도구\구조도_틀.html', '문서\저장소_코드안내.html')){
+    $p = Join-Path $ROOT $d
+    if(-not (Test-Path $p)){ continue }
+    $t = [IO.File]::ReadAllText($p, [Text.Encoding]::UTF8)
+    # 총계를 말하는 표현만 본다 — 「파일 검사 18가지 + 브라우저 3가지」 같은 분해는 빼고
+    foreach($m in [regex]::Matches($t, '자동 검사\s*(\d+)\s*가지|(\d+)\s*가지\s*자동 검사|검사\s*(\d+)\s*가지\s*전부')){
+      $v = [int]($m.Groups[1].Value + $m.Groups[2].Value + $m.Groups[3].Value)
+      if($v -ne $ran){ $cntBad += ('{0} : 「{1}가지」라고 적었는데 실제로 돈 것은 {2}가지' -f (Split-Path $d -Leaf), $v, $ran) }
+    }
+  }
+  if($cntBad.Count){ Bad ('문서의 검사 가짓수가 실제와 다름 : ' + (($cntBad | Select-Object -Unique) -join ' / ')) }
+  else { Ok ('문서가 말하는 검사 가짓수 = 실제로 돈 {0}가지' -f $ran) }
 }
 
 # ═══ 끝 ══════════════════════════════════════════════════════════

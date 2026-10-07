@@ -68,7 +68,7 @@
   .cover .foot { position: absolute; bottom: 0; left: 0; right: 0; font-size: 8pt; color: var(--muted);
                  border-top: 1px solid var(--line); padding-top: 6px; }
 
-  /* ※ 줄바꿈을 그대로 살려야 한다 — 안 주면 그림이 한 문단으로 뭉개진다(2026-10-06 실측) */
+  /* ※ 줄바꿈을 그대로 살려야 한다 — 안 주면 그림이 한 문단으로 뭉개진다(2026-10-07 실측) */
   .tree { font-family: Consolas,"D2Coding",monospace; font-size: 8.6pt; line-height: 1.75;
           white-space: pre-wrap;
           background: var(--soft2); border: 1px solid var(--line); border-radius: 4px; padding: 9px 12px; margin: 7px 0;
@@ -90,13 +90,13 @@
     <b>저장소</b> &nbsp;&nbsp;github.com/minjong0910/minjong0910.github.io<br>
     <b>배포</b> &nbsp;&nbsp;&nbsp;&nbsp;https://minjong0910.github.io/ (GitHub Pages)<br>
     <b>만든 이</b> &nbsp;김민종 · 손의윤 · 문성일<br>
-    <b>작성일</b> &nbsp;&nbsp;2026-10-06
+    <b>작성일</b> &nbsp;&nbsp;2026-10-07
   </div>
   <div class="kpis">
     <div><div class="v">1,153</div><div class="k">저장소 전체 파일</div></div>
     <div><div class="v">240</div><div class="k">앱(site/) 파일</div></div>
     <div><div class="v">36</div><div class="k">직접 쓴 코드 파일</div></div>
-    <div><div class="v">24,798</div><div class="k">직접 쓴 줄 수</div></div>
+    <div><div class="v">24,812</div><div class="k">직접 쓴 줄 수</div></div>
     <div><div class="v">0원</div><div class="k">서버 비용</div></div>
   </div>
   <div class="toc">
@@ -110,7 +110,7 @@
     <div><span class="no">8</span><span class="t">교수님 질문에 그대로 쓸 답</span><span class="p">12</span></div>
   </div>
   <div class="foot">
-    이 문서는 발표 준비를 위해 저장소를 직접 세어 정리한 것입니다. 수치는 2026-10-06 기준이며
+    이 문서는 발표 준비를 위해 저장소를 직접 세어 정리한 것입니다. 수치는 2026-10-07 기준이며
     <code>검사.ps1</code> 과 <code>문서\구조도.html</code> 의 숫자와 같습니다.
   </div>
 </section>
@@ -147,7 +147,7 @@
 <p>240개 파일이 전부 우리가 쓴 코드는 아닙니다. 나눠 보면 이렇습니다.</p>
 <table>
 <tr><th style="width:30%">구분</th><th class="n" style="width:12%">파일</th><th>내용</th></tr>
-<tr class="hi"><td><b>직접 쓴 코드</b></td><td class="n"><b>36</b></td><td>JavaScript 25 · HTML 2 · CSS 2 · 자료 2 · 보안 규칙 1 · 배포 설정 1 · PowerShell 3 — <b>24,798줄</b></td></tr>
+<tr class="hi"><td><b>직접 쓴 코드</b></td><td class="n"><b>36</b></td><td>JavaScript 25 · HTML 2 · CSS 2 · 자료 2 · 보안 규칙 1 · 배포 설정 1 · PowerShell 3 — <b>24,812줄</b></td></tr>
 <tr><td>빌려 온 라이브러리</td><td class="n">10</td><td>Three.js · TensorFlow.js · MobileNet · jsQR · JSZip · Tesseract(5개)</td></tr>
 <tr><td>자료 (사람이 안 씀)</td><td class="n">173</td><td>AI 기준 벡터 10MB · 자료집 2MB · 사진 169장</td></tr>
 <tr><td>그림 · 3D 재질</td><td class="n">26</td><td>아이콘 5 · 실사 3D 페이지 1 · 텍스처 21</td></tr>
@@ -167,7 +167,7 @@
 
 <div class="tree">
 site/
- ├ <b>index.html</b> &nbsp;&nbsp;화면 23개가 전부 여기 (696줄)
+ ├ <b>index.html</b> &nbsp;&nbsp;화면 21개가 전부 여기 (696줄)
  ├ <b>sw.js</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;인터넷 없이 열기 — 230개 15.6MB 저장 (408줄)
  ├ manifest.webmanifest &nbsp;<span class="x">앱 이름·아이콘</span>
  ├ css/ &nbsp;&nbsp;&nbsp;app.css (1,062줄) · boot.css (18줄)
@@ -210,8 +210,8 @@ site/
 <h3>② 화면과 상태</h3>
 <table>
 <tr><th style="width:24%">파일</th><th class="n" style="width:8%">줄</th><th>하는 일 · 어디에 쓰이나</th></tr>
-<tr><td class="f">index.html</td><td class="n">696</td><td><b>화면 23개가 전부 여기.</b> 화면마다 파일을 나누지 않은 이유는 <b>화면 전환에 네트워크를 안 쓰기 위해서</b>입니다 — 오프라인에서 즉시 바뀝니다.</td></tr>
-<tr><td class="f">shell.js</td><td class="n">367</td><td><b>화면 전환 <code>go()</code>.</b> 라우터가 없습니다. 앱 전체의 상태가 <b>변수 네 개</b>(목적지·현재층·안내단계·단계번호)뿐입니다. 실사 3D 를 iframe 으로 띄우는 것도 여기입니다.</td></tr>
+<tr><td class="f">index.html</td><td class="n">696</td><td><b>화면 21개가 전부 여기.</b> 화면마다 파일을 나누지 않은 이유는 <b>화면 전환에 네트워크를 안 쓰기 위해서</b>입니다 — 오프라인에서 즉시 바뀝니다.</td></tr>
+<tr><td class="f">shell.js</td><td class="n">367</td><td><b>화면 전환 <code>go()</code>.</b> 라우터가 없습니다. 앱 전체의 상태가 <b>변수 다섯 개</b>(목적지·현재층·안내단계·단계번호)뿐입니다. 실사 3D 를 iframe 으로 띄우는 것도 여기입니다.</td></tr>
 <tr><td class="f">ui.js</td><td class="n">427</td><td><b>한/영 전환 · 검색 · 카테고리 · 층 버튼.</b> 번역 라이브러리 없이 <code>data-ko</code>/<code>data-en</code> 속성으로 처리합니다. 검색은 장소가 152곳뿐이라 색인 없이 훑습니다.</td></tr>
 <tr><td class="f">zoom.js</td><td class="n">185</td><td><b>사진 확대.</b> 브라우저 기본 확대를 쓰면 화면 전체가 커져 UI 가 깨지므로, 사진에만 적용되는 확대를 직접 만들었습니다.</td></tr>
 <tr><td class="f">css/app.css</td><td class="n">1,062</td><td>앱 디자인 전부</td></tr>
@@ -223,12 +223,12 @@ site/
 <tr><th style="width:24%">파일</th><th class="n" style="width:8%">줄</th><th>하는 일 · 어디에 쓰이나</th></tr>
 <tr class="hi"><td class="f">building.js</td><td class="n">429</td><td><b>건물 자료표.</b> 실제 평면도 PDF 를 보고 옮긴 좌표입니다. <b>3D·길안내·층 평면도가 모두 이 한 파일을 봅니다</b> — 숫자만 고치면 전부 따라 바뀝니다.</td></tr>
 <tr><td class="f">view3d.js</td><td class="n">722</td><td>3D 공통 + <b><code>NAVGRAPH</code></b>(경로 그래프) — 어느 지점에서 어디로 갈 수 있는지</td></tr>
-<tr><td class="f">overview3d.js</td><td class="n">1,576</td><td><b>건물 전체 3D.</b> 층을 쌓아 그리고 목적지에 불을 켭니다. 모델 파일 없이 좌표에서 매번 생성합니다.</td></tr>
+<tr><td class="f">overview3d.js</td><td class="n">1,580</td><td><b>건물 전체 3D.</b> 층을 쌓아 그리고 목적지에 불을 켭니다. 모델 파일 없이 좌표에서 매번 생성합니다.</td></tr>
 <tr><td class="f">floor-detail.js</td><td class="n">322</td><td>층 평면도(위에서 내려다본 그림)</td></tr>
 <tr><td class="f">3d/realistic.html</td><td class="n">—</td><td><b>실사 3D — 별도 페이지.</b> <code>shell.js</code> 가 iframe 으로 띄웁니다. 재질 그림 21장을 씁니다.</td></tr>
 </table>
 
-<h3>④ 1인칭 로드뷰 — 8개 파일 10,795줄 (전체의 45%)</h3>
+<h3>④ 1인칭 로드뷰 — 8개 파일 10,805줄 (전체의 45%)</h3>
 <table>
 <tr><th style="width:24%">파일</th><th class="n" style="width:8%">줄</th><th>어느 공간을 짓는가</th></tr>
 <tr><td class="f">roadview.js</td><td class="n">2,399</td><td>기본값 · 그림(텍스처) · 소품 만들기 — 나머지 7개가 이것을 씁니다</td></tr>
@@ -236,10 +236,10 @@ site/
 <tr><td class="f">roadview-roof.js</td><td class="n">1,691</td><td>옥상 · 복층</td></tr>
 <tr><td class="f">roadview-free.js</td><td class="n">1,546</td><td><b>자유 탐색</b> — 바닥을 눌러 이동, 엘리베이터·계단으로 층 이동</td></tr>
 <tr><td class="f">roadview-stairs.js</td><td class="n">924</td><td>계단실</td></tr>
-<tr><td class="f">roadview-corr.js</td><td class="n">768</td><td>복도 · 엘리베이터 홀</td></tr>
+<tr><td class="f">roadview-corr.js</td><td class="n">778</td><td>복도 · 엘리베이터 홀</td></tr>
 <tr><td class="f">roadview-1f.js</td><td class="n">654</td><td>1층 출입문 · 중앙계단 홀</td></tr>
 <tr><td class="f">roadview-play.js</td><td class="n">412</td><td><b>자동 재생</b> — 안내 경로를 대본대로 걸어감</td></tr>
-<tr class="tot"><td>합계</td><td class="n">10,795</td><td>자동 재생과 자유 탐색이 카메라·문 갱신에 <b>같은 함수</b>를 씁니다</td></tr>
+<tr class="tot"><td>합계</td><td class="n">10,805</td><td>자동 재생과 자유 탐색이 카메라·문 갱신에 <b>같은 함수</b>를 씁니다</td></tr>
 </table>
 
 <h3>⑤ 길안내와 사진</h3>
@@ -262,7 +262,7 @@ site/
 <h2 class="pb">2.3 자료 파일 — 코드가 아니라 도구가 만든 것</h2>
 <table>
 <tr><th style="width:24%">파일</th><th class="n" style="width:10%">크기</th><th>무엇 · 누가 만드나</th></tr>
-<tr><td class="f">data/aivec.js</td><td class="n">10.0MB</td><td><b>AI 기준 벡터 5,752개</b> (숫자 736만 개). 장소 152곳의 사진을 미리 계산해 둔 것. <code>도구\AI자료_넣기.ps1</code> 이 만듭니다. <b>오프라인 저장에서 제외</b> — 그래서 AI 는 인터넷이 필요합니다.</td></tr>
+<tr><td class="f">data/aivec.js</td><td class="n">9.6MB</td><td><b>AI 기준 벡터 5,752개</b> (숫자 736만 개). 장소 152곳의 사진을 미리 계산해 둔 것. <code>도구\AI자료_넣기.ps1</code> 이 만듭니다. <b>오프라인 저장에서 제외</b> — 그래서 AI 는 인터넷이 필요합니다.</td></tr>
 <tr><td class="f">data/ailib.js</td><td class="n">2.0MB</td><td>기준 사진 239장의 이름표(장소·파일명·시점)</td></tr>
 <tr><td class="f">data/photos.js</td><td class="n">16KB</td><td>사진 색인 167곳. <code>도구\고른사진_넣기.ps1</code> 이 만듭니다.</td></tr>
 <tr><td class="f">data/places.js</td><td class="n">1.5KB</td><td>장소 152곳. 호실 외에 <code>EV1</code>(엘리베이터 1층)·<code>WC3</code>(3층 화장실)·<code>HALL4L</code>(4층 왼쪽 복도) 같은 <b>복도·시설 코드</b>도 있습니다.</td></tr>
@@ -313,12 +313,12 @@ site/
 <tr><td class="c"><b>dom</b></td><td>화면의 모든 id, 글자, 요소마다의 <b>계산된 CSS 값</b></td></tr>
 </table>
 
-<div class="good"><b>왜 만들었나</b> — 코드가 24,000줄이 되니 어디를 고치면 어디가 깨지는지 알 수 없게 되었습니다.
+<div class="good"><b>왜 만들었나</b> — 코드가 2만 줄을 넘으니 어디를 고치면 어디가 깨지는지 알 수 없게 되었습니다.
 실제로 길안내 문장 하나가 조용히 바뀐 적이 있었습니다. 글자는 눈으로 못 잡습니다.
 그래서 <b>기계가 전부 대조</b>하게 만들었습니다.</div>
 
 <div class="say"><b class="q">교수님 : 「시험은 어떻게 하셨나요?」</b><br>
-→ 「<b>자동 검사 19가지와 안전망이 있습니다.</b> 안전망은 고치기 전 결과를 816개 파일로 기록해 두고,
+→ 「<b>자동 검사 22가지와 안전망이 있습니다.</b> 안전망은 고치기 전 결과를 816개 파일로 기록해 두고,
 고친 뒤 한 글자·한 점까지 비교합니다. 그리고 <b>검사를 통과하지 못하면 사이트가 바뀌지 않도록</b> 배포 길목에 박아 두었습니다.」</div>
 </section>
 
@@ -331,7 +331,7 @@ site/
 <h2>4.1 검사와 실행</h2>
 <table>
 <tr><th style="width:26%">파일</th><th>무엇</th></tr>
-<tr class="hi"><td class="f">검사.ps1</td><td><b>자동 검사 19가지</b> — 파일 검사 16 + 진짜 브라우저(Edge) 검사 3. 올리기 전에 돌립니다.</td></tr>
+<tr class="hi"><td class="f">검사.ps1</td><td><b>자동 검사 22가지</b> — 파일 검사 18 + 진짜 브라우저(Edge) 검사 3 + 마무리 1. 올리기 전에 돌립니다.</td></tr>
 <tr><td class="f">검사_실행.bat</td><td>더블클릭으로 검사</td></tr>
 <tr><td class="f">preview.ps1 · 미리보기_실행.bat</td><td>로컬 미리보기 서버(8080) — 브라우저 검사가 이것을 씁니다</td></tr>
 <tr><td class="f">README.md</td><td>저장소 설명</td></tr>
@@ -426,7 +426,7 @@ Firebase 콘솔에 사람이 붙여넣어야 적용됩니다. 저장소에 둔 �
 <h2>6.4 .github/ — 1개</h2>
 <table>
 <tr><th style="width:30%">파일</th><th>무엇</th></tr>
-<tr class="hi"><td class="f">workflows/check-and-deploy.yml</td><td><b>검사 후 배포.</b> <code>main</code> 에 올리면 윈도우 컴퓨터에서 미리보기 서버를 띄우고 검사 19가지를 다시 돌립니다. <b>통과해야만</b> <code>site/</code> 가 사이트로 나갑니다.</td></tr>
+<tr class="hi"><td class="f">workflows/check-and-deploy.yml</td><td><b>검사 후 배포.</b> <code>main</code> 에 올리면 윈도우 컴퓨터에서 미리보기 서버를 띄우고 검사 22가지를 다시 돌립니다. <b>통과해야만</b> <code>site/</code> 가 사이트로 나갑니다.</td></tr>
 </table>
 <div class="good"><b>왜 서버에서 또 검사하나</b> — 내 PC 에서 검사를 돌리는 건 깜빡할 수 있습니다.
 급할 때 건너뛰고 올리면 망가진 앱이 그대로 나갑니다. <b>올리는 길목에 박아 두면 사람이 깜빡해도 막힙니다.</b></div>
@@ -440,13 +440,13 @@ Firebase 콘솔에 사람이 붙여넣어야 적용됩니다. 저장소에 둔 �
 
 <table>
 <tr><th style="width:14%">묶음</th><th style="width:20%">만드는 파일</th><th class="c" style="width:10%">쓰는 곳</th><th>무엇을 제공하나</th></tr>
-<tr class="hi"><td class="f"><b>QRNAV</b></td><td class="f">qrnav.js</td><td class="c"><b>11곳</b></td><td>어느 문으로 들어왔는지 · QR 찍기 화면 — shell · ui · boot · start · sugai · suggest · view3d · roadview-play 등</td></tr>
-<tr class="hi"><td class="f"><b>SUGAI</b></td><td class="f">sugai.js</td><td class="c"><b>9곳</b></td><td>AI 판정 · 격차 · 장소 이름 · 접수 범위 — suggest · sugdb · photos · aid · shell · zoom · boot 등</td></tr>
+<tr class="hi"><td class="f"><b>QRNAV</b></td><td class="f">qrnav.js</td><td class="c"><b>10곳</b></td><td>어느 문으로 들어왔는지 · QR 찍기 화면 — shell · ui · boot · start · sugai · suggest · view3d · roadview-play 등</td></tr>
+<tr class="hi"><td class="f"><b>SUGAI</b></td><td class="f">sugai.js</td><td class="c"><b>8곳</b></td><td>AI 판정 · 격차 · 장소 이름 · 접수 범위 — suggest · sugdb · photos · aid · shell · zoom · boot 등</td></tr>
 <tr><td class="f"><b>SUGDB</b></td><td class="f">sugdb.js</td><td class="c">2곳</td><td>서버 통신 — shell · suggest <b>만</b> 씁니다</td></tr>
 <tr><td class="f"><b>PWA</b></td><td class="f">pwa.js</td><td class="c">4곳</td><td>앱 설치 안내</td></tr>
 <tr><td class="f"><b>DIAG</b></td><td class="f">pwa.js</td><td class="c">4곳</td><td>문제 기록 — 오류를 모아 둡니다</td></tr>
-<tr><td class="f"><b>NAVGRAPH</b></td><td class="f">view3d.js</td><td class="c">—</td><td>경로 그래프 — 어느 지점에서 어디로 갈 수 있는지</td></tr>
-<tr><td class="f"><b>PHFIX</b></td><td class="f">photos.js</td><td class="c">—</td><td>사진 보정</td></tr>
+<tr><td class="f"><b>NAVGRAPH</b></td><td class="f">view3d.js</td><td class="c">0곳</td><td>경로 그래프 — 어느 지점에서 어디로 갈 수 있는지</td></tr>
+<tr><td class="f"><b>PHFIX</b></td><td class="f">photos.js</td><td class="c">2곳</td><td>사진 보정</td></tr>
 </table>
 
 <h2>7.1 자료가 흐르는 길</h2>
@@ -488,10 +488,10 @@ Firebase 콘솔에 사람이 붙여넣어야 적용됩니다. 저장소에 둔 �
 <h2>8.1 규모</h2>
 <div class="say"><b class="q">「전체 규모가 얼마나 되나요?」</b><br>
 → 「저장소는 <b>1,153개 파일 34MB</b> 인데, <b>앱은 240개</b>입니다.
-그중 <b>직접 쓴 코드는 36개 파일 24,798줄</b>이고, 나머지는 자료·시험 기준·기록입니다.」</div>
+그중 <b>직접 쓴 코드는 36개 파일 24,812줄</b>이고, 나머지는 자료·시험 기준·기록입니다.」</div>
 
 <div class="say"><b class="q">「제일 큰 부분은 어디인가요?」</b><br>
-→ 「<b>1인칭 로드뷰입니다. 8개 파일 10,795줄로 전체의 45%</b> 입니다.
+→ 「<b>1인칭 로드뷰입니다. 8개 파일 10,805줄로 전체의 45%</b> 입니다.
 복도·계단·엘리베이터 홀·지하·옥상을 전부 코드로 지었습니다.
 3D 모델 파일을 쓰지 않고 좌표에서 매번 만들기 때문에, <b>건물 자료만 고치면 3D 가 따라 바뀝니다.</b>」</div>
 
@@ -514,7 +514,7 @@ Firebase 콘솔에 사람이 붙여넣어야 적용됩니다. 저장소에 둔 �
 
 <h2>8.3 품질</h2>
 <div class="say"><b class="q">「시험은 하셨나요?」</b><br>
-→ 「<b>자동 검사 19가지</b>와 <b>안전망</b>이 있습니다.
+→ 「<b>자동 검사 22가지</b>와 <b>안전망</b>이 있습니다.
 안전망은 고치기 전 결과를 <b>816개 파일</b>로 기록해 두고, 고친 뒤 <b>한 글자·한 점까지</b> 비교합니다.
 그리고 <b>검사를 통과하지 못하면 사이트가 바뀌지 않도록</b> 배포 길목에 박아 두었습니다.」</div>
 
@@ -548,7 +548,7 @@ Firebase 콘솔에 사람이 붙여넣어야 적용됩니다. 저장소에 둔 �
 <tr><td class="c">☐</td><td>깃허브 저장소 화면</td><td>「코드를 보여 주세요」 — Actions 탭에서 검사 통과 이력도 보입니다</td></tr>
 </table>
 
-<div class="note" style="margin-top:12px">외울 숫자 다섯 개 — <b>1,153(저장소 파일) · 240(앱 파일) · 24,798(직접 쓴 줄) ·
+<div class="note" style="margin-top:12px">외울 숫자 다섯 개 — <b>1,153(저장소 파일) · 240(앱 파일) · 24,812(직접 쓴 줄) ·
 55.6%→92.9%(정확도) · 0원(서버 비용)</b></div>
 </section>
 

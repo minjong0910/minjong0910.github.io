@@ -12,8 +12,12 @@ on:
 permissions:
   contents: read
 
+# 2026-10-08 : 「pages」 묶음에 며칠째 Queued 로 멈춘 실행(#99)이 있어,
+#   그 뒤의 모든 실행이 기다리다 취소됐다("Canceling since a higher priority
+#   waiting request for pages exists"). 복도 버그 수정도 18시간 기다리다 취소됐다.
+#   묶음 이름을 바꿔 멈춘 줄에서 빠져나온다.
 concurrency:
-  group: pages
+  group: pages-deploy
   cancel-in-progress: false
 
 jobs:
@@ -54,6 +58,8 @@ jobs:
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # 시간 제한이 없으면 한 번 멈췄을 때 뒤의 모든 배포를 영원히 막는다(위 주석 참고)
+    timeout-minutes: 15
     permissions:
       pages: write
       id-token: write

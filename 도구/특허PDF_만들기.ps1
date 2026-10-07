@@ -7,7 +7,7 @@
 #   ※ Edge 헤드리스는 한글 경로를 주면 실패한다 — %TEMP% 아래 영문 경로에서 만든 뒤 옮긴다.
 #   ※ 내용이 인쇄 영역보다 넓으면 Edge 가 문서 전체를 몰래 줄인다. 표 폭을 넘기지 말 것.
 #   ※ 쪽이 제대로 찍혔는지는 도구\PDF_쪽그림.ps1 로 그림을 떠서 눈으로 본다.
-param([ValidateSet('전부','조사','신고서','설명서','발표','상담','코드안내')][string]$Doc = '전부')
+param([ValidateSet('전부','조사','신고서','설명서','발표','상담','코드안내','도면')][string]$Doc = '전부')
 
 $ErrorActionPreference = 'Stop'
 $ROOT = Split-Path $PSScriptRoot -Parent
@@ -23,6 +23,7 @@ $DOCS = @(
   @{ key='발표';   src='문서\발표_상세설계.html';       out='졸업작품_상세설계_발표.pdf'  }
   @{ key='상담';   src='문서\변리사_상담준비.html';     out='변리사_상담준비.pdf'         }
   @{ key='코드안내'; src='문서\저장소_코드안내.html';   out='저장소_코드안내.pdf'         }
+  @{ key='도면';   src='문서\특허도면.html';           out='특허도면.pdf'                }
 )
 
 foreach($d in $DOCS){

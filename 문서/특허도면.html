@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>특허 도면 — 실내 장소 판정 시스템 (구성도 · 블록도 · 흐름도)</title>
+<style>
+  @page {
+    size: A4; margin: 15mm 14mm 14mm 14mm;
+    @top-right { content: "영상 유사도 격차에 따라 응답 수준을 가변하는 실내 장소 판정 방법 및 시스템"; font: 7.5pt "Malgun Gothic"; color: #9AA7B6; }
+    @bottom-center { content: counter(page) " / " counter(pages); font: 8pt "Malgun Gothic"; color: #7C8AA0; }
+  }
+  @page :first { @top-right { content: none; } }
+  :root { --ink:#16202B; --ink2:#52514e; --muted:#7C8AA0; --navy:#10345E; --blue:#1B4F8C;
+          --line:#C9D3DF; --soft:#EEF2F7; --soft2:#F5F8FB; --grid:#E4E7EC; }
+  * { box-sizing: border-box; }
+  html, body { background:#fff; }
+  body { font-family:"Malgun Gothic","맑은 고딕",sans-serif; font-size:9.3pt; line-height:1.58; color:var(--ink);
+         margin:0; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  h1 { font-size:15pt; color:var(--navy); margin:0 0 4px; letter-spacing:-0.3px; }
+  h2 { font-size:11.4pt; color:var(--navy); margin:0 0 8px; padding-bottom:4px; border-bottom:2px solid #C9D9EA; }
+  h3 { font-size:9.8pt; color:var(--blue); margin:10px 0 4px; }
+  p { margin:0 0 6px; }
+  code { font-family:Consolas,"D2Coding",monospace; font-size:8.6pt; background:var(--soft2);
+         border:1px solid var(--grid); border-radius:3px; padding:0 3px; }
+  table { width:100%; border-collapse:collapse; margin:5px 0 7px; font-size:8.3pt; page-break-inside:avoid; }
+  th, td { border:1px solid var(--line); padding:3px 6px; text-align:left; vertical-align:top; }
+  th { background:var(--soft); font-weight:700; }
+  td.c, th.c { text-align:center; white-space:nowrap; }
+  td.n { text-align:center; white-space:nowrap; font-weight:700; font-family:"Times New Roman",serif; font-size:9.4pt; }
+  .note { color:#4E5C6B; font-size:8.5pt; background:var(--soft2); border-left:3px solid #9FC0E0;
+          padding:6px 9px; margin:7px 0; page-break-inside:avoid; }
+  .nav  { border-left-color:#C7B07E; background:#FFFBF0; }
+  .nav b.t { color:#8A6D1F; }
+  .warn { border-left-color:#D99A9A; background:#FCF5F5; }
+  .pb { page-break-before:always; }
+  .part { font-size:9pt; color:var(--muted); letter-spacing:1px; margin:0 0 2px; }
+
+  /* ── 도면 ── */
+  .sheet { border:1px solid var(--grid); border-radius:3px; padding:8px 6px 4px; margin:6px 0 4px;
+           text-align:center; page-break-inside:avoid; background:#fff; }
+  .fignum { font-family:"Malgun Gothic",sans-serif; font-size:10.5pt; font-weight:700; color:var(--ink);
+            text-align:left; margin:0 0 2px; }
+  .figcap { font-size:8.6pt; color:var(--ink2); text-align:center; margin:2px 0 0; }
+  svg { display:block; margin:0 auto; }
+  svg text { font-family:"Malgun Gothic","맑은 고딕",sans-serif; fill:#111; }
+  svg .ref { font-family:"Times New Roman",Times,serif; font-style:italic; font-size:14px; fill:#111; }
+  svg .dat { font-size:11px; fill:#111; }
+  svg .lbl { font-size:12px; fill:#111; }
+  svg .sml { font-size:10px; fill:#333; }
+  svg .stp { font-family:"Times New Roman",Times,serif; font-style:italic; font-size:12px; fill:#111; }
+
+  .cover { padding-top:16mm; }
+  .cover .band { background:var(--navy); color:#fff; padding:12mm 11mm 10mm; border-radius:4px; }
+  .cover .kicker { font-size:10pt; opacity:.8; letter-spacing:2px; margin-bottom:8px; }
+  .cover .title { font-size:19pt; font-weight:700; line-height:1.34; letter-spacing:-0.5px; }
+  .cover .subt { font-size:10.5pt; margin-top:8px; opacity:.92; }
+  .cover .meta { margin-top:8mm; font-size:10pt; color:var(--ink2); line-height:1.9; }
+  .cover .meta b { color:var(--ink); }
+  .toc { margin-top:7mm; font-size:9.6pt; }
+  .toc div { display:flex; align-items:baseline; gap:6px; padding:3px 0; border-bottom:1px dotted var(--grid); }
+  .toc .no { width:46px; color:var(--blue); font-weight:700; }
+  .toc .t { flex:1; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ 표지 ══════════ -->
+<section class="cover">
+  <div class="band">
+    <div class="kicker">특허 도면 · 발표용</div>
+    <div class="title">영상 유사도 격차에 따라 응답 수준을<br>가변하는 실내 장소 판정 방법 및 시스템</div>
+    <div class="subt">구성도 · 블록도 · 흐름도 (특허 도면 양식)</div>
+  </div>
+  <div class="meta">
+    <b>작품</b> &nbsp;&nbsp;&nbsp;&nbsp;군산대학교 공과대학 3호관 실내 길안내 (졸업작품)<br>
+    <b>발명자</b> &nbsp;김민종 · 손의윤 · 문성일<br>
+    <b>작성일</b> &nbsp;2026-10-07
+  </div>
+  <div class="toc">
+    <div><span class="no">도 1</span><span class="t">실내 장소 판정 시스템의 전체 구성도</span></div>
+    <div><span class="no">도 2</span><span class="t">휴대단말(100)의 블록도</span></div>
+    <div><span class="no">도 3</span><span class="t">서버부(300)의 블록도</span></div>
+    <div><span class="no">도 4</span><span class="t">경로 안내 동작의 흐름도</span></div>
+    <div><span class="no">도 5</span><span class="t">안내 영상 갱신 동작의 흐름도</span></div>
+    <div><span class="no">도 6</span><span class="t">응답 수준 결정 과정의 흐름도</span></div>
+    <div><span class="no">부호</span><span class="t">부호의 설명</span></div>
+  </div>
+  <div class="note nav" style="margin-top:8mm">
+    <b class="t">이 문서를 읽는 법</b> — 도면마다 아래에 <b>「길안내 앱에 빗대면」</b>을 붙였습니다.
+    네이버·카카오 내비게이션에서 같은 일을 하는 부분이 무엇인지 적어 두었으므로,
+    특허 용어를 몰라도 무엇을 가리키는지 바로 알 수 있습니다.
+  </div>
+  <div class="note">
+    <b>부호는 「발명의 내용 설명서」와 같은 번호를 씁니다.</b> 두 문서를 나란히 놓고 보실 수 있습니다.
+    설명서의 도 1은 판정을 <b>서버</b>에서 하는 실시예를, 이 문서의 도 1~3은 실제로 구현한
+    <b>단말에서 판정하는 실시예</b>를 그린 것입니다 — 청구항은 두 가지를 모두 포함합니다.
+  </div>
+</section>
+
+<!-- ══════════ 도 1 ══════════ -->
+<section class="pb">
+<p class="part">도 1</p>
+<h1>실내 장소 판정 시스템의 전체 구성도</h1>
+
+<div class="sheet">
+<div class="fignum">【도 1】</div>
+<svg viewBox="0 0 720 430" width="672">
+  <defs>
+    <marker id="a1" markerWidth="10" markerHeight="8" refX="9.5" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#111"/></marker>
+  </defs>
+
+  <rect x="8" y="30" width="704" height="392" fill="none" stroke="#111" stroke-width="1"/>
+  <text class="ref" x="16" y="24">10</text>
+  <path d="M30 26 L 46 14" stroke="#111" stroke-width="1" fill="none"/>
+
+  <!-- 출입구 광학코드 200 -->
+  <rect x="20" y="150" width="96" height="58" fill="none" stroke="#111" stroke-width="1.6"/>
+  <text class="lbl" x="68" y="174" text-anchor="middle">출입구</text>
+  <text class="lbl" x="68" y="192" text-anchor="middle">광학코드</text>
+  <text class="ref" x="86" y="140">200</text>
+  <path d="M84 144 L 100 152" stroke="#111" stroke-width="1" fill="none"/>
+
+  <!-- 휴대단말 100 -->
+  <rect x="160" y="58" width="186" height="330" fill="none" stroke="#111" stroke-width="1.9"/>
+  <text class="ref" x="276" y="50">100</text>
+  <path d="M274 54 L 290 42" stroke="#111" stroke-width="1" fill="none"/>
+  <text class="sml" x="253" y="78" text-anchor="middle">휴대단말</text>
+
+  <rect x="176" y="92" width="154" height="42" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="253" y="118" text-anchor="middle">광학코드 판독부</text>
+  <text class="ref" x="306" y="86">110</text>
+
+  <rect x="176" y="150" width="154" height="42" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="253" y="176" text-anchor="middle">안내 실행부</text>
+  <text class="ref" x="306" y="144">111</text>
+
+  <rect x="176" y="208" width="154" height="42" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="253" y="234" text-anchor="middle">영상 획득부</text>
+  <text class="ref" x="306" y="202">120</text>
+
+  <rect x="176" y="266" width="154" height="50" fill="none" stroke="#111" stroke-width="1.9"/>
+  <text class="lbl" x="253" y="287" text-anchor="middle">응답수준</text>
+  <text class="lbl" x="253" y="304" text-anchor="middle">결정부</text>
+  <text class="ref" x="306" y="260">160</text>
+
+  <rect x="176" y="332" width="154" height="40" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="253" y="357" text-anchor="middle">통신부</text>
+  <text class="ref" x="306" y="326">190</text>
+
+  <!-- 서버부 300 -->
+  <rect x="518" y="58" width="186" height="246" fill="none" stroke="#111" stroke-width="1.9"/>
+  <text class="ref" x="634" y="50">300</text>
+  <path d="M632 54 L 648 42" stroke="#111" stroke-width="1" fill="none"/>
+  <text class="sml" x="611" y="78" text-anchor="middle">서버부</text>
+
+  <rect x="534" y="92" width="154" height="42" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="611" y="118" text-anchor="middle">접수 검증부</text>
+  <text class="ref" x="664" y="86">310</text>
+
+  <rect x="534" y="150" width="154" height="42" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="611" y="176" text-anchor="middle">보관부</text>
+  <text class="ref" x="650" y="144">320 · 330</text>
+
+  <rect x="534" y="208" width="154" height="42" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="611" y="234" text-anchor="middle">배포부</text>
+  <text class="ref" x="664" y="202">350</text>
+
+  <!-- 관리자 단말 400 -->
+  <rect x="534" y="340" width="154" height="48" fill="none" stroke="#111" stroke-width="1.6"/>
+  <text class="lbl" x="611" y="369" text-anchor="middle">관리자 단말</text>
+  <text class="ref" x="664" y="334">400</text>
+
+  <!-- 광학코드 → 단말 -->
+  <path d="M116 176 L 176 166" stroke="#111" stroke-width="1.2" fill="none" marker-end="url(#a1)"/>
+  <text class="dat" x="22" y="240" text-anchor="start">건물 · 층 ·</text>
+  <text class="dat" x="22" y="254" text-anchor="start">진입문 식별정보</text>
+
+  <!-- 서버 → 단말 (배포) -->
+  <path d="M518 113 L 330 113" stroke="#111" stroke-width="1.2" fill="none" marker-end="url(#a1)"/>
+  <text class="dat" x="424" y="98" text-anchor="middle">안내 영상 · 기준벡터</text>
+
+  <!-- 단말 → 서버 (제보) -->
+  <path d="M330 291 L 518 240" stroke="#111" stroke-width="1.2" fill="none" marker-end="url(#a1)"/>
+  <text class="dat" x="424" y="296" text-anchor="middle">제보 영상 · 판정 결과</text>
+
+  <!-- 관리자 → 서버 -->
+  <path d="M611 340 L 611 254" stroke="#111" stroke-width="1.2" fill="none" marker-end="url(#a1)"/>
+  <text class="dat" x="619" y="322" text-anchor="start">승인 / 반려</text>
+</svg>
+
+<div class="figcap">도 1 — 실내 장소 판정 시스템의 전체 구성도</div>
+</div>
+
+<h3>구성</h3>
+<p>본 시스템(10)은 이용자가 휴대하는 <b>휴대단말(100)</b>과, 건물 각 출입구에 배치되는
+<b>출입구 광학코드(200)</b>와, 제보를 접수·보관·배포하는 <b>서버부(300)</b>와,
+승인을 담당하는 <b>관리자 단말(400)</b>을 포함한다.</p>
+
+<p>휴대단말(100)은 광학코드(200)로부터 <b>건물·층·진입문 식별정보</b>를 획득하고,
+사전에 수신한 안내 데이터로 <b>통신 없이</b> 경로를 안내한다.
+안내 영상이 실제와 달라진 경우, 이용자가 촬영한 제보 영상에 대하여
+<b>휴대단말 내부에서</b> 장소 판정을 수행하고(도 2의 130·150·160),
+그 결과를 서버부(300)로 전송한다.</p>
+
+<div class="note nav">
+<b class="t">길안내 앱에 빗대면</b><br>
+<b>100 휴대단말</b> = 내비게이션 앱이 깔린 내 휴대폰. &nbsp;
+<b>200 출입구 광학코드</b> = <b>「출발지를 묻는 대신 알려 주는 표지」</b>.
+자동차 내비게이션은 GPS로 출발지를 알아내지만, 건물 안은 GPS가 안 잡히므로
+문에 붙인 QR이 그 역할을 대신한다. &nbsp;
+<b>300 서버부</b> = 내비게이션 회사의 서버. 다만 여기서는 <b>길을 계산하지 않고</b>
+사진을 보관·배포만 한다. &nbsp;
+<b>400 관리자 단말</b> = 「도로 정보 제보」를 사람이 검수하는 자리.
+</div>
+
+<div class="note">
+<b>일반적인 내비게이션과 다른 점</b> — 보통은 서버가 경로를 계산해 단말에 내려 준다.
+본 시스템은 <b>경로 계산도, 영상 판정도 단말이 수행</b>하고 서버는 저장·전달만 한다.
+그 결과 ① 통신이 끊겨도 안내가 되고 ② 제보 영상이 판정을 위해 외부로 나가지 않는다.
+</div>
+</section>
+
+<!-- ══════════ 도 2 ══════════ -->
+<section class="pb">
+<p class="part">도 2</p>
+<h1>휴대단말(100)의 블록도</h1>
+
+<div class="sheet">
+<div class="fignum">【도 2】</div>
+<svg viewBox="0 0 700 452" width="600">
+  <defs>
+    <marker id="a2" markerWidth="10" markerHeight="8" refX="9.5" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#111"/></marker>
+  </defs>
+
+  <rect x="36" y="34" width="628" height="400" fill="none" stroke="#111" stroke-width="1.9"/>
+  <text class="ref" x="572" y="26">100</text>
+  <path d="M570 30 L 588 18" stroke="#111" stroke-width="1" fill="none"/>
+  <text class="sml" x="92" y="54" text-anchor="middle">휴대단말</text>
+
+  <!-- 왼쪽 열 : 안내 -->
+  <text class="sml" x="178" y="80" text-anchor="middle">［경로 안내］</text>
+  <rect x="62" y="90" width="232" height="44" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="178" y="117" text-anchor="middle">광학코드 판독부</text>
+  <text class="ref" x="266" y="84">110</text>
+
+  <rect x="62" y="156" width="232" height="44" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="178" y="183" text-anchor="middle">경로 생성부</text>
+  <text class="ref" x="266" y="150">112</text>
+
+  <rect x="62" y="222" width="232" height="44" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="178" y="249" text-anchor="middle">안내 실행부</text>
+  <text class="ref" x="266" y="216">111</text>
+
+  <rect x="62" y="288" width="232" height="44" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="178" y="315" text-anchor="middle">표시부</text>
+  <text class="ref" x="266" y="282">192</text>
+
+  <rect x="62" y="354" width="232" height="44" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="178" y="381" text-anchor="middle">저장부</text>
+  <text class="ref" x="266" y="348">191</text>
+
+  <!-- 오른쪽 열 : 판정 -->
+  <text class="sml" x="522" y="80" text-anchor="middle">［장소 판정］</text>
+  <rect x="406" y="90" width="232" height="44" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="522" y="117" text-anchor="middle">영상 획득부</text>
+  <text class="ref" x="610" y="84">120</text>
+
+  <rect x="406" y="156" width="232" height="44" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="522" y="183" text-anchor="middle">영상 품질 검사부</text>
+  <text class="ref" x="610" y="150">121</text>
+
+  <rect x="406" y="222" width="232" height="44" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="522" y="249" text-anchor="middle">특징벡터 추출부</text>
+  <text class="ref" x="610" y="216">130</text>
+
+  <rect x="406" y="288" width="232" height="44" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="522" y="315" text-anchor="middle">대조부</text>
+  <text class="ref" x="610" y="282">150</text>
+
+  <rect x="406" y="354" width="232" height="44" fill="none" stroke="#111" stroke-width="2.2"/>
+  <text class="lbl" x="522" y="381" text-anchor="middle">응답수준 결정부</text>
+  <text class="ref" x="610" y="348">160</text>
+
+  <!-- 세로 흐름 화살표 -->
+  <g stroke="#111" stroke-width="1.2" fill="none" marker-end="url(#a2)">
+    <path d="M178 134 L 178 156"/><path d="M178 200 L 178 222"/>
+    <path d="M178 266 L 178 288"/>
+    <path d="M522 134 L 522 156"/><path d="M522 200 L 522 222"/>
+    <path d="M522 266 L 522 288"/><path d="M522 332 L 522 354"/>
+  </g>
+  <!-- 저장부 → 안내 실행부 -->
+  <path d="M120 354 L 120 266" stroke="#111" stroke-width="1.2" fill="none" marker-end="url(#a2)"/>
+  <!-- 판독부 → 대조부 (후보 축소 151) -->
+  <path d="M294 112 L 406 300" stroke="#111" stroke-width="1.2" stroke-dasharray="5 3" fill="none" marker-end="url(#a2)"/>
+  <text class="dat" x="350" y="196" text-anchor="middle">진입 층으로</text>
+  <text class="dat" x="350" y="210" text-anchor="middle">후보 축소 (151)</text>
+</svg>
+<div class="figcap">도 2 — 휴대단말(100)의 블록도</div>
+</div>
+
+<table>
+<tr><th class="c" style="width:10%">부호</th><th style="width:26%">명칭</th><th>기능</th></tr>
+<tr><td class="n">110</td><td>광학코드 판독부</td><td>출입구 광학코드(200)를 판독하여 건물·진입 층·진입문을 확정</td></tr>
+<tr><td class="n">112</td><td>경로 생성부</td><td>목적지와 진입 층으로부터 안내 단계를 생성</td></tr>
+<tr><td class="n">111</td><td>안내 실행부</td><td>생성된 단계를 순차 제시. <b>통신 없이 동작</b></td></tr>
+<tr><td class="n">192</td><td>표시부</td><td>3차원 영상 · 실사 안내 영상 · 1인칭 영상을 제시</td></tr>
+<tr><td class="n">191</td><td>저장부</td><td>안내 데이터 및 안내 영상을 단말에 저장(오프라인 동작의 근거)</td></tr>
+<tr><td class="n">120</td><td>영상 획득부</td><td>이용자가 「안내 영상과 실제가 다르다」고 판단한 장면을 촬영</td></tr>
+<tr><td class="n">121</td><td>영상 품질 검사부</td><td>흔들림·밝기·해상도를 검사. 부적합 시 재촬영 요청</td></tr>
+<tr><td class="n">130</td><td>특징벡터 추출부</td><td>제보 영상으로부터 소정 차원의 질의 특징벡터를 산출</td></tr>
+<tr><td class="n">150</td><td>대조부</td><td>질의 특징벡터와 기준 특징벡터군의 유사도를 산출하고 정렬</td></tr>
+<tr><td class="n">151</td><td>후보 축소부</td><td>광학코드로 확정된 진입 층에 대응하도록 후보 집합을 축소</td></tr>
+<tr><td class="n">160</td><td><b>응답수준 결정부</b></td><td><b>제1·제2 후보의 유사도 격차로 응답 수준을 세 단계로 결정</b></td></tr>
+</table>
+
+<div class="note nav">
+<b class="t">길안내 앱에 빗대면</b><br>
+왼쪽 열(110·112·111·192·191)이 <b>내비게이션의 「길안내」 기능</b>에 해당한다 —
+출발지를 정하고(110), 경로를 만들고(112), 한 단계씩 안내하고(111), 화면에 그리고(192),
+지도를 미리 받아 두는 것(191)이다. 카카오내비의 <b>「오프라인 지도 내려받기」</b>가 191과 같은 역할이다.<br>
+오른쪽 열(120·121·130·150·160)은 내비게이션에 없는 부분으로,
+<b>「길 사진이 실제와 다르다」는 제보를 기계가 먼저 읽어 보는</b> 기능이다.
+</div>
+</section>
+
+<!-- ══════════ 도 3 ══════════ -->
+<section class="pb">
+<p class="part">도 3</p>
+<h1>서버부(300)의 블록도</h1>
+
+<div class="sheet">
+<div class="fignum">【도 3】</div>
+<svg viewBox="0 0 700 400" width="660">
+  <defs>
+    <marker id="a3" markerWidth="10" markerHeight="8" refX="9.5" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#111"/></marker>
+  </defs>
+
+  <rect x="150" y="30" width="400" height="344" fill="none" stroke="#111" stroke-width="1.9"/>
+  <text class="ref" x="458" y="22">300</text>
+  <path d="M456 26 L 474 14" stroke="#111" stroke-width="1" fill="none"/>
+  <text class="sml" x="202" y="50" text-anchor="middle">서버부</text>
+
+  <rect x="186" y="66" width="328" height="46" fill="none" stroke="#111" stroke-width="1.9"/>
+  <text class="lbl" x="350" y="94" text-anchor="middle">접수 검증부</text>
+  <text class="ref" x="486" y="60">310</text>
+
+  <rect x="186" y="140" width="156" height="46" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="264" y="168" text-anchor="middle">제보 보관부</text>
+  <text class="ref" x="314" y="134">320</text>
+
+  <rect x="358" y="140" width="156" height="46" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="436" y="168" text-anchor="middle">관리자 인증부</text>
+  <text class="ref" x="486" y="134">340</text>
+
+  <rect x="186" y="214" width="328" height="46" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="350" y="242" text-anchor="middle">승인 영상 보관부</text>
+  <text class="ref" x="486" y="208">330</text>
+
+  <rect x="186" y="288" width="328" height="52" fill="none" stroke="#111" stroke-width="1.3"/>
+  <text class="lbl" x="350" y="310" text-anchor="middle">배포부</text>
+  <text class="sml" x="350" y="328" text-anchor="middle">앱 · 안내 데이터 · 기준벡터</text>
+  <text class="ref" x="486" y="282">350</text>
+
+  <g stroke="#111" stroke-width="1.2" fill="none" marker-end="url(#a3)">
+    <path d="M264 112 L 264 140"/>
+    <path d="M264 186 L 264 214"/>
+    <path d="M436 186 L 380 214"/>
+    <path d="M350 260 L 350 288"/>
+  </g>
+
+  <!-- 바깥 : 단말에서 들어오고 나간다 -->
+  <path d="M40 89 L 186 89" stroke="#111" stroke-width="1.2" fill="none" marker-end="url(#a3)"/>
+  <text class="dat" x="24" y="72" text-anchor="start">제보 영상 · 판정 결과</text>
+  <text class="ref" x="22" y="94">100</text>
+
+  <path d="M514 314 L 660 314" stroke="#111" stroke-width="1.2" fill="none" marker-end="url(#a3)"/>
+  <text class="dat" x="658" y="298" text-anchor="end">승인된 안내 영상</text>
+  <text class="ref" x="664" y="320">100</text>
+
+  <path d="M660 163 L 514 163" stroke="#111" stroke-width="1.2" fill="none" marker-end="url(#a3)"/>
+  <text class="dat" x="658" y="147" text-anchor="end">승인 / 반려</text>
+  <text class="ref" x="664" y="169">400</text>
+</svg>
+<div class="figcap">도 3 — 서버부(300)의 블록도</div>
+</div>
+
+<table>
+<tr><th class="c" style="width:10%">부호</th><th style="width:26%">명칭</th><th>기능</th></tr>
+<tr><td class="n">310</td><td><b>접수 검증부</b></td><td>제보의 <b>형식·크기·항목</b>을 검사하여 규격에 맞는 것만 접수. 인증 없이 제출이 가능하되 규격 외는 거부</td></tr>
+<tr><td class="n">320</td><td>제보 보관부</td><td>접수된 제보를 <b>미승인 상태</b>로 보관. 관리자만 열람 가능</td></tr>
+<tr><td class="n">340</td><td>관리자 인증부</td><td>관리자 명부에 등재된 자인지 확인. <b>로그인만으로는 권한이 생기지 않음</b></td></tr>
+<tr><td class="n">330</td><td>승인 영상 보관부</td><td>승인된 안내 영상을 보관. 열람은 제한 없음, 기록은 관리자만</td></tr>
+<tr><td class="n">350</td><td>배포부</td><td>앱·안내 데이터·기준 특징벡터군(140)을 단말로 배포</td></tr>
+</table>
+
+<div class="note nav">
+<b class="t">길안내 앱에 빗대면</b><br>
+내비게이션의 <b>「도로 정보 제보」</b> 창구가 그대로 대응한다.
+이용자가 제보를 보내면(→310) 일단 접수함에 쌓이고(320),
+담당자가 확인해(340) 승인한 것만 실제 지도에 반영되며(330),
+그 뒤 모든 이용자에게 배포된다(350).<br>
+<b>핵심은 320과 330이 분리되어 있다는 점이다</b> —
+제보가 바로 지도에 반영되지 않으므로, 잘못된 제보 하나가 모두에게 퍼지지 않는다.
+</div>
+
+<div class="note">
+<b>서버부에 연산 기능이 없다.</b> 310·340은 규격 검사와 자격 확인이고,
+320·330은 보관이며, 350은 전달이다. 영상 판정(130·150·160)은 전부 휴대단말(100)에 있다.
+</div>
+</section>
+
+<!-- ══════════ 도 4 ══════════ -->
+<section class="pb">
+<p class="part">도 4</p>
+<h1>경로 안내 동작의 흐름도</h1>
+
+<div class="sheet">
+<div class="fignum">【도 4】</div>
+<svg viewBox="0 0 560 620" width="440">
+  <defs>
+    <marker id="a4" markerWidth="10" markerHeight="8" refX="9.5" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#111"/></marker>
+  </defs>
+  <g fill="none" stroke="#111" stroke-width="1.4">
+    <rect x="150" y="24"  width="260" height="46" rx="22"/>
+    <rect x="150" y="104" width="260" height="46"/>
+    <rect x="150" y="184" width="260" height="46"/>
+    <rect x="150" y="264" width="260" height="46"/>
+    <rect x="150" y="344" width="260" height="46"/>
+    <rect x="150" y="424" width="260" height="46"/>
+    <rect x="150" y="504" width="260" height="46" rx="22"/>
+  </g>
+  <g stroke="#111" stroke-width="1.3" fill="none" marker-end="url(#a4)">
+    <path d="M280 70 L 280 104"/><path d="M280 150 L 280 184"/>
+    <path d="M280 230 L 280 264"/><path d="M280 310 L 280 344"/>
+    <path d="M280 390 L 280 424"/><path d="M280 470 L 280 504"/>
+  </g>
+  <g class="lbl" text-anchor="middle">
+    <text x="280" y="53">시작</text>
+    <text x="280" y="133">광학코드 판독 — 건물 · 층 · 진입문 확정</text>
+    <text x="280" y="213">목적지 입력</text>
+    <text x="280" y="293">안내 단계 생성</text>
+    <text x="280" y="373">단계별 제시 (영상 · 사진 · 1인칭)</text>
+    <text x="280" y="453">다음 단계 또는 도착</text>
+    <text x="280" y="533">종료</text>
+  </g>
+  <g class="stp" text-anchor="start">
+    <text x="52" y="133">S110</text><text x="52" y="213">S120</text>
+    <text x="52" y="293">S130</text><text x="52" y="373">S140</text>
+    <text x="52" y="453">S150</text>
+  </g>
+  <g class="sml" text-anchor="start">
+    <text x="420" y="128">110</text><text x="420" y="208">192</text>
+    <text x="420" y="288">112</text><text x="420" y="368">111 · 192</text>
+    <text x="420" y="448">111</text>
+  </g>
+  <!-- 통신 불요 표시 -->
+  <path d="M120 112 L 120 462" stroke="#111" stroke-width="1" stroke-dasharray="4 3" fill="none"/>
+  <path d="M120 112 L 134 112 M120 462 L 134 462" stroke="#111" stroke-width="1" fill="none"/>
+  <text class="dat" x="112" y="300" text-anchor="end" transform="rotate(-90 112 300)">통신 불요</text>
+</svg>
+<div class="figcap">도 4 — 경로 안내 동작의 흐름도</div>
+</div>
+
+<table>
+<tr><th class="c" style="width:12%">단계</th><th style="width:30%">동작</th><th>수행 주체</th></tr>
+<tr><td class="n">S110</td><td>광학코드 판독</td><td>광학코드 판독부(110) — 건물·진입 층·진입문을 확정한다</td></tr>
+<tr><td class="n">S120</td><td>목적지 입력</td><td>표시부(192) — 호실 번호 또는 명칭으로 검색</td></tr>
+<tr><td class="n">S130</td><td>안내 단계 생성</td><td>경로 생성부(112) — 수직 이동·복도 방향·도착을 조합</td></tr>
+<tr><td class="n">S140</td><td>단계별 제시</td><td>안내 실행부(111)·표시부(192)</td></tr>
+<tr><td class="n">S150</td><td>다음 단계 / 도착</td><td>안내 실행부(111)</td></tr>
+</table>
+
+<div class="note nav">
+<b class="t">길안내 앱에 빗대면</b><br>
+<b>S110</b>이 내비게이션의 <b>「현재 위치 확인」</b>, <b>S120</b>이 <b>「목적지 검색」</b>,
+<b>S130</b>이 <b>「경로 탐색」</b>, <b>S140~S150</b>이 <b>「턴바이턴 안내」</b>에 해당한다.<br>
+다른 점은 두 가지다. ① 현재 위치를 <b>GPS가 아니라 출입구 QR</b>로 정한다.
+② 전 과정에서 <b>통신을 쓰지 않는다</b>(도면 왼쪽 점선 구간).
+지하·계단처럼 전파가 닿지 않는 곳에서 길을 잃기 때문이다.
+</div>
+</section>
+
+<!-- ══════════ 도 5 ══════════ -->
+<section class="pb">
+<p class="part">도 5</p>
+<h1>안내 영상 갱신 동작의 흐름도</h1>
+
+<div class="sheet">
+<div class="fignum">【도 5】</div>
+<svg viewBox="0 0 620 700" width="470">
+  <defs>
+    <marker id="a5" markerWidth="10" markerHeight="8" refX="9.5" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#111"/></marker>
+  </defs>
+  <g fill="none" stroke="#111" stroke-width="1.4">
+    <rect x="170" y="20"  width="270" height="44" rx="21"/>
+    <rect x="170" y="94"  width="270" height="44"/>
+    <path d="M305 168 L 440 204 L 305 240 L 170 204 Z"/>
+    <rect x="170" y="270" width="270" height="44"/>
+    <rect x="170" y="344" width="270" height="44"/>
+    <rect x="170" y="418" width="270" height="52" stroke-width="2.2"/>
+    <rect x="170" y="500" width="270" height="44"/>
+    <rect x="170" y="574" width="270" height="44"/>
+    <rect x="170" y="648" width="270" height="44" rx="21"/>
+  </g>
+  <g stroke="#111" stroke-width="1.3" fill="none" marker-end="url(#a5)">
+    <path d="M305 64 L 305 94"/><path d="M305 138 L 305 168"/>
+    <path d="M305 240 L 305 270"/><path d="M305 314 L 305 344"/>
+    <path d="M305 388 L 305 418"/><path d="M305 470 L 305 500"/>
+    <path d="M305 544 L 305 574"/><path d="M305 618 L 305 648"/>
+  </g>
+  <!-- 품질 미달 되돌림 -->
+  <path d="M440 204 L 520 204 L 520 116 L 440 116" stroke="#111" stroke-width="1.3" fill="none" marker-end="url(#a5)"/>
+  <text class="dat" x="528" y="160" text-anchor="start">부적합</text>
+  <text class="dat" x="528" y="174" text-anchor="start">— 재촬영</text>
+
+  <g class="lbl" text-anchor="middle">
+    <text x="305" y="48">시작 — 「사진이 실제와 다름」</text>
+    <text x="305" y="123">영상 촬영</text>
+    <text x="305" y="209">품질 검사</text>
+    <text x="305" y="298">특징벡터 추출</text>
+    <text x="305" y="372">기준 특징벡터군과 대조</text>
+    <text x="305" y="440">★ 제1 · 제2 후보의</text>
+    <text x="305" y="458">유사도 격차 산출 → 응답 수준</text>
+    <text x="305" y="528">서버부로 전송 · 접수 검증</text>
+    <text x="305" y="602">관리자 승인</text>
+    <text x="305" y="676">안내 영상 교체 · 배포</text>
+  </g>
+  <g class="stp" text-anchor="start">
+    <text x="104" y="123">S210</text><text x="104" y="209">S220</text>
+    <text x="104" y="298">S230</text><text x="104" y="372">S240</text>
+    <text x="104" y="448">S250</text><text x="104" y="528">S260</text>
+    <text x="104" y="602">S270</text><text x="104" y="676">S280</text>
+  </g>
+  <g class="sml" text-anchor="start">
+    <text x="452" y="90">120</text><text x="450" y="294">130</text>
+    <text x="450" y="368">150 · 151</text><text x="450" y="446">160</text>
+    <text x="450" y="524">190 → 310</text><text x="450" y="598">340 · 400</text>
+    <text x="450" y="672">330 · 350</text>
+  </g>
+  <!-- 단말 / 서버 구분 -->
+  <path d="M60 94 L 60 470" stroke="#111" stroke-width="1" stroke-dasharray="4 3" fill="none"/>
+  <path d="M60 94 L 74 94 M60 470 L 74 470" stroke="#111" stroke-width="1" fill="none"/>
+  <text class="dat" x="52" y="282" text-anchor="middle" transform="rotate(-90 52 282)">휴대단말(100)</text>
+  <path d="M60 500 L 60 692" stroke="#111" stroke-width="1" stroke-dasharray="4 3" fill="none"/>
+  <path d="M60 500 L 74 500 M60 692 L 74 692" stroke="#111" stroke-width="1" fill="none"/>
+  <text class="dat" x="52" y="596" text-anchor="middle" transform="rotate(-90 52 596)">서버부(300)</text>
+</svg>
+<div class="figcap">도 5 — 안내 영상 갱신 동작의 흐름도</div>
+</div>
+
+<div class="note">
+<b>S210~S250은 휴대단말에서, S260~S280은 서버부에서 수행된다.</b>
+제보 영상이 외부로 나가는 시점은 <b>S260</b>이며, 그 이전의 판정은 단말 내부에서 끝난다.
+</div>
+
+<div class="note nav">
+<b class="t">길안내 앱에 빗대면</b><br>
+내비게이션에서 <b>「이 길 막혔어요」 제보</b>를 보내는 과정과 같다.
+다만 보통은 제보를 보내면 사람이 전부 확인해야 하는데,
+여기서는 <b>S230~S250에서 기계가 「이 사진이 어디인지」를 먼저 좁혀 준다.</b><br>
+그리고 <b>S270(사람의 승인)을 건너뛸 수 없게</b> 만들었다.
+잘못 반영되면 그 장소를 찾는 모든 사람이 엉뚱한 사진을 보기 때문이다.
+</div>
+</section>
+
+<!-- ══════════ 도 6 ══════════ -->
+<section class="pb">
+<p class="part">도 6</p>
+<h1>응답 수준 결정 과정의 흐름도</h1>
+<p>본 발명의 핵심에 해당하는 부분으로, 도 5의 S250을 상세히 나타낸 것이다.</p>
+
+<div class="sheet">
+<div class="fignum">【도 6】</div>
+<svg viewBox="0 0 700 470" width="660">
+  <defs>
+    <marker id="a6" markerWidth="10" markerHeight="8" refX="9.5" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#111"/></marker>
+  </defs>
+  <g fill="none" stroke="#111" stroke-width="1.4">
+    <rect x="250" y="18"  width="200" height="44"/>
+    <rect x="250" y="92"  width="200" height="44" stroke-width="2.2"/>
+    <path d="M350 166 L 470 200 L 350 234 L 230 200 Z"/>
+    <path d="M350 258 L 470 292 L 230 292 Z" stroke="none"/>
+    <path d="M350 262 L 466 296 L 350 330 L 234 296 Z"/>
+    <rect x="516" y="178" width="168" height="44"/>
+    <rect x="516" y="274" width="168" height="44"/>
+    <rect x="250" y="368" width="200" height="44"/>
+    <rect x="30"  y="368" width="176" height="44" stroke-width="2.2"/>
+  </g>
+  <g stroke="#111" stroke-width="1.3" fill="none" marker-end="url(#a6)">
+    <path d="M350 62 L 350 92"/>
+    <path d="M350 136 L 350 166"/>
+    <path d="M350 234 L 350 262"/>
+    <path d="M470 200 L 516 200"/>
+    <path d="M466 296 L 516 296"/>
+    <path d="M350 330 L 350 368"/>
+    <path d="M250 390 L 206 390"/>
+  </g>
+  <g class="lbl" text-anchor="middle">
+    <text x="350" y="46">후보별 최고 유사도 정렬</text>
+    <text x="350" y="112">제1위 − 제2위 = 격차 m</text>
+    <text x="350" y="205">m ≥ 0.22 ?</text>
+    <text x="350" y="301">m ≥ 0.16 ?</text>
+    <text x="600" y="206">「자리까지」 제시</text>
+    <text x="600" y="302">「층만」 제시</text>
+    <text x="350" y="395">「모르겠음」 — 보류</text>
+    <text x="118" y="386">확정은 문자인식(171)</text>
+    <text x="118" y="403">또는 사람(172·173)만</text>
+  </g>
+  <g class="dat">
+    <text x="486" y="192" text-anchor="middle">예</text>
+    <text x="486" y="288" text-anchor="middle">예</text>
+    <text x="362" y="252" text-anchor="start">아니오</text>
+    <text x="362" y="352" text-anchor="start">아니오</text>
+  </g>
+  <g class="sml" text-anchor="start">
+    <text x="458" y="88">150</text><text x="458" y="134">160</text>
+  </g>
+  <text class="stp" x="244" y="118" text-anchor="end">S250</text>
+
+  <!-- 측정 근거 -->
+  <rect x="30" y="20" width="176" height="124" fill="none" stroke="#111" stroke-width="1" stroke-dasharray="4 3"/>
+  <text class="sml" x="118" y="42" text-anchor="middle">［실측 근거］</text>
+  <text class="sml" x="118" y="64" text-anchor="middle">제보 1,844장</text>
+  <text class="sml" x="118" y="84" text-anchor="middle">유사도 점수 상위 10%</text>
+  <text class="sml" x="118" y="100" text-anchor="middle">→ 자리 정확도 64.7%</text>
+  <text class="sml" x="118" y="120" text-anchor="middle">격차 상위 10%</text>
+  <text class="sml" x="118" y="136" text-anchor="middle">→ 자리 정확도 92.9%</text>
+</svg>
+<div class="figcap">도 6 — 응답 수준 결정 과정의 흐름도</div>
+</div>
+
+<div class="note nav">
+<b class="t">길안내 앱에 빗대면</b><br>
+내비게이션이 <b>「목적지가 두 곳 검색됩니다」</b> 할 때를 생각하면 된다.
+1위 후보의 점수가 아무리 높아도 2위가 바로 뒤에 붙어 있으면 사실은 헷갈리는 것이다.
+<b>1위가 2위를 얼마나 크게 이겼는지</b>를 봐야 「확실한가」를 알 수 있다.<br>
+그래서 크게 이겼으면 <b>자리까지</b>, 조금 이겼으면 <b>층만</b>, 비슷하면 <b>「모르겠다」</b>고 답한다.
+</div>
+
+<div class="note warn">
+<b>자동 확정은 하지 않는다.</b> 응답 수준이 「자리까지」인 경우에도 장소가 확정되는 것은 아니며,
+문자인식부(171)가 호실 번호를 읽었거나 이용자(172)·관리자(173)가 선택·승인한 경우에만 확정된다.
+</div>
+</section>
+
+<!-- ══════════ 부호의 설명 ══════════ -->
+<section class="pb">
+<p class="part">부호</p>
+<h1>부호의 설명</h1>
+
+<table>
+<tr><th class="c" style="width:10%">부호</th><th style="width:26%">명칭</th><th style="width:30%">도면</th><th>길안내 앱에서</th></tr>
+<tr><td class="n">10</td><td>실내 장소 판정 시스템</td><td>도 1</td><td>전체</td></tr>
+<tr><td class="n">100</td><td>휴대단말</td><td>도 1 · 2</td><td>앱이 깔린 휴대폰</td></tr>
+<tr><td class="n">110</td><td>광학코드 판독부</td><td>도 1 · 2 · 4</td><td>출입문 QR 찍기</td></tr>
+<tr><td class="n">111</td><td>안내 실행부</td><td>도 1 · 2 · 4</td><td>단계별 길안내</td></tr>
+<tr><td class="n">112</td><td>경로 생성부</td><td>도 2 · 4</td><td>경로 만들기</td></tr>
+<tr><td class="n">120</td><td>영상 획득부</td><td>도 1 · 2 · 5</td><td>제보 사진 촬영</td></tr>
+<tr><td class="n">121</td><td>영상 품질 검사부</td><td>도 2 · 5</td><td>흔들림·밝기 검사</td></tr>
+<tr><td class="n">130</td><td>특징벡터 추출부</td><td>도 2 · 5</td><td>사진 → 숫자</td></tr>
+<tr><td class="n">140</td><td>기준벡터 저장부</td><td>도 1 · 3</td><td>미리 외워 둔 사진 특징</td></tr>
+<tr><td class="n">150</td><td>대조부</td><td>도 2 · 5 · 6</td><td>후보 줄 세우기</td></tr>
+<tr><td class="n">151</td><td>후보 축소부</td><td>도 2 · 5</td><td>진입 층으로 좁히기</td></tr>
+<tr class="hi"><td class="n">160</td><td><b>응답수준 결정부</b></td><td>도 1 · 2 · 5 · 6</td><td><b>자리 / 층 / 모름</b></td></tr>
+<tr><td class="n">170</td><td>장소 확정부</td><td>도 6</td><td>최종 확정</td></tr>
+<tr><td class="n">171</td><td>문자인식부</td><td>도 6</td><td>호실 번호판 읽기</td></tr>
+<tr><td class="n">172</td><td>이용자 선택부</td><td>도 6</td><td>후보 중 고르기</td></tr>
+<tr><td class="n">173</td><td>관리자 승인부</td><td>도 5 · 6</td><td>사람의 최종 승인</td></tr>
+<tr><td class="n">180</td><td>안내영상 갱신부</td><td>도 5</td><td>사진 교체</td></tr>
+<tr><td class="n">190</td><td>통신부</td><td>도 1 · 2</td><td>서버와 주고받기</td></tr>
+<tr><td class="n">191</td><td>저장부</td><td>도 2</td><td>오프라인 저장</td></tr>
+<tr><td class="n">192</td><td>표시부</td><td>도 2 · 4</td><td>화면</td></tr>
+<tr><td class="n">200</td><td>출입구 광학코드</td><td>도 1</td><td>문에 붙인 QR</td></tr>
+<tr><td class="n">300</td><td>서버부</td><td>도 1 · 3</td><td>사진 보관·배포</td></tr>
+<tr><td class="n">310</td><td>접수 검증부</td><td>도 3 · 5</td><td>규격 검사(문지기)</td></tr>
+<tr><td class="n">320</td><td>제보 보관부</td><td>도 3</td><td>검토 대기함</td></tr>
+<tr><td class="n">330</td><td>승인 영상 보관부</td><td>도 3</td><td>승인된 사진 창고</td></tr>
+<tr><td class="n">340</td><td>관리자 인증부</td><td>도 3</td><td>관리자 명부 대조</td></tr>
+<tr><td class="n">350</td><td>배포부</td><td>도 3</td><td>앱·자료 배포</td></tr>
+<tr><td class="n">400</td><td>관리자 단말</td><td>도 1 · 3</td><td>검수하는 사람</td></tr>
+</table>
+
+<h2 style="margin-top:14px">단계 부호</h2>
+<table>
+<tr><th class="c" style="width:12%">단계</th><th style="width:34%">동작</th><th>도면</th></tr>
+<tr><td class="n">S110~S150</td><td>경로 안내</td><td>도 4</td></tr>
+<tr><td class="n">S210~S280</td><td>안내 영상 갱신</td><td>도 5</td></tr>
+<tr><td class="n">S250</td><td>응답 수준 결정 (상세는 도 6)</td><td>도 5 · 6</td></tr>
+</table>
+
+<div class="note">
+<b>이 도면과 「발명의 내용 설명서」의 관계</b> — 부호 100~400은 두 문서가 같습니다.
+설명서의 도 1은 판정을 <b>서버</b>에서 수행하는 실시예를, 본 문서의 도 1~3은
+실제로 구현한 <b>단말에서 판정하는 실시예</b>를 나타냅니다.
+청구항 1은 수행 주체를 한정하지 않으므로 두 실시예를 모두 포함합니다.
+</div>
+</section>
+
+</body>
+</html>

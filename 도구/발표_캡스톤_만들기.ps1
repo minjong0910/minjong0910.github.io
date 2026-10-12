@@ -28,8 +28,22 @@ if($svgs.Count -ne 5){ throw "도면이 5장이어야 하는데 $($svgs.Count)�
 
 $slot = @('구조도','블록도폰','블록도서버','흐름길안내','흐름갱신')
 
-Write-Host "`n[2] 발표 자료에 끼우기"
+Write-Host "`n[2] 도면 글자 규칙 대조"
+# 도면.html 의 <svg> 만 가져오고 그쪽 <style> 은 안 가져온다.
+#   그래서 글자 크기 규칙(svg .lbl 등)이 틀에도 **같은 값으로** 있어야 한다.
+#   2026-10-13 : 실제로 빠져 있어 발표 자료의 도면 글자가 전부 기본 16px 로 떨어져 있었다.
+#   조용히 틀어지는 종류라서 대조로 막는다.
 $tpl = [IO.File]::ReadAllText($TPL, [Text.Encoding]::UTF8)
+$norm = { param($x) ($x -replace '\s+', ' ').Trim() }
+$rules = [regex]::Matches($src, '(?m)^\s*svg\s+\.\w+\s*\{[^}]*\}') | ForEach-Object { & $norm $_.Value }
+if($rules.Count -lt 5){ throw "문서\도면.html 에서 글자 규칙을 $($rules.Count)개밖에 못 찾았습니다" }
+$tplN = & $norm $tpl
+foreach($r in $rules){
+  if($tplN -notlike "*$r*"){ throw "틀에 이 규칙이 없거나 값이 다릅니다 : $r" }
+}
+Write-Host ("  규칙 {0}가지 모두 같습니다" -f $rules.Count)
+
+Write-Host "`n[3] 발표 자료에 끼우기"
 for($i = 0; $i -lt 5; $i++){
   $mark = '<!--SVG:' + $slot[$i] + '-->'
   if($tpl -notmatch [regex]::Escape($mark)){ throw "틀에 $mark 자리가 없습니다" }
@@ -39,7 +53,7 @@ for($i = 0; $i -lt 5; $i++){
 # 도면 안의 marker id 가 한 문서 안에서 겹치지 않게 — 도면.html 은 A~E 로 이미 다르다
 [IO.File]::WriteAllText($OUT, $tpl, (New-Object Text.UTF8Encoding($false)))
 
-Write-Host "`n[3] 확인"
+Write-Host "`n[4] 확인"
 $bad = 0
 if($tpl -match '<!--SVG:'){ Write-Host "  안 채워진 자리가 남았습니다 ★" -ForegroundColor Red; $bad++ }
 $n = ([regex]::Matches($tpl, '<section class="slide')).Count

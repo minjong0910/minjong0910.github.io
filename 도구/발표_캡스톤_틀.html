@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>캡스톤 발표 — 공대 3호관 실내 길안내</title>
+<style>
+  /* 16:9 슬라이드 (338.7mm × 190.5mm) — 문서형(에디토리얼) 디자인
+     ※ 도면 다섯 개는 문서\도면.html 에서 그대로 가져온다 (도구\발표_캡스톤_만들기.ps1) */
+  @page { size: 338.7mm 190.5mm; margin: 0; }
+  :root{
+    --paper:#FBFAF7; --ink:#1F1D1A; --ink2:#55504A; --muted:#8A837A;
+    --rule:#DAD4C9; --rule2:#EDE9E1;
+    --red:#8C2F1E; --blue:#2C5F6B; --ok:#2D6A4F; --warn:#8A6200;
+    --tintR:#FAF1EE; --tintB:#EFF4F5; --tintG:#EEF4F0; --tintY:#FAF5E8;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--paper); }
+  body{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; color:var(--ink);
+        -webkit-print-color-adjust:exact; print-color-adjust:exact; counter-reset:sl; }
+
+  .slide{ width:338.7mm; height:190.5mm; page-break-after:always; position:relative;
+          padding:15mm 18mm 13mm 24mm; overflow:hidden; background:var(--paper); counter-increment:sl; }
+  .slide:last-child{ page-break-after:auto; }
+  .slide::before{ content:""; position:absolute; left:10mm; top:15mm; bottom:13mm;
+                  width:1.2mm; background:var(--red); opacity:.85; }
+
+  .tag{ font-size:10pt; letter-spacing:3px; color:var(--red); font-weight:700; margin-bottom:3mm; }
+  h1{ font-size:27pt; color:var(--ink); margin:0 0 2.5mm; letter-spacing:-0.6px; line-height:1.22; font-weight:700; }
+  .rule{ width:26mm; height:1.1mm; background:var(--ink); margin-bottom:4.5mm; }
+  .sub{ font-size:13pt; color:var(--ink2); margin:0 0 6mm; line-height:1.65; }
+  .foot{ position:absolute; left:24mm; right:18mm; bottom:6.5mm; display:flex;
+         justify-content:space-between; font-size:8.5pt; color:var(--muted);
+         border-top:1px solid var(--rule2); padding-top:2.5mm; letter-spacing:.5px; }
+  .foot .pg::after{ content:counter(sl); }
+
+  .cover{ padding:0; display:flex; align-items:center; background:var(--ink); }
+  .cover::before{ display:none; }
+  .cover .in{ padding:0 26mm; width:100%; color:var(--paper); }
+  .cover .k{ font-size:11pt; letter-spacing:5px; color:#D9A497; margin-bottom:7mm; }
+  .cover h1{ color:var(--paper); font-size:40pt; line-height:1.28; margin-bottom:5mm; }
+  .cover .rule{ background:var(--red); width:34mm; height:1.6mm; margin-bottom:6mm; }
+  .cover .s{ font-size:14pt; color:#CFC9C0; margin-bottom:13mm; }
+  .cover .m{ font-size:11.5pt; color:#A9A29A; line-height:2; }
+
+  .part{ background:#F3EFE8; display:flex; align-items:center; }
+  .part .in{ padding:0 10mm; position:relative; z-index:1; }
+  .part .han{ position:absolute; right:22mm; top:50%; transform:translateY(-50%);
+              font-size:170pt; font-weight:700; color:var(--red); opacity:.10; line-height:1; }
+  .part h1{ font-size:34pt; margin-bottom:3mm; }
+  .part .rule{ background:var(--red); }
+  .part .s{ font-size:14pt; color:var(--ink2); }
+
+  .cols{ display:flex; gap:7mm; }
+  .cols > *{ flex:1; }
+  .card{ border:1px solid var(--rule); border-radius:1.5mm; padding:5mm 6mm; background:#fff; }
+  .card .h{ font-size:13pt; font-weight:700; color:var(--ink); margin-bottom:2.5mm;
+            padding-bottom:1.5mm; border-bottom:1px solid var(--rule2); }
+  .card p{ margin:0; font-size:12pt; line-height:1.72; color:var(--ink2); }
+  .card.bad{ border-color:#E0C0B8; background:var(--tintR); }
+  .card.good{ border-color:#BCD3C5; background:var(--tintG); }
+  .card.hi{ border-color:var(--red); border-width:1.6px; background:#fff; }
+
+  ul{ margin:0; padding-left:6mm; font-size:13pt; line-height:1.9; color:var(--ink2); }
+  li{ margin-bottom:2mm; }
+  b.hl{ background:#F6E7C9; padding:0 1mm; color:var(--ink); }
+  .big-num{ font-size:40pt; font-weight:700; color:var(--ink); line-height:1; font-variant-numeric:tabular-nums; }
+  .big-num small{ font-size:15pt; font-weight:400; color:var(--muted); }
+  .lbl{ font-size:11pt; color:var(--muted); margin-top:1.5mm; line-height:1.5; }
+
+  table{ width:100%; border-collapse:collapse; font-size:12pt; background:#fff; }
+  th,td{ border:1px solid var(--rule); padding:3mm 4mm; text-align:left; vertical-align:middle; color:var(--ink2); }
+  th{ background:#F3EFE8; font-weight:700; font-size:11pt; color:var(--ink); letter-spacing:.3px; }
+  td b{ color:var(--ink); }
+  td.c,th.c{ text-align:center; white-space:nowrap; }
+  td.n,th.n{ text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  tr.hi td{ background:var(--tintY); }
+  tr.hi td b{ color:var(--red); }
+
+  .note{ font-size:12pt; color:var(--ink2); background:#F3EFE8;
+         border-left:2.5mm solid var(--rule); padding:4mm 5mm; line-height:1.7; }
+  .note b{ color:var(--ink); }
+  .note.warn{ border-left-color:var(--red); background:var(--tintR); }
+  .note.good{ border-left-color:var(--ok); background:var(--tintG); }
+
+  /* 도면 + 설명 두 칸 */
+  .fig{ display:flex; gap:9mm; align-items:flex-start; }
+  .fig .pic{ flex:none; }
+  .fig .pic svg{ display:block; height:128mm; width:auto; }   /* 128mm : 제목/바닥글을 뺀 자리에 딱 맞다 — 더 키우면 잘린다 */
+  .fig .say{ flex:1; padding-top:2mm; }
+  .fig .say .one{ font-size:16pt; font-weight:700; color:var(--ink); line-height:1.45; margin-bottom:5mm; }
+  .fig .say ul{ font-size:12.5pt; line-height:1.85; }
+  svg text{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; }
+  .center{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+</style>
+</head>
+<body>
+
+<!-- ══════ 표지 ══════ -->
+<section class="slide cover">
+  <div class="in">
+    <div class="k">캡스톤 디자인 발표</div>
+    <h1>인터넷이 끊겨도<br>길을 알려 주는 앱</h1>
+    <div class="rule"></div>
+    <div class="s">군산대학교 공과대학 3호관 실내 길안내</div>
+    <div class="m">김민종 · 손의윤 · 문성일<br>2026. 10.</div>
+  </div>
+</section>
+
+<!-- ══════ 차례 ══════ -->
+<section class="slide">
+  <div class="tag">차례</div>
+  <h1>네 마디로 말씀드립니다</h1>
+  <div class="rule"></div>
+  <table style="margin-top:3mm">
+  <tr><th class="c" style="width:10%">마디</th><th style="width:18%">제목</th><th>한 줄</th></tr>
+  <tr><td class="c"><b>起</b></td><td><b>문제</b></td><td>건물 안에서는 길을 못 찾는다. 그런데 <b>더 큰 문제</b>가 따로 있다</td></tr>
+  <tr><td class="c"><b>承</b></td><td><b>만든 것</b></td><td>구조도 · 블록도 · 흐름도 — <b>그림 다섯 장</b>으로 전부 설명됩니다</td></tr>
+  <tr class="hi"><td class="c"><b>轉</b></td><td><b>뒤집힘</b></td><td><b>믿었던 것이 틀렸습니다.</b> 측정해 보고 기능을 없앴습니다</td></tr>
+  <tr><td class="c"><b>結</b></td><td><b>결과</b></td><td>숫자 · 믿을 수 있게 만든 장치 · 남은 일</td></tr>
+  </table>
+  <div class="note" style="margin-top:7mm"><b>오늘 기억하실 것은 하나입니다.</b>
+    &nbsp;「<b>모를 때는 모른다고 말하는 앱</b>」 — 왜 그렇게 만들었는지를 말씀드립니다.</div>
+  <div class="foot"><span>공대 3호관 실내 길안내</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════ 起 ══════ -->
+<section class="slide part">
+  <div class="han">起</div>
+  <div class="in">
+    <div class="tag">첫째 마디</div>
+    <h1>문제</h1>
+    <div class="rule"></div>
+    <div class="s">건물 안에서 길을 잃습니다.<br>그런데 아무도 안 다루는 문제가 하나 더 있습니다.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="tag">起 · 1</div>
+  <h1>3호관에서는 길을 잃습니다</h1>
+  <div class="rule"></div>
+  <div class="cols" style="margin-top:2mm">
+    <div class="card"><div class="h">복도가 다 똑같이 생겼습니다</div>
+      <p>3층 복도와 4층 복도를 <b>사람 눈으로도</b> 구분하기 어렵습니다.
+         호실 번호판은 작고, 문 앞에 가야 보입니다.</p></div>
+    <div class="card"><div class="h">찾아야 할 곳이 152곳</div>
+      <p>지하 1층부터 5층까지 강의실 · 연구실 · 교수연구실에
+         화장실 · 엘리베이터 · 복도까지 합하면 <b>152곳</b>입니다.</p></div>
+    <div class="card bad"><div class="h">물어볼 사람이 없습니다</div>
+      <p>수업 시간에는 복도가 비어 있고, 신입생과 외부 방문객은
+         <b>어느 층인지조차</b> 모르는 채로 헤맵니다.</p></div>
+  </div>
+  <div class="note" style="margin-top:7mm">저희 셋 다 1학년 때 겪은 일입니다.
+    <b>「건물 안에서는 네이버 지도가 안 통한다」</b>는 것이 출발점이었습니다.</div>
+  <div class="foot"><span>起 · 문제</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">起 · 2</div>
+  <h1>기존 방법은 왜 안 되나</h1>
+  <div class="rule"></div>
+  <table style="margin-top:2mm">
+  <tr><th style="width:20%">방법</th><th style="width:34%">어떻게 하는가</th><th>막히는 곳</th></tr>
+  <tr><td><b>GPS</b></td><td>위성으로 내 위치를 잡는다</td><td><b class="hl">건물 안에서는 안 잡힙니다.</b> 자동차 내비게이션을 실내에서 못 쓰는 이유입니다</td></tr>
+  <tr><td><b>Wi-Fi · 비콘</b></td><td>건물에 장치를 달아 위치를 잰다</td><td>장치를 <b>수십 개 달고 관리</b>해야 합니다. 졸업작품으로 할 수 없습니다</td></tr>
+  <tr><td><b>실내 지도 앱</b></td><td>큰 쇼핑몰·공항에 이미 있다</td><td>대학 건물은 <b>지도 자체가 없습니다.</b> 만들어 주는 곳도 없습니다</td></tr>
+  </table>
+  <div class="note good" style="margin-top:7mm"><b>그래서 발상을 바꿨습니다.</b>
+    내 위치를 <b>알아내려 하지 말고</b>, 들어올 때 <b>물어보자</b> —
+    문에 QR을 붙이면 공사도 비용도 없습니다.</div>
+  <div class="foot"><span>起 · 문제</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">起 · 3 — 핵심</div>
+  <h1>그런데 더 큰 문제가 있습니다</h1>
+  <div class="rule"></div>
+  <div class="sub">길안내 앱은 <b>사진</b>으로 길을 알려 줍니다. 그런데 그 사진이 금방 낡습니다.</div>
+  <div class="cols">
+    <div class="card bad"><div class="h">건물은 계속 바뀝니다</div>
+      <p>가구가 옮겨지고, 게시물이 바뀌고, 공사를 합니다.
+         <b>사진과 실제가 달라지면</b> 안내가 오히려 헷갈립니다.</p></div>
+    <div class="card bad"><div class="h">다시 찍으려면</div>
+      <p>사람이 <b>건물을 전부 돌아다니며</b> 152곳을 다시 찍어야 합니다.
+         한 번 하기도 힘든 일을 계속 할 수는 없습니다.</p></div>
+    <div class="card hi"><div class="h">그래서 이렇게 했습니다</div>
+      <p><b>본 사람이 찍어 올리게</b> 하자.<br>
+         그런데 이번엔 <b class="hl">「이 사진이 어디냐」</b>를 가려내는 일이 문제가 됩니다.</p></div>
+  </div>
+  <div class="note warn" style="margin-top:7mm"><b>이것이 저희가 푼 진짜 문제이고, 특허로 내려는 부분입니다.</b>
+    길안내 자체는 이미 많이 있습니다. <b>안내 사진을 스스로 최신으로 지키는 것</b>이 저희 몫입니다.</div>
+  <div class="foot"><span>起 · 문제</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════ 承 ══════ -->
+<section class="slide part">
+  <div class="han">承</div>
+  <div class="in">
+    <div class="tag">둘째 마디</div>
+    <h1>만든 것</h1>
+    <div class="rule"></div>
+    <div class="s">그림 다섯 장이면 전부 설명됩니다.<br>구조도 하나 · 블록도 둘 · 흐름도 둘.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="tag">承 · 구조도</div>
+  <h1>휴대폰과 서버</h1>
+  <div class="rule" style="margin-bottom:3mm"></div>
+  <div class="fig">
+    <div class="pic"><!--SVG:구조도--></div>
+    <div class="say">
+      <div class="one">휴대폰과 서버가 만나는 곳은 <span style="color:var(--red)">두 줄</span>뿐입니다.</div>
+      <ul>
+        <li><b>문에 붙인 QR</b>을 찍으면 어느 문·몇 층인지 앱이 압니다</li>
+        <li>길 만들기도, <b>AI 판단도 휴대폰이</b> 합니다</li>
+        <li>서버는 <b>사진을 보관하고 나눠 줄 뿐</b>, 계산은 하지 않습니다</li>
+      </ul>
+      <div class="note good" style="margin-top:6mm"><b>왜 이렇게?</b><br>
+        ① 통신이 끊겨도 길안내가 되고<br>
+        ② 제보 사진이 <b>판정하려고 밖으로 나가지 않습니다</b></div>
+    </div>
+  </div>
+  <div class="foot"><span>承 · 만든 것</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">承 · 블록도</div>
+  <h1>휴대폰 안</h1>
+  <div class="rule" style="margin-bottom:3mm"></div>
+  <div class="fig">
+    <div class="pic"><!--SVG:블록도폰--></div>
+    <div class="say">
+      <div class="one">왼쪽은 <span style="color:var(--red)">길안내</span>,<br>오른쪽은 <span style="color:var(--red)">사진 판정</span>.</div>
+      <ul>
+        <li><b>왼쪽</b>은 내비게이션에도 다 있는 기능입니다</li>
+        <li><b>오른쪽</b>이 저희가 새로 만든 부분입니다</li>
+        <li>가운데 점선 — 들어온 층을 알면 <b>후보를 좁힐 수</b> 있습니다</li>
+      </ul>
+      <div class="note" style="margin-top:6mm">맨 아래 <b>「받아 둔 자료 저장」</b> 덕분에
+        지하·계단에서도 앱이 열립니다.</div>
+    </div>
+  </div>
+  <div class="foot"><span>承 · 만든 것</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">承 · 블록도</div>
+  <h1>서버 안</h1>
+  <div class="rule" style="margin-bottom:3mm"></div>
+  <div class="fig">
+    <div class="pic"><!--SVG:블록도서버--></div>
+    <div class="say">
+      <div class="one">검사하고, 담아 두고, 나눠 줍니다.<br><span style="color:var(--red)">계산은 하지 않습니다.</span></div>
+      <ul>
+        <li><b>문지기</b> — 모양이 맞는 것만 받습니다</li>
+        <li><b>대기함과 창고가 따로</b> 있습니다</li>
+        <li>그 사이에 <b>사람의 승인</b>이 있습니다</li>
+      </ul>
+      <div class="note warn" style="margin-top:6mm">제보가 <b>바로 반영되지 않습니다.</b>
+        잘못된 제보 하나가 모두에게 퍼지지 않게 한 것입니다.</div>
+    </div>
+  </div>
+  <div class="foot"><span>承 · 만든 것</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">承 · 흐름도</div>
+  <h1>길안내는 이렇게 돕니다</h1>
+  <div class="rule" style="margin-bottom:3mm"></div>
+  <div class="fig">
+    <div class="pic"><!--SVG:흐름길안내--></div>
+    <div class="say">
+      <div class="one">점선으로 묶은 구간 전체가<br><span style="color:var(--red)">인터넷 없이</span> 됩니다.</div>
+      <ul>
+        <li>문 QR을 찍으면 <b>어느 문·몇 층</b>인지 정해집니다</li>
+        <li>길은 <b>경로 계산이 아니라 표 네 개</b>의 조합으로 만듭니다</li>
+        <li>한 단계마다 <b>3D · 사진 · 1인칭</b>을 같이 보여 줍니다</li>
+      </ul>
+      <div class="note good" style="margin-top:6mm"><b>길을 잃는 곳이 하필 전파가 안 닿는 곳</b>입니다 —
+        지하, 계단, 엘리베이터 안.</div>
+    </div>
+  </div>
+  <div class="foot"><span>承 · 만든 것</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">承 · 흐름도</div>
+  <h1>사진은 이렇게 바뀝니다</h1>
+  <div class="rule" style="margin-bottom:3mm"></div>
+  <div class="fig">
+    <div class="pic"><!--SVG:흐름갱신--></div>
+    <div class="say">
+      <div class="one">사진이 휴대폰 밖으로 나가는 것은<br><span style="color:var(--red)">한 번뿐</span>입니다.</div>
+      <ul>
+        <li>흔들린 사진은 <b>AI 를 부르기 전에</b> 되돌립니다</li>
+        <li>판정은 <b>전부 휴대폰 안</b>에서 끝납니다</li>
+        <li>★ 표가 있는 칸 — <b>1등과 2등의 차이</b>를 재는 곳</li>
+        <li>마지막은 반드시 <b>사람의 승인</b></li>
+      </ul>
+      <div class="note" style="margin-top:6mm">★ 칸이 왜 중요한지는
+        <b>다음 마디</b>에서 말씀드립니다.</div>
+    </div>
+  </div>
+  <div class="foot"><span>承 · 만든 것</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════ 轉 ══════ -->
+<section class="slide part">
+  <div class="han">轉</div>
+  <div class="in">
+    <div class="tag">셋째 마디</div>
+    <h1>뒤집힘</h1>
+    <div class="rule"></div>
+    <div class="s">믿었던 것이 틀렸습니다.<br>측정해 보고, 만들었던 기능을 없앴습니다.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="tag">轉 · 1</div>
+  <h1>「정답 100%」가 거짓이었습니다</h1>
+  <div class="rule"></div>
+  <div class="cols" style="margin-top:2mm">
+    <div class="card"><div class="h">처음 만든 것</div>
+      <p>AI 가 매긴 점수가 높으면 <b>자동으로 확정</b>하게 했습니다.
+         시험해 보니 <b>정답률 100%</b>가 나왔습니다. 다 됐다고 생각했습니다.</p></div>
+    <div class="card bad"><div class="h">그런데</div>
+      <p>시험에 쓴 사진이 <b class="hl">이미 AI 자료집에 들어 있었습니다.</b><br>
+         자기 사진을 자기가 알아본 것이었습니다.</p></div>
+    <div class="card bad"><div class="h">다시 재 보니</div>
+      <p>새로 찍은 사진으로 측정하자<br>
+         자동 확정의 정답률은 <b class="hl">0%</b> 였습니다.</p></div>
+  </div>
+  <div class="note warn" style="margin-top:7mm"><b>그래서 그 기능을 없앴습니다.</b>
+    코드에서 임계값을 <b>절대 넘을 수 없는 값</b>으로 두어, 앞으로도 자동 확정이 되살아나지 못하게 막았습니다.
+    <b>AI 가 혼자 정하지 못합니다</b> — 번호판을 읽거나 사람이 고를 때만 확정됩니다.</div>
+  <div class="foot"><span>轉 · 뒤집힘</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">轉 · 2 — 핵심</div>
+  <h1>재는 「자」를 바꿨습니다</h1>
+  <div class="rule"></div>
+  <div class="sub">점수가 높다고 맞는 게 아니었습니다. <b>1등이 2등을 얼마나 크게 이겼는지</b>를 봐야 했습니다.</div>
+  <div class="cols">
+    <div class="card bad center" style="padding:7mm 5mm">
+      <div class="lbl" style="margin:0 0 2mm">점수가 높은 순 — 상위 10%</div>
+      <div class="big-num" style="color:var(--red)">64.7<small>%</small></div>
+      <div class="lbl">1등 점수만 보고 고르면</div></div>
+    <div class="card good center" style="padding:7mm 5mm">
+      <div class="lbl" style="margin:0 0 2mm">1·2등 차이가 큰 순 — 상위 10%</div>
+      <div class="big-num" style="color:var(--ok)">92.9<small>%</small></div>
+      <div class="lbl">차이를 보고 고르면</div></div>
+    <div class="card hi center" style="padding:7mm 5mm">
+      <div class="lbl" style="margin:0 0 2mm">같은 AI · 같은 사진</div>
+      <div class="big-num">+28.2<small>%p</small></div>
+      <div class="lbl">자만 바꿨습니다</div></div>
+  </div>
+  <div class="note good" style="margin-top:7mm"><b>생각해 보면 당연합니다.</b>
+    「1등 90점」도 2등이 89점이면 사실은 헷갈리는 것입니다.
+    그래서 <b>크게 이기면 자리까지, 조금 이기면 층만, 비슷하면 「모르겠다」</b>고 답합니다.</div>
+  <div class="foot"><span>轉 · 뒤집힘</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════ 結 ══════ -->
+<section class="slide part">
+  <div class="han">結</div>
+  <div class="in">
+    <div class="tag">넷째 마디</div>
+    <h1>결과</h1>
+    <div class="rule"></div>
+    <div class="s">무엇을 만들었고, 어떻게 믿을 수 있게 했는지.<br>그리고 못 한 것.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="tag">結 · 1</div>
+  <h1>숫자로</h1>
+  <div class="rule"></div>
+  <div class="cols" style="margin-top:4mm">
+    <div class="card center"><div class="big-num">152<small>곳</small></div><div class="lbl">안내하는 장소<br>지하 1층 ~ 5층</div></div>
+    <div class="card center"><div class="big-num">174<small>장</small></div><div class="lbl">실제로 찍은<br>안내 사진</div></div>
+    <div class="card center"><div class="big-num">15.6<small>MB</small></div><div class="lbl">폰에 저장<br>인터넷 없이 열림</div></div>
+    <div class="card center"><div class="big-num">0<small>원</small></div><div class="lbl">서버 비용<br>빌려 쓰기만</div></div>
+  </div>
+  <div class="cols" style="margin-top:6mm">
+    <div class="card good"><div class="h">되는 것</div>
+      <p>출입문 QR 로 출발점을 정하고, <b>인터넷 없이</b> 152곳까지 길을 안내합니다.
+         3D · 실제 사진 · 1인칭 걷기를 함께 보여 줍니다.</p></div>
+    <div class="card good"><div class="h">새로 만든 것</div>
+      <p>이용자가 올린 사진이 어디인지 <b>휴대폰 안에서</b> 판정하고,
+         <b>확신이 있을 때만</b> 답합니다. 확정은 사람이 합니다.</p></div>
+  </div>
+  <div class="foot"><span>結 · 결과</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">結 · 2</div>
+  <h1>믿을 수 있게 만든 장치</h1>
+  <div class="rule"></div>
+  <div class="sub">코드가 2만 줄이 넘으니 <b>어디를 고치면 어디가 깨지는지</b> 알 수 없게 되었습니다.</div>
+  <div class="cols">
+    <div class="card"><div class="h">자동 검사 22가지</div>
+      <p>부르는 파일이 다 있는지, 사진 174장이 다 있는지, 장소 152곳이 AI 자료와 같은지…
+         <b>한 번 당한 실수는 검사로 바꿨습니다.</b></p></div>
+    <div class="card"><div class="h">안전망 — 기준 816개</div>
+      <p>고치기 전 결과를 전부 기록해 두고, 고친 뒤 <b>한 글자·한 점까지</b> 비교합니다.
+         안내 문장이 조용히 바뀐 적이 있어 만들었습니다.</p></div>
+    <div class="card hi"><div class="h">검사를 통과해야 배포</div>
+      <p>올리는 길목에 검사를 박아 두었습니다.
+         <b>통과하지 못하면 사이트가 바뀌지 않습니다.</b> 사람이 깜빡해도 막힙니다.</p></div>
+  </div>
+  <div class="note" style="margin-top:7mm"><b>실제로 잡았습니다.</b>
+    발표 준비 중에도 이 검사들이 「문서에 적은 숫자가 실제 코드와 다르다」를 두 번 잡아 주었습니다.</div>
+  <div class="foot"><span>結 · 결과</span><span class="pg"></span></div>
+</section>
+
+<section class="slide">
+  <div class="tag">結 · 3</div>
+  <h1>못 한 것과 남은 일</h1>
+  <div class="rule"></div>
+  <div class="cols" style="margin-top:2mm">
+    <div class="card bad"><div class="h">정확도가 높지 않습니다</div>
+      <p>전부 답하게 하면 자리 정확도 <b>55.6%</b> 입니다.
+         「정확도를 높였다」고는 말할 수 없습니다.
+         저희가 한 것은 <b>확신이 있을 때만 답하게</b> 한 것입니다.</p></div>
+    <div class="card bad"><div class="h">지금 어디인지는 모릅니다</div>
+      <p>측위를 하지 않습니다. 출발점을 QR 로 <b>선언</b>할 뿐,
+         걷는 도중의 위치는 알지 못합니다. 아는 척하지 않으려고 그렇게 두었습니다.</p></div>
+    <div class="card bad"><div class="h">AI 는 인터넷이 필요합니다</div>
+      <p>길안내는 오프라인이지만, <b>사진 판정은 통신이 있어야</b> 합니다.
+         기준 자료가 10MB 라 폰에 미리 저장하지 못했습니다.</p></div>
+  </div>
+  <div class="note" style="margin-top:7mm"><b>남은 일</b> &nbsp;—&nbsp;
+    기준 사진을 더 모아 정확도 올리기 · 개인정보처리방침과 오픈소스 고지 갖추기 ·
+    다른 건물로 넓힐 때 필요한 자료 정리</div>
+  <div class="foot"><span>結 · 결과</span><span class="pg"></span></div>
+</section>
+
+<section class="slide center" style="padding:20mm 30mm">
+  <div class="tag" style="text-align:center">마무리</div>
+  <h1 style="font-size:32pt; text-align:center; margin-bottom:6mm">
+    저희가 만든 것은<br><span style="color:var(--red)">모를 때는 모른다고 말하는 앱</span>입니다</h1>
+  <div class="rule" style="margin:0 auto 7mm"></div>
+  <div style="font-size:14pt; color:var(--ink2); line-height:2; max-width:210mm">
+    길을 알려 주는 앱은 이미 많습니다.<br>
+    저희는 <b>안내 사진이 낡는 문제</b>를 풀려고 했고,<br>
+    그 과정에서 <b>AI 를 믿으면 안 된다</b>는 것을 측정으로 배웠습니다.<br><br>
+    <b>틀릴 수 있다는 것을 인정하고 설계한 것</b>이 이 작품의 결론입니다.
+  </div>
+  <div class="foot"><span>공대 3호관 실내 길안내 · 김민종 · 손의윤 · 문성일</span><span class="pg"></span></div>
+</section>
+
+</body>
+</html>

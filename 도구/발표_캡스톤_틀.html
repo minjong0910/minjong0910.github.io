@@ -171,9 +171,11 @@
 <section class="slide cover">
   <div class="in">
     <div class="k">캡스톤 디자인 발표</div>
-    <h1>이 사진,<br><em>어디일까요?</em></h1>
+    <h1>저희 AI는<br><em>절반을 틀립니다.</em></h1>
+    <div style="font-size:19pt; color:var(--fg2); margin:-2mm 0 7mm; line-height:1.5">
+      그래서 <b style="color:#EAF1F6">틀릴 때는 입을 다물게</b> 했습니다.</div>
     <div class="bar"></div>
-    <div class="s">이용자가 올린 사진으로 <b style="color:#EAF1F6">안내 사진을 스스로 갱신하는</b> 실내 길안내<br>
+    <div class="s">이용자가 찍어 올린 사진으로 <b style="color:#EAF1F6">안내가 스스로 갱신되는</b> 실내 길안내<br>
       군산대학교 공과대학 3호관</div>
     <div class="m">김민종 · 손의윤 · 문성일<br>2026. 10.</div>
   </div>
@@ -188,16 +190,16 @@
       <th class="c" style="width:9%">쪽</th><th>한 줄</th></tr>
   <tr><td class="c"><b>첫째</b></td><td><b>무엇을 만들기로 했나</b></td><td class="c">4~6</td>
       <td>스스로 건 <b>조건 네 가지</b>가 설계를 정했고, 그중 하나가 숙제로 남았습니다</td></tr>
-  <tr><td class="c"><b>둘째</b></td><td><b>어떻게 만들었나</b></td><td class="c">8~20</td>
+  <tr><td class="c"><b>둘째</b></td><td><b>어떻게 만들었나</b></td><td class="c">8~21</td>
       <td>재료 · <b>휴대폰에 무엇이 들어가나</b> · 구조도 · 블록도 둘 · 흐름도 둘</td></tr>
-  <tr><td class="c"><b>셋째</b></td><td><b>측정 결과</b></td><td class="c">22~25</td>
+  <tr><td class="c"><b>셋째</b></td><td><b>측정 결과</b></td><td class="c">23~26</td>
       <td>세 가지를 재서 <b>둘은 그만두고 하나는 그대로</b> 두었습니다 <span class="sm">(지난 발표 내용)</span></td></tr>
-  <tr class="hi"><td class="c"><b>넷째</b></td><td><b>한 일과 결과</b></td><td class="c">27~28</td>
+  <tr class="hi"><td class="c"><b>넷째</b></td><td><b>한 일과 결과</b></td><td class="c">28~29</td>
       <td><b>무엇을 했고 무엇이 나왔는지</b> — 숫자를 숨기지 않습니다</td></tr>
   </table>
   <div class="strip vbot" style="margin-top:7mm"><b>오늘 한 가지만 기억하신다면</b> —
     저희 성과는 「정확도를 올렸다」가 아니라 <b>「틀릴 때를 골라낸다」</b>입니다.</div>
-  <div class="foot"><span>이 사진, 어디일까요?</span><span class="pg"></span></div>
+  <div class="foot"><span>저희 AI는 절반을 틀립니다</span><span class="pg"></span></div>
 </section>
 
 <!-- ══════════════════ 3 起 간지 ══════════════════ -->
@@ -253,10 +255,10 @@
       <td>첫 실행이 한 번 느립니다</td></tr>
   <tr class="hi"><td><b>④ 손 안 가게</b></td><td>관리자가 주기적으로 사진을 다시 찍는다</td>
       <td><b>이용자가 찍어 올리게</b><br><span class="sm">지나가는 사람이 갱신한다</span></td>
-      <td><b>← 이 줄이 안 풀렸습니다</b></td></tr>
+      <td><b>실제로 물어봤습니다</b></td></tr>
   </table>
   <div class="strip vbot" style="margin-top:6mm"><b>앞의 세 줄은 하루면 정할 수 있는 기술 선택입니다.</b>
-    네 번째 줄만 <b>풀어야 할 문제</b>로 남았습니다.</div>
+    네 번째 줄은 <b>실제 풀어 나가야 할 문제</b>로 남았습니다.</div>
   <div class="foot"><span>01 · 무엇을 만들기로 했나</span><span class="pg"></span></div>
 </section>
 
@@ -443,30 +445,68 @@
 <section class="slide">
   <div class="kick">02 · 저장되는 곳</div>
   <h1>받은 것은 폰의 <em>어디에 있나</em></h1>
-  <div class="lead">설치 파일(APK·IPA)이 아니라 <b>앱 폴더가 없습니다.</b> 브라우저가 주소마다 따로 관리하는 칸에 들어갑니다.</div>
+  <div class="lead">설치 파일(APK·IPA)이 아니라 <b>앱 폴더가 없습니다.</b>
+    아래 것들이 <b>브라우저가 주소마다 따로 관리하는 칸</b>으로 들어갑니다.</div>
   <table class="vtop tight">
-  <tr><th style="width:26%">어디에</th><th style="width:44%">무엇이</th><th>얼마나</th></tr>
-  <tr class="hi"><td><b>Cache Storage</b> <span class="sm"><code>b3nav-&lt;판번호&gt;</code></span></td>
-      <td>앱 화면·코드 · 안내 사진 169장 · 3D 텍스처</td>
-      <td><b>230개 15.6MB</b> — 덩치는 전부 여기</td></tr>
-  <tr><td><b>Cache Storage</b> <span class="sm"><code>b3nav-font</code></span></td>
-      <td>글꼴 — 인터넷에서 받은 것이라 따로</td><td>작습니다</td></tr>
-  <tr><td><b>localStorage</b></td>
-      <td>최근 검색 · 즐겨찾기 · 들어온 문 · 못 올린 제보</td>
-      <td>글자만 · <b>5MB 한계</b></td></tr>
-  <tr><td><b>IndexedDB</b> <span class="sm"><code>b3nav_ai</code></span></td>
-      <td>관리자가 넣어 둔 AI 자료집(사진 벡터)</td>
-      <td>관리자만 — 일반 이용자에겐 거의 없음</td></tr>
+  <tr><th style="width:30%">무엇이 들어오나</th><th class="n" style="width:11%">몇 개</th>
+      <th class="n" style="width:12%">얼마나</th><th>어디에</th></tr>
+  <tr class="hi"><td><b>안내 사진</b> <span class="sm">단계마다 보여 주는 실제 사진</span></td>
+      <td class="n"><b>169장</b></td><td class="n"><b>12.5MB</b></td>
+      <td rowspan="5"><b>Cache Storage</b><br><span class="sm"><code>b3nav-&lt;판번호&gt;</code></span><br><br>
+          판이 바뀌면 <b>바뀐 파일만</b> 새로 받고,<br>안 바뀐 사진은 전에 받아 둔 것을 <b>그대로 옮겨</b> 씁니다</td></tr>
+  <tr><td><b>직접 쓴 코드</b> <span class="sm">js/app/ — 길안내·3D·AI·QR</span></td>
+      <td class="n">25개</td><td class="n">1.3MB</td></tr>
+  <tr><td><b>3D 건물 재료</b> <span class="sm">벽·바닥 텍스처</span></td>
+      <td class="n">22장</td><td class="n">1.1MB</td></tr>
+  <tr><td><b>빌려 쓴 코드</b> <span class="sm">three.js · jsQR · JSZip</span></td>
+      <td class="n">3개</td><td class="n">812KB</td></tr>
+  <tr><td><b>앱 화면 · 꾸밈 · 아이콘 · 장소 목록</b> <span class="sm">152곳 좌표 포함</span></td>
+      <td class="n">11개</td><td class="n">202KB</td></tr>
+  <tr class="hi"><td><b>합계</b></td><td class="n"><b>230개</b></td><td class="n"><b>15.6MB</b></td>
+      <td><b>사진이 12.5MB</b> — 덩치의 80%입니다</td></tr>
+  <tr class="dim"><td>최근 검색 · 즐겨찾기 · 들어온 문 · 못 올린 제보</td>
+      <td class="n">9가지</td><td class="n">글자만</td>
+      <td><b>localStorage</b> — 5MB 한계라 사진은 못 담습니다</td></tr>
+  <tr class="dim"><td>관리자가 넣어 둔 AI 자료집(사진 벡터)</td>
+      <td class="n">—</td><td class="n">—</td>
+      <td><b>IndexedDB</b> <code>b3nav_ai</code> — 일반 이용자에겐 거의 없음</td></tr>
   </table>
-  <div class="row" style="margin-top:4mm">
-    <div class="box" style="padding:5mm 6mm"><div class="h">폰의 어느 폴더인가</div>
-      <p>안드로이드 <code>/data/data/com.android.chrome/…</code> · 아이폰 <code>Library/WebKit/…</code><br>
-         <b class="hl">앱 전용 영역이라 파일 관리자로는 안 열립니다.</b>
-         지우려면 브라우저 설정 → 사이트 데이터 삭제</p></div>
-    <div class="box cy" style="padding:5mm 6mm"><div class="h">지워지지 않게 한 장치</div>
-      <p>받아 둔 것은 원래 <b>「임시로 맡아 둔 것」</b>이라 공간이 모자라면 지워질 수 있습니다.
-         그래서 <b class="cy">설치 직후 「지우지 말아 달라」고 요청</b>하게 했습니다</p></div>
-  </div>
+  <div class="strip" style="margin-top:4mm; font-size:11.5pt; line-height:1.5"><b>어느 폴더인가</b> — 안드로이드
+    <code>/data/data/com.android.chrome/…</code> · 아이폰 <code>Library/WebKit/…</code>.
+    <b>파일 관리자로는 안 열립니다.</b></div>
+  <div class="foot"><span>02 · 어떻게 만들었나</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 앱으로 만들면 ══════════════════ -->
+<section class="slide">
+  <div class="kick">02 · 앞으로</div>
+  <h1>앱으로 만든다면 <em>무엇이 더 깔릴까</em></h1>
+  <div class="lead">지금은 브라우저가 맡아 둡니다. <b>스토어 앱(APK·IPA)으로 감싸면</b> 깔리는 것이 이렇게 달라집니다.</div>
+  <table class="vtop tight">
+  <tr><th style="width:30%">무엇이</th><th class="n" style="width:14%">크기</th>
+      <th style="width:26%">지금 — 웹앱(PWA)</th><th>앱으로 만들면</th></tr>
+  <tr><td><b>앱 화면 · 코드 · 안내 사진 · 3D</b></td><td class="n">15.6MB</td>
+      <td>처음 열 때 <b>받아 둔다</b></td>
+      <td><b>설치 파일 안에 들어간다</b> — 받을 것이 없다</td></tr>
+  <tr class="hi"><td><b>AI 기준 자료</b> <span class="sm">aivec.js · ailib.js</span></td><td class="n">11.7MB</td>
+      <td><b class="hl">안 받는다</b> — 쓸 때만 내려받음</td>
+      <td rowspan="2"><b class="cy">같이 깔 수 있다</b> →
+          <b>사진 판정도 인터넷 없이</b> 됩니다</td></tr>
+  <tr class="hi"><td><b>AI 라이브러리</b> <span class="sm">TensorFlow.js · MobileNet · Tesseract</span></td><td class="n">12MB</td>
+      <td><b class="hl">안 받는다</b> — 쓸 때만 내려받음</td></tr>
+  <tr><td colspan="2"><b>설치 크기 어림</b></td>
+      <td><b>15.6MB</b> <span class="sm">(브라우저 칸)</span></td>
+      <td><b>40MB 안팎</b> <span class="sm">(앱 전용 폴더)</span></td></tr>
+  <tr class="dim"><td colspan="2">지워질 걱정</td>
+      <td>공간이 모자라면 <b>지워질 수 있다</b></td>
+      <td><b>지워지지 않는다</b></td></tr>
+  <tr class="dim"><td colspan="2">찾는 법 · 드는 돈</td>
+      <td>QR·주소를 알아야 · <b>0원</b></td>
+      <td>스토어에서 검색됨 · <b class="hl">애플 연 99달러</b></td></tr>
+  </table>
+  <div class="strip am vbot" style="margin-top:5mm"><b>지금 PWA 인 것은 못 해서가 아니라 조건 ①(돈 0원) 때문입니다.</b>
+    화면을 새로 만들 필요는 없습니다 — <b>지금 코드를 그대로 감싸면</b> 됩니다.
+    바꾸는 순간 얻는 가장 큰 것은 <b class="cy">「AI가 오프라인에서 쉰다」는 한계가 없어지는 것</b>입니다.</div>
   <div class="foot"><span>02 · 어떻게 만들었나</span><span class="pg"></span></div>
 </section>
 
@@ -871,20 +911,20 @@
 
 <section class="slide">
   <div class="end">
-    <div class="kick" style="letter-spacing:5px; margin-bottom:5mm">발표를 열며 드린 질문</div>
-    <div style="font-size:21pt; color:var(--fg2); margin-bottom:9mm">「이 사진, 어디일까요?」</div>
-    <h1 style="font-size:62pt; line-height:1.1; margin:0 0 9mm; letter-spacing:-2px">
-      <em>— 모르겠습니다.</em></h1>
+    <div class="kick" style="letter-spacing:5px; margin-bottom:6mm">발표를 열며 드린 말 — 「저희 AI는 절반을 틀립니다」</div>
+    <h1 style="font-size:44pt; line-height:1.22; margin:0 0 8mm; letter-spacing:-1.5px">
+      틀릴 걸 알면서 답하는 AI는,<br><em>쓸 수가 없습니다.</em></h1>
     <div style="width:46mm;height:1.6mm;background:var(--cy);margin:0 auto 8mm"></div>
-    <div style="font-size:15pt; color:var(--fg2); line-height:1.95; max-width:235mm">
-      AI는 묻는 족족 답을 냅니다. <b style="color:#EAF1F6">틀려도 냅니다.</b><br>
-      저희가 한 것은 정확도를 올린 것이 아니라,
-      <b style="color:var(--cy)">이 한마디를 할 줄 알게 만든 것</b>입니다.<br><br>
-      전부 답하면 <b style="color:#EAF1F6">55.6%</b> · 답할 것만 골라 답하면 <b style="color:#EAF1F6">92.9%</b>.
-      <b style="color:#EAF1F6">같은 AI, 같은 사진입니다.</b>
-    </div>
+    <div style="font-size:15pt; color:var(--fg2); line-height:1.95; max-width:238mm">
+      그래서 저희는 정확도를 올리는 대신,
+      <b style="color:#EAF1F6">「모르겠다」고 말하는 법</b>을 가르쳤습니다.<br>
+      전부 답하면 <b style="color:#EAF1F6">55.6%</b> · 답할 것만 골라 답하면 <b style="color:#EAF1F6">92.9%</b> —
+      같은 AI, 같은 사진, 같은 계산입니다.<br>
+      바꾼 것은 <b style="color:#EAF1F6">답할지 말지를 정하는 기준 하나</b>뿐입니다.</div>
+    <div style="margin-top:10mm; font-size:17.5pt; color:var(--cy); font-weight:700; line-height:1.5">
+      이 앱이 할 줄 아는 가장 중요한 말은<br>「여기가 어디인지 모르겠습니다」입니다.</div>
   </div>
-  <div class="foot"><span>이 사진, 어디일까요? · 김민종 · 손의윤 · 문성일</span><span class="pg"></span></div>
+  <div class="foot"><span>저희 AI는 절반을 틀립니다 · 김민종 · 손의윤 · 문성일</span><span class="pg"></span></div>
 </section>
 
 

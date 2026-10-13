@@ -8,6 +8,7 @@
      캡스톤 발표 (16:9 · 338.7mm × 190.5mm)
 
      2026-10-14 : 디자인을 또 바꿨다. 앞선 자료와 겹치면 안 되기 때문이다.
+       (초록으로 갔다가 「넓게 깔면 눈이 아프다」는 말을 듣고 짙은 먹색으로 다시 내렸다)
        발표_상세설계.html  크림 종이 #FBFAF7 + 벽돌빛 빨강 + 왼쪽 세로줄
        발표_중간발표.html  흰 바탕 + 남청 #1B4F8C, A4 문서풍
        이 자료(전 판)      어두운 남색 #111A22 + 시안
@@ -25,15 +26,15 @@
   :root{
     --bg:#F2F4F6; --card:#FFFFFF; --line:#D6DCE2; --line2:#E7EBEF;
     --ink:#15181C; --ink2:#4A5560; --dim:#6B7684;
-    /* 큰 면(머리띠·표지·간지·마무리)과 작은 글자를 나눠 둔다.
-       한 색으로 쓰면 큰 면이 눈에 부담이 된다 — #0F6B4A 는 흰 글자 대비 6.5:1 로
-       넓게 깔면 피로했다. 큰 면은 깊은 숲색(흰 글자 12.4:1)으로 내리고,
-       작은 글자는 조금 밝은 초록을 따로 쓴다. */
-    --ac:#0C3B2B;            /* 깊은 숲색 — 쪽 머리띠·표지·간지·마무리 */
-    --acT:#15573E;           /* 작은 글자용 초록 — 표 머리글·코드·강조 (밝은 바탕 대비 8.2:1) */
-    --mint:#86D6B2;          /* 어두운 면 위의 강조 글자 */
-    --ac2:#EAF0ED;           /* 아주 옅은 초록 — 표 머리줄·강조 칸 */
-    --am:#B4530F; --rd:#A3301E; --gr:#15573E; --bl:#1A6FB5;
+    /* 짙은 먹색 한 가지로 뼈대를 세우고, 강조는 호박색 하나만 쓴다.
+       초록은 넓게 깔면 눈이 피로하다는 말을 듣고 바꿨다 —
+       먹색은 아무리 넓게 깔아도 거슬리지 않는다 (흰 글자 대비 16.0:1).
+       앞선 자료들과도 겹치지 않는다 : 크림+벽돌빨강 · 흰+남청 · 어두운남색+시안. */
+    --ac:#1E2227;            /* 짙은 먹색 — 쪽 머리띠·표지·간지·마무리 */
+    --acT:#2B3138;           /* 작은 글자용 먹색 — 표 머리글·코드 (밝은 바탕 대비 11.9:1) */
+    --mint:#E8A664;          /* 어두운 면 위의 강조 글자 — 호박색 (먹색 위 7.7:1) */
+    --ac2:#E9EBEE;           /* 아주 옅은 회색 — 표 머리줄·강조 칸 */
+    --am:#B4530F; --rd:#A3301E; --gr:#2B3138; --bl:#1A6FB5;
     --s1:#1A6FB5; --s2:#B4530F;   /* 그림 두 계열 */
   }
   *{ box-sizing:border-box; }
@@ -89,9 +90,9 @@
   .box{ background:var(--card); border:1px solid var(--line); border-radius:2mm; padding:7mm 8mm; }
   .box .h{ font-size:14.5pt; font-weight:700; color:var(--ink); margin-bottom:3.5mm; }
   .box p{ margin:0; font-size:13pt; line-height:1.85; color:var(--ink2); }
-  .box.cy{ border-color:#9BC9B6; background:var(--ac2); } .box.cy .h{ color:var(--acT); }
+  .box.cy{ border-color:#BFC6CE; background:var(--ac2); } .box.cy .h{ color:var(--acT); }
   .box.am{ border-color:#E0B48C; } .box.am .h{ color:var(--am); }
-  .box.gr{ border-color:#9BC9B6; } .box.gr .h{ color:var(--gr); }
+  .box.gr{ border-color:#BFC6CE; } .box.gr .h{ color:var(--gr); }
   .box.rd{ border-color:#E2ADA3; } .box.rd .h{ color:var(--rd); }
   b.hl{ color:var(--am); }  b.cy{ color:var(--acT); }  b.rd{ color:var(--rd); }  b.gr{ color:var(--gr); }
 

@@ -168,11 +168,11 @@
       <th class="c" style="width:9%">쪽</th><th>한 줄</th></tr>
   <tr><td class="c"><b>첫째</b></td><td><b>무엇을 만들기로 했나</b></td><td class="c">4~6</td>
       <td>스스로 건 <b>조건 네 가지</b>가 설계를 정했고, 그중 하나가 숙제로 남았습니다</td></tr>
-  <tr><td class="c"><b>둘째</b></td><td><b>어떻게 만들었나</b></td><td class="c">8~15</td>
+  <tr><td class="c"><b>둘째</b></td><td><b>어떻게 만들었나</b></td><td class="c">8~16</td>
       <td>재료 · <b>휴대폰에 무엇이 들어가나</b> · 구조도 · 블록도 둘 · 흐름도 둘</td></tr>
-  <tr><td class="c"><b>셋째</b></td><td><b>측정 결과</b></td><td class="c">17~18</td>
+  <tr><td class="c"><b>셋째</b></td><td><b>측정 결과</b></td><td class="c">18~19</td>
       <td>세 가지를 재서 <b>둘은 그만두고 하나는 그대로</b> 두었습니다 <span class="sm">(지난 발표 내용)</span></td></tr>
-  <tr class="hi"><td class="c"><b>넷째</b></td><td><b>한 일과 결과</b></td><td class="c">20~22</td>
+  <tr class="hi"><td class="c"><b>넷째</b></td><td><b>한 일과 결과</b></td><td class="c">21~23</td>
       <td><b>무엇을 했고 무엇이 나왔는지</b> — 그리고 못 한 것</td></tr>
   </table>
   <div class="strip vbot" style="margin-top:7mm"><b>오늘 한 가지만 기억하신다면</b> —
@@ -340,13 +340,43 @@
          <b>사진 판정</b> — 필요한 순간에 라이브러리를 받습니다.
          <b>같은 서버 <code>lib/</code>를 먼저</b> 보고, 없으면 공개 CDN으로 넘어갑니다.
          계산은 WebGL로 하고 <b>안 되면 CPU로 떨어집니다</b><br><br>
-         <b>저장되는 곳</b> — 파일 230개는 <b>Cache Storage</b>,
-         최근 검색·설정은 <b>localStorage</b></p></div>
+         <b>저장되는 곳</b> — 네 군데로 나뉩니다. <b class="cy">다음 쪽에서 보시겠습니다</b></p></div>
   </div>
   <div class="strip gr vbot" style="margin-top:7mm"><b>③ 새 판이 나오면</b> —
     <code>sw.js</code>의 판 번호가 바뀌고, 다음에 열 때 <b>바뀐 파일만 새로 받습니다.</b>
     안 바뀐 사진은 전에 저장해 둔 것을 그대로 옮겨 씁니다. 받은 파일은
     <b>SHA-256 앞 12자리</b>로 대조해 옛 파일이 섞여 오면 다시 받습니다.</div>
+  <div class="foot"><span>02 · 어떻게 만들었나</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 폰 어디에 저장되나 ══════════════════ -->
+<section class="slide">
+  <div class="kick">02 · 저장되는 곳</div>
+  <h1>받은 것은 폰의 <em>어디에 있나</em></h1>
+  <div class="lead">설치 파일(APK·IPA)이 아니라 <b>앱 폴더가 없습니다.</b> 브라우저가 주소마다 따로 관리하는 칸에 들어갑니다.</div>
+  <table class="vtop tight">
+  <tr><th style="width:26%">어디에</th><th style="width:44%">무엇이</th><th>얼마나</th></tr>
+  <tr class="hi"><td><b>Cache Storage</b> <span class="sm"><code>b3nav-&lt;판번호&gt;</code></span></td>
+      <td>앱 화면·코드 · 안내 사진 169장 · 3D 텍스처</td>
+      <td><b>230개 15.6MB</b> — 덩치는 전부 여기</td></tr>
+  <tr><td><b>Cache Storage</b> <span class="sm"><code>b3nav-font</code></span></td>
+      <td>글꼴 — 인터넷에서 받은 것이라 따로</td><td>작습니다</td></tr>
+  <tr><td><b>localStorage</b></td>
+      <td>최근 검색 · 즐겨찾기 · 들어온 문 · 못 올린 제보</td>
+      <td>글자만 · <b>5MB 한계</b></td></tr>
+  <tr><td><b>IndexedDB</b> <span class="sm"><code>b3nav_ai</code></span></td>
+      <td>관리자가 넣어 둔 AI 자료집(사진 벡터)</td>
+      <td>관리자만 — 일반 이용자에겐 거의 없음</td></tr>
+  </table>
+  <div class="row" style="margin-top:4mm">
+    <div class="box" style="padding:5mm 6mm"><div class="h">폰의 어느 폴더인가</div>
+      <p>안드로이드 <code>/data/data/com.android.chrome/…</code> · 아이폰 <code>Library/WebKit/…</code><br>
+         <b class="hl">앱 전용 영역이라 파일 관리자로는 안 열립니다.</b>
+         지우려면 브라우저 설정 → 사이트 데이터 삭제</p></div>
+    <div class="box cy" style="padding:5mm 6mm"><div class="h">지워지지 않게 한 장치</div>
+      <p>받아 둔 것은 원래 <b>「임시로 맡아 둔 것」</b>이라 공간이 모자라면 지워질 수 있습니다.
+         그래서 <b class="cy">설치 직후 「지우지 말아 달라」고 요청</b>하게 했습니다</p></div>
+  </div>
   <div class="foot"><span>02 · 어떻게 만들었나</span><span class="pg"></span></div>
 </section>
 

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>캡스톤 발표 — 나올 질문과 답</title>
+<style>
+  /* 캡스톤 발표(25장)에 맞춘 예상 질문 — 손에 들고 보는 종이.
+     ※ 문서\발표_예상질문_답변.html 은 2026-09-20 상세설계 발표용이고 숫자가 옛것이다.
+       이 문서가 지금 발표의 기준이다. */
+  @page { size: A4; margin: 15mm 14mm 13mm 14mm;
+    @bottom-center { content: counter(page) " / " counter(pages); font: 8pt "Malgun Gothic"; color: #98A4B3; } }
+  @page :first { @bottom-center { content: none; } }
+  * { box-sizing: border-box; }
+  html, body { background: #fff; }
+  body { font-family: "Malgun Gothic", "맑은 고딕", sans-serif; color: #1A1D21;
+         font-size: 10.2pt; line-height: 1.62; margin: 0;
+         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  h1 { font-size: 20pt; margin: 0 0 3px; letter-spacing: -0.6px; color: #11243D; }
+  .sub { color: #6B7682; font-size: 9.6pt; margin-bottom: 13px; }
+  .rule { height: 3px; background: #11243D; margin: 0 0 14px; }
+
+  .hero { background: #11243D; color: #fff; border-radius: 6px; padding: 13px 16px; margin-bottom: 14px; }
+  .hero .t { font-size: 9.4pt; opacity: .8; margin-bottom: 5px; letter-spacing: 1px; }
+  .hero .big { font-size: 11.2pt; line-height: 1.62; }
+  .hero b { color: #7FD6E4; }
+
+  .nums { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid #C9D3DF; border-radius: 6px;
+          margin-bottom: 15px; overflow: hidden; }
+  .nums div { flex: 0 0 25%; text-align: center; padding: 7px 4px; border-right: 1px solid #DFE6EE;
+                border-bottom: 1px solid #DFE6EE; }
+  .nums div:nth-child(4n) { border-right: 0; }
+  .nums div:nth-child(n+5) { border-bottom: 0; }
+  .nums .v { font-size: 13pt; font-weight: 700; color: #11243D; }
+  .nums .l { font-size: 8.3pt; color: #6B7682; line-height: 1.35; margin-top: 1px; }
+
+  h2 { font-size: 12.5pt; color: #fff; background: #2D4A6B; margin: 13px 0 8px;
+       padding: 5px 11px; border-radius: 4px; page-break-after: avoid; }
+  h2 small { font-weight: 400; opacity: .82; font-size: 9.3pt; margin-left: 6px; }
+
+  .card { border: 1px solid #D5DCE5; border-radius: 6px; padding: 9px 12px;
+          margin-bottom: 7px; page-break-inside: avoid; }
+  .card.star { border-color: #C0452F; border-width: 1.6px; }
+  .q { font-size: 11pt; font-weight: 700; color: #11243D; margin-bottom: 7px; }
+  .q .n { display: inline-block; background: #2D4A6B; color: #fff; font-size: 8.6pt;
+          min-width: 22px; height: 18px; line-height: 18px; text-align: center;
+          border-radius: 4px; margin-right: 7px; vertical-align: 1px; padding: 0 4px; }
+  .card.star .q .n { background: #C0452F; }
+  .key { background: #EEF4FB; border-left: 4px solid #2D4A6B; padding: 7px 11px;
+         margin-bottom: 8px; font-weight: 700; font-size: 10.4pt; }
+  .card.star .key { background: #FCF0ED; border-left-color: #C0452F; }
+  .card p { margin: 0 0 5px; }
+  .card p:last-child { margin-bottom: 0; }
+  ul { margin: 0 0 5px; padding-left: 17px; }
+  li { margin-bottom: 2px; }
+  b.hl { background: #FFF2C4; padding: 0 2px; }
+  code { font-family: Consolas, "D2Coding", monospace; font-size: 0.92em;
+         background: #F0F3F7; border-radius: 2px; padding: 0 3px; color: #11243D; }
+  .warn { margin-top: 7px; padding-top: 6px; border-top: 1px dashed #D5DCE5;
+          color: #8A3A26; font-size: 9.4pt; }
+  .warn b { color: #8A3A26; }
+  .note { margin-top: 7px; padding-top: 6px; border-top: 1px dashed #D5DCE5;
+          color: #6B7682; font-size: 9.4pt; }
+
+  table { width: 100%; border-collapse: collapse; margin: 5px 0 6px; font-size: 9.5pt; }
+  th, td { border: 1px solid #C9D3DF; padding: 4px 7px; text-align: left; vertical-align: top; }
+  th { background: #EEF2F7; font-weight: 700; }
+  td.n, th.n { text-align: right; white-space: nowrap; }
+  tr.hi td { background: #EEF4FB; font-weight: 700; }
+
+  .foot { margin-top: 11px; padding-top: 7px; border-top: 1px solid #D5DCE5;
+          color: #7A848F; font-size: 8.8pt; page-break-before: avoid; }
+</style>
+</head>
+<body>
+
+<h1>캡스톤 발표 — 나올 질문과 답</h1>
+<div class="sub">공대 3호관 실내 길안내 &nbsp;·&nbsp; 발표 자료 25장에 맞춘 것 &nbsp;·&nbsp; 2026-10-14 기준</div>
+<div class="rule"></div>
+
+<div class="hero">
+  <div class="t">먼저 이 두 문장을 외우세요 — 거의 모든 질문이 여기서 갈라집니다</div>
+  <div class="big">
+    “문에 붙인 QR을 찍으면 출발점이 정해지고, 목적지까지 <b>단계마다 그 자리의 실제 사진</b>으로 안내합니다.
+    인터넷이 없어도 됩니다.”<br>
+    “그런데 저희가 푼 진짜 문제는 <b>그 안내 사진이 낡는 것</b>입니다 — 이용자가 찍어 올리면
+    <b>기계가 어디인지 판정</b>하고, <b>확신이 있을 때만</b> 답하게 만들었습니다.”
+  </div>
+</div>
+
+<div class="nums">
+  <div><div class="v">152곳</div><div class="l">안내하는 장소</div></div>
+  <div><div class="v">15.6MB</div><div class="l">폰에 받아 두는 양<br>(사진이 13MB)</div></div>
+  <div><div class="v">1,844장</div><div class="l">평가에 쓴 사진<br>(남이 찍은 것)</div></div>
+  <div><div class="v">55.6%</div><div class="l">전부 답할 때<br>자리 정확도</div></div>
+  <div><div class="v">92.9%</div><div class="l">상위 10%만<br>답할 때</div></div>
+  <div><div class="v">+34.6%p</div><div class="l">가장 나은<br>단순 방식 대비</div></div>
+  <div><div class="v">0건</div><div class="l">글자 읽기가<br>틀린 층을 말한 횟수</div></div>
+  <div><div class="v">0원</div><div class="l">서버 비용</div></div>
+</div>
+
+<div class="card">
+  <div class="q">답할 때 지킬 세 가지</div>
+  <ul>
+    <li><b>숫자로 답하고, 어떻게 쟀는지까지 말한다.</b> “잘 됩니다”(×) → “55.6%입니다. 기준 사진을 찍은 사람과
+        다른 사람이 찍은 1,844장으로 쟀습니다”(○)</li>
+    <li><b>안 되는 것은 안 된다고 하고, 왜 안 되는지를 말한다.</b> 얼버무리면 거기서 계속 파고듭니다.
+        한계를 먼저 말하면 오히려 질문이 끝납니다.</li>
+    <li><b>“그래서 다음에 무엇을 할 것인지”로 닫는다.</b> “아직 안 됩니다”로 끝내지 말 것.</li>
+  </ul>
+</div>
+
+<h2>A. 가장 먼저 나올 다섯 가지 <small>★ 이것만은 반드시 외워 가세요</small></h2>
+
+<div class="card star">
+  <div class="q"><span class="n">A1</span>그래서 뭐가 새로운 겁니까? 길안내 앱은 이미 많은데요.</div>
+  <div class="key">길안내가 아니라 <b>안내 자료가 스스로 갱신되게 한 것</b>이 저희 몫입니다.</div>
+  <p>실내 안내는 보통 한 번 만들고 아무도 갱신하지 않아 낡습니다. 사진이 실제와 달라지면
+     이용자는 <b>자기가 길을 잘못 들었다고 생각</b>해서, 안내가 아예 없을 때보다 나쁜 상태가 됩니다.</p>
+  <p>저희는 지나가는 사람이 찍어 올리게 하고, <b>「이 사진이 어디냐」를 휴대폰 안에서 판정</b>합니다.
+     그리고 확신이 큰 것만 관리자에게 올립니다.</p>
+  <div class="warn"><b>주의</b> — “그게 왜 어렵냐”로 이어지면 A2로 넘어가세요.
+     맞히는 것보다 <b>“못 맞혔다”를 아는 것</b>이 어렵다는 것이 이 발표의 축입니다.</div>
+</div>
+
+<div class="card star">
+  <div class="q"><span class="n">A2</span>정확도 55.6%면 낮은 것 아닙니까?</div>
+  <div class="key">낮습니다. 숨기지 않겠습니다. <b>그래서 전부 답하지 않습니다.</b></div>
+  <table>
+  <tr><th>얼마나 자주 답하나</th><th class="n">대상</th><th class="n">자리</th><th class="n">층</th><th>앱이 어떻게 말하나</th></tr>
+  <tr class="hi"><td>확신 큰 상위 10%만</td><td class="n">184장</td><td class="n">92.9%</td><td class="n">97.8%</td><td>「여기입니다」</td></tr>
+  <tr><td>상위 20%만</td><td class="n">369장</td><td class="n">87.5%</td><td class="n">95.1%</td><td>「여기입니다」</td></tr>
+  <tr><td>상위 50%만</td><td class="n">922장</td><td class="n">73.8%</td><td class="n">84.9%</td><td>층만 / 자리까지</td></tr>
+  <tr><td>전부 다 답하면</td><td class="n">1,844장</td><td class="n">55.6%</td><td class="n">66.8%</td><td>— 그래서 안 합니다</td></tr>
+  </table>
+  <p>저희 성과는 <b class="hl">정확도를 올린 것이 아니라, 답해도 되는 것을 골라낸 것</b>입니다.</p>
+  <div class="warn"><b>절대 하지 말 것</b> — “정확도가 높습니다”라고 말하기.
+     낮은 숫자를 먼저 꺼내면 질문이 거기서 끝나고, 감추면 끝까지 파고듭니다.</div>
+</div>
+
+<div class="card star">
+  <div class="q"><span class="n">A3</span>AI를 썼다는데, 진짜로 AI가 일을 하는 겁니까?</div>
+  <div class="key">저희도 의심해서 <b>재 봤습니다. 가장 나은 단순 방식보다 ＋34.6%p</b>였습니다.</div>
+  <table>
+  <tr><th>무엇으로 맞히나</th><th class="n">정확한 자리</th><th class="n">층</th></tr>
+  <tr><td>아무거나 찍기 (152곳 중에서)</td><td class="n">0.7%</td><td class="n">19.4%</td></tr>
+  <tr><td>가장 흔한 곳만 답하기</td><td class="n">9.6%</td><td class="n">26.1%</td></tr>
+  <tr><td>색 분포만 보기 (RGB 8×8×8)</td><td class="n">8.1%</td><td class="n">16.5%</td></tr>
+  <tr><td>작은 흑백 사진 16×16</td><td class="n">18.6%</td><td class="n">29.0%</td></tr>
+  <tr class="hi"><td>지금 앱이 쓰는 방식 (CNN)</td><td class="n">53.2%</td><td class="n">65.7%</td></tr>
+  </table>
+  <p>같은 사진·같은 시험에서 <b>특징만 바꿔</b> 쟀습니다. 95% 구간 <b>+27.9 ~ +39.1%p</b>라
+     우연으로 설명되지 않습니다.</p>
+  <div class="note">덧붙이면 좋은 말 — <b>색 분포가 “흔한 곳 찍기”보다도 못했습니다.</b>
+     폰마다 색감이 달라 오히려 방해가 됩니다. 이것도 재 보고 알았습니다.</div>
+</div>
+
+<div class="card star">
+  <div class="q"><span class="n">A4</span>코드를 생성형 AI로 쓰셨습니까?</div>
+  <div class="key"><b>네, 썼습니다.</b> 코드 작성과 문서 정리에 썼고,
+     <b>무엇을 만들지·무엇을 측정할지·결과를 보고 무엇을 버릴지는 저희가 정했습니다.</b></div>
+  <p>예를 들어 자동 확정 기능은 정답률 100%로 나왔지만, <b>시험 사진이 기준 자료에 섞여 있다</b>는 것을
+     찾아내고 <b>그 기능을 지우기로 한 판단</b>은 저희가 했습니다. 효과가 확인되지 않은 후처리를
+     <b>그대로 두기로 한 것</b>도 마찬가지입니다.</p>
+  <div class="warn"><b>반드시 정직하게 답할 것.</b> 숨기면 그 자리에서 신뢰를 잃습니다.
+     공모전에 낼 경우 운영 규정(제20조 ⑤)이 <b>생성형 AI 활용 여부와 범위를 밝히도록</b> 요구하고,
+     고의로 누락하면 실격·상금 환수 사유입니다.</div>
+</div>
+
+<div class="card star">
+  <div class="q"><span class="n">A5</span>이 앱, 지금 실제로 쓸 수 있습니까?</div>
+  <div class="key">쓸 수 있습니다. <b>주소를 열고 「홈 화면에 추가」</b>를 누르면 끝입니다.</div>
+  <p>앱스토어를 쓰지 않습니다(PWA). 아이콘이 생기고, 주소창 없이 전체 화면으로 열리고,
+     <b>받아 둔 뒤로는 비행기 모드에서도</b> 152곳까지 안내됩니다.</p>
+  <p>지금 <code>minjong0910.github.io</code> 에 올라가 있고, 출입문 네 곳의 QR을 찍으면 바로 열립니다.</p>
+  <div class="warn"><b>주의</b> — “스토어에 올렸느냐”로 이어지면 B1으로. 올리지 않은 것은
+     <b>못 해서가 아니라 조건 ①(돈 0원)을 지키려고</b>입니다.</div>
+</div>
+
+<h2>B. 설계와 구조 <small>엔지니어가 물을 것</small></h2>
+
+<div class="card">
+  <div class="q"><span class="n">B1</span>왜 네이티브 앱이 아니라 PWA입니까?</div>
+  <div class="key">조건 ① <b>“돈이 들면 안 된다”</b> 때문입니다.</div>
+  <p>애플 개발자 등록은 <b>연 99달러(약 14만 원)</b>입니다. 저희가 졸업하면 낼 사람이 없습니다.
+     스토어에 올리는 순간 ①번 조건이 깨집니다. 심사가 없어 <b>고치면 바로 반영</b>되는 것도 이점입니다.</p>
+  <p>지금도 아이콘·전체 화면·오프라인·카메라가 전부 됩니다. 필요하면 <b>Capacitor로 감싸면
+     지금 코드 그대로 APK가 나옵니다</b> — 화면을 새로 만들지 않습니다.</p>
+  <div class="note">솔직히 말할 약점 — <b>스토어 검색으로는 못 찾습니다.</b> QR이나 주소를 알아야 합니다.
+     저희는 문에 QR을 붙이니 오히려 맞지만, 널리 퍼뜨리기에는 불리합니다.</div>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">B2</span>QR을 못 찍고 들어온 사람은 어떻게 합니까?</div>
+  <div class="key">인식 경로가 넷이고, 마지막이 <b>수동 선택 버튼</b>입니다.</div>
+  <ul>
+    <li>① <b>BarcodeDetector</b> — 안드로이드 크롬에 기본 탑재, 가장 빠름</li>
+    <li>② <b>jsQR</b> — 아이폰 사파리 등 그 밖의 브라우저</li>
+    <li>③ <b>사진 파일로 인식</b> — 카메라 권한이 막힌 환경</li>
+    <li>④ <b>수동 선택</b> — 어느 문으로 들어왔는지 직접 고름 (최후 폴백)</li>
+  </ul>
+  <p>휴대폰 기본 카메라로 찍어도 됩니다. QR이 주소(<code>?gate=MAIN</code>)라서 앱이 열리고
+     바로 「정문에 계신가요?」 확인 화면이 뜹니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">B3</span>측위를 안 하면, 걷다가 길을 잘못 들었을 때 어떻게 압니까?</div>
+  <div class="key"><b>모릅니다.</b> 출발점을 <b>선언</b>할 뿐이고, 걷는 도중의 위치는 알지 못합니다.</div>
+  <p>대신 단계마다 <b>그 자리의 실제 사진</b>을 보여 주어 이용자가 스스로 대조하게 했습니다.
+     눈앞 풍경이 사진과 다르면 잘못 든 것입니다. <b>아는 척하지 않으려고</b> 그렇게 두었습니다.</p>
+  <p>다음 단계는 <b>층마다 QR 스티커</b>입니다. 중간에 한 번 더 확정할 수 있고, 공사도 비용도 들지 않습니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">B4</span>번들러 없이 스크립트 30개를 순서대로 읽으면 느리지 않습니까?</div>
+  <div class="key">첫 화면에 받는 우리 파일 33개가 <b>압축 728KB</b>입니다(원래 2,262KB).</div>
+  <p>나머지는 서비스 워커가 뒤에서 받습니다. 번들러를 안 쓴 이유는
+     <b><code>&lt;script&gt;</code> 순서가 곧 실행 순서</b>라 읽기 쉽고, 빌드 도구가 없어
+     <b>아무 PC에서나 바로 고칠 수 있기</b> 때문입니다.</p>
+  <p>순서가 틀어지면 조용히 깨지므로, <b>자동 검사가 읽는 순서를 지킵니다</b>
+     (자료가 그것을 쓰는 코드보다 먼저인지 등).</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">B5</span>제보 사진을 Firestore 문서에 base64로 넣는다고요? 왜 Storage를 안 씁니까?</div>
+  <div class="key">Firestore <b>문서 1MB 한도</b> 안에 들어가게 사진을 <b>900KB로 줄여</b> 넣습니다.</div>
+  <p>보안 규칙이 <code>950,000자</code>에서 막습니다. Storage를 쓰면 더 깔끔하지만
+     <b>버킷 보안 규칙과 정리 작업이 하나 더</b> 늘어납니다. 제보는 승인되면 바로 <code>photos</code>로
+     옮겨지고 원본은 지워지므로, 지금 규모에서는 문서로 충분하다고 판단했습니다.</p>
+  <div class="note">정직하게 인정할 것 — <b>규모가 커지면 Storage가 맞습니다.</b>
+     지금 선택은 “작게 유지하려고 고른 것”이지 “더 나은 설계”가 아닙니다.</div>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">B6</span>서버 비용 0원이라는데 Firestore 무료 한도를 넘으면 어떻게 됩니까?</div>
+  <div class="key">넘어도 <b>길안내는 그대로 됩니다.</b> 멈추는 것은 사진 판정뿐입니다.</div>
+  <p>길안내는 서버를 전혀 쓰지 않습니다 — 받아 둔 15.6MB로 폰 안에서 끝납니다.
+     한도를 넘으면 <b>승인 사진 받아 가기(읽기)</b>가 먼저 막히고, 그 결과 AI 기준 자료가 갱신되지 않을 뿐입니다.</p>
+  <p>이것이 <b>계산을 폰으로 옮긴 또 하나의 이득</b>입니다. 서버가 죽어도 핵심 기능이 살아 있습니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">B7</span>3D 건물 도면은 어디서 구했습니까?</div>
+  <div class="key">도면 파일이 <b>없습니다.</b> 좌표 표에서 <b>three.js가 그 자리에서 만들어</b> 그립니다.</div>
+  <p>실측과 사진을 보고 좌표를 적었습니다. 그래서 <b>3D 모델 파일이 0바이트</b>이고,
+     층이나 방을 추가할 때 <b>숫자만 넣으면</b> 됩니다. 건물 도면을 3D로 만들 사람도 프로그램도 없었기 때문에
+     고른 방법입니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">B8</span>오프라인이 정말 보장됩니까?</div>
+  <div class="key">받아 둔 것은 원래 브라우저가 <b>“임시로 맡아 둔 것”</b>이라 지워질 수 있습니다.
+     그래서 <b>“지우지 말아 달라”고 요청</b>하게 했습니다.</div>
+  <p>폰 저장 공간이 모자라면 브라우저가 캐시를 지울 수 있습니다(eviction).
+     그래서 서비스 워커가 등록된 뒤와 <b>홈 화면에 추가된 직후</b>
+     <code>navigator.storage.persist()</code>를 부릅니다 — 브라우저는 <b>설치된 앱에 훨씬 너그럽습니다.</b></p>
+  <p>허락 여부는 설정 화면에 <b>그대로 보여 줍니다</b>(「준비됨 ✓ (15.6MB) · 지우지 않음」).
+     거절되거나 지워져도 다음에 인터넷이 될 때 다시 받습니다.</p>
+  <div class="note">이 질문을 받으면 <b>먼저 “원래는 지워질 수 있는 것”이라고 말하세요.</b>
+     그 뒤에 대책을 말하면 설계를 아는 사람으로 보입니다.</div>
+</div>
+
+<h2>C. 측정과 성능 <small>교수님이 물을 것</small></h2>
+
+<div class="card">
+  <div class="q"><span class="n">C1</span>시험 사진과 학습 사진을 어떻게 나눴습니까?</div>
+  <div class="key">장소를 <b>두 조각으로 갈라</b> 한쪽에서 배우고 다른 쪽에서 시험했습니다(2-fold).</div>
+  <p>처음에는 이걸 하지 않아 <b>정답률 100%</b>가 나왔습니다. 시험에 쓴 사진이
+     <b>이미 기준 자료에 들어 있었습니다</b> — 자기 사진을 자기가 알아본 것이었습니다(자료 누출).</p>
+  <p>제대로 다시 재니 자동 확정의 정답률은 <b>0%</b>였고, <b>그 기능을 지웠습니다.</b>
+     임계값을 넘을 수 없는 값으로 코드에 박아 되살아나지 못하게 했습니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">C2</span>95% 구간은 어떻게 구했습니까?</div>
+  <div class="key"><b>부트스트랩 2,000번</b>입니다. 사진 한 장씩이 아니라
+     <b>촬영 묶음 36개를 통째로</b> 다시 뽑았습니다.</div>
+  <p>같은 사람이 한 번에 찍은 사진은 <b>함께 맞거나 함께 틀립니다.</b> 1,844장을 독립으로 보고 계산하면
+     구간이 <b>절반 폭으로 좁게</b> 나옵니다. 그러면 1~2%p 차이로 방식을 고르게 되는데, 그건 틀린 판단입니다.</p>
+  <p>그래서 저희는 <b>“53%”가 아니라 “46~58% 어딘가”</b>라고 읽습니다.</p>
+</div>
+
+<div class="card star">
+  <div class="q"><span class="n">C3</span>1·2등 격차로 고르는 건 새로운 방법이 아니지 않습니까? 이미 있는 겁니다.</div>
+  <div class="key"><b>맞습니다. 새 알고리즘을 만들었다고 주장하지 않습니다.</b></div>
+  <p>저희가 한 것은 셋입니다.</p>
+  <ul>
+    <li><b>이 문제에 그 자가 맞다는 것을 측정으로 보였습니다</b> — 같은 AI·같은 사진·같은 계산에서
+        상위 10% 기준 64.7% → <b>92.9%</b> (＋28.2%p)</li>
+    <li><b>그 판단을 앱의 동작으로 바꿨습니다</b> — 크게 이기면 자리까지, 조금 이기면 층만,
+        비슷하면 「모르겠다」</li>
+    <li><b>그래서 자동 확정 기능을 지웠습니다</b> — 성능 숫자를 올리는 대신 기능을 없앴습니다</li>
+  </ul>
+  <div class="warn"><b>여기서 “저희가 발명했습니다”라고 하면 그 자리에서 무너집니다.</b>
+     “알려진 방법을, 이 문제에서 재서, 제품의 동작으로 옮겼습니다”가 정확한 표현입니다.</div>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">C4</span>상위 10%만 답하면 나머지 90%는 어떻게 합니까? 쓸모가 있습니까?</div>
+  <div class="key">못 답하는 것이 아니라 <b>답의 종류를 낮춥니다.</b></div>
+  <p>확신이 중간이면 <b>층만</b> 말하고, 낮으면 「모르겠다」고 한 뒤 <b>후보를 보여 주어 사람이 고르게</b> 합니다.
+     어느 쪽이든 관리자가 승인하기 전에는 아무것도 반영되지 않습니다.</p>
+  <p>그리고 이 기능은 <b>실시간 서비스가 아닙니다.</b> 제보는 관리자가 모아서 처리하는 일이라
+     <b>아껴서 답하는 것이 맞는 선택</b>입니다. 틀린 사진 한 장이 들어가면 모든 기기가 그것을 배웁니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">C5</span>임계값(상위 10%)은 어떤 근거로 정했습니까?</div>
+  <div class="key">정하지 않았습니다 — <b>곡선 전체를 보여 드리는 것</b>이 저희 결과입니다.</div>
+  <p>10%는 <b>설명하기 쉬운 지점</b>으로 고른 것입니다. 20%면 87.5%, 50%면 73.8%,
+     전부 답하면 55.6%입니다.</p>
+  <p>운영하면서 <b>“얼마나 자주 답할지”를 정하면 정확도가 따라옵니다.</b>
+     그 교환 관계를 재서 보여 주는 것까지가 저희가 한 일입니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">C6</span>강의실 정확도 6%는 치명적이지 않습니까?</div>
+  <div class="key">사진 모양만으로는 <b>못 풉니다.</b> 문이 전부 똑같이 생겼습니다.</div>
+  <p>사진을 더 찍어도 안 됩니다 — 문 사진 200장으로 재도 7%였습니다.
+     그래서 <b>강의실은 번호판 글자 읽기가 맡고</b>, 모양은 「몇 층쯤」까지만 씁니다.</p>
+  <p>글자 읽기 적중률은 복도 번호판 37% · 엘리베이터 안 97% · 대피 안내판 45%이고,
+     <b class="hl">틀린 층을 말한 적은 0건</b>입니다. 읽히면 모양보다 글자를 믿습니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">C7</span>모델을 이 건물 사진으로 재학습(fine-tuning)했습니까?</div>
+  <div class="key">안 했습니다. ImageNet으로 미리 학습된 MobileNet v2를 <b>그대로</b> 쓰고 특징만 꺼냅니다.</div>
+  <p>이유는 둘입니다. ① 폰 브라우저에서 돌아야 해서 <b>작은 모델</b>이 필요했고 학습용 GPU도 시간도 없었습니다.
+     ② <b>사진이 계속 늘어나는데 매번 다시 학습할 수 없습니다</b> — 지금 방식은 사진을 넣기만 하면 바로 반영됩니다.</p>
+  <p><b>가장 큰 개선 여지가 여기라고 봅니다.</b> 사진이 충분히 모이면 이 건물로 미세조정하는 것이 다음 단계입니다.</p>
+</div>
+
+<h2>D. 보안 · 개인정보 · 운영</h2>
+
+<div class="card">
+  <div class="q"><span class="n">D1</span>누가 아무 사진이나 올리면 어떻게 됩니까?</div>
+  <div class="key">보안 규칙이 <b>쓰기 요청 자체를 거부</b>합니다. 서버에서 프로그램이 도는 게 아닙니다.</div>
+  <p><code>firestore.rules</code>의 <code>validSuggestion()</code>이 검사합니다 —
+     칸 <b>8개만</b> 허용, 사진은 <b>950,000자 미만</b> base64,
+     <code>status</code>는 <b><code>pending</code> 고정</b>.</p>
+  <p>마지막이 핵심입니다. <b>올리는 사람이 자기 사진을 「승인됨」으로 만들 수 없습니다.</b>
+     관리자가 보고 승인해야 창고로 갑니다.</p>
+  <div class="warn"><b>솔직히 말할 것</b> — <b>도배를 막는 장치는 없습니다.</b>
+     로그인 없이 누구나 올릴 수 있습니다. 기기당 하루 제보 수 제한이 다음 과제입니다.</div>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">D2</span>복도 사진에 지나가는 사람 얼굴이 찍히면요?</div>
+  <div class="key"><b>자동으로 가리는 기능이 없습니다.</b> 지금은 관리자가 보고 거절하는 것이 유일한 장치입니다.</div>
+  <p>승인된 사진은 로그인 없이 누구나 읽을 수 있습니다(모든 기기가 같은 자료로 배워야 하므로).
+     제보 원본은 외부에서 읽을 수 없습니다.</p>
+  <p>다음 과제로 <b>얼굴 가리기</b>를 두려 합니다. 개인정보처리방침도 아직 없습니다 —
+     서비스로 내보내려면 반드시 갖춰야 합니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">D3</span>관리자가 잘못된 위치로 승인하면요?</div>
+  <div class="key">모든 기기가 그 틀린 것을 배웁니다. <b>가장 위험한 지점</b>입니다.</div>
+  <ul>
+    <li>관리자가 <b>코드가 아니라 한글 이름</b>으로 장소를 고르게 했습니다</li>
+    <li>고른 장소를 <b>승인 직전에 한 번 더</b> 보여 줍니다</li>
+    <li>잘못 승인한 사진은 <b>지울 수 있습니다</b></li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">D4</span>관리자는 어떻게 정합니까?</div>
+  <div class="key"><code>admins</code> 컬렉션에 <b>UID가 있는 사람만</b>입니다.</div>
+  <p>그 명단은 <b>앱에서 아무도 못 바꾸고</b> Firebase 콘솔에서만 바꿉니다.
+     예전 규칙은 <b>로그인만 하면 관리자</b>였는데, 계정만 만들면 누구나 관리자가 되는 구멍이라 고쳤습니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">D5</span>여러분이 졸업하면 누가 관리합니까?</div>
+  <div class="key">사람 손이 가는 부분(<b>승인</b>)은 남습니다. 저희가 없앤 것은
+     <b>152곳을 다시 찍으러 다니는 일</b>입니다.</div>
+  <p>승인은 사진 한 장에 몇 초입니다. 반면 재촬영은 사람 셋이 건물을 종일 도는 일이고,
+     <b>저희가 졸업하면 그걸로 끝</b>입니다.</p>
+  <div class="warn"><b>완전 자동은 못 했습니다.</b> 자동 확정을 켰다가 0%라서 껐습니다.
+     “사람을 줄였다”가 아니라 <b>“사람이 할 일을 바꿨다”</b>가 정확한 표현입니다.</div>
+</div>
+
+<h2>E. 한계와 앞으로</h2>
+
+<div class="card star">
+  <div class="q"><span class="n">E1</span>처음 온 사람이 실제로 길을 찾는 시험은 했습니까?</div>
+  <div class="key"><b>안 했습니다. 가장 큰 빈칸입니다.</b></div>
+  <p>지금 숫자는 전부 <b>사진 판정 정확도</b>이지 <b>사람이 길을 찾았는지</b>가 아닙니다.
+     사용성 평가는 아직 못 했습니다.</p>
+  <p>다음에 할 일 1순위로 보고 있습니다 — 3호관에 처음 오는 사람 몇 명에게
+     목적지를 주고 <b>도착 시간과 실패 횟수</b>를 재면 됩니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">E2</span>시험 사진을 찍은 사람이 셋뿐이면 일반화가 됩니까?</div>
+  <div class="key"><b>안 된다고 봐야 합니다.</b></div>
+  <p>기기 정보가 남은 사진은 iPhone 14 795장 · Galaxy S20 45장이고, 나머지 절반은
+     메신저로 받아 기기 정보가 지워졌습니다. 처음 오는 사람의 폰·각도·시간대와 다를 수 있습니다.</p>
+  <p>또 평가 사진은 <b>같은 계절·같은 게시물 상태</b>입니다.
+     게시판 포스터가 바뀌면 정확도가 떨어질 수 있는데 <b>그건 아직 재 보지 못했습니다.</b></p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">E3</span>속도는 어떻습니까?</div>
+  <div class="key">PC 기준으로 <b>번호판이 바로 읽히는 복도 1~2초</b>, 못 읽는 복도 7~9초, 안내판 4~5초입니다.</div>
+  <p><b>폰 실측은 아직 안 했습니다.</b> 재는 방법은 정해 두었습니다.
+     “모른다”고 말하고 넘어가는 편이 낫습니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">E4</span>다음에 무엇을 하시겠습니까?</div>
+  <div class="key">넷입니다.</div>
+  <ul>
+    <li><b>기준 사진 늘리기</b> — 장소당 10장 이상(각도·거리·밝기를 다르게). 지금은 2장뿐인 곳이 많습니다</li>
+    <li><b>사용성 평가</b> — 처음 온 사람이 실제로 길을 찾는지</li>
+    <li><b>얼굴 가리기 · 제보 도배 방지 · 개인정보처리방침</b></li>
+    <li><b>미세조정</b> — 사진이 충분히 모이면 이 건물 사진으로</li>
+  </ul>
+</div>
+
+<h2>F. 곤란한 질문 — 정면으로 받으세요</h2>
+
+<div class="card">
+  <div class="q"><span class="n">F1</span>이거 그냥 사진 보여 주는 거 아닙니까?</div>
+  <div class="key">사진을 보여 주는 부분은 어렵지 않습니다. <b>그건 저희도 쉬웠다고 말합니다.</b></div>
+  <p>저희가 한 것은 <b>그 사진이 낡지 않게 지키는 방법</b>이고, 그러려면
+     <b>기계가 “모르겠다”고 말할 줄 알아야</b> 했습니다. 발표 전체가 그 이야기입니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">F2</span>측정 결과가 안 좋은데 왜 그 기능을 넣었습니까?</div>
+  <div class="key">안 좋아서 <b>뺐습니다.</b></div>
+  <p>자동 확정은 지웠고, 효과가 확인되지 않은 후처리(＋0.4%p, 구간 −1.3~+2.0%p)는
+     <b>바꾸지 않고 그대로 뒀습니다.</b></p>
+  <p>저희가 보고드리는 것은 <b>좋은 숫자가 아니라, 숫자를 보고 내린 판단</b>입니다.</p>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">F3</span>특허는 어떻게 됩니까?</div>
+  <div class="key">이미 공개했으므로 <b>1년 안에 출원</b>해야 합니다. 변리사 상담을 준비 중입니다.</div>
+  <p>GitHub Pages에 올려 둔 것이 공개에 해당합니다. 한국은 <b>공지예외 주장</b> 제도가 있어
+     공개일로부터 12개월 안에 출원하면서 그 사실을 주장하면 구제받을 수 있습니다.</p>
+  <div class="warn"><b>세부는 단정하지 말 것.</b> “변리사와 상의 중입니다”로 닫으세요.
+     요건과 서류는 변리사 영역입니다.</div>
+</div>
+
+<div class="card">
+  <div class="q"><span class="n">F4</span>팀에서 각자 무엇을 했습니까?</div>
+  <div class="key">김민종 설계·구현, 손의윤·문성일 사진 촬영·시험입니다.</div>
+  <p>촬영이 단순 작업이 아니었다는 근거가 있습니다. 5층 복도는 한 사람 사진에 치우쳐 있어
+     자리 정확도가 <b>5%</b>였는데, <b>두 사람이 다른 날 다시 찍어</b> 넣자 <b>48%</b>로 올랐습니다.
+     4층 오른쪽 복도도 38% → 61%가 됐습니다.</p>
+  <p><b>촬영자 편중을 푼 것이 그 구간에서 가장 큰 개선이었습니다.</b></p>
+</div>
+
+<h2>부록 · 막혔을 때 쓰는 문장</h2>
+
+<div class="card">
+  <div class="q">이 네 문장이면 거의 다 넘어갑니다</div>
+  <ul>
+    <li>“<b>그건 재 보지 않았습니다.</b> 재려면 ○○를 하면 됩니다.”</li>
+    <li>“<b>모릅니다.</b> 확인해서 알려 드리겠습니다.”</li>
+    <li>“<b>그 부분은 저희가 못 한 것입니다.</b> 이유는 ○○입니다.”</li>
+    <li>“<b>좋은 지적입니다.</b> 저희도 그게 걸려서 ○○까지는 해 봤습니다.”</li>
+  </ul>
+  <div class="warn"><b>절대 하지 말 것</b> — 추측을 사실처럼 말하기 · “잘 됩니다” 같은 숫자 없는 답 ·
+     모르는 것을 아는 척하기. 한 번 걸리면 그 뒤 답을 전부 의심받습니다.</div>
+</div>
+
+<div class="foot">
+  공대 3호관 실내 길안내 · 김민종 · 손의윤 · 문성일 &nbsp;|&nbsp;
+  숫자 출처 — AI정확도_측정결과_2차.txt · 한계와_대응.txt · 글자읽기_개선_결과.txt · 검사.ps1 &nbsp;|&nbsp;
+  2026-10-14
+</div>
+
+</body>
+</html>

@@ -168,11 +168,11 @@
       <th class="c" style="width:9%">쪽</th><th>한 줄</th></tr>
   <tr><td class="c"><b>첫째</b></td><td><b>무엇을 만들기로 했나</b></td><td class="c">4~6</td>
       <td>스스로 건 <b>조건 네 가지</b>가 설계를 정했고, 그중 하나가 숙제로 남았습니다</td></tr>
-  <tr><td class="c"><b>둘째</b></td><td><b>어떻게 만들었나</b></td><td class="c">8~16</td>
+  <tr><td class="c"><b>둘째</b></td><td><b>어떻게 만들었나</b></td><td class="c">8~17</td>
       <td>재료 · <b>휴대폰에 무엇이 들어가나</b> · 구조도 · 블록도 둘 · 흐름도 둘</td></tr>
-  <tr><td class="c"><b>셋째</b></td><td><b>측정 결과</b></td><td class="c">18~19</td>
+  <tr><td class="c"><b>셋째</b></td><td><b>측정 결과</b></td><td class="c">19~20</td>
       <td>세 가지를 재서 <b>둘은 그만두고 하나는 그대로</b> 두었습니다 <span class="sm">(지난 발표 내용)</span></td></tr>
-  <tr class="hi"><td class="c"><b>넷째</b></td><td><b>한 일과 결과</b></td><td class="c">21~23</td>
+  <tr class="hi"><td class="c"><b>넷째</b></td><td><b>한 일과 결과</b></td><td class="c">22~24</td>
       <td><b>무엇을 했고 무엇이 나왔는지</b> — 그리고 못 한 것</td></tr>
   </table>
   <div class="strip vbot" style="margin-top:7mm"><b>오늘 한 가지만 기억하신다면</b> —
@@ -377,6 +377,39 @@
       <p>받아 둔 것은 원래 <b>「임시로 맡아 둔 것」</b>이라 공간이 모자라면 지워질 수 있습니다.
          그래서 <b class="cy">설치 직후 「지우지 말아 달라」고 요청</b>하게 했습니다</p></div>
   </div>
+  <div class="foot"><span>02 · 어떻게 만들었나</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 사진은 두 종류 ══════════════════ -->
+<section class="slide">
+  <div class="kick">02 · 사진</div>
+  <h1>사진은 <em>두 종류</em>입니다</h1>
+  <div class="lead">같은 「사진」이라도 <b>어디에 있고 언제 쓰는지가 다릅니다.</b>
+    이 선이 곧 <b>오프라인 설계의 경계</b>입니다.</div>
+  <table class="vtop tight">
+  <tr><th style="width:17%"></th><th style="width:41%">안내 사진</th><th>제보로 승인된 사진</th></tr>
+  <tr><td><b>무엇</b></td>
+      <td>저희 셋이 직접 찍어 앱에 넣은 것</td>
+      <td>이용자가 올리고 관리자가 승인한 것</td></tr>
+  <tr><td><b>어디에</b></td>
+      <td>앱 안 <code>data/photos/</code> — <b>평범한 jpg 파일</b></td>
+      <td><b>Firestore 서버</b></td></tr>
+  <tr class="hi"><td><b>폰에 복사되나</b></td>
+      <td><b class="cy">네 — 169장 13MB 전부</b></td>
+      <td><b class="hl">아니요 — 그때그때 받아 옵니다</b></td></tr>
+  <tr><td><b>어디에 쓰나</b></td>
+      <td><b>길안내</b> — 단계마다 그 자리 사진을 보여 줍니다</td>
+      <td><b>사진 판정(AI)의 기준</b>으로 씁니다</td></tr>
+  <tr><td><b>인터넷</b></td>
+      <td><b class="gr">없어도 됩니다</b></td>
+      <td><b class="hl">있어야 합니다</b></td></tr>
+  </table>
+  <div class="strip" style="margin-top:5mm"><b>받아 두는 15.6MB 가운데 13MB가 사진입니다</b> — 덩치의 대부분입니다.
+    그래서 <b>길안내 사진은 통째로 받아 두고, 승인 사진은 받아 두지 않습니다.</b>
+    폰에는 사진 대신 <b>그 사진에서 뽑은 숫자(벡터)만</b> 남습니다.</div>
+  <div class="easy vbot" style="margin-top:4mm"><span class="t">숫자가 두 개인 이유</span>
+    사진 목록에 적힌 항목은 <b>174장</b>인데 파일은 <b>169장</b>입니다 —
+    건물 외관 4장과 복도 1장을 <b>두 장소가 나눠 쓰기</b> 때문입니다.</div>
   <div class="foot"><span>02 · 어떻게 만들었나</span><span class="pg"></span></div>
 </section>
 

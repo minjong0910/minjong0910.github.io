@@ -7,126 +7,152 @@
   /* ══════════════════════════════════════════════════════════════
      캡스톤 발표 (16:9 · 338.7mm × 190.5mm)
 
-     2026-10-13 전면 개편
-       그 전 판은 「건물에서 길을 잃는다 · GPS 가 안 된다」처럼
-       듣는 사람이 이미 아는 이야기로 절반을 썼다. 전부 버리고
-       **측정해서 알게 된 것**만 남겼다 —
-         · 자료 누출로 100% 가 0% 가 된 일
-         · AI 가 정말 일하는지 의심해 기준선과 견준 일 (+34.6%p)
-         · 우리가 넣은 처리가 효과 없다고 나와 그대로 둔 일
-         · 격차로 고르면 상위 10% 에서 64.7% → 92.9%
-       도면 다섯 장은 문서\도면.html 에서 그대로 가져온다.
+     2026-10-14 : 디자인을 또 바꿨다. 앞선 자료와 겹치면 안 되기 때문이다.
+       발표_상세설계.html  크림 종이 #FBFAF7 + 벽돌빛 빨강 + 왼쪽 세로줄
+       발표_중간발표.html  흰 바탕 + 남청 #1B4F8C, A4 문서풍
+       이 자료(전 판)      어두운 남색 #111A22 + 시안
+       → 셋 다 피해서 : 밝은 회색 바탕 + 쪽 위를 가로지르는 딥그린 띠.
+         한눈에 다른 것은 「제목이 색 띠 안에 흰 글자로 들어 있다」는 점이다.
+
+     그림 두 계열(#1A6FB5 · #B4530F)은 밝은 바탕 기준으로 다시 계산해 골랐다 —
+       L 0.530 / 0.555 (띠 0.43~0.77) · C 0.134 / 0.145 (바닥 0.10)
+       대비 4.78:1 / 4.55:1 (바닥 3:1) · 색각 min 22.5 (목표 8) · 보통시야 27.5 (바닥 15)
+       전 판의 시안(#00A3BA)은 밝은 바탕에서 2.74:1 로 떨어져 못 쓴다.
 
      ※ 고칠 때는 문서\발표_캡스톤.html 이 아니라 이 파일을 고친다.
      ══════════════════════════════════════════════════════════════ */
   @page { size: 338.7mm 190.5mm; margin: 0; }
   :root{
-    --bg:#111A22; --bg2:#18242E; --bg3:#1E2C36; --line:#2A3A47;
-    --fg:#EAF1F6; --fg2:#A9BCC9; --dim:#73899A;
-    --cy:#35C8DC; --am:#F0A84E; --gr:#5FD3A0; --rd:#F2766B;
-    /* 그림용 — dataviz 여섯 가지 검사를 통과한 값 (바탕 #18242E 기준)
-       #00A3BA  L=0.657 C=0.115 대비 5.22:1      #C27F22  L=0.651 C=0.130 대비 4.77:1
-       색각 분리 min(protan,deutan)=19.0 (목표 8)   보통 시야 ΔE=23.2 (바닥 15) */
-    --s1:#00A3BA; --s2:#C27F22;
-    --card:#FFFFFF;
+    --bg:#F2F4F6; --card:#FFFFFF; --line:#D6DCE2; --line2:#E7EBEF;
+    --ink:#15181C; --ink2:#4A5560; --dim:#6B7684;
+    --ac:#0F6B4A;            /* 딥그린 — 쪽 머리띠·표지·간지 */
+    --ac2:#E7F1EC;           /* 아주 옅은 초록 — 표 머리줄·강조 칸 */
+    --am:#B4530F; --rd:#A3301E; --gr:#0F6B4A; --bl:#1A6FB5;
+    --s1:#1A6FB5; --s2:#B4530F;   /* 그림 두 계열 */
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; background:var(--bg); }
-  body{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; color:var(--fg);
+  body{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; color:var(--ink);
         -webkit-print-color-adjust:exact; print-color-adjust:exact; counter-reset:sl; }
 
   .slide{ width:338.7mm; height:190.5mm; page-break-after:always; position:relative;
-          padding:14mm 20mm 17mm 20mm; overflow:hidden; background:var(--bg); counter-increment:sl;
+          padding:36mm 20mm 16mm 20mm; overflow:hidden; background:var(--bg); counter-increment:sl;
           display:flex; flex-direction:column; }
   .slide:last-child{ page-break-after:auto; }
-  /* 남는 높이를 본문 위·아래로 똑같이 나눈다 — 본문 덩어리가 쪽 한가운데 앉는다 */
+  /* 쪽 위를 가로지르는 띠 — 제목이 이 안에 흰 글자로 들어간다 */
+  .slide::before{ content:""; position:absolute; left:0; right:0; top:0; height:29mm; background:var(--ac); }
+  .slide.part::before, .slide.cover::before, .slide.fin::before{ display:none; }
   .slide > .vtop{ margin-top:auto !important; }
   .slide > .vbot{ margin-bottom:auto !important; }
 
-  .kick{ font-size:10pt; letter-spacing:4px; color:var(--cy); font-weight:700; margin-bottom:2.5mm; }
-  h1{ font-size:27pt; margin:0 0 3mm; letter-spacing:-0.8px; line-height:1.2; font-weight:700; }
-  h1 em{ font-style:normal; color:var(--cy); }
-  h1 s{ text-decoration:line-through; text-decoration-thickness:2px; color:var(--dim); }
-  .lead{ font-size:14pt; color:var(--fg2); margin:0 0 6mm; line-height:1.6; }
-  .lead b{ color:var(--fg); }
-  .foot{ position:absolute; left:20mm; right:20mm; bottom:7mm; display:flex;
+  .kick{ position:absolute; left:20mm; top:6mm; z-index:1;
+         font-size:9.5pt; letter-spacing:3px; color:rgba(255,255,255,.72); font-weight:700; }
+  h1{ position:absolute; left:20mm; right:20mm; top:12mm; z-index:1;
+      font-size:22pt; margin:0; letter-spacing:-0.6px; line-height:1.25; font-weight:700; color:#fff; }
+  h1 em{ font-style:normal; color:#8FE3BE; }
+  h1 s{ text-decoration:line-through; text-decoration-thickness:2px; color:rgba(255,255,255,.55); }
+  .lead{ font-size:13.5pt; color:var(--ink2); margin:0 0 6mm; line-height:1.6; }
+  .lead b{ color:var(--ink); }
+  .foot{ position:absolute; left:20mm; right:20mm; bottom:6mm; display:flex;
          justify-content:space-between; font-size:8.5pt; color:var(--dim);
          border-top:1px solid var(--line); padding-top:2.5mm; letter-spacing:.6px; }
   .foot .pg::after{ content:counter(sl); }
 
+  /* 표지·간지·마무리 — 전면 딥그린 */
+  .cover, .part, .fin{ background:var(--ac); color:#fff; }
   .cover{ padding:0; display:flex; flex-direction:row; align-items:center; }
   .cover .in{ padding:0 24mm; width:100%; }
-  .cover .k{ font-size:11pt; letter-spacing:6px; color:var(--cy); margin-bottom:9mm; }
-  .cover h1{ font-size:46pt; line-height:1.22; margin-bottom:7mm; }
-  .cover .s{ font-size:14.5pt; color:var(--fg2); margin-bottom:13mm; line-height:1.6; }
-  .cover .m{ font-size:11.5pt; color:var(--dim); line-height:2; }
-  .cover .bar{ width:40mm; height:1.8mm; background:var(--cy); margin-bottom:8mm; }
+  .cover .k{ font-size:11pt; letter-spacing:6px; color:rgba(255,255,255,.7); margin-bottom:9mm; }
+  .cover h1{ position:static; font-size:46pt; line-height:1.2; margin-bottom:7mm; color:#fff; }
+  .cover h1 em{ color:#8FE3BE; }
+  .cover .s{ font-size:14.5pt; color:rgba(255,255,255,.82); margin-bottom:13mm; line-height:1.6; }
+  .cover .m{ font-size:11.5pt; color:rgba(255,255,255,.6); line-height:2; }
+  .cover .bar{ width:40mm; height:1.8mm; background:#8FE3BE; margin-bottom:8mm; }
 
-  .part{ display:flex; flex-direction:row; align-items:center; background:var(--bg2); }
-  .part .han{ position:absolute; right:14mm; top:50%; transform:translateY(-50%);
-              font-size:190pt; font-weight:700; color:var(--cy); opacity:.13; line-height:1; }
+  .part{ display:flex; flex-direction:row; align-items:center; }
+  .part .han{ position:absolute; right:16mm; top:50%; transform:translateY(-50%);
+              font-size:200pt; font-weight:700; color:#fff; opacity:.14; line-height:1; }
   .part .in{ padding:0 4mm; position:relative; z-index:1; max-width:195mm; }
-  .part .no{ font-size:12pt; letter-spacing:4px; color:var(--cy); margin-bottom:4mm; font-weight:700; }
-  .part h1{ font-size:36pt; margin-bottom:5mm; }
-  .part .s{ font-size:14.5pt; color:var(--fg2); line-height:1.75; }
+  .part .no{ font-size:12pt; letter-spacing:4px; color:#8FE3BE; margin-bottom:4mm; font-weight:700; }
+  .part h1{ position:static; font-size:36pt; margin-bottom:5mm; color:#fff; }
+  .part .s{ font-size:14.5pt; color:rgba(255,255,255,.85); line-height:1.75; }
+  .part .foot, .cover .foot, .fin .foot{ color:rgba(255,255,255,.5); border-top-color:rgba(255,255,255,.25); }
 
   .row{ display:flex; gap:7mm; }
   .row > *{ flex:1; }
-  .box{ background:var(--bg2); border:1px solid var(--line); border-radius:2mm; padding:7mm 8mm; }
-  .box .h{ font-size:14.5pt; font-weight:700; color:var(--fg); margin-bottom:3.5mm; }
-  .box p{ margin:0; font-size:13pt; line-height:1.85; color:var(--fg2); }
-  .box.cy{ border-color:#2E7F8C; } .box.cy .h{ color:var(--cy); }
-  .box.am{ border-color:#8A6230; } .box.am .h{ color:var(--am); }
-  .box.gr{ border-color:#2F7A5C; } .box.gr .h{ color:var(--gr); }
-  .box.rd{ border-color:#8A4440; } .box.rd .h{ color:var(--rd); }
-  b.hl{ color:var(--am); }  b.cy{ color:var(--cy); }  b.rd{ color:var(--rd); }  b.gr{ color:var(--gr); }
+  .box{ background:var(--card); border:1px solid var(--line); border-radius:2mm; padding:7mm 8mm; }
+  .box .h{ font-size:14.5pt; font-weight:700; color:var(--ink); margin-bottom:3.5mm; }
+  .box p{ margin:0; font-size:13pt; line-height:1.85; color:var(--ink2); }
+  .box.cy{ border-color:#9BC9B6; background:var(--ac2); } .box.cy .h{ color:var(--ac); }
+  .box.am{ border-color:#E0B48C; } .box.am .h{ color:var(--am); }
+  .box.gr{ border-color:#9BC9B6; } .box.gr .h{ color:var(--gr); }
+  .box.rd{ border-color:#E2ADA3; } .box.rd .h{ color:var(--rd); }
+  b.hl{ color:var(--am); }  b.cy{ color:var(--ac); }  b.rd{ color:var(--rd); }  b.gr{ color:var(--gr); }
 
-  .num{ font-size:50pt; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; }
+  .num{ font-size:50pt; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; color:var(--ink); }
   .num small{ font-size:17pt; font-weight:400; color:var(--dim); }
   .cap{ font-size:11.5pt; color:var(--dim); margin-top:2.5mm; line-height:1.6; }
   .mid{ text-align:center; }
 
-  .strip{ background:var(--bg2); border-left:2.5mm solid var(--cy); border-radius:0 2mm 2mm 0;
-          padding:5.5mm 7mm; font-size:13.5pt; line-height:1.72; color:var(--fg2); }
-  .strip b{ color:var(--fg); }
+  .strip{ background:var(--card); border-left:2.5mm solid var(--ac); border-radius:0 2mm 2mm 0;
+          padding:5.5mm 7mm; font-size:13.5pt; line-height:1.72; color:var(--ink2);
+          border-top:1px solid var(--line2); border-right:1px solid var(--line2); border-bottom:1px solid var(--line2); }
+  .strip b{ color:var(--ink); }
   .strip.am{ border-left-color:var(--am); }
   .strip.rd{ border-left-color:var(--rd); }
   .strip.gr{ border-left-color:var(--gr); }
 
-  table{ width:100%; border-collapse:collapse; font-size:12.5pt; }
-  th,td{ border:1px solid var(--line); padding:3.4mm 5mm; text-align:left; color:var(--fg2); }
-  th{ background:var(--bg2); font-weight:700; font-size:11.5pt; color:var(--fg); letter-spacing:.4px; }
-  td b{ color:var(--fg); }
+  table{ width:100%; border-collapse:collapse; font-size:12.5pt; background:var(--card); }
+  th,td{ border:1px solid var(--line); padding:3.4mm 5mm; text-align:left; color:var(--ink2); }
+  th{ background:var(--ac2); font-weight:700; font-size:11.5pt; color:var(--ac); letter-spacing:.4px; }
+  td b{ color:var(--ink); }
   td.c,th.c{ text-align:center; white-space:nowrap; }
   td.n,th.n{ text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
-  tr.hi td{ background:var(--bg3); }
-  tr.hi td b{ color:var(--cy); }
+  tr.hi td{ background:var(--ac2); }
+  tr.hi td b{ color:var(--ac); }
   tr.dim td{ color:var(--dim); }
-  table.tight th, table.tight td{ padding:2.4mm 4.5mm; }   /* 줄이 여섯 이상인 표 */
-  table.tight .sm{ font-size:10pt; }
   td .sm{ font-size:10.5pt; color:var(--dim); }
+  table.tight th, table.tight td{ padding:2.4mm 4.5mm; }
+  table.tight .sm{ font-size:10pt; }
 
-  /* 도면 장 — 흰 카드에 얹는다 */
+  /* 도면 — 검정 선이라 밝은 바탕에 그대로 올린다 */
   .fig{ display:flex; gap:8mm; align-items:flex-start; flex:1; }
-  .fig .pic{ flex:none; background:var(--card); border-radius:2mm; padding:4mm 5mm; }
-  .fig .pic svg{ display:block; height:126mm; width:auto; }   /* 제목·바닥글을 뺀 자리에 맞춘 값 — 더 키우면 잘린다 */
+  .fig .pic{ flex:none; background:var(--card); border:1px solid var(--line); border-radius:2mm; padding:4mm 5mm; }
+  .fig .pic svg{ display:block; height:126mm; width:auto; }
   .fig .say{ flex:1; min-width:0; }
   .fig .say .strip{ font-size:11pt; line-height:1.52; padding:3mm 5mm; }
-  .fig .say .one{ font-size:15pt; font-weight:700; color:var(--fg); line-height:1.34; margin-bottom:3mm; }
-  .fig .say .one em{ font-style:normal; color:var(--cy); }
-  .read{ background:var(--bg2); border:1px solid var(--line); border-radius:2mm; padding:3.2mm 5mm; margin-bottom:3mm; }
-  .read .h{ font-size:10pt; letter-spacing:1.5px; color:var(--cy); font-weight:700; margin-bottom:2mm; }
-  .read ol, .read ul{ margin:0; padding-left:6mm; font-size:10.8pt; line-height:1.54; color:var(--fg2); }
+  .fig .say .one{ font-size:15pt; font-weight:700; color:var(--ink); line-height:1.34; margin-bottom:3mm; }
+  .fig .say .one em{ font-style:normal; color:var(--ac); }
+  .read{ background:var(--card); border:1px solid var(--line); border-radius:2mm; padding:3.2mm 5mm; margin-bottom:3mm; }
+  .read .h{ font-size:10pt; letter-spacing:1.5px; color:var(--ac); font-weight:700; margin-bottom:2mm; }
+  .read ol, .read ul{ margin:0; padding-left:6mm; font-size:10.8pt; line-height:1.54; color:var(--ink2); }
   .read ul{ list-style:none; padding-left:0; }
   .read ul li{ margin-bottom:1.4mm; padding-left:4.5mm; text-indent:-4.5mm; }
-  .read ul li::before{ content:"· "; color:var(--cy); font-weight:700; }
-  .read ol li b, .read ul li b{ color:var(--fg); }
-  code{ font-family:Consolas,"D2Coding",monospace; font-size:0.92em; color:var(--cy);
-        background:#13202A; border-radius:1mm; padding:0 1mm; }
+  .read ul li::before{ content:"· "; color:var(--ac); font-weight:700; }
+  .read ol li b, .read ul li b{ color:var(--ink); }
+  code{ font-family:Consolas,"D2Coding",monospace; font-size:0.92em; color:var(--ac);
+        background:var(--ac2); border-radius:1mm; padding:0 1mm; }
   .easy{ margin-top:3mm; border:1px dashed var(--line); border-radius:2mm; padding:3mm 5mm;
          font-size:10.3pt; line-height:1.48; color:var(--dim); }
   .easy .t{ color:var(--am); font-weight:700; letter-spacing:1.5px; font-size:9.5pt; display:block; margin-bottom:1.2mm; }
-  .easy b{ color:var(--fg2); }
+  .easy b{ color:var(--ink2); }
+
+  /* 「돌려 보기」 단추 — 머리띠 안 오른쪽. PDF 로 뽑아도 누를 수 있는 링크로 남는다.
+     공개 주소(minjong0910.github.io/eval_all.html?auto=fast)를 열면 7초 측정이 저절로 시작된다. */
+  .runbtn{ position:absolute; right:20mm; top:7mm; z-index:2; text-decoration:none; display:block;
+           background:#fff; color:var(--ac); border-radius:2mm; padding:3mm 6mm;
+           font-size:12.5pt; font-weight:700; text-align:center; letter-spacing:-0.3px; }
+  .runbtn .sub{ display:block; font-size:8.5pt; font-weight:400; color:var(--ink2); margin-top:0.8mm; letter-spacing:0; }
+
+  /* 실제 화면·사진 */
+  .shots{ display:flex; gap:6mm; align-items:flex-start; }
+  .shot{ flex:1; min-width:0; text-align:center; }
+  .shot img{ max-width:100%; max-height:92mm; width:auto; height:auto; border-radius:2mm;
+             border:1px solid var(--line); display:block; margin:0 auto; }
+  .shots.wide .shot img{ max-height:104mm; }
+  .shot .cp{ font-size:10.5pt; color:var(--ink2); margin-top:2.5mm; line-height:1.45; }
+  .shot .cp b{ color:var(--ink); }
+  .shot .num{ font-size:15pt; margin-top:1.5mm; }
 
   /* ※ 도면 글자 규칙 — 문서\도면.html 의 것과 같은 값이어야 한다.
        <svg> 만 가져오고 그쪽 <style> 은 안 가져오므로, 여기 없으면 글자가
@@ -138,32 +164,13 @@
   svg .big { font-size:23px; font-weight:700; }
   svg .dat { font-size:17px; }
   svg .zon { font-size:17px; fill:#555; }
-  /* 그림(곡선)은 어두운 바탕 위에 그린다 — 위 규칙을 덮어쓴다 */
-  .plot text{ fill:var(--fg2); }
-
-  /* 쪽 오른쪽 위에 다는 「돌려 보기」 단추.
-     PDF 로 뽑아도 <a> 는 누를 수 있는 링크로 남는다(크롬 인쇄가 링크를 심는다).
-     공개 주소(minjong0910.github.io/eval_all.html?auto=fast)를 열면 7초 측정이 저절로 시작된다 —
-     서버를 켤 필요가 없고, 교수님이 나중에 본인 기기로 열어 보실 수도 있다.
-     발표장 인터넷이 나쁠 때를 위해 바탕화면 「빠른측정」(도구\빠른측정.bat)이 같은 것을 노트북 안에서 연다. */
-  .runbtn{ position:absolute; right:20mm; top:12mm; text-decoration:none; display:block;
-           background:var(--cy); color:#06222A; border-radius:2mm; padding:3mm 6mm;
-           font-size:12.5pt; font-weight:700; text-align:center; letter-spacing:-0.3px; }
-  .runbtn .sub{ display:block; font-size:8.5pt; font-weight:400; opacity:.78; margin-top:0.8mm; letter-spacing:0; }
-
-  /* 실제 화면·사진 — 교수님이 "숫자 말고 눈으로 볼 수 있는 것"을 요구하셨다 */
-  .shots{ display:flex; gap:6mm; align-items:flex-start; }
-  .shot{ flex:1; min-width:0; text-align:center; }
-  /* 폰 화면 캡처는 세로로 길다 — 너비가 아니라 높이로 맞춰야 쪽을 안 넘긴다 */
-  .shot img{ max-width:100%; max-height:92mm; width:auto; height:auto; border-radius:2mm;
-             border:1px solid var(--line); display:block; margin:0 auto; }
-  .shots.wide .shot img{ max-height:104mm; }
-  .shot .cp{ font-size:10.5pt; color:var(--fg2); margin-top:2.5mm; line-height:1.45; }
-  .shot .cp b{ color:var(--fg); }
-  .shot .num{ font-size:15pt; margin-top:1.5mm; }
+  .plot text{ fill:var(--ink2); }
 
   .end{ display:flex; flex-direction:column; align-items:center; justify-content:center;
         flex:1; text-align:center; }
+  .fin .end h1{ position:static; color:#fff; }
+  .fin .end h1 em{ color:#8FE3BE; }
+  .fin .kick{ position:static; color:rgba(255,255,255,.7); }
 </style>
 </head>
 <body>
@@ -777,31 +784,31 @@
   <svg class="plot" viewBox="0 0 1180 400" style="height:92mm; width:auto" role="img"
        aria-label="답하는 비율에 따른 자리 정확도 — 격차로 고를 때와 점수로 고를 때">
     <!-- 눈금선 : 뒤로 물러나 있어야 한다 -->
-    <g stroke="#2A3A47" stroke-width="1">
+    <g stroke="#DDE3E8" stroke-width="1">
       <line x1="120" y1="40"  x2="1140" y2="40"/>
       <line x1="120" y1="98"  x2="1140" y2="98"/>
       <line x1="120" y1="156" x2="1140" y2="156"/>
       <line x1="120" y1="214" x2="1140" y2="214"/>
       <line x1="120" y1="272" x2="1140" y2="272"/>
     </g>
-    <line x1="120" y1="330" x2="1140" y2="330" stroke="#4A5C6B" stroke-width="1.6"/>
-    <line x1="120" y1="40"  x2="120"  y2="330" stroke="#4A5C6B" stroke-width="1.6"/>
+    <line x1="120" y1="330" x2="1140" y2="330" stroke="#9AA6B2" stroke-width="1.6"/>
+    <line x1="120" y1="40"  x2="120"  y2="330" stroke="#9AA6B2" stroke-width="1.6"/>
 
     <!-- 점수로 고를 때 (보통 방법) -->
-    <polyline fill="none" stroke="#C27F22" stroke-width="2.6" stroke-dasharray="11 7" stroke-linejoin="round"
+    <polyline fill="none" stroke="#B4530F" stroke-width="2.6" stroke-dasharray="11 7" stroke-linejoin="round"
       points="173.7,244.7 281.1,244.2 388.4,238.9 495.8,248.2 603.2,258.7 710.5,262.7 817.9,272 925.3,277.2 1032.6,285.3 1140,297.5"/>
     <!-- 격차로 고를 때 (우리 방법) -->
-    <polyline fill="none" stroke="#00A3BA" stroke-width="3.2" stroke-linejoin="round"
+    <polyline fill="none" stroke="#1A6FB5" stroke-width="3.2" stroke-linejoin="round"
       points="173.7,81.2 281.1,112.5 388.4,137.4 495.8,170.5 603.2,192 710.5,214 817.9,237.8 925.3,254.6 1032.6,278.4 1140,297.5"/>
 
-    <g fill="#C27F22">
+    <g fill="#B4530F">
       <circle cx="281.1" cy="244.2" r="4.5"/><circle cx="388.4" cy="238.9" r="4.5"/>
       <circle cx="495.8" cy="248.2" r="4.5"/><circle cx="603.2" cy="258.7" r="4.5"/>
       <circle cx="710.5" cy="262.7" r="4.5"/><circle cx="817.9" cy="272" r="4.5"/>
       <circle cx="925.3" cy="277.2" r="4.5"/><circle cx="1032.6" cy="285.3" r="4.5"/>
       <circle cx="173.7" cy="244.7" r="8"/>
     </g>
-    <g fill="#00A3BA">
+    <g fill="#1A6FB5">
       <circle cx="281.1" cy="112.5" r="5"/><circle cx="388.4" cy="137.4" r="5"/>
       <circle cx="495.8" cy="170.5" r="5"/><circle cx="603.2" cy="192" r="5"/>
       <circle cx="710.5" cy="214" r="5"/><circle cx="817.9" cy="237.8" r="5"/>
@@ -809,20 +816,20 @@
       <circle cx="173.7" cy="81.2" r="8"/>
     </g>
     <!-- 두 선이 만나는 끝점 : 바탕색 테두리로 겹침을 떼어 놓는다 -->
-    <circle cx="1140" cy="297.5" r="6" fill="#00A3BA" stroke="#111A22" stroke-width="2.5"/>
+    <circle cx="1140" cy="297.5" r="6" fill="#1A6FB5" stroke="#F2F4F6" stroke-width="2.5"/>
 
     <!-- 둘의 차이 -->
-    <line x1="173.7" y1="81.2" x2="173.7" y2="244.7" stroke="#EAF1F6" stroke-width="1.6" stroke-dasharray="5 4"/>
-    <text x="190" y="158" font-size="21" font-weight="700" fill="#EAF1F6">+28.2%p</text>
-    <text x="190" y="182" font-size="15" fill="#A9BCC9">같은 AI · 같은 사진</text>
+    <line x1="173.7" y1="81.2" x2="173.7" y2="244.7" stroke="#15181C" stroke-width="1.6" stroke-dasharray="5 4"/>
+    <text x="190" y="158" font-size="21" font-weight="700" fill="#15181C">+28.2%p</text>
+    <text x="190" y="182" font-size="15" fill="#4A5560">같은 AI · 같은 사진</text>
 
     <!-- 값 표시는 꼭 필요한 곳만 -->
-    <text x="190" y="72"  font-size="21" font-weight="700" fill="#EAF1F6">92.9%</text>
-    <text x="190" y="238" font-size="19" font-weight="700" fill="#A9BCC9">64.7%</text>
-    <text x="1128" y="322" font-size="17" font-weight="700" text-anchor="end" fill="#A9BCC9">둘 다 55.6%</text>
+    <text x="190" y="72"  font-size="21" font-weight="700" fill="#15181C">92.9%</text>
+    <text x="190" y="238" font-size="19" font-weight="700" fill="#4A5560">64.7%</text>
+    <text x="1128" y="322" font-size="17" font-weight="700" text-anchor="end" fill="#4A5560">둘 다 55.6%</text>
 
     <!-- 눈금 글자 -->
-    <g font-size="15" fill="#73899A">
+    <g font-size="15" fill="#6B7684">
       <text x="106" y="46"  text-anchor="end">100%</text>
       <text x="106" y="104" text-anchor="end">90%</text>
       <text x="106" y="162" text-anchor="end">80%</text>
@@ -838,12 +845,12 @@
 
     <!-- 범례 -->
     <g transform="translate(660,52)">
-      <line x1="0" y1="0" x2="40" y2="0" stroke="#00A3BA" stroke-width="3.2"/>
-      <circle cx="20" cy="0" r="5" fill="#00A3BA"/>
-      <text x="52" y="6" font-size="17" fill="#EAF1F6">1·2등 <tspan font-weight="700">차이</tspan>로 고름 — 우리 방법</text>
-      <line x1="0" y1="30" x2="40" y2="30" stroke="#C27F22" stroke-width="2.6" stroke-dasharray="11 7"/>
-      <circle cx="20" cy="30" r="4.5" fill="#C27F22"/>
-      <text x="52" y="36" font-size="17" fill="#A9BCC9">닮은 <tspan font-weight="700">정도</tspan>로 고름 — 보통 방법</text>
+      <line x1="0" y1="0" x2="40" y2="0" stroke="#1A6FB5" stroke-width="3.2"/>
+      <circle cx="20" cy="0" r="5" fill="#1A6FB5"/>
+      <text x="52" y="6" font-size="17" fill="#15181C">1·2등 <tspan font-weight="700">차이</tspan>로 고름 — 우리 방법</text>
+      <line x1="0" y1="30" x2="40" y2="30" stroke="#B4530F" stroke-width="2.6" stroke-dasharray="11 7"/>
+      <circle cx="20" cy="30" r="4.5" fill="#B4530F"/>
+      <text x="52" y="36" font-size="17" fill="#4A5560">닮은 <tspan font-weight="700">정도</tspan>로 고름 — 보통 방법</text>
     </g>
   </svg>
   </div>
@@ -909,7 +916,7 @@
   <div class="foot"><span>04 · 한 일과 결과</span><span class="pg"></span></div>
 </section>
 
-<section class="slide">
+<section class="slide fin">
   <div class="end">
     <div class="kick" style="letter-spacing:5px; margin-bottom:6mm">마지막으로</div>
     <h1 style="font-size:44pt; line-height:1.22; margin:0 0 8mm; letter-spacing:-1.5px">

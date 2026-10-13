@@ -27,6 +27,10 @@
 <div class="sub">이 페이지 하나로 발표에 쓰는 숫자를 전부 다시 만듭니다. 결과는 화면에 표로 나오고 JSON 으로도 받을 수 있습니다.</div>
 
 <div class="note">
+  <b>빠른 측정</b>은 질의 사진을 <b>무작위 표본</b>으로만 뽑아 10초 안에 끝냅니다 — 발표장에서 눈앞에 돌려 보이려고 둔 것입니다.
+  뽑는 방식이 고정 씨앗이라 돌릴 때마다 같은 표본이 나오고, 결과 표에 <b>표본 장수를 그대로 적습니다.</b>
+  <b>발표에 쓰는 숫자는 전체 측정 값입니다.</b> 두 장 합치기와 신뢰구간은 빠른 측정에서 건너뜁니다.
+  <br><br>
   <b>측정 방법</b> — 사진 한 장을 질의로 두고, <b>같은 배치(같은 사람이 한 번에 찍어 보낸 묶음)의 사진은 기준에서 모두 빼고</b> 맞힙니다.
   실제 사용자는 우리가 찍은 사진을 갖고 있지 않으므로, 이 조건이 실제와 가장 가깝습니다.
   배치는 파일 이름 계열(<code>e###·d###·c###·b###·n###·v##·w##·x###·y###·f###</code> 등)로 나눕니다.
@@ -35,6 +39,7 @@
 </div>
 
 <button id="go" disabled>전체 측정 시작</button>
+<button id="goFast" disabled>빠른 측정 (약 10초) — 발표 시연용</button>
 <button id="dl" disabled>결과 JSON 받기</button>
 <div class="bar"><i id="pg"></i></div>
 <div class="st" id="st">기준 데이터를 읽는 중…</div>
@@ -143,8 +148,21 @@ function rankOf(qs, skipGroup, ownIdx){
   return arr;
 }
 
+/* 발표장에서 돌려 보이려고 둔 빠른 모드.
+   질의 사진만 줄인다 — 기준 벡터 4,150개는 그대로 쓴다(줄이면 다른 측정이 되어 버린다).
+   씨앗을 고정해 매번 같은 표본이 나오게 한다 : 발표 때와 연습 때 숫자가 달라지면 곤란하다. */
+var FAST = false, FAST_N = 240;
+function sampleFixed(arr, k){
+  if(arr.length <= k) return arr.slice();
+  var seed = 20261014, a = arr.slice();
+  function rnd(){ seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+  for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(rnd() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a.slice(0, k);
+}
+
 function run(){
   document.getElementById('go').disabled = true;
+  document.getElementById('goFast').disabled = true;
   var t0 = Date.now();
   SEL = [];
   var codeBatches = {}, cnt = {};
@@ -155,6 +173,8 @@ function run(){
     var multi = Object.keys(codeBatches[p.code]).length > 1;
     return catOf(p.code) === '강의실' ? cnt[p.code] > 1 : multi;
   });
+
+  if(FAST){ test = sampleFixed(test, FAST_N); window.__FAST_USED = test.length; }
 
   var stat = {}, conf = {}, sideRows = [], weak = {}, byCode = {};
   /* 자리 × 촬영 묶음 — 새 사진을 넣었을 때 "예전 사진이 좋아졌나 / 새 사진은 어떤가"를 따로 보려고 (2026-09-23) */
@@ -197,7 +217,7 @@ function run(){
       }
     }
     PG.style.width = (100*i/test.length).toFixed(1) + '%';
-    ST.textContent = '① 정확도 측정 ' + i + ' / ' + test.length + '장';
+    ST.textContent = (FAST ? '빠른 측정 (표본) ' : '① 정확도 측정 ') + i + ' / ' + test.length + '장';
     if(i < test.length) return later(step);
     pass2(test, stat, conf, sideRows, byCode, t0);
   }
@@ -274,6 +294,7 @@ function bootCI(rows, field){
 
 /* ② 같은 자리에서 두 장 (복도) */
 function pass2(test, stat, conf, sideRows, byCode, t0){
+  if(FAST){ return report(stat, conf, sideRows, byCode, {n:0,e:0,f:0,t5:0}, {n:0,e:0,f:0,t5:0}, t0); }
   var halls = test.filter(function(p){ return /^HALL/.test(p.code); });
   var mate = {};
   halls.forEach(function(p){ (mate[p.code+'|'+p.g] = mate[p.code+'|'+p.g] || []).push(p); });
@@ -313,7 +334,8 @@ function report(stat, conf, sideRows, byCode, one, two, t0){
     var s = stat[k]; if(!s) return;
     rows.push([k, s.n, pct(s.e,s.n), pct(s.f,s.n), pct(s.t5,s.n)]);
   });
-  var h = '<h2>① 종류별 정확도 (다른 배치 사진으로 맞히기)</h2>'
+  var h = (FAST ? '<div class="note warn"><b>빠른 측정 (표본) — 발표 시연용입니다.</b> 질의 사진을 무작위 ' + FAST_N + '장만 뽑아 쟀습니다(전체는 2,000장 남짓). 표본이라 구간이 넓고 장수가 적은 줄은 믿을 수 없습니다. <b>발표에 쓰는 숫자는 [전체 측정 시작] 으로 낸 값입니다.</b></div>' : '')
+     + '<h2>① 종류별 정확도 (다른 배치 사진으로 맞히기)</h2>'
         + table(['종류','장수','정확한 자리','층','5등 안'], rows);
 
   sideRows.sort(function(a,b){ return b.m - a.m; });
@@ -393,6 +415,13 @@ function report(stat, conf, sideRows, byCode, one, two, t0){
   var d = new Date(), pad = function(x){ return (x < 10 ? '0' : '') + x; };
   var stamp = d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes());
   var body = JSON.stringify(RESULT);
+  /* 빠른 측정(표본)이 전체 측정 결과를 덮어쓰면 안 된다 — 발표 전날 돌린 진짜 값이 날아간다 */
+  if(FAST){
+    try{ fetch('api/save?name=eval_all_fast.json', {method:'POST', body:body}); }catch(e){}
+    document.getElementById('go').disabled = false;
+    document.getElementById('goFast').disabled = false;
+    return;
+  }
   try{ fetch('api/save?name=eval_all.json', {method:'POST', body:body}); }catch(e){}
   try{ fetch('api/save?name=eval_all_' + stamp + '.json', {method:'POST', body:body}).then(function(){ document.title = 'EVAL-DONE ' + stamp; }); }catch(e){}
 }
@@ -403,6 +432,7 @@ var READY = {vec:false, batch:false};
 function arm(){
   if(!(READY.vec && READY.batch)) return;
   document.getElementById('go').disabled = false;
+  document.getElementById('goFast').disabled = false;
   /* ?auto=1 : 버튼 없이 바로 측정 (헤드리스 브라우저로 돌릴 때) */
   if(/[?&]auto=1/.test(location.search) && !arm.done){ arm.done = true; document.getElementById('go').click(); }
 }
@@ -417,7 +447,8 @@ fetch('batches.json').then(function(r){ return r.ok ? r.json() : null; }).then(f
   }
 })['catch'](function(){}).then(function(){ READY.batch = true; arm(); });
 
-document.getElementById('go').onclick = function(){ run(); };
+document.getElementById('go').onclick     = function(){ FAST = false; run(); };
+document.getElementById('goFast').onclick = function(){ FAST = true;  run(); };
 document.getElementById('dl').onclick = function(){
   var b = new Blob([JSON.stringify(RESULT, null, 1)], {type:'application/json'});
   var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'eval_all.json'; a.click();

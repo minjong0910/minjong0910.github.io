@@ -141,6 +141,15 @@
   /* 그림(곡선)은 어두운 바탕 위에 그린다 — 위 규칙을 덮어쓴다 */
   .plot text{ fill:var(--fg2); }
 
+  /* 쪽 오른쪽 위에 다는 「돌려 보기」 단추.
+     PDF 로 뽑아도 <a> 는 누를 수 있는 링크로 남는다(크롬 인쇄가 링크를 심는다).
+     누르면 eval_all.html?auto=fast 가 열리면서 7초 측정이 저절로 시작된다.
+     미리보기 서버가 꺼져 있으면 열리지 않으므로, 바탕화면 「빠른측정」 을 먼저 누른다. */
+  .runbtn{ position:absolute; right:20mm; top:12mm; text-decoration:none; display:block;
+           background:var(--cy); color:#06222A; border-radius:2mm; padding:3mm 6mm;
+           font-size:12.5pt; font-weight:700; text-align:center; letter-spacing:-0.3px; }
+  .runbtn .sub{ display:block; font-size:8.5pt; font-weight:400; opacity:.78; margin-top:0.8mm; letter-spacing:0; }
+
   /* 실제 화면·사진 — 교수님이 "숫자 말고 눈으로 볼 수 있는 것"을 요구하셨다 */
   .shots{ display:flex; gap:6mm; align-items:flex-start; }
   .shot{ flex:1; min-width:0; text-align:center; }
@@ -179,11 +188,11 @@
       <th class="c" style="width:9%">쪽</th><th>한 줄</th></tr>
   <tr><td class="c"><b>첫째</b></td><td><b>무엇을 만들기로 했나</b></td><td class="c">4~6</td>
       <td>스스로 건 <b>조건 네 가지</b>가 설계를 정했고, 그중 하나가 숙제로 남았습니다</td></tr>
-  <tr><td class="c"><b>둘째</b></td><td><b>어떻게 만들었나</b></td><td class="c">8~18</td>
+  <tr><td class="c"><b>둘째</b></td><td><b>어떻게 만들었나</b></td><td class="c">8~20</td>
       <td>재료 · <b>휴대폰에 무엇이 들어가나</b> · 구조도 · 블록도 둘 · 흐름도 둘</td></tr>
-  <tr><td class="c"><b>셋째</b></td><td><b>측정 결과</b></td><td class="c">20~23</td>
+  <tr><td class="c"><b>셋째</b></td><td><b>측정 결과</b></td><td class="c">22~25</td>
       <td>세 가지를 재서 <b>둘은 그만두고 하나는 그대로</b> 두었습니다 <span class="sm">(지난 발표 내용)</span></td></tr>
-  <tr class="hi"><td class="c"><b>넷째</b></td><td><b>한 일과 결과</b></td><td class="c">25~27</td>
+  <tr class="hi"><td class="c"><b>넷째</b></td><td><b>한 일과 결과</b></td><td class="c">27~29</td>
       <td><b>무엇을 했고 무엇이 나왔는지</b> — 그리고 못 한 것</td></tr>
   </table>
   <div class="strip vbot" style="margin-top:7mm"><b>오늘 한 가지만 기억하신다면</b> —
@@ -280,22 +289,73 @@
   </div>
 </section>
 
-<!-- ══════════════════ 앱 실제 화면 ══════════════════ -->
+<!-- ══════════════════ 앱 이용 흐름 ① ══════════════════ -->
 <section class="slide">
-  <div class="kick">02 · 실제 화면</div>
-  <h1>말씀드리기 전에, <em>실제로 이렇게 생겼습니다</em></h1>
+  <div class="kick">02 · 이용 흐름 ①</div>
+  <h1>들어와서 <em>길을 받기까지</em></h1>
   <div class="shots vtop">
-    <div class="shot"><img data-pic="앱1_QR확인" alt="QR 확인 화면">
-      <div class="cp"><b>① 문 QR을 찍으면</b><br>「정문 · 지금 계신 곳 1F」</div></div>
-    <div class="shot"><img data-pic="앱2_3D경로" alt="3D 경로 화면">
-      <div class="cp"><b>② 목적지를 고르면</b><br>3D 건물 위에 길이 그려집니다</div></div>
-    <div class="shot"><img data-pic="앱3_1단계" alt="1단계 안내 화면">
-      <div class="cp"><b>③ 한 단계씩</b><br>1/4 「정문으로 들어오세요」</div></div>
-    <div class="shot"><img data-pic="앱4_복도단계" alt="복도 단계 화면">
-      <div class="cp"><b>④ 그 자리의 실제 사진</b><br>3/4 「복도를 따라 직진하세요」</div></div>
+    <div class="shot"><img data-pic="흐름01_첫화면" alt="첫 화면">
+      <div class="cp"><b>① 앱을 연다</b><br>앱스토어 없이 주소로</div></div>
+    <div class="shot"><img data-pic="흐름02_QR스캔" alt="QR 스캔 화면">
+      <div class="cp"><b>② 문 QR을 찍는다</b><br>안 되면 <b>직접 고르기</b>(아래 네 칸)</div></div>
+    <div class="shot"><img data-pic="흐름03_여기가맞나요" alt="출발점 확인">
+      <div class="cp"><b>③ 출발점을 확인</b><br>사진으로 「여기가 맞나요?」</div></div>
+    <div class="shot"><img data-pic="흐름04_무엇을찾으세요" alt="무엇을 찾으세요">
+      <div class="cp"><b>④ 무엇을 찾나</b><br>강의실 · 화장실 · 비상계단</div></div>
+    <div class="shot"><img data-pic="흐름05_검색" alt="강의실 검색">
+      <div class="cp"><b>⑤ 목적지를 고른다</b><br>호실 번호 · 교수님 성함으로</div></div>
   </div>
-  <div class="strip vbot" style="margin-top:6mm"><b>네 화면 모두 지금 돌아가는 앱에서 그대로 찍은 것입니다.</b>
-    주소를 열면 이 자리에서도 바로 보실 수 있습니다.</div>
+  <div class="strip vbot" style="margin-top:5mm"><b>②번이 이 앱의 출발점입니다.</b>
+    내 위치를 알아내지 않고 <b>물어봅니다</b> — QR이 안 읽히면 네 문 가운데서 직접 고르면 됩니다.</div>
+  <div class="foot"><span>02 · 어떻게 만들었나</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 앱 이용 흐름 ② ══════════════════ -->
+<section class="slide">
+  <div class="kick">02 · 이용 흐름 ②</div>
+  <h1>안내를 따라 <em>걸어가기</em></h1>
+  <div class="shots vtop">
+    <div class="shot"><img data-pic="흐름06_3D경로" alt="3D 경로">
+      <div class="cp"><b>⑥ 길을 통째로 본다</b><br>3D 건물 위에 경로</div></div>
+    <div class="shot"><img data-pic="흐름07_1인칭" alt="1인칭 걷기">
+      <div class="cp"><b>⑦ 미리 걸어 본다</b><br>1인칭 · 남은 거리 32m</div></div>
+    <div class="shot"><img data-pic="흐름08_1단계" alt="1단계">
+      <div class="cp"><b>⑧ 1/4 단계</b><br>「정문으로 들어오세요」</div></div>
+    <div class="shot"><img data-pic="흐름09_복도" alt="3단계 복도">
+      <div class="cp"><b>⑨ 3/4 단계</b><br>「복도를 따라 직진하세요」</div></div>
+    <div class="shot"><img data-pic="흐름10_도착" alt="도착">
+      <div class="cp"><b>⑩ 4/4 도착</b><br>「왼쪽에서 네 번째 방」</div></div>
+  </div>
+  <div class="strip gr vbot" style="margin-top:5mm"><b>단계마다 그 자리의 실제 사진을 함께 보여 줍니다.</b>
+    눈앞 풍경이 사진과 다르면 잘못 든 것입니다 — 측위를 하지 않는 대신 <b>이용자가 스스로 대조</b>하게 했습니다.
+    <b>⑥~⑩ 다섯 단계는 통신이 없어도</b> 됩니다 — 사진 판정(⑫)만 인터넷이 필요합니다.</div>
+  <div class="foot"><span>02 · 어떻게 만들었나</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 앱 이용 흐름 ③ ══════════════════ -->
+<section class="slide">
+  <div class="kick">02 · 이용 흐름 ③</div>
+  <h1>사진이 실제와 다를 때 — <em>여기가 저희 몫입니다</em></h1>
+  <div class="row vtop" style="gap:8mm">
+    <div class="shot" style="flex:0 0 31%"><img data-pic="흐름11_건의함" alt="건의함 안내">
+      <div class="cp"><b>⑪ 건의함을 연다</b></div></div>
+    <div class="shot" style="flex:0 0 31%"><img data-pic="흐름12_사진올림" alt="사진을 올린 화면">
+      <div class="cp"><b>⑫ 지금 보이는 모습을 찍어 올린다</b></div></div>
+    <div style="flex:1; min-width:0">
+      <div class="read"><div class="h">올리는 순간 폰 안에서 벌어지는 일</div>
+        <ul>
+          <li><b>흔들림·밝기 검사</b> — 못 쓸 사진은 올리기 전에 되돌립니다</li>
+          <li><b>숫자 1,280개로</b> 바꿔 기준 자료와 대조합니다</li>
+          <li><b>호실 번호판이 보이면 글자로 읽습니다</b> — 읽히면 모양보다 글자를 믿습니다</li>
+          <li><b>1·2등 격차</b>를 재어 자리 / 층 / 모름으로 답을 정합니다</li>
+        </ul></div>
+      <div class="strip am" style="margin-top:3mm; font-size:11pt; line-height:1.55; padding:3.5mm 5mm">
+        <b>이용자에게는 판정 결과를 보여 주지 않습니다.</b>
+        AI가 짐작한 것은 <b>관리자에게만</b> 넘어가고, 관리자가 확인해야 반영됩니다.</div>
+      <div class="easy" style="margin-top:3mm"><span class="t">반영되면</span>
+        그 자리의 대표 사진이 바뀌고, <b>이 앱을 쓰는 모든 사람의 화면이 함께 바뀝니다.</b></div>
+    </div>
+  </div>
   <div class="foot"><span>02 · 어떻게 만들었나</span><span class="pg"></span></div>
 </section>
 
@@ -585,6 +645,8 @@
 <!-- ══════════════════ 측정을 눈앞에서 ══════════════════ -->
 <section class="slide">
   <div class="kick">03 · 증거</div>
+  <a class="runbtn" href="http://localhost:8080/eval_all.html?auto=fast" target="_blank">▶ 빠른 측정 (7초)
+    <span class="sub">누르면 측정이 저절로 시작됩니다</span></a>
   <h1>이 숫자는 <em>지금 이 자리에서</em> 다시 만듭니다</h1>
   <div class="lead">발표 자료에 옮겨 적은 숫자가 아닙니다. <b>측정 도구를 띄워 두었고, 7초면 끝납니다.</b></div>
   <div class="row vtop" style="gap:8mm">
@@ -604,6 +666,9 @@
       <div class="strip gr" style="font-size:11pt; line-height:1.55; padding:3.5mm 5mm">
         <b>5층 사진 238장 가운데 52장(22%)을 4층으로</b> 봤습니다.
         <b>어디서 틀리는지가 표 하나에 그대로 보입니다.</b></div>
+      <div class="easy" style="margin-top:3mm; border-color:#2E7F8C"><span class="t" style="color:var(--cy)">누르기 전에</span>
+        바탕화면 <b>「빠른측정」</b>을 한 번 더블클릭해 두면 됩니다 — 서버가 켜지고 측정 화면이 바로 열립니다.
+        위 단추는 그 서버가 켜져 있을 때 동작합니다.</div>
       <div class="easy" style="margin-top:3mm"><span class="t">같은 화면의 아래쪽</span>
         가장 약한 자리 — WIN3(3층 창밖) 20장 <b>0%</b> ·
         EVIN4(4층 엘리베이터 안) 8장 <b>0%</b>. 다음 쪽에서 그 사진을 직접 보시겠습니다.</div>

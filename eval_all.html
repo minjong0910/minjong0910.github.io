@@ -433,8 +433,12 @@ function arm(){
   if(!(READY.vec && READY.batch)) return;
   document.getElementById('go').disabled = false;
   document.getElementById('goFast').disabled = false;
-  /* ?auto=1 : 버튼 없이 바로 측정 (헤드리스 브라우저로 돌릴 때) */
-  if(/[?&]auto=1/.test(location.search) && !arm.done){ arm.done = true; document.getElementById('go').click(); }
+  /* ?auto=1   : 버튼 없이 바로 전체 측정 (헤드리스 브라우저로 돌릴 때)
+     ?auto=fast : 바로 빠른 측정 — 발표 자료 20쪽 버튼이 이 주소로 연다 (7초) */
+  if(!arm.done){
+    if(/[?&]auto=fast/.test(location.search)){ arm.done = true; document.getElementById('goFast').click(); }
+    else if(/[?&]auto=1/.test(location.search)){ arm.done = true; document.getElementById('go').click(); }
+  }
 }
 fetch('batches.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
   if(j){

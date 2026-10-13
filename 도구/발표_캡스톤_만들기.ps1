@@ -53,7 +53,27 @@ for($i = 0; $i -lt 5; $i++){
 # 도면 안의 marker id 가 한 문서 안에서 겹치지 않게 — 도면.html 은 A~E 로 이미 다르다
 [IO.File]::WriteAllText($OUT, $tpl, (New-Object Text.UTF8Encoding($false)))
 
-Write-Host "`n[4] 확인"
+Write-Host "`n[4] 사진 넣기"
+# 발표 자료는 PDF 로 뽑을 때 영문 임시 경로로 옮겨 가므로, 사진을 파일로 두면 끊긴다.
+#   (한글 경로에서 Edge 가 실패해 영문 경로로 복사하는 구조 — 도구\특허PDF_만들기.ps1)
+#   그래서 그림을 글자(base64)로 바꿔 HTML 안에 박아 넣는다. 파일 하나로 끝난다.
+$PIC = Join-Path $PSScriptRoot '발표그림'
+$used = 0
+[regex]::Matches($tpl, '<img([^>]*?)data-pic="([^"]+)"([^>]*?)>') | ForEach-Object {
+  $name = $_.Groups[2].Value
+  $file = Join-Path $PIC ($name + '.jpg')
+  if(-not (Test-Path $file)){ throw "발표그림에 없습니다 : $name.jpg" }
+  $b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($file))
+  $rep = '<img' + $_.Groups[1].Value + 'src="data:image/jpeg;base64,' + $b64 + '"' + $_.Groups[3].Value + '>'
+  $tpl = $tpl.Replace($_.Value, $rep)
+  $used++
+  Write-Host ("  {0}  ({1:N0} KB)" -f $name, ((Get-Item $file).Length / 1KB))
+}
+if($used -eq 0){ Write-Host "  (사진 없음)" }
+[IO.File]::WriteAllText($OUT, $tpl, (New-Object Text.UTF8Encoding($false)))
+
+Write-Host "`n[5] 확인"
+
 $bad = 0
 if($tpl -match '<!--SVG:'){ Write-Host "  안 채워진 자리가 남았습니다 ★" -ForegroundColor Red; $bad++ }
 $n = ([regex]::Matches($tpl, '<section class="slide')).Count

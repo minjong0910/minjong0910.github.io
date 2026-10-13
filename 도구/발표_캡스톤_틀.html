@@ -141,6 +141,17 @@
   /* 그림(곡선)은 어두운 바탕 위에 그린다 — 위 규칙을 덮어쓴다 */
   .plot text{ fill:var(--fg2); }
 
+  /* 실제 화면·사진 — 교수님이 "숫자 말고 눈으로 볼 수 있는 것"을 요구하셨다 */
+  .shots{ display:flex; gap:6mm; align-items:flex-start; }
+  .shot{ flex:1; min-width:0; text-align:center; }
+  /* 폰 화면 캡처는 세로로 길다 — 너비가 아니라 높이로 맞춰야 쪽을 안 넘긴다 */
+  .shot img{ max-width:100%; max-height:92mm; width:auto; height:auto; border-radius:2mm;
+             border:1px solid var(--line); display:block; margin:0 auto; }
+  .shots.wide .shot img{ max-height:104mm; }
+  .shot .cp{ font-size:10.5pt; color:var(--fg2); margin-top:2.5mm; line-height:1.45; }
+  .shot .cp b{ color:var(--fg); }
+  .shot .num{ font-size:15pt; margin-top:1.5mm; }
+
   .end{ display:flex; flex-direction:column; align-items:center; justify-content:center;
         flex:1; text-align:center; }
 </style>
@@ -168,11 +179,11 @@
       <th class="c" style="width:9%">쪽</th><th>한 줄</th></tr>
   <tr><td class="c"><b>첫째</b></td><td><b>무엇을 만들기로 했나</b></td><td class="c">4~6</td>
       <td>스스로 건 <b>조건 네 가지</b>가 설계를 정했고, 그중 하나가 숙제로 남았습니다</td></tr>
-  <tr><td class="c"><b>둘째</b></td><td><b>어떻게 만들었나</b></td><td class="c">8~17</td>
+  <tr><td class="c"><b>둘째</b></td><td><b>어떻게 만들었나</b></td><td class="c">8~18</td>
       <td>재료 · <b>휴대폰에 무엇이 들어가나</b> · 구조도 · 블록도 둘 · 흐름도 둘</td></tr>
-  <tr><td class="c"><b>셋째</b></td><td><b>측정 결과</b></td><td class="c">19~20</td>
+  <tr><td class="c"><b>셋째</b></td><td><b>측정 결과</b></td><td class="c">20~23</td>
       <td>세 가지를 재서 <b>둘은 그만두고 하나는 그대로</b> 두었습니다 <span class="sm">(지난 발표 내용)</span></td></tr>
-  <tr class="hi"><td class="c"><b>넷째</b></td><td><b>한 일과 결과</b></td><td class="c">22~24</td>
+  <tr class="hi"><td class="c"><b>넷째</b></td><td><b>한 일과 결과</b></td><td class="c">25~27</td>
       <td><b>무엇을 했고 무엇이 나왔는지</b> — 그리고 못 한 것</td></tr>
   </table>
   <div class="strip vbot" style="margin-top:7mm"><b>오늘 한 가지만 기억하신다면</b> —
@@ -267,6 +278,25 @@
     <div class="s">무엇으로 만들었고, 이용자 휴대폰에 무엇이 들어가며,<br>
       그것이 어떤 구조로 돌아가는지 — 그림 다섯 장까지.</div>
   </div>
+</section>
+
+<!-- ══════════════════ 앱 실제 화면 ══════════════════ -->
+<section class="slide">
+  <div class="kick">02 · 실제 화면</div>
+  <h1>말씀드리기 전에, <em>실제로 이렇게 생겼습니다</em></h1>
+  <div class="shots vtop">
+    <div class="shot"><img data-pic="앱1_QR확인" alt="QR 확인 화면">
+      <div class="cp"><b>① 문 QR을 찍으면</b><br>「정문 · 지금 계신 곳 1F」</div></div>
+    <div class="shot"><img data-pic="앱2_3D경로" alt="3D 경로 화면">
+      <div class="cp"><b>② 목적지를 고르면</b><br>3D 건물 위에 길이 그려집니다</div></div>
+    <div class="shot"><img data-pic="앱3_1단계" alt="1단계 안내 화면">
+      <div class="cp"><b>③ 한 단계씩</b><br>1/4 「정문으로 들어오세요」</div></div>
+    <div class="shot"><img data-pic="앱4_복도단계" alt="복도 단계 화면">
+      <div class="cp"><b>④ 그 자리의 실제 사진</b><br>3/4 「복도를 따라 직진하세요」</div></div>
+  </div>
+  <div class="strip vbot" style="margin-top:6mm"><b>네 화면 모두 지금 돌아가는 앱에서 그대로 찍은 것입니다.</b>
+    주소를 열면 이 자리에서도 바로 보실 수 있습니다.</div>
+  <div class="foot"><span>02 · 어떻게 만들었나</span><span class="pg"></span></div>
 </section>
 
 <section class="slide">
@@ -550,6 +580,57 @@
     <div class="s">이 부분은 <b style="color:#EAF1F6">지난 발표에서 과정을 말씀드렸습니다.</b><br>
       오늘은 무엇을 쟀고 무엇이 나왔는지, <b style="color:#EAF1F6">결과만</b> 말씀드립니다.</div>
   </div>
+</section>
+
+<!-- ══════════════════ 측정을 눈앞에서 ══════════════════ -->
+<section class="slide">
+  <div class="kick">03 · 증거</div>
+  <h1>이 숫자는 <em>지금 이 자리에서</em> 다시 만듭니다</h1>
+  <div class="lead">발표 자료에 옮겨 적은 숫자가 아닙니다. <b>측정 도구를 띄워 두었고, 7초면 끝납니다.</b></div>
+  <div class="row vtop" style="gap:8mm">
+    <div style="flex:1.45; min-width:0">
+      <img data-pic="측정2_혼동표만" alt="측정 도구가 낸 층 혼동표"
+           style="width:100%; height:auto; border-radius:2mm; border:1px solid var(--line); display:block">
+      <div style="font-size:10.5pt; color:var(--dim); margin-top:2.5mm; text-align:center">
+        측정 도구(<code>eval_all.html</code>)가 낸 <b style="color:var(--fg2)">실제 화면</b> — 손으로 옮겨 적지 않았습니다</div>
+    </div>
+    <div style="flex:1; min-width:0">
+      <div class="read" style="margin-bottom:3mm"><div class="h">무엇을 돌리나</div>
+        <ul>
+          <li>사진 <b>2,075장</b> · 기준 벡터 <b>4,150개</b> · 촬영 묶음 <b>38개</b></li>
+          <li><b>전체 152초</b> — 발표 숫자를 전부 다시 만듭니다</li>
+          <li><b>빠른 측정 7초</b> — 이 자리에서 돌려 보여 드립니다</li>
+        </ul></div>
+      <div class="strip gr" style="font-size:11pt; line-height:1.55; padding:3.5mm 5mm">
+        <b>5층 사진 238장 가운데 52장(22%)을 4층으로</b> 봤습니다.
+        <b>어디서 틀리는지가 표 하나에 그대로 보입니다.</b></div>
+      <div class="easy" style="margin-top:3mm"><span class="t">같은 화면의 아래쪽</span>
+        가장 약한 자리 — WIN3(3층 창밖) 20장 <b>0%</b> ·
+        EVIN4(4층 엘리베이터 안) 8장 <b>0%</b>. 다음 쪽에서 그 사진을 직접 보시겠습니다.</div>
+    </div>
+  </div>
+  <div class="foot"><span>03 · 측정 결과</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 왜 틀리는지 눈으로 ══════════════════ -->
+<section class="slide">
+  <div class="kick">03 · 증거</div>
+  <h1>왜 틀리는지 <em>눈으로 보십시오</em></h1>
+  <div class="shots vtop">
+    <div class="shot"><img data-pic="증거1_엘리3층" alt="3층 엘리베이터 안">
+      <div class="cp"><b>엘리베이터 안 — 3층</b></div>
+      <div class="num" style="color:var(--rd)"><b>자리 0%</b></div></div>
+    <div class="shot"><img data-pic="증거2_엘리4층" alt="4층 엘리베이터 안">
+      <div class="cp"><b>엘리베이터 안 — 4층</b></div>
+      <div class="num" style="color:var(--rd)"><b>자리 0%</b></div></div>
+    <div class="shot"><img data-pic="증거3_지하홀" alt="지하 홀">
+      <div class="cp"><b>지하 홀 — 건물에 하나뿐</b></div>
+      <div class="num" style="color:var(--gr)"><b>자리 89.7%</b></div></div>
+  </div>
+  <div class="strip rd vbot" style="margin-top:6mm"><b>왼쪽 두 장은 사람 눈으로도 구분이 안 됩니다.</b>
+    다른 것은 문 위 표시기의 작은 숫자 <b>3 / 4</b> 하나뿐입니다 — 사진을 224×224로 줄이면 그 숫자가 뭉개집니다.
+    <b class="cy">그래서 글자 읽기를 모양 판정보다 앞에 두었고, 엘리베이터 안에서는 97% 적중합니다.</b></div>
+  <div class="foot"><span>03 · 측정 결과</span><span class="pg"></span></div>
 </section>
 
 <section class="slide">

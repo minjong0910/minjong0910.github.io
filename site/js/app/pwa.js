@@ -224,7 +224,9 @@ var PWA = (function(){
     deferred = e;
     sync();
   });
-  window.addEventListener('appinstalled', function(){ deferred = null; justInstalled = true; sync(); });
+  window.addEventListener('appinstalled', function(){ deferred = null; justInstalled = true; sync();
+    /* 브라우저는 '홈 화면에 추가된 앱'에 훨씬 너그럽다 — 설치 직후 다시 한 번 묻는다 */
+    try{ keepStore(); }catch(e){} });
 
   /* 설정의 「앱 다운로드」 버튼 글자 */
   function sync(){
@@ -407,7 +409,44 @@ var PWA = (function(){
     catch(e){ prompt('', url); }
   }
 
+  /* ── 저장해 둔 것을 지키기 (2026-10-14) ──
+     서비스 워커가 받아 둔 파일 230개 15.6MB 는 브라우저가 "임시로 맡아 둔 것"이다.
+     폰 저장 공간이 모자라면 말없이 지워질 수 있다(eviction). 지워져도 다음에
+     인터넷이 될 때 다시 받으니 앱이 깨지지는 않지만, 하필 지하에서 비어 있으면
+     그때가 바로 앱이 가장 필요한 때다. 그래서 "지우지 말아 달라"고 한 번 요청한다.
+
+       · 들어줄지는 브라우저가 정한다. 크롬은 홈 화면에 추가했거나 자주 쓰면 조용히 허락하고,
+         사파리는 홈 화면 앱에 대개 허락한다. 파이어폭스는 사용자에게 물어볼 수 있다.
+       · 거절돼도 앱은 그대로 돈다 — 보장이 '대개'로 내려갈 뿐이다.
+       · 이미 허락돼 있으면 다시 묻지 않는다. 요청은 설치 직후가 가장 잘 먹힌다.
+       · 설정 화면 「인터넷 없이 열기」 줄에 결과가 같이 보인다. */
+  var store = {state:'unknown', used:0, quota:0};
+  function storeText(){
+    var k = ko();
+    if(store.state === 'kept') return k ? '지우지 않음' : 'persistent';
+    if(store.state === 'temp') return k ? '공간이 모자라면 지워질 수 있음' : 'best-effort';
+    if(store.state === 'nosupport') return k ? '이 브라우저는 알 수 없음' : 'unknown';
+    return '';
+  }
+  function measureStore(){
+    if(!navigator.storage || !navigator.storage.estimate) return Promise.resolve();
+    return navigator.storage.estimate().then(function(e){
+      store.used = e.usage || 0; store.quota = e.quota || 0;
+    })['catch'](function(){});
+  }
+  function keepStore(){
+    if(!navigator.storage || !navigator.storage.persist){ store.state = 'nosupport'; return measureStore(); }
+    return navigator.storage.persisted().then(function(has){
+      return has ? true : navigator.storage.persist();
+    }).then(function(okNow){
+      store.state = okNow ? 'kept' : 'temp';
+    })['catch'](function(){ store.state = 'temp'; }).then(measureStore).then(function(){
+      try{ syncOff(); }catch(e){}
+    });
+  }
+
   /* ── ③ 인터넷 없이 열기 (sw.js) ──
+
      미리보기 서버(localhost)에서는 끈다 — 고친 파일이 바로 보여야 한다 (?sw=1 을 붙이면 켠다).
      검사 페이지의 iframe 안에서도 건드리지 않는다 (검사가 직접 등록·해제한다). */
   function local(){ return /^(localhost|127\.0\.0\.1)$/.test(location.hostname); }
@@ -419,7 +458,11 @@ var PWA = (function(){
   }
   function offText(){
     var K = ko();
-    if(off.state === 'ready') return (K ? '준비됨 ✓ (' : 'Ready ✓ (') + sizeText() + ')';
+    if(off.state === 'ready'){
+      /* 저장이 지켜지는지도 같이 보여 준다 — 사용자가 눈으로 확인할 수 있어야 한다 */
+      var st = storeText();
+      return (K ? '준비됨 ✓ (' : 'Ready ✓ (') + sizeText() + ')' + (st ? ' · ' + st : '');
+    }
     if(off.state === 'saving') return (K ? '저장하는 중 ' : 'Saving ') + (off.total ? Math.floor(off.done / off.total * 100) : 0) + '%';
     if(off.state === 'fail') return K ? '저장 못 함 — 다음에 열 때 다시 해요' : 'Not saved — will retry next time';
     if(off.state === 'nosupport') return K ? '이 브라우저는 안 돼요' : 'Not supported in this browser';
@@ -539,6 +582,7 @@ var PWA = (function(){
           askStatus();
           reg.addEventListener('updatefound', function(){ off.state = 'saving'; syncOff(); });
           checkUpdate();                            // 앱을 열 때마다 새 판이 있는지 물어본다
+          keepStore();                              // 받아 둔 것을 지워도 되는지 — 지우지 말아 달라고 한 번
         })['catch'](function(){ off.state = 'fail'; syncOff(); });
       });
     } else {
@@ -555,6 +599,9 @@ var PWA = (function(){
     install:install, doPrompt:doPrompt, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, sync:sync,
     netInfo:netInfo, netSync:netSync, netOn:netOn,
     get offline(){ return {state:off.state, done:off.done, total:off.total, bytes:off.bytes, version:off.version, text:offText()}; },
+    /* 저장해 둔 것이 지켜지는가 — 설정 화면과 검사(tests/pwa.html)가 본다 */
+    get storage(){ return {state:store.state, used:store.used, quota:store.quota, text:storeText()}; },
+    _keepStore:keepStore,
     /* 검사(tests/pwa.html)가 설치 갈래를 확인할 때 쓴다 */
     _env:function(){ return {ios:isIOS(), android:isAndroid(), inapp:inAppName(), standalone:standalone(), prompt:!!deferred}; },
     _envOf:envOf, _pick:pick, _sheet:sheet, _fakePrompt:function(ev){ deferred = ev; sync(); }

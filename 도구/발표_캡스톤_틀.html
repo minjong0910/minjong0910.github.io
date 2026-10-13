@@ -143,8 +143,9 @@
 
   /* 쪽 오른쪽 위에 다는 「돌려 보기」 단추.
      PDF 로 뽑아도 <a> 는 누를 수 있는 링크로 남는다(크롬 인쇄가 링크를 심는다).
-     누르면 eval_all.html?auto=fast 가 열리면서 7초 측정이 저절로 시작된다.
-     미리보기 서버가 꺼져 있으면 열리지 않으므로, 바탕화면 「빠른측정」 을 먼저 누른다. */
+     공개 주소(minjong0910.github.io/eval_all.html?auto=fast)를 열면 7초 측정이 저절로 시작된다 —
+     서버를 켤 필요가 없고, 교수님이 나중에 본인 기기로 열어 보실 수도 있다.
+     발표장 인터넷이 나쁠 때를 위해 바탕화면 「빠른측정」(도구\빠른측정.bat)이 같은 것을 노트북 안에서 연다. */
   .runbtn{ position:absolute; right:20mm; top:12mm; text-decoration:none; display:block;
            background:var(--cy); color:#06222A; border-radius:2mm; padding:3mm 6mm;
            font-size:12.5pt; font-weight:700; text-align:center; letter-spacing:-0.3px; }
@@ -683,7 +684,7 @@
 <!-- ══════════════════ 측정을 눈앞에서 ══════════════════ -->
 <section class="slide">
   <div class="kick">03 · 증거</div>
-  <a class="runbtn" href="http://localhost:8080/eval_all.html?auto=fast" target="_blank">▶ 빠른 측정 (7초)
+  <a class="runbtn" href="https://minjong0910.github.io/eval_all.html?auto=fast" target="_blank">▶ 빠른 측정 (7초)
     <span class="sub">누르면 측정이 저절로 시작됩니다</span></a>
   <h1>이 숫자는 <em>지금 이 자리에서</em> 다시 만듭니다</h1>
   <div class="lead">발표 자료에 옮겨 적은 숫자가 아닙니다. <b>측정 도구를 띄워 두었고, 7초면 끝납니다.</b></div>
@@ -704,9 +705,10 @@
       <div class="strip gr" style="font-size:11pt; line-height:1.55; padding:3.5mm 5mm">
         <b>5층 사진 238장 가운데 52장(22%)을 4층으로</b> 봤습니다.
         <b>어디서 틀리는지가 표 하나에 그대로 보입니다.</b></div>
-      <div class="easy" style="margin-top:3mm; border-color:#2E7F8C"><span class="t" style="color:var(--cy)">누르기 전에</span>
-        바탕화면 <b>「빠른측정」</b>을 한 번 더블클릭해 두면 됩니다 — 서버가 켜지고 측정 화면이 바로 열립니다.
-        위 단추는 그 서버가 켜져 있을 때 동작합니다.</div>
+      <div class="easy" style="margin-top:3mm; border-color:#2E7F8C"><span class="t" style="color:var(--cy)">누구나 다시 돌려 볼 수 있습니다</span>
+        위 단추는 <b>공개 주소</b>를 엽니다 — <code>minjong0910.github.io/eval_all.html</code>.
+        저희 노트북이 없어도, <b>교수님 기기에서도 같은 측정이 그대로 돕니다.</b><br>
+        인터넷이 나쁘면 바탕화면 <b>「빠른측정」</b>으로 노트북 안에서 돌립니다.</div>
       <div class="easy" style="margin-top:3mm"><span class="t">같은 화면의 아래쪽</span>
         가장 약한 자리 — WIN3(3층 창밖) 20장 <b>0%</b> ·
         EVIN4(4층 엘리베이터 안) 8장 <b>0%</b>. 다음 쪽에서 그 사진을 직접 보시겠습니다.</div>

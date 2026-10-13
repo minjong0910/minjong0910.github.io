@@ -13,7 +13,7 @@ rem  ※ 전체 측정(152초)이 필요하면 열린 화면에서 [전체 측�
 rem ══════════════════════════════════════════════════════════════
 
 set ROOT=%~dp0..
-set URL=http://localhost:8080/eval_all.html?auto=fast
+set URL=http://localhost:8080/site/eval_all.html?auto=fast
 
 rem 서버가 이미 떠 있나
 powershell -NoProfile -Command "try{ (New-Object Net.Sockets.TcpClient('localhost',8080)).Close(); exit 0 }catch{ exit 1 }" >nul 2>&1

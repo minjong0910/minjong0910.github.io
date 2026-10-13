@@ -43,7 +43,7 @@ Write-Host "  ┌─────────────────────
 Write-Host "  │  미리보기 서버가 켜졌습니다                      │" -ForegroundColor Cyan
 Write-Host ("  │  {0,-48}│" -f $url)                                -ForegroundColor Cyan
 Write-Host ("  │  {0,-48}│" -f ($url + 'site/index.html  ← 앱'))  -ForegroundColor Cyan
-Write-Host ("  │  {0,-48}│" -f ($url + 'eval_all.html  ← 정확도 측정'))  -ForegroundColor Cyan
+Write-Host ("  │  {0,-48}│" -f ($url + 'site/eval_all.html  ← 정확도 측정'))  -ForegroundColor Cyan
 Write-Host "  │  끄려면 Ctrl+C 또는 이 창을 닫으세요             │" -ForegroundColor Cyan
 Write-Host "  └──────────────────────────────────────────────────┘" -ForegroundColor Cyan
 Write-Host ""

@@ -25,9 +25,15 @@
   :root{
     --bg:#F2F4F6; --card:#FFFFFF; --line:#D6DCE2; --line2:#E7EBEF;
     --ink:#15181C; --ink2:#4A5560; --dim:#6B7684;
-    --ac:#0F6B4A;            /* 딥그린 — 쪽 머리띠·표지·간지 */
-    --ac2:#E7F1EC;           /* 아주 옅은 초록 — 표 머리줄·강조 칸 */
-    --am:#B4530F; --rd:#A3301E; --gr:#0F6B4A; --bl:#1A6FB5;
+    /* 큰 면(머리띠·표지·간지·마무리)과 작은 글자를 나눠 둔다.
+       한 색으로 쓰면 큰 면이 눈에 부담이 된다 — #0F6B4A 는 흰 글자 대비 6.5:1 로
+       넓게 깔면 피로했다. 큰 면은 깊은 숲색(흰 글자 12.4:1)으로 내리고,
+       작은 글자는 조금 밝은 초록을 따로 쓴다. */
+    --ac:#0C3B2B;            /* 깊은 숲색 — 쪽 머리띠·표지·간지·마무리 */
+    --acT:#15573E;           /* 작은 글자용 초록 — 표 머리글·코드·강조 (밝은 바탕 대비 8.2:1) */
+    --mint:#86D6B2;          /* 어두운 면 위의 강조 글자 */
+    --ac2:#EAF0ED;           /* 아주 옅은 초록 — 표 머리줄·강조 칸 */
+    --am:#B4530F; --rd:#A3301E; --gr:#15573E; --bl:#1A6FB5;
     --s1:#1A6FB5; --s2:#B4530F;   /* 그림 두 계열 */
   }
   *{ box-sizing:border-box; }
@@ -49,7 +55,7 @@
          font-size:9.5pt; letter-spacing:3px; color:rgba(255,255,255,.72); font-weight:700; }
   h1{ position:absolute; left:20mm; right:20mm; top:12mm; z-index:1;
       font-size:22pt; margin:0; letter-spacing:-0.6px; line-height:1.25; font-weight:700; color:#fff; }
-  h1 em{ font-style:normal; color:#8FE3BE; }
+  h1 em{ font-style:normal; color:var(--mint); }
   h1 s{ text-decoration:line-through; text-decoration-thickness:2px; color:rgba(255,255,255,.55); }
   .lead{ font-size:13.5pt; color:var(--ink2); margin:0 0 6mm; line-height:1.6; }
   .lead b{ color:var(--ink); }
@@ -64,16 +70,16 @@
   .cover .in{ padding:0 24mm; width:100%; }
   .cover .k{ font-size:11pt; letter-spacing:6px; color:rgba(255,255,255,.7); margin-bottom:9mm; }
   .cover h1{ position:static; font-size:46pt; line-height:1.2; margin-bottom:7mm; color:#fff; }
-  .cover h1 em{ color:#8FE3BE; }
+  .cover h1 em{ color:var(--mint); }
   .cover .s{ font-size:14.5pt; color:rgba(255,255,255,.82); margin-bottom:13mm; line-height:1.6; }
   .cover .m{ font-size:11.5pt; color:rgba(255,255,255,.6); line-height:2; }
-  .cover .bar{ width:40mm; height:1.8mm; background:#8FE3BE; margin-bottom:8mm; }
+  .cover .bar{ width:40mm; height:1.8mm; background:var(--mint); margin-bottom:8mm; }
 
   .part{ display:flex; flex-direction:row; align-items:center; }
   .part .han{ position:absolute; right:16mm; top:50%; transform:translateY(-50%);
               font-size:200pt; font-weight:700; color:#fff; opacity:.14; line-height:1; }
   .part .in{ padding:0 4mm; position:relative; z-index:1; max-width:195mm; }
-  .part .no{ font-size:12pt; letter-spacing:4px; color:#8FE3BE; margin-bottom:4mm; font-weight:700; }
+  .part .no{ font-size:12pt; letter-spacing:4px; color:var(--mint); margin-bottom:4mm; font-weight:700; }
   .part h1{ position:static; font-size:36pt; margin-bottom:5mm; color:#fff; }
   .part .s{ font-size:14.5pt; color:rgba(255,255,255,.85); line-height:1.75; }
   .part .foot, .cover .foot, .fin .foot{ color:rgba(255,255,255,.5); border-top-color:rgba(255,255,255,.25); }
@@ -83,11 +89,11 @@
   .box{ background:var(--card); border:1px solid var(--line); border-radius:2mm; padding:7mm 8mm; }
   .box .h{ font-size:14.5pt; font-weight:700; color:var(--ink); margin-bottom:3.5mm; }
   .box p{ margin:0; font-size:13pt; line-height:1.85; color:var(--ink2); }
-  .box.cy{ border-color:#9BC9B6; background:var(--ac2); } .box.cy .h{ color:var(--ac); }
+  .box.cy{ border-color:#9BC9B6; background:var(--ac2); } .box.cy .h{ color:var(--acT); }
   .box.am{ border-color:#E0B48C; } .box.am .h{ color:var(--am); }
   .box.gr{ border-color:#9BC9B6; } .box.gr .h{ color:var(--gr); }
   .box.rd{ border-color:#E2ADA3; } .box.rd .h{ color:var(--rd); }
-  b.hl{ color:var(--am); }  b.cy{ color:var(--ac); }  b.rd{ color:var(--rd); }  b.gr{ color:var(--gr); }
+  b.hl{ color:var(--am); }  b.cy{ color:var(--acT); }  b.rd{ color:var(--rd); }  b.gr{ color:var(--gr); }
 
   .num{ font-size:50pt; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; color:var(--ink); }
   .num small{ font-size:17pt; font-weight:400; color:var(--dim); }
@@ -104,12 +110,12 @@
 
   table{ width:100%; border-collapse:collapse; font-size:12.5pt; background:var(--card); }
   th,td{ border:1px solid var(--line); padding:3.4mm 5mm; text-align:left; color:var(--ink2); }
-  th{ background:var(--ac2); font-weight:700; font-size:11.5pt; color:var(--ac); letter-spacing:.4px; }
+  th{ background:var(--ac2); font-weight:700; font-size:11.5pt; color:var(--acT); letter-spacing:.4px; }
   td b{ color:var(--ink); }
   td.c,th.c{ text-align:center; white-space:nowrap; }
   td.n,th.n{ text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
   tr.hi td{ background:var(--ac2); }
-  tr.hi td b{ color:var(--ac); }
+  tr.hi td b{ color:var(--acT); }
   tr.dim td{ color:var(--dim); }
   td .sm{ font-size:10.5pt; color:var(--dim); }
   table.tight th, table.tight td{ padding:2.4mm 4.5mm; }
@@ -122,15 +128,15 @@
   .fig .say{ flex:1; min-width:0; }
   .fig .say .strip{ font-size:11pt; line-height:1.52; padding:3mm 5mm; }
   .fig .say .one{ font-size:15pt; font-weight:700; color:var(--ink); line-height:1.34; margin-bottom:3mm; }
-  .fig .say .one em{ font-style:normal; color:var(--ac); }
+  .fig .say .one em{ font-style:normal; color:var(--acT); }
   .read{ background:var(--card); border:1px solid var(--line); border-radius:2mm; padding:3.2mm 5mm; margin-bottom:3mm; }
-  .read .h{ font-size:10pt; letter-spacing:1.5px; color:var(--ac); font-weight:700; margin-bottom:2mm; }
+  .read .h{ font-size:10pt; letter-spacing:1.5px; color:var(--acT); font-weight:700; margin-bottom:2mm; }
   .read ol, .read ul{ margin:0; padding-left:6mm; font-size:10.8pt; line-height:1.54; color:var(--ink2); }
   .read ul{ list-style:none; padding-left:0; }
   .read ul li{ margin-bottom:1.4mm; padding-left:4.5mm; text-indent:-4.5mm; }
-  .read ul li::before{ content:"· "; color:var(--ac); font-weight:700; }
+  .read ul li::before{ content:"· "; color:var(--acT); font-weight:700; }
   .read ol li b, .read ul li b{ color:var(--ink); }
-  code{ font-family:Consolas,"D2Coding",monospace; font-size:0.92em; color:var(--ac);
+  code{ font-family:Consolas,"D2Coding",monospace; font-size:0.92em; color:var(--acT);
         background:var(--ac2); border-radius:1mm; padding:0 1mm; }
   .easy{ margin-top:3mm; border:1px dashed var(--line); border-radius:2mm; padding:3mm 5mm;
          font-size:10.3pt; line-height:1.48; color:var(--dim); }
@@ -169,7 +175,7 @@
   .end{ display:flex; flex-direction:column; align-items:center; justify-content:center;
         flex:1; text-align:center; }
   .fin .end h1{ position:static; color:#fff; }
-  .fin .end h1 em{ color:#8FE3BE; }
+  .fin .end h1 em{ color:var(--mint); }
   .fin .kick{ position:static; color:rgba(255,255,255,.7); }
 </style>
 </head>

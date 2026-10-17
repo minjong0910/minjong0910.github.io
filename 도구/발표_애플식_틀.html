@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>졸업작품 발표 — 공대 3호관 길안내 (신제품 발표형)</title>
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     졸업작품 발표 — 신제품 발표(키노트) 흐름
+       한 장에 메시지 하나 · 글자는 최소 · 큰 숫자 · 실제 화면
+       1 제목 · 2 지금까지 · 3 문제 · 4 세 가지 예고 · 5 하나로 공개 · 6 QR · 7 보고·걷고·따라가기
+       8 오프라인 · 9 사진이 새로워진다 · 10 확신할 때만 · 11 92.9% · 12 자기 자신과 비교
+       13 만든 이야기 · 14 모두를 위해 · 15 가격 · 출시 · 16 하나 더 · 17 마무리
+
+     회사 로고 · 브랜드 색 · 회사 이름은 넣지 않는다 — 흐름과 분위기만 따른다.
+     색 : 검은 바탕 + 흰 글자, 강조는 주황 하나(#FF8C61, 검은 바탕 대비 8.9:1) — 막대에만 주황→분홍 그라데이션. 밝은 쪽(#F5F5F7)은 쉼표처럼 세 번만.
+       흐린 글자 #A1A1A6 은 검은 바탕 대비 8.2:1, 밝은 쪽의 #515154 는 7.1:1.
+
+     ※ 고칠 때는 문서\발표_애플식.html 이 아니라 이 파일을 고친다 (도구\발표_스토리라인_만들기.ps1 -Type 애플).
+     ══════════════════════════════════════════════════════════════ */
+  @page { size: 338.7mm 190.5mm; margin: 0; }
+  :root{ --bk:#000; --fg:#F5F5F7; --fg2:#A1A1A6; --card:#1C1C1E; --card2:#2C2C2E;
+         --lt:#F5F5F7; --ink:#1D1D1F; --ink2:#515154; --g1:#FFB547; --g2:#FF6A88; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--bk); }
+  body{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; color:var(--fg);
+        -webkit-print-color-adjust:exact; print-color-adjust:exact; counter-reset:sl; }
+  .slide{ width:338.7mm; height:190.5mm; page-break-after:always; position:relative; overflow:hidden;
+          background:var(--bk); counter-increment:sl; display:flex; flex-direction:column; padding:22mm 24mm; }
+  .slide:last-child{ page-break-after:auto; }
+  .slide::after{ content:counter(sl); position:absolute; right:10mm; bottom:7mm; font-size:8pt; color:#6E6E73; }
+  .lt{ background:var(--lt); color:var(--ink); }
+  .c{ align-items:center; justify-content:center; text-align:center; }
+  /* 강조 글자 — 글자 모양 그라데이션(background-clip:text)은 Edge PDF 에서 색 막대로 찍혀 단색으로 둔다. 그라데이션은 막대에만 */
+  .gr{ color:#FF8C61; }
+  .eyebrow{ font-size:15pt; color:var(--fg2); letter-spacing:.5px; }
+  .lt .eyebrow{ color:var(--ink2); }
+  .sub{ font-size:17pt; line-height:1.6; color:var(--fg2); }
+  .lt .sub{ color:var(--ink2); }
+  h2{ margin:0; font-size:40pt; line-height:1.18; letter-spacing:-1.5px; font-weight:700; }
+  .phone{ border-radius:6.5mm; border:2mm solid #2A2A2C; display:block; box-shadow:0 0 0 .4mm #3A3A3C; }
+  .lt .phone{ border-color:#1D1D1F; box-shadow:none; }
+
+  /* 1 · 17 */
+  .mega{ font-size:62pt; font-weight:700; letter-spacing:-2.5px; line-height:1.16; margin:7mm 0 12mm; }
+  .by{ font-size:12.5pt; color:var(--fg2); line-height:1.8; }
+
+  /* 2 지금까지 */
+  .nums{ display:flex; gap:10mm; margin-top:14mm; width:100%; }
+  .nums div{ flex:1; text-align:center; }
+  .nums b{ display:block; font-size:96pt; letter-spacing:-4px; line-height:1; }
+  .nums span{ display:block; font-size:16pt; color:var(--fg2); margin-top:4mm; line-height:1.5; }
+
+  /* 3 문제 */
+  .bleed{ padding:0; flex-direction:row; }
+  .bleed .tx{ flex:0 0 46%; padding:0 6mm 0 24mm; display:flex; flex-direction:column; justify-content:center; }
+  .bleed .im{ flex:1; position:relative; }
+  .bleed .im img{ position:absolute; left:0; top:0; width:100%; height:100%; object-fit:cover; }
+  .bleed .im::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:40mm; z-index:1;
+                      background:linear-gradient(90deg, #000, rgba(0,0,0,0)); }
+  .bleed .im span{ position:absolute; right:6mm; bottom:6mm; z-index:1; font-size:10pt; color:#fff;
+                   background:rgba(0,0,0,.55); padding:1mm 3mm; border-radius:1mm; }
+
+  /* 4 예고 */
+  .tease{ list-style:none; margin:12mm 0 0; padding:0; }
+  .tease li{ display:flex; align-items:center; gap:7mm; font-size:36pt; font-weight:700; letter-spacing:-1.2px; margin-bottom:9mm; }
+  .tease li i{ font-style:normal; flex:none; width:15mm; height:15mm; border-radius:50%; border:1.2mm solid; display:flex;
+               align-items:center; justify-content:center; font-size:17pt; }
+  .tease li:nth-child(1) i{ border-color:var(--g1); color:var(--g1); }
+  .tease li:nth-child(2) i{ border-color:#FF9064; color:#FF9064; }
+  .tease li:nth-child(3) i{ border-color:var(--g2); color:var(--g2); }
+
+  /* 5 공개 */
+  .reveal{ flex-direction:row; align-items:center; padding:0 24mm; }
+  .reveal .tx{ flex:1; }
+  .reveal .ph{ flex:0 0 96mm; display:flex; justify-content:center; position:relative; }
+  .reveal .ph::before{ content:""; position:absolute; width:100mm; height:100mm; top:50%; left:50%; transform:translate(-50%,-50%);
+                       border-radius:50%; background:radial-gradient(circle, rgba(255,140,110,.42), rgba(0,0,0,0) 68%); }
+  .reveal .ph img{ position:relative; height:156mm; width:auto; }
+
+  /* 6 QR */
+  .qr6{ flex-direction:row; align-items:center; gap:14mm; padding:0 24mm; }
+  .qr6 .tx{ flex:1; }
+  .qr6 .big{ font-size:76pt; font-weight:700; letter-spacing:-3px; line-height:1.05; margin-bottom:7mm; }
+  .qr6 .sticker{ width:62mm; height:auto; display:block; border-radius:2mm; }
+  .qr6 .cap{ font-size:10.5pt; color:var(--ink2); text-align:center; margin-top:2.5mm; }
+
+  /* 7 · 13 세 화면 */
+  .trio{ display:flex; gap:14mm; justify-content:center; margin-top:9mm; }
+  .trio div{ text-align:center; }
+  .trio img{ height:112mm; width:auto; }
+  .trio b{ display:block; font-size:16pt; margin-top:4mm; }
+  .trio span{ font-size:11.5pt; color:var(--fg2); }
+
+  /* 8 오프라인 */
+  .huge{ font-size:150pt; font-weight:700; letter-spacing:-7px; line-height:1; margin:6mm 0 8mm; }
+
+  /* 9 새로워진다 */
+  .flow9{ display:flex; align-items:center; gap:16mm; margin-top:8mm; }
+  .flow9 img{ height:118mm; width:auto; }
+  .steps{ list-style:none; margin:0; padding:0; }
+  .steps li{ display:flex; gap:6mm; align-items:baseline; padding:4.2mm 0; border-bottom:1px solid #D2D2D7; }
+  .steps li:last-child{ border-bottom:none; }
+  .steps li b{ font-size:26pt; letter-spacing:-.8px; flex:0 0 46mm; }
+  .steps li span{ font-size:15pt; color:var(--ink2); }
+
+  /* 10 확신할 때만 */
+  .bub{ display:flex; flex-direction:column; gap:6mm; margin-top:12mm; width:220mm; }
+  .bub div{ display:flex; justify-content:space-between; align-items:center; background:var(--card); border-radius:5mm; padding:6mm 9mm; }
+  .bub div b{ font-size:22pt; letter-spacing:-.5px; }
+  .bub div span{ font-size:13pt; color:var(--fg2); }
+
+  /* 11 큰 숫자 */
+  .stat{ font-size:170pt; font-weight:700; letter-spacing:-8px; line-height:1; margin:4mm 0 6mm; }
+  .fine{ font-size:11.5pt; color:var(--fg2); margin-top:9mm; }
+
+  /* 12 비교 */
+  .cmp{ display:flex; align-items:center; gap:14mm; margin-top:12mm; width:100%; }
+  .cmp .bars{ flex:1; }
+  .cmp .bar{ margin-bottom:9mm; }
+  .cmp .bar .lb{ display:flex; justify-content:space-between; font-size:15pt; color:var(--fg2); margin-bottom:2.5mm; }
+  .cmp .bar .lb b{ color:var(--fg); font-size:20pt; }
+  .cmp .bar .tr{ height:11mm; background:var(--card); border-radius:5.5mm; overflow:hidden; }
+  .cmp .bar .fl{ height:100%; border-radius:5.5mm; background:#48484A; }
+  .cmp .bar.hi .fl{ background:linear-gradient(90deg, var(--g1), var(--g2)); }
+  .cmp .delta{ flex:0 0 78mm; text-align:center; }
+  .cmp .delta b{ display:block; font-size:66pt; letter-spacing:-3px; line-height:1; }
+  .cmp .delta span{ font-size:13pt; color:var(--fg2); }
+
+  /* 13 만든 이야기 */
+  .craft{ flex-direction:row; gap:12mm; align-items:center; }
+  .craft .tx{ flex:0 0 96mm; }
+  .craft .n{ font-size:64pt; font-weight:700; letter-spacing:-3px; line-height:1; margin:8mm 0 2mm; }
+  .craft .n small{ font-size:22pt; letter-spacing:0; margin-left:1.5mm; }
+  .craft .who{ margin-top:9mm; font-size:13pt; line-height:1.9; color:var(--ink2); }
+  .craft .who b{ color:var(--ink); }
+  .grid{ flex:1; display:grid; grid-template-columns:repeat(5, 1fr); gap:2.5mm; }
+  .grid img{ width:100%; aspect-ratio:1 / 1; object-fit:cover; display:block; border-radius:1.6mm; }
+
+  /* 14 모두를 위해 */
+  .vals{ display:flex; gap:7mm; margin-top:13mm; }
+  .vals div{ flex:1; background:var(--card); border-radius:5mm; padding:9mm 8mm; text-align:left; }
+  .vals b{ display:block; font-size:21pt; line-height:1.3; letter-spacing:-.6px; margin-bottom:4mm; }
+  .vals span{ font-size:13pt; line-height:1.65; color:var(--fg2); }
+
+  /* 15 가격 · 출시 */
+  .buy{ flex-direction:row; align-items:center; gap:14mm; padding:0 24mm; }
+  .buy .tx{ flex:1; }
+  .buy .price{ font-size:120pt; font-weight:700; letter-spacing:-6px; line-height:1; }
+  .buy .now{ font-size:40pt; font-weight:700; letter-spacing:-1.5px; margin:3mm 0 8mm; }
+  .buy .qr{ flex:0 0 92mm; background:#fff; border-radius:5mm; padding:7mm; text-align:center; }
+  .buy .qr img{ width:76mm; height:76mm; display:block; margin:0 auto; image-rendering:pixelated; }
+  .buy .qr code{ display:block; margin-top:3mm; font-family:Consolas,monospace; font-size:12pt; font-weight:700; color:var(--ink); }
+
+  /* 16 하나 더 */
+  .url{ display:inline-block; margin-top:10mm; font-family:Consolas,monospace; font-size:17pt; color:var(--fg);
+        background:var(--card); border-radius:3mm; padding:3.5mm 7mm; }
+</style>
+</head>
+<body>
+
+<!-- 1 제목 -->
+<section class="slide c">
+  <div class="eyebrow">공대 3호관 길안내</div>
+  <div class="mega">길을, <span class="gr">묻지 않아도</span><br>되는 건물.</div>
+  <div class="by">팀 공3길　김민종 · 손의윤 · 문성일<br>지도교수　강규창 교수님</div>
+</section>
+
+<!-- 2 지금까지 -->
+<section class="slide c">
+  <h2>3호관의 모든 문에서, 모든 층으로.</h2>
+  <div class="nums">
+    <div><b>4</b><span>출입문</span></div>
+    <div><b>6</b><span>개 층<br>지하 1층부터 5층까지</span></div>
+    <div><b class="gr">754</b><span>가지 길</span></div>
+  </div>
+</section>
+
+<!-- 3 문제 -->
+<section class="slide bleed">
+  <div class="tx">
+    <h2 style="font-size:46pt">건물 안에서는,<br>지도가 멈춥니다.</h2>
+    <div class="sub" style="margin-top:9mm">GPS는 실내에 닿지 않고,<br>층마다 복도는 똑같이 생겼습니다.</div>
+  </div>
+  <div class="im"><img data-photo="site:EV3/01.jpg" alt="3층 엘리베이터 앞"><span>3층 엘리베이터 앞 — 5층도 이렇게 생겼습니다</span></div>
+</section>
+
+<!-- 4 세 가지 예고 -->
+<section class="slide" style="justify-content:center; padding-left:40mm">
+  <div class="eyebrow" style="font-size:20pt">오늘, 세 가지를 소개합니다.</div>
+  <ol class="tease">
+    <li><i>1</i>QR로 시작하는 길안내.</li>
+    <li><i>2</i>인터넷 없이 되는 지도.</li>
+    <li><i>3</i>스스로 새로워지는 사진.</li>
+  </ol>
+</section>
+
+<!-- 5 하나로 공개 -->
+<section class="slide reveal">
+  <div class="tx">
+    <div class="sub" style="font-size:24pt">세 가지가 아닙니다.</div>
+    <h2 style="font-size:64pt; margin:3mm 0 10mm">하나입니다.</h2>
+    <div class="gr" style="font-size:34pt; font-weight:700; letter-spacing:-1px; display:inline-block">공대 3호관 길안내</div>
+  </div>
+  <div class="ph"><img class="phone" data-pic="흐름06_3D경로" alt="3D 경로 화면"></div>
+</section>
+
+<!-- 6 QR -->
+<section class="slide lt qr6">
+  <div class="tx">
+    <div class="big">QR 한 장.</div>
+    <div class="sub" style="font-size:20pt">장치도, 공사도 없이.<br>문에 붙은 QR을 찍으면<br>출발점이 정해집니다.</div>
+  </div>
+  <div><img class="sticker" data-qr="정문_MAIN.png" alt="정문 QR 스티커"><div class="cap">정문에 붙인 실제 스티커</div></div>
+  <div><img class="phone" data-pic="흐름03_여기가맞나요" alt="여기가 맞나요" style="height:140mm; width:auto"></div>
+</section>
+
+<!-- 7 보고 · 걷고 · 따라가기 -->
+<section class="slide c" style="justify-content:flex-start">
+  <h2 style="font-size:34pt">보고, 미리 걷고, 따라갑니다.</h2>
+  <div class="trio">
+    <div><img class="phone" data-pic="흐름06_3D경로" alt="3D 경로"><b>보고.</b><span>3D 건물 위에 길 전체를</span></div>
+    <div><img class="phone" data-pic="흐름07_1인칭" alt="1인칭 걷기"><b>미리 걷고.</b><span>1인칭으로 한 번 걸어 보고</span></div>
+    <div><img class="phone" data-pic="흐름08_1단계" alt="실제 사진 단계"><b>따라갑니다.</b><span>단계마다 그 자리의 실제 사진</span></div>
+  </div>
+</section>
+
+<!-- 8 오프라인 -->
+<section class="slide c">
+  <div class="sub" style="font-size:22pt">처음 한 번이면 충분합니다.</div>
+  <div class="huge gr">15.6MB</div>
+  <h2 style="font-size:30pt; font-weight:700">지하에서도. 계단에서도. 비행기 모드에서도.</h2>
+</section>
+
+<!-- 9 사진이 새로워진다 -->
+<section class="slide lt">
+  <h2>사진이, 스스로 새로워집니다.</h2>
+  <div class="flow9">
+    <img class="phone" data-pic="흐름12_사진올림" alt="사진 제보 화면">
+    <ol class="steps">
+      <li><b>찍는다.</b><span>안내 사진과 다르면, 지금 모습을</span></li>
+      <li><b>알아본다.</b><span>휴대폰 안의 AI가 어디인지</span></li>
+      <li><b>확인한다.</b><span>관리자가 맞는지만</span></li>
+      <li><b>바뀐다.</b><span>모든 사람의 화면이 함께</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 10 확신할 때만 -->
+<section class="slide c">
+  <h2 style="font-size:46pt">확신할 때만, 답합니다.</h2>
+  <div class="bub">
+    <div><b>「아마 여기예요 : 3층 라운지」</b><span>확신이 클 때</span></div>
+    <div><b>「층은 3층 같아요」</b><span>층만 확실할 때</span></div>
+    <div><b class="gr">「어디인지 알 수 없어요」</b><span>모를 때</span></div>
+  </div>
+</section>
+
+<!-- 11 큰 숫자 -->
+<section class="slide c">
+  <div class="sub" style="font-size:22pt">AI가 가장 확신한 사진 10%,</div>
+  <div class="stat gr">92.9%</div>
+  <h2 style="font-size:30pt">정확한 자리를 맞혔습니다.</h2>
+  <div class="fine">시험 사진 1,844장 · 기준 사진을 찍은 사람과 다른 사람이 찍은 사진</div>
+</section>
+
+<!-- 12 자기 자신과 비교 -->
+<section class="slide c">
+  <h2 style="font-size:36pt">같은 AI. 같은 사진.<br>고르는 기준 하나만 바꿨습니다.</h2>
+  <div class="cmp">
+    <div class="bars">
+      <div class="bar"><div class="lb"><span>1등 점수로 고를 때</span><b>64.7%</b></div>
+        <div class="tr"><div class="fl" style="width:64.7%"></div></div></div>
+      <div class="bar hi" style="margin-bottom:0"><div class="lb"><span>1등과 2등의 격차로 고를 때</span><b>92.9%</b></div>
+        <div class="tr"><div class="fl" style="width:92.9%"></div></div></div>
+    </div>
+    <div class="delta"><b class="gr">+28.2%p</b><span>확신이 가장 큰 10%만 답할 때<br>정확한 자리를 맞힌 비율</span></div>
+  </div>
+</section>
+
+<!-- 13 만든 이야기 -->
+<section class="slide lt craft">
+  <div class="tx">
+    <h2 style="font-size:36pt">세 사람이,<br>직접 걸었습니다.</h2>
+    <div class="n">2,075<small>장</small></div>
+    <div class="sub" style="font-size:14pt">3호관 구석구석을 직접 찍은 사진</div>
+    <div class="who"><b>김민종</b>　설계 · 구현<br><b>손의윤 · 문성일</b>　촬영 · 현장 시험</div>
+  </div>
+  <div class="grid">
+    <img data-photo="site:HALL2L/01.jpg" alt=""><img data-photo="site:LNG2/01.jpg" alt=""><img data-photo="site:EMS3/01.jpg" alt="">
+    <img data-photo="site:HALL4L/01.jpg" alt=""><img data-photo="site:B1PATH/01.jpg" alt="">
+    <img data-photo="site:EVIN3/01.jpg" alt=""><img data-photo="site:GATE_W/01.jpg" alt=""><img data-photo="site:WC2/01.jpg" alt="">
+    <img data-photo="site:LNG4/01.jpg" alt=""><img data-photo="site:SIGN1/01.jpg" alt="">
+    <img data-photo="site:HALL5R/01.jpg" alt=""><img data-photo="site:13101/01.jpg" alt=""><img data-photo="site:EV2/01.jpg" alt="">
+    <img data-photo="site:WIN3/01.jpg" alt=""><img data-photo="site:GATE_BACK/01.jpg" alt="">
+  </div>
+</section>
+
+<!-- 14 모두를 위해 -->
+<section class="slide c">
+  <h2 style="font-size:38pt">모두를 위해, 이렇게 만들었습니다.</h2>
+  <div class="vals">
+    <div><b>내 위치를<br>따라가지 않습니다.</b><span>출발점은 문 QR로만 정합니다.<br>GPS를 쓰지 않습니다.</span></div>
+    <div><b>틀린 사진은<br>퍼지지 않습니다.</b><span>관리자가 확인하기 전에는<br>누구의 화면에도 반영되지 않습니다.</span></div>
+    <div><b class="gr">누구에게나.</b><span>한국어와 영어.<br>가장 가까운 화장실과 비상계단까지.</span></div>
+  </div>
+</section>
+
+<!-- 15 가격 · 출시 -->
+<section class="slide lt buy">
+  <div class="tx">
+    <div class="price">0원.</div>
+    <div class="now">지금 바로.</div>
+    <div class="sub" style="font-size:17pt">앱스토어 없이 · 가입 없이<br>네 문 × 지하 1층부터 5층까지</div>
+  </div>
+  <div class="qr"><img data-qr="정문_MAIN.png" alt="정문 QR"><code>minjong0910.github.io</code></div>
+</section>
+
+<!-- 16 하나 더 -->
+<section class="slide c">
+  <div class="gr" style="font-size:22pt; font-weight:700; display:inline-block">그리고, 하나 더.</div>
+  <h2 style="font-size:46pt; margin-top:8mm">오늘 보신 숫자는,<br>누구나 다시 잴 수 있습니다.</h2>
+  <div class="sub" style="margin-top:8mm">측정 도구를 공개해 두었습니다 — 빠른 측정 7초, 전체 측정 약 2분 30초.</div>
+  <div class="url">minjong0910.github.io/eval_all.html</div>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide c">
+  <div class="mega" style="font-size:54pt; margin:0 0 10mm">길을, <span class="gr">묻지 않아도</span><br>되는 건물.</div>
+  <h2 style="font-size:28pt">감사합니다. 질문 받겠습니다.</h2>
+  <div class="by" style="margin-top:12mm">공대 3호관 길안내 · 팀 공3길　|　김민종 · 손의윤 · 문성일　|　지도교수 강규창 교수님</div>
+</section>
+
+</body>
+</html>

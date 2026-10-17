@@ -946,8 +946,16 @@ function ghostSlabTune(){
      걷기·미리보기(inFP)에 들어가면 예전 값(0.3 / 320)으로 돌아간다.
    바닥 빛웅덩이(holoPool)는 줄인 만큼 함께 키워, 줄여도 건물 밑 바닥이 평소처럼 밝게 보이게 한다.
    평소 거리(autoRadius) 이하에서는 빛웅덩이 크기가 예전 그대로다. */
+/* 2026-10-18(2차) : 폰에서는 그래도 화면 위쪽이 검었다(사용자 폰 사진 — 노트북은 괜찮았다).
+   폰은 화면이 세로로 길어 건물을 조금만 낮게 기울여도 지평선 위 '하늘'이 보이는데,
+   하늘(배경색 0x040814)이 거의 검정이라 청록 바닥과 지평선에서 뚝 끊겼다. 노트북은 가로로 넓어 하늘이 잘 안 보인다.
+   → 조감도에서는 하늘도 먼 바닥(안개)과 같은 청록으로 — 바닥이 끊김 없이 하늘로 이어진다.
+     걷기(1인칭)에서는 예전 배경색 그대로. */
+var HOLO_SKY_HEX = 0x0B2A37, FP_SKY_HEX = 0x040814;
 function holoFloorTune(inFP){
   if(holoGround) holoGround.visible = !inFP;
+  var sky = inFP ? FP_SKY_HEX : HOLO_SKY_HEX;
+  if(scene.background && scene.background.getHex() !== sky) scene.background.setHex(sky);
   var n = inFP ? 0.3 : Math.max(0.3, radius*0.02);
   var f = inFP ? 320 : Math.max(320, radius*14);
   if(Math.abs(camera.near-n) > 1e-4 || Math.abs(camera.far-f) > 1e-3){

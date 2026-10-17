@@ -917,6 +917,28 @@ function updateStartTag(){
   sp.renderOrder = 998;
   buildingRoot.add(sp); startTag=sp;
 }
+/* 2026-10-17 : 건물 전체를 두 손가락으로 줄이면 위층(목적지·현재 층이 아닌 층)이 어둡게 가라앉았다(폰·PC 같음).
+   그 층들의 바닥판·복도·옥상판이 짙은 남회색(0x222B36 등)이고 같은 색으로 스스로 빛나서, 7% 로 옅게 그려도
+   여러 층이 겹치면 어두운 막이 된다. 확대해서 볼 때는 앞쪽 몇 칸만 보여 괜찮지만, 줄이면 2층~옥상이
+   건물 끝까지 겹친 곳이 한꺼번에 보인다 — 재 보니 위층 자리의 평균 밝기가 85.9(평소) → 74.2(최대로 줄임).
+   → 줄일수록(radius 가 자동 기준거리 autoRadius 보다 커질수록) 그 판들의 색을 방과 같은 밝은 회청색으로
+     조금씩 옮긴다. 기준거리 이하(평소·확대)는 예전과 똑같다. 최대로 줄였을 때 84.9 — 평소와 같은 밝기.
+   (방 상자·테두리를 진하게 하는 쪽도 재 봤지만 1층의 노란 '가야 할 층'까지 뿌옇게 가려서 버렸다) */
+var GHOST_SLAB_HEX = [0x222B36, 0x39465A, 0x2A3A32];   // 층 바닥판 · 복도 · 옥상판 (addLevelContents)
+var GHOST_LIGHT_HEX = 0x9FB4CC;                         // 유령 층 방 상자와 같은 색
+var ghostSlabs = [], _ghostK = -1, _ghostLight = null;
+function ghostSlabTune(){
+  if(!ghostSlabs.length || !(autoRadius > 0)) return;
+  var k = Math.max(0, Math.min(1, (radius/autoRadius - 1)/1.2));   // 기준거리의 2.2배에서 다 바뀐다
+  if(Math.abs(k - _ghostK) < 0.01) return;                        // 바뀔 때만 칠한다
+  _ghostK = k;
+  if(!_ghostLight) _ghostLight = new THREE.Color(GHOST_LIGHT_HEX);
+  for(var i=0; i<ghostSlabs.length; i++){
+    var m = ghostSlabs[i].material;
+    m.color.setHex(ghostSlabs[i].userData._baseHex).lerp(_ghostLight, k);
+    if(m.emissive) m.emissive.copy(m.color);
+  }
+}
 function highlight3D(){
   layout();
   buildRouteA();
@@ -924,6 +946,7 @@ function highlight3D(){
   updateStartTag();
   pulseTargets.length=0;
   pulseFloorTargets.length=0;
+  ghostSlabs.length=0; _ghostK=-1;
   floorGroups.forEach(function(g,i){
     var lv=LEVELS[i];
     var isTgtFloor = target && lv===target.floor;
@@ -997,10 +1020,20 @@ function highlight3D(){
           o.material.opacity = (isTgtFloor||isFirst) ? 1 : 0.55;
         }else{
           o.material.opacity = (isTgtFloor||isFirst) ? 1 : 0.07;
+          /* 바닥판·복도·옥상판 : 원래 색을 기억해 두고, 가는 층·지금 층이 되면 원래 색으로 되돌린다.
+             나머지 층은 ghostSlabTune() 이 줄인 만큼 밝게 칠한다 (위 주석) */
+          var ud2 = o.userData;
+          if(ud2 && ud2._baseHex===undefined && o.isMesh && o.material.color &&
+             GHOST_SLAB_HEX.indexOf(o.material.color.getHex())>=0) ud2._baseHex = o.material.color.getHex();
+          if(ud2 && ud2._baseHex!==undefined){
+            setMatColor(o, ud2._baseHex);
+            if(!(isTgtFloor||isFirst)) ghostSlabs.push(o);
+          }
         }
       }
     });
   });
+  ghostSlabTune();
 }
 function fitRadius(cam, halfW, halfH){
   var vf = cam.fov*Math.PI/180;
@@ -1080,6 +1113,7 @@ function animate(){
     if(_now - A3D_LAST < 26){ A3D_SKIP = true; } else { A3D_SKIP = false; A3D_LAST = _now; }
   }
   if(fpHoloGrid) fpHoloGrid.visible = !fpActive;   // 걷기 모드에서는 홀로그램 격자를 끈다
+  ghostSlabTune();                                   // 줄일수록 위층 바닥판을 밝게 (아래 highlight3D 앞 주석)
   /* '지금 1인칭(걷기·미리보기) 안인가' — 아래 여러 곳에서 쓰므로 맨 앞에서 한 번만 정한다.
      예전에는 이 판단이 함수 중간(조감도 감추기 직전)에 있어서, 그 앞의 '가야 할 층 노란 반짝임'은
      걷기 중에도 계속 돌고 있었다. */

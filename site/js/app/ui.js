@@ -30,6 +30,8 @@ function applyLang(){
   if(typeof target!=='undefined' && target && document.getElementById('t4') && typeof t4TitleFor==='function'){
     document.getElementById('t4').textContent = t4TitleFor(target);
   }
+  // 층 상세 버튼의 '옥상 / Roof' 글자도 언어를 따라가게
+  if(typeof target!=='undefined' && target && document.getElementById('fp') && typeof buildFloorPicker==='function') buildFloorPicker();
   if(typeof syncTripBtn==='function') syncTripBtn();
   if(typeof PWA!=='undefined') PWA.sync();
   if(typeof rebuildAllFloors==='function') rebuildAllFloors();
@@ -370,12 +372,16 @@ function searchEnter(){
 }
 
 /* ========== 층 선택 버튼 ========== */
+/* 2026-10-17 사용자 요청 : 왼쪽부터 낮은 층 순서(B1 1F 2F … 5F 옥상), 옥상은 'RF' 대신 '옥상'.
+   버튼 7개는 손가락 최소 폭(44px)으로도 한 줄에 안 들어가(360px 폰에서 칸 폭 271px · 필요 341px)
+   남는 버튼 하나가 줄 전체로 늘어나 「B1 이 너무 크다」 — 같은 크기의 4칸 격자로 놓는다(app.css .floorpick). */
+function floorPickLabel(lv){ return (lv==='R') ? ((LANG==='ko') ? '옥상' : 'Roof') : lvLabel(lv); }
 function buildFloorPicker(){
   var fp=document.getElementById('fp'); fp.innerHTML='';
-  for(var i=LEVELS.length-1; i>=0; i--){
+  for(var i=0; i<LEVELS.length; i++){
     (function(lv){
       var b=document.createElement('button');
-      b.textContent=lvLabel(lv);
+      b.textContent=floorPickLabel(lv);
       if(target && lv===target.floor) b.classList.add('tgt');
       if(lv===curFloor) b.classList.add('on');
       b.onclick=function(){
@@ -399,9 +405,9 @@ function buildStartFloorPicker(){
      지하를 골라 둔 채 비상계단으로 넘어왔으면 1층으로 되돌린다. */
   var noB1 = !!(target && target.kind==='emstair');
   if(noB1 && startFloor==='B1') startFloor=1;
-  // 바로 위 '층 상세' 줄과 순서가 반대(오름차순)여서 같은 층 버튼 위치가 서로 달랐음
-  // → 잘못 누르기 쉬웠으므로 위 줄과 똑같이 내림차순(5F…B1)으로 맞춘다.
-  for(var i=LEVELS.length-1; i>=0; i--){
+  // 바로 위 '층 상세' 줄과 순서가 반대여서 같은 층 버튼 위치가 서로 달랐음 → 잘못 누르기 쉬웠으므로
+  // 위 줄과 같은 방향으로 맞춘다. 2026-10-17 에 '층 상세'가 낮은 층부터(B1…옥상)로 바뀌어 이 줄도 B1…5F.
+  for(var i=0; i<LEVELS.length; i++){
     /* 옥상은 엘리베이터가 안 서서 '출발층'로 고르면 경로 미리보기를 만들 수 없다 */
     if(LEVELS[i]==='R') continue;
     if(LEVELS[i]==='B1' && noB1) continue;

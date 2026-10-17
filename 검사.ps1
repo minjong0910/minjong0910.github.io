@@ -22,7 +22,7 @@
 #     설치·오프라인(tests/pwa.html) QR 주소로 열기·기기별 설치 안내 13가지·12MB 저장·끊김 흉내·AI 는 인터넷 될 때만·QR 4장 다시 읽기
 #     안전망(tests/golden)        길안내 754가지·사진·화면·CSS·3D 그림 15장이 기록과 같은가
 #   pwsh -File 검사.ps1 -Ci      GitHub 자동 검사용 — 다른 컴퓨터라 글꼴·그래픽이 달라, 안전망에서 글자 폭·3D 그림 비교를 뺀다
-param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v134', [int]$Port = 8080)
+param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v135', [int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ROOT = $PSScriptRoot
@@ -290,8 +290,10 @@ if(-not $Quick){
 #   한 번에 두 번이나 어긋났다. 이제 **검사가 스스로 세어** 대조한다.
 #   +1 은 이 검사 자신 — 아래 Ok/Bad 도 한 줄 찍히므로 센 수에 들어가야 맞다.
 #   파일 검사만 돌린 -Quick 에서는 브라우저 검사가 빠지므로 건너뛴다.
+#   -Full 은 로드뷰 재생 하나를 더 돈다 — 문서가 말하는 수는 평소 검사이므로 그 하나는 빼고 센다
+#   (2026-10-17 : 이게 없어서 -Full 로 돌리면 늘 「22가지라고 적었는데 23가지」로 실패했다).
 if(-not $Quick){
-  $ran = $oks + $warns.Count + $fails.Count + 1
+  $ran = $oks + $warns.Count + $fails.Count + 1 - $(if($Full){ 1 } else { 0 })
   $cntBad = @()
   foreach($d in @('도구\구조도_틀.html', '문서\저장소_코드안내.html')){
     $p = Join-Path $ROOT $d

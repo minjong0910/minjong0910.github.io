@@ -124,7 +124,10 @@ function init3D(){
   scene.background=new THREE.Color(0x040814);
   // 뒤로 최대한 스크롤(줌아웃, radius 최대 260)해도 건물이 안개에 묻혀 어두워지지 않도록,
   // 안개가 실제로 시작되는 거리를 카메라가 갈 수 있는 최대 거리보다 훨씬 멀리 둔다.
-  scene.fog=new THREE.Fog(0x040814, 340, 900);
+  /* 2026-10-18 : 안개 색을 검정(0x040814)에서 바닥판과 같은 청록(0x0B2A37)으로 —
+     먼 바닥이 검게 꺼지지 않고 바닥색 그대로 지평선까지 이어지게 (아래 holoGround 주석).
+     걷기(1인칭)에서는 far 가 320 이라 340 부터 끼는 안개가 애초에 보이지 않는다. */
+  scene.fog=new THREE.Fog(0x0B2A37, 340, 900);
   // Z-파이팅 원인 3: 실내 씬은 far=1000까지 필요 없다 —
   // far를 줄여 깊이버퍼 정밀도(far/near 비율)를 높여서 겹치는 유리·프레임의 깜빡임을 줄인다.
   // 버그 수정: far를 150으로 낮췄더니, 두 손가락으로 최대한
@@ -154,10 +157,17 @@ function init3D(){
      건물 뒤쪽이 그냥 검은 배경으로 보였다("바닥이 안 보인다"는 제보).
      칸 크기(5)는 그대로 두고 판만 넓혀, 최대로 축소해도 바닥이 화면을 채우게 한다.
      선 묶음 하나(LineSegments)라 넓혀도 그리는 부담은 거의 늘지 않는다. */
-  fpHoloGrid=new THREE.GridHelper(560, 112, 0x1E7A94, 0x0D2A33);
+  /* 2026-10-18 : 그래도 최대로 축소하면 화면 위쪽 절반이 검은 바탕이었다("건물 위가 검어서 잘 안 보인다").
+     카메라가 320 거리까지만 그려서(far) 바닥이 그 거리에서 잘리고, 격자판도 560 이라 거기서 끝났다.
+     → 격자판을 2400 으로 넓히고(칸 크기 5 는 그대로), 그 밑에 같은 청록 바닥판(holoGround)을 지평선까지 깐다.
+       조감도에서는 overview3d.js holoFloorTune() 이 far 를 거리에 맞춰 늘린다. */
+  fpHoloGrid=new THREE.GridHelper(2400, 480, 0x1E7A94, 0x0D2A33);
   var grid = fpHoloGrid;
   grid.position.y=-0.4; grid.material.transparent=true; grid.material.opacity=0.38;
   scene.add(grid);
+  holoGround=new THREE.Mesh(new THREE.CircleGeometry(6000, 64), new THREE.MeshBasicMaterial({color:0x0B2A37}));
+  holoGround.rotation.x=-Math.PI/2; holoGround.position.y=-0.6;
+  scene.add(holoGround);
   // 격자 밑에 은은하게 번지는 시안색 빛웅덩이 — 건물이 홀로그램 발판 위에 떠 있는 듯한
   // '제품샷' 느낌을 준다(실사 조명 대신 캔버스 그라디언트로 값싸게 흉내).
   (function(){
@@ -173,6 +183,7 @@ function init3D(){
     var pool=new THREE.Mesh(new THREE.PlaneGeometry(260,260), poolMat);
     pool.rotation.x=-Math.PI/2; pool.position.y=-0.55;
     scene.add(pool);
+    holoPool=pool;     // 줄인 만큼 함께 키운다 (holoFloorTune)
   })();
 
   buildingRoot = new THREE.Group();

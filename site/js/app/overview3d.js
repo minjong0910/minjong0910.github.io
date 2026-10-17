@@ -939,6 +939,25 @@ function ghostSlabTune(){
     if(m.emissive) m.emissive.copy(m.color);
   }
 }
+/* 2026-10-18 : 최대로 축소하면 건물 위쪽 화면이 검은 바탕만 남았다 — 카메라가 320 거리(far)까지만 그려
+   바닥이 거기서 잘렸기 때문(view3d.js 의 far 주석 : 1인칭 실내의 깊이 정밀도 때문에 낮춘 값).
+   → 조감도에서만 far 를 거리의 14배까지 늘려 바닥판(holoGround)이 지평선까지 그려지게 하고,
+     near 도 거리의 2%로 함께 올려 far/near 비율(깊이 정밀도)을 예전 수준으로 지킨다.
+     걷기·미리보기(inFP)에 들어가면 예전 값(0.3 / 320)으로 돌아간다.
+   바닥 빛웅덩이(holoPool)는 줄인 만큼 함께 키워, 줄여도 건물 밑 바닥이 평소처럼 밝게 보이게 한다.
+   평소 거리(autoRadius) 이하에서는 빛웅덩이 크기가 예전 그대로다. */
+function holoFloorTune(inFP){
+  if(holoGround) holoGround.visible = !inFP;
+  var n = inFP ? 0.3 : Math.max(0.3, radius*0.02);
+  var f = inFP ? 320 : Math.max(320, radius*14);
+  if(Math.abs(camera.near-n) > 1e-4 || Math.abs(camera.far-f) > 1e-3){
+    camera.near = n; camera.far = f; camera.updateProjectionMatrix();
+  }
+  if(holoPool){
+    var k = (inFP || !(autoRadius > 0)) ? 1 : Math.max(1, radius/autoRadius);
+    if(Math.abs(holoPool.scale.x-k) > 1e-3) holoPool.scale.set(k, k, 1);
+  }
+}
 function highlight3D(){
   layout();
   buildRouteA();
@@ -1118,6 +1137,7 @@ function animate(){
      예전에는 이 판단이 함수 중간(조감도 감추기 직전)에 있어서, 그 앞의 '가야 할 층 노란 반짝임'은
      걷기 중에도 계속 돌고 있었다. */
   var inFP = (rideBlend > 0.01) || !!window.fpActive || !!window.fpFree;
+  holoFloorTune(inFP);                               // 조감도 바닥을 지평선까지 (아래 함수 주석)
 
   /* ★ 2026-09-25(2차) : 조감도(건물 3D) 감추기를 '실내를 지었는가'와 완전히 떼어 놓는다.
      1차 수정 때 "실내가 보이든 말든 무조건 감춘다"고 써 놓고는 정작 이 처리를

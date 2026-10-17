@@ -374,7 +374,8 @@ function searchEnter(){
 /* ========== 층 선택 버튼 ========== */
 /* 2026-10-17 사용자 요청 : 왼쪽부터 낮은 층 순서(B1 1F 2F … 5F 옥상), 옥상은 'RF' 대신 '옥상'.
    버튼 7개는 손가락 최소 폭(44px)으로도 한 줄에 안 들어가(360px 폰에서 칸 폭 271px · 필요 341px)
-   남는 버튼 하나가 줄 전체로 늘어나 「B1 이 너무 크다」 — 같은 크기의 4칸 격자로 놓는다(app.css .floorpick). */
+   남는 버튼 하나가 줄 전체로 늘어나 「B1 이 너무 크다」 — 같은 크기의 격자로 놓는다(app.css .floorpick :
+   2026-10-18 「버튼이 너무 크다」 → 6칸, 아래 「현재 위치」 줄과 칸·크기가 같다). */
 function floorPickLabel(lv){ return (lv==='R') ? ((LANG==='ko') ? '옥상' : 'Roof') : lvLabel(lv); }
 function buildFloorPicker(){
   var fp=document.getElementById('fp'); fp.innerHTML='';

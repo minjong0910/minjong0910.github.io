@@ -4,6 +4,7 @@
 /* ========== 상태 ========== */
 var target=null, curFloor=null, steps=[], si=0;
 var fpHoloGrid=null; /* 버그 수정: 선언 없이 대입만 하면 strict 모드에서 ReferenceError로 앱 전체가 멈춤 */
+var holoGround=null, holoPool=null;   /* 조감도 바닥판 · 바닥 빛웅덩이 (view3d.js 가 만들고 overview3d.js holoFloorTune 이 다룬다) */
 var startFloor=1;   // 사용자가 지금 있는 층(기본 1층=정문). 출발층 선택으로 바뀜.
 
 function targetPos(){

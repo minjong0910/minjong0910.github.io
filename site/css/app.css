@@ -544,10 +544,11 @@
   .fprow .floorpick{flex:1;min-width:0;margin:0;}
   .fprow .sflabel{color:#7C8AA0;font-size:0.7188rem;font-weight:600;flex:0 0 auto;letter-spacing:.2px;}
   /* 층 상세 버튼 7개(B1~5F·옥상) — 한 줄에 다 안 들어가 줄바꿈하면 남는 버튼 하나가 줄 전체로 늘어났다.
-     같은 크기의 4칸 격자로 놓는다 : B1 1F 2F 3F / 4F 5F 옥상 (2026-10-17) */
-  .floorpick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0.375rem;margin:0.625rem 0;}
-  .floorpick button{min-width:44px;min-height:46px;background:#0D0F18;border:1px solid #1A1D2B;color:#7C8AA0;border-radius:0.5625rem;
-    padding:0.5625rem 0;font-size:0.8125rem;font-weight:700;cursor:pointer;font-family:inherit;}
+     같은 크기의 격자로 놓는다 (2026-10-17 4칸). 2026-10-18 「버튼이 너무 크다」 → 6칸 :
+     B1 1F 2F 3F 4F 5F / 옥상 — 바로 아래 「현재 위치」 버튼(B1~5F)과 칸·크기·간격이 똑같아 같은 층이 위아래로 맞는다 */
+  .floorpick{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0.3125rem;margin:0.625rem 0;}
+  .floorpick button{min-width:0;min-height:44px;background:#0D0F18;border:1px solid #1A1D2B;color:#7C8AA0;border-radius:0.5625rem;
+    padding:0.375rem 0;font-size:0.8125rem;font-weight:700;cursor:pointer;font-family:inherit;}
   .floorpick button.tgt{border-color:#FF2E88;color:#E7F6FF;}
   .floorpick button.on{background:#00E5FF;color:#05060A;border-color:#00E5FF;}
   /* 안내 화면 아래 이전/다음 : 한 줄을 반씩 나눠 쓰고 기존 버튼보다 조금 크게 */

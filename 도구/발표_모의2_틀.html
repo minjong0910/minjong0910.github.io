@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>캡스톤 발표 2 — 제작기편</title>
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     캡스톤 발표 2 · 제작기편 (16:9 · 338.7mm × 190.5mm) — 3인 발표, 13쪽
+     이 작품을 「어떻게 만들었나」를 사람·현장·사건으로만 말한다.
+     앱 기능 설명 · 측정 수치 · 도면은 넣지 않는다 (기존 캡스톤 자료와 1번 이용자편의 몫).
+       1부 세 사람, 여덟 달  →  2부 사진을 모으다  →  3부 부딪히고 배운 것
+
+     디자인 : 잡지 — 흰 바탕 + 바탕체 큰 제목 + 라즈베리 한 가지 강조 + 가는 선
+       기존 캡스톤(회색 + 먹색 띠 + 호박 · 맑은 고딕) · 1번 이용자편(표지판 파랑 + 노랑)과 겹치지 않게.
+       라즈베리 #A3174F 흰 바탕 대비 7.4:1
+
+     ※ 고칠 때는 이 파일을 고친다 → pwsh -File 도구\발표_모의_만들기.ps1 -Kind 2
+     ══════════════════════════════════════════════════════════════ */
+  @page { size: 338.7mm 190.5mm; margin: 0; }
+  :root{
+    --ink:#121417; --ink2:#41464E; --dim:#7B818A; --rule:#D9DCE0; --acc:#A3174F; --accL:#FBEAF1; --mark:#F6C9DA;
+    --serif:"바탕","Batang","Nanum Myeongjo",serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:#fff; }
+  body{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; color:var(--ink);
+        -webkit-print-color-adjust:exact; print-color-adjust:exact; counter-reset:sl; }
+  .slide{ width:338.7mm; height:190.5mm; page-break-after:always; position:relative; overflow:hidden;
+          padding:12mm 20mm 16mm; background:#fff; counter-increment:sl; display:flex; flex-direction:column; }
+  .slide:last-child{ page-break-after:auto; }
+
+  /* 쪽 머리 — 잡지의 섹션 표시 */
+  .run{ display:flex; justify-content:space-between; align-items:baseline; border-bottom:0.5mm solid var(--ink);
+        padding-bottom:2mm; margin-bottom:6mm; font-size:9.5pt; letter-spacing:2px; color:var(--ink2); }
+  .run b{ color:var(--acc); letter-spacing:2px; }
+  .run .who{ letter-spacing:1px; }
+  h1{ font-family:var(--serif); font-size:28pt; font-weight:700; margin:0 0 3mm; letter-spacing:-1px; line-height:1.22; }
+  h1 em{ font-style:normal; color:var(--acc); }
+  .dek{ font-size:13pt; color:var(--ink2); line-height:1.6; margin:0 0 6mm; max-width:250mm; }
+  .dek b{ color:var(--ink); }
+  .foot{ position:absolute; left:20mm; right:20mm; bottom:6mm; display:flex; justify-content:space-between;
+         font-size:8.5pt; color:var(--dim); letter-spacing:1px; }
+  .foot .pg::after{ content:counter(sl); font-family:var(--serif); font-size:11pt; color:var(--ink); }
+  .vbot{ margin-top:auto !important; }
+  .mid{ margin-top:auto; margin-bottom:auto; }
+
+  .cols{ display:flex; gap:9mm; }
+  .cols > *{ flex:1; min-width:0; }
+  .col{ border-top:0.4mm solid var(--ink); padding-top:3.5mm; }
+  .col .k{ font-size:9pt; letter-spacing:2px; color:var(--acc); font-weight:700; margin-bottom:1.5mm; }
+  .col .h{ font-family:var(--serif); font-size:17pt; font-weight:700; margin-bottom:2.5mm; line-height:1.3; }
+  .col p{ margin:0 0 2mm; font-size:12.5pt; line-height:1.65; color:var(--ink2); }
+  .col p b{ color:var(--ink); }
+  .mk{ background:linear-gradient(transparent 55%, var(--mark) 55%); color:var(--ink); font-weight:700; }
+  .big{ font-family:var(--serif); font-size:40pt; font-weight:700; line-height:1; color:var(--acc); }
+  .big small{ font-family:"Malgun Gothic",sans-serif; font-size:12pt; color:var(--ink2); font-weight:400; margin-left:1.5mm; }
+  .pull{ border-left:1.2mm solid var(--acc); padding:1mm 0 1mm 6mm; font-family:var(--serif); font-size:16pt; line-height:1.5; color:var(--ink); }
+  .pull b{ color:var(--acc); }
+  .note{ font-size:10.5pt; color:var(--dim); line-height:1.5; }
+  .pass{ font-size:10.5pt; color:var(--dim); margin-top:3mm; }
+  .pass b{ color:var(--acc); }
+
+  /* 사진 */
+  .ph{ display:flex; gap:3.5mm; }
+  .ph figure{ flex:1; margin:0; min-width:0; }
+  .ph img{ width:100%; display:block; object-fit:cover; }
+  .ph figcaption{ font-size:10pt; color:var(--dim); margin-top:1.8mm; line-height:1.4; }
+  .ph figcaption b{ color:var(--ink); }
+
+  /* 타임라인 */
+  .tl{ display:flex; border-top:0.5mm solid var(--ink); }
+  .tl .m{ flex:1; padding:3mm 3mm 0 0; border-right:1px solid var(--rule); margin-right:3mm; position:relative; }
+  .tl .m:last-child{ border-right:none; margin-right:0; }
+  .tl .m::before{ content:""; position:absolute; top:-2.3mm; left:0; width:4mm; height:4mm; border-radius:50%; background:var(--ink); }
+  .tl .m.hot::before{ background:var(--acc); }
+  .tl .mo{ font-family:var(--serif); font-size:24pt; font-weight:700; line-height:1.1; }
+  .tl .m.hot .mo{ color:var(--acc); }
+  .tl .mo small{ font-size:11pt; }
+  .tl .t{ font-size:12pt; font-weight:700; margin:2mm 0 1.5mm; line-height:1.35; }
+  .tl .d{ font-size:10.5pt; color:var(--ink2); line-height:1.5; }
+
+  /* 버그 일지 */
+  .log{ display:grid; grid-template-columns:1fr 1fr; gap:5mm 9mm; }
+  .entry{ border-top:0.4mm solid var(--ink); padding-top:3mm; }
+  .entry .dt{ font-family:var(--serif); font-size:12pt; color:var(--acc); font-weight:700; }
+  .entry .h{ font-family:var(--serif); font-size:15.5pt; font-weight:700; margin:1mm 0 2mm; line-height:1.3; }
+  .entry dl{ margin:0; display:grid; grid-template-columns:13mm 1fr; gap:1mm 3mm; font-size:11.5pt; line-height:1.5; }
+  .entry dt{ color:var(--dim); font-size:10pt; padding-top:.5mm; }
+  .entry dd{ margin:0; color:var(--ink2); }
+  .entry dd b{ color:var(--ink); }
+  .sw{ display:flex; gap:3mm; }
+  .sw div{ flex:1; border-radius:1.5mm; height:22mm; display:flex; flex-direction:column; justify-content:flex-end; padding:2mm 3mm;
+           font-size:9.5pt; line-height:1.3; border:1px solid rgba(0,0,0,.12); }
+  .sw .bad{ outline:1mm solid var(--acc); outline-offset:1mm; }
+
+  table{ width:100%; border-collapse:collapse; font-size:12pt; }
+  th,td{ border-bottom:1px solid var(--rule); padding:2.8mm 3mm; text-align:left; vertical-align:top; color:var(--ink2); }
+  th{ border-bottom:0.4mm solid var(--ink); font-size:9.5pt; letter-spacing:1.5px; color:var(--ink); }
+  td b{ color:var(--ink); }
+
+  /* 표지 · 차례 · 마무리 */
+  .cover{ flex-direction:row; padding:0; }
+  .cover .l{ flex:1.05; padding:14mm 14mm 14mm 22mm; display:flex; flex-direction:column; }
+  .cover .mast{ font-family:var(--serif); font-size:78pt; font-weight:700; line-height:1; letter-spacing:-3px; margin-top:6mm; }
+  .cover .mast em{ font-style:normal; color:var(--acc); }
+  .cover .iss{ border-top:0.5mm solid var(--ink); border-bottom:1px solid var(--ink); padding:2mm 0; margin:6mm 0 8mm;
+               display:flex; justify-content:space-between; font-size:10pt; letter-spacing:2px; color:var(--ink2); }
+  .cover .hl{ font-family:var(--serif); font-size:24pt; font-weight:700; line-height:1.35; margin-bottom:5mm; }
+  .cover .sub{ font-size:12.5pt; color:var(--ink2); line-height:1.65; }
+  .cover .names{ margin-top:auto; font-size:12pt; letter-spacing:2px; }
+  .cover .r{ flex:1; position:relative; }
+  .cover .r img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05); }
+  .cover .r .cap{ position:absolute; left:6mm; bottom:6mm; background:#fff; padding:1.5mm 3mm; font-size:9pt; letter-spacing:1px; }
+
+  .toc .row{ display:flex; gap:8mm; align-items:baseline; border-top:0.4mm solid var(--ink); padding:4.5mm 0; }
+  .toc .no{ font-family:var(--serif); font-size:44pt; font-weight:700; color:var(--acc); width:28mm; line-height:1; }
+  .toc .tt{ flex:1; }
+  .toc .tt .h{ font-family:var(--serif); font-size:20pt; font-weight:700; }
+  .toc .tt .d{ font-size:12pt; color:var(--ink2); margin-top:1.5mm; }
+  .toc .wp{ text-align:right; font-size:11pt; color:var(--ink2); white-space:nowrap; }
+  .toc .wp b{ font-family:var(--serif); font-size:15pt; color:var(--ink); }
+
+  .fin{ justify-content:center; padding:0 34mm; }
+  .fin .k{ font-size:10pt; letter-spacing:4px; color:var(--acc); font-weight:700; margin-bottom:6mm; }
+  .fin h1{ font-size:34pt; line-height:1.38; margin-bottom:8mm; }
+  .fin .rule{ width:40mm; height:0.6mm; background:var(--ink); margin-bottom:7mm; }
+  .fin .s{ font-size:13.5pt; color:var(--ink2); line-height:1.85; }
+  .fin .t{ margin-top:10mm; font-family:var(--serif); font-size:17pt; font-weight:700; color:var(--acc); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ 1 표지 ═══════════ -->
+<section class="slide cover">
+  <div class="l">
+    <div class="mast">제작<em>기</em></div>
+    <div class="iss"><span>캡스톤 디자인 발표 · 제작기편</span><span>2026. 4 — 11</span></div>
+    <div class="hl">공대 3호관 길안내를<br>만든 여덟 달</div>
+    <div class="sub">무엇을 만들었는지가 아니라,<br><b>어떻게 만들었는지</b>를 말씀드립니다.</div>
+    <div class="names">김민종 · 손의윤 · 문성일</div>
+  </div>
+  <div class="r"><img data-photo="site:LNG4/01.jpg" alt="4층 라운지"><div class="cap">3호관 4층 — 저희가 찍은 사진</div></div>
+</section>
+
+<!-- ═══════════ 2 차례 ═══════════ -->
+<section class="slide toc">
+  <div class="run"><span><b>차례</b></span><span>세 사람이 나눠 말씀드립니다</span></div>
+  <div class="row"><div class="no">01</div><div class="tt"><div class="h">세 사람, 여덟 달</div>
+      <div class="d">누가 무엇을 맡았나 · 여덟 달의 타임라인 · 일하는 방식</div></div>
+    <div class="wp">발표자 ① · <b>3–5</b>쪽</div></div>
+  <div class="row"><div class="no">02</div><div class="tt"><div class="h">사진을 모으다</div>
+      <div class="d">찍는 법 · 잘못 들어간 사진 찾기 · 5층을 다시 찍은 이유</div></div>
+    <div class="wp">발표자 ② · <b>6–8</b>쪽</div></div>
+  <div class="row" style="border-bottom:0.4mm solid var(--ink)"><div class="no">03</div><div class="tt"><div class="h">부딪히고 배운 것</div>
+      <div class="d">버그 일지 · 하지 않기로 한 것 · 배운 것과 다시 한다면</div></div>
+    <div class="wp">발표자 ③ · <b>9–12</b>쪽</div></div>
+  <div class="foot"><span>제작기 · 공대 3호관 길안내</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 3 세 사람 ═══════════ -->
+<section class="slide">
+  <div class="run"><span><b>01</b>&nbsp; 세 사람, 여덟 달</span><span class="who">발표자 ①</span></div>
+  <h1>세 사람이 <em>맡은 일</em></h1>
+  <div class="dek">한 사람은 책상에서 만들고, 두 사람은 건물에서 찍고 걸었습니다. <b>현장과 코드가 매일 오갔습니다.</b></div>
+  <div class="cols mid">
+    <div class="col"><div class="k">설계 · 구현</div><div class="h">김민종</div>
+      <p>앱 · 3D 건물 · 사진 판정 · 서버 · <b>자동 검사 도구</b>까지 만들었습니다.</p>
+      <p>현장에서 올라온 제보를 받아 <b>고치고, 검사하고, 올리는</b> 일을 맡았습니다.</p></div>
+    <div class="col" style="flex:1.45"><div class="k">촬영 · 현장 시험</div><div class="h">손의윤 · 문성일</div>
+      <p>촬영 안내서대로 층을 돌며 찍고, 앱을 들고 3호관을 걸으며 <b>안내가 실제와 맞는지</b> 시험했습니다.</p>
+      <div style="display:flex; gap:12mm; margin-top:4mm">
+        <div><div class="big">185<small>장</small></div><div class="note" style="margin-top:1.5mm">손의윤 · 9월 5층 재촬영</div></div>
+        <div><div class="big">137<small>장</small></div><div class="note" style="margin-top:1.5mm">문성일 · 다른 날, 다른 폰으로</div></div>
+      </div></div>
+  </div>
+  <div class="pull vbot">조원 폰으로 찍은 <b>화면 사진</b>이 버그를 찾게 했고, <b>서로 다른 폰 · 다른 날</b>에 찍은 사진이 2부의 핵심이 됩니다.</div>
+  <div class="foot"><span>제작기 · 01 세 사람, 여덟 달</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 4 타임라인 ═══════════ -->
+<section class="slide">
+  <div class="run"><span><b>01</b>&nbsp; 세 사람, 여덟 달</span><span class="who">발표자 ①</span></div>
+  <h1>여덟 달을 <em>한 줄</em>로</h1>
+  <div class="dek">처음 다섯 달은 <b>뼈대</b>를, 마지막 석 달은 <b>현장에서 고치는 일</b>을 했습니다.</div>
+  <div class="tl mid">
+    <div class="m"><div class="mo">4<small>월</small></div><div class="t">주제 · 실측</div><div class="d">장치 없는 실내 길안내로 정하고 지하 1층~5층을 쟀다</div></div>
+    <div class="m"><div class="mo">5<small>월</small></div><div class="t">3D 건물</div><div class="d">도면 없이 좌표를 코드로 적어 건물을 세웠다</div></div>
+    <div class="m"><div class="mo">6<small>월</small></div><div class="t">길안내 표</div><div class="d">네 문 × 다섯 층의 안내 문구를 짰다</div></div>
+    <div class="m"><div class="mo">7<small>월</small></div><div class="t">사진 판정</div><div class="d">사진으로 장소를 알아보는 첫 동작</div></div>
+    <div class="m"><div class="mo">8<small>월</small></div><div class="t">QR · 글자 · 제보</div><div class="d">출입문 QR, 번호판 읽기, 제보 서버</div></div>
+    <div class="m hot"><div class="mo">9<small>월</small></div><div class="t">현장의 달</div><div class="d">첫 측정 → 5층 재촬영, 인터넷 없이 열기, <b>9/21 중간 발표</b></div></div>
+    <div class="m hot"><div class="mo">10<small>월</small></div><div class="t">버그와 서류</div><div class="d">갤럭시 화면 문제, 배포 멈춤, 발명신고서</div></div>
+    <div class="m"><div class="mo">11<small>월</small></div><div class="t">마무리</div><div class="d">현장을 걸으며 최종 점검, 졸업작품 발표</div></div>
+  </div>
+  <div class="note vbot">9월 21일 코드 저장소를 연 뒤로는 모든 변경을 <b style="color:var(--ink)">한 줄 설명과 함께</b> 기록했습니다 — 150건이 넘습니다.</div>
+  <div class="foot"><span>제작기 · 01 세 사람, 여덟 달</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 5 일하는 방식 ═══════════ -->
+<section class="slide">
+  <div class="run"><span><b>01</b>&nbsp; 세 사람, 여덟 달</span><span class="who">발표자 ①</span></div>
+  <h1>규칙은 하나 — <em>고치면 검사, 통과해야 배포</em></h1>
+  <div class="cols mid">
+    <div class="col"><div class="k">규칙 1</div><div class="h">고친 사람이 먼저 돌린다</div>
+      <p>파일 검사 다음에 브라우저로 <b>앱 검사</b>, 그리고 <b>설치 · 인터넷 없이 열기 · 출입문 QR</b> 검사.</p></div>
+    <div class="col"><div class="k">규칙 2</div><div class="h">어제와 달라지면 멈춘다</div>
+      <p>「안전망」이 <b>길안내 754가지</b>와 3D 화면 15장을 기록과 대조합니다. 하나라도 다르면 이유를 밝혀야 합니다.</p></div>
+    <div class="col"><div class="k">규칙 3</div><div class="h">올리는 건 기계가 한다</div>
+      <p>저장소에 올리면 GitHub가 <b>같은 검사를 한 번 더</b> 돌리고, 통과했을 때만 사이트를 바꿉니다.</p></div>
+  </div>
+  <div class="cols vbot" style="gap:9mm">
+    <div class="pull">겪은 일은 <b>글로 남겼습니다</b> — 측정 결과, 촬영 안내, 실패한 이유까지 문서 40여 개.</div>
+    <div class="pass" style="align-self:flex-end">다음 발표자에게 → 「이 앱의 재료는 결국 <b>사진</b>입니다. 사진을 어떻게 모았는지 말씀드리겠습니다.」</div>
+  </div>
+  <div class="foot"><span>제작기 · 01 세 사람, 여덟 달</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 6 찍는 법 ═══════════ -->
+<section class="slide">
+  <div class="run"><span><b>02</b>&nbsp; 사진을 모으다</span><span class="who">발표자 ②</span></div>
+  <h1>「서서 앞 4장, <em>뒤돌아 4장</em>」</h1>
+  <div class="cols" style="gap:9mm; flex:1; min-height:0">
+    <div style="flex:0 0 40%">
+      <div class="dek" style="margin-bottom:4mm">조원 누구라도 똑같이 찍을 수 있게 <b>촬영 안내서</b>를 만들었습니다. 한 층 30~40분.</div>
+      <table>
+      <tr><th style="width:24%">몇 장째</th><th>어떻게</th></tr>
+      <tr><td><b>1</b></td><td>그 자리에서 그대로</td></tr>
+      <tr><td><b>2</b></td><td>한 걸음 앞으로</td></tr>
+      <tr><td><b>3 · 4</b></td><td>왼쪽 · 오른쪽으로 반 걸음</td></tr>
+      <tr><td><b>5 – 8</b></td><td>뒤로 돌아서 똑같이</td></tr>
+      </table>
+      <p class="note" style="margin-top:4mm"><b style="color:var(--ink)">지킬 것</b> — 폰은 세로로 · 눈높이 그대로 · 사람이 지나가면 기다리기 · 필터·보정 금지</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:3mm">
+      <div class="ph">
+        <figure><img data-photo="raw:HALL3R/3층-HALL3R-복도-c041.jpg" alt="" style="height:96mm"></figure>
+        <figure><img data-photo="raw:HALL3R/3층-HALL3R-복도-c045.jpg" alt="" style="height:96mm"></figure>
+        <figure><img data-photo="raw:HALL3R/3층-HALL3R-복도-c049.jpg" alt="" style="height:96mm"></figure>
+        <figure><img data-photo="raw:HALL3R/3층-HALL3R-복도-c050.jpg" alt="" style="height:96mm"></figure>
+      </div>
+      <div class="note">3층 오른쪽 복도에서 실제로 찍은 원본. 일부러 <b style="color:var(--ink)">조금씩 다르게</b> — 똑같은 사진 8장은 1장과 같기 때문입니다.</div>
+    </div>
+  </div>
+  <div class="foot"><span>제작기 · 02 사진을 모으다</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 7 잘못 들어간 사진 찾기 ═══════════ -->
+<section class="slide">
+  <div class="run"><span><b>02</b>&nbsp; 사진을 모으다</span><span class="who">발표자 ②</span></div>
+  <h1>잘못 들어간 사진을 <em>기계로 찾고, 눈으로 확인</em></h1>
+  <div class="cols" style="gap:10mm; flex:1; min-height:0">
+    <div>
+      <div class="col" style="margin-bottom:5mm"><div class="k">어떻게</div>
+        <p>사진 1,753장을 한 장씩 꺼내 나머지 전부와 견줬습니다. <b>자기 폴더보다 남의 폴더를 더 닮은 사진</b>을 골랐습니다.</p></div>
+      <div style="display:flex; gap:7mm; align-items:flex-end; margin-bottom:5mm">
+        <div><div class="big">208<small>장 의심</small></div></div>
+        <div style="font-family:var(--serif); font-size:26pt; color:var(--dim)">→</div>
+        <div><div class="big">1<small>장만 진짜 잘못</small></div></div>
+      </div>
+      <div class="col"><div class="k">나머지는 대부분</div>
+        <p><b>원래 닮은 곳</b>이었습니다 — 다른 층의 같은 복도, 라운지와 복도의 경계, 층마다 같은 화장실 앞.</p></div>
+    </div>
+    <div>
+      <div class="ph">
+        <figure><img data-photo="raw:LNG4/4층-LNG4-라운지-b176.jpg" alt="" style="height:88mm">
+          <figcaption><b>「라운지」 폴더</b> — 4층</figcaption></figure>
+        <figure><img data-photo="raw:HALL4L/4층-HALL4L-복도-z002.jpg" alt="" style="height:88mm">
+          <figcaption><b>「복도」 폴더</b> — 4층</figcaption></figure>
+      </div>
+      <div class="pull" style="margin-top:4mm; font-size:14pt">두 장은 <b>같은 기둥</b>이었습니다. 「이름이 둘인 한 자리」 — 사람 눈으로 봐야 알 수 있었습니다.</div>
+    </div>
+  </div>
+  <div class="foot"><span>제작기 · 02 사진을 모으다</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 8 5층을 다시 찍은 이유 ═══════════ -->
+<section class="slide">
+  <div class="run"><span><b>02</b>&nbsp; 사진을 모으다</span><span class="who">발표자 ②</span></div>
+  <h1>5층을 <em>다시 찍은</em> 이유</h1>
+  <div class="dek">처음의 5층 사진은 <b>한 사람이 찍은 것에 치우쳐</b> 있었습니다. 그러자 다른 사람이 찍은 5층 사진을 <span class="mk">AI가 알아보지 못했습니다.</span></div>
+  <div class="ph mid">
+    <figure><img data-photo="raw:HALL5L/5층-HALL5L-복도-n002.jpg" alt="" style="height:84mm"><figcaption><b>묶음 ㉮</b></figcaption></figure>
+    <figure><img data-photo="raw:HALL5L/5층-HALL5L-복도-s056.jpg" alt="" style="height:84mm"><figcaption><b>묶음 ㉯</b></figcaption></figure>
+    <figure><img data-photo="raw:HALL5L/5층-HALL5L-복도-u001.jpg" alt="" style="height:84mm"><figcaption><b>묶음 ㉰</b></figcaption></figure>
+    <figure><img data-photo="raw:HALL5L/5층-HALL5L-복도-w01.jpg" alt="" style="height:84mm"><figcaption><b>묶음 ㉱</b></figcaption></figure>
+    <div style="flex:1.3; display:flex; flex-direction:column; justify-content:center; gap:4mm; padding-left:3mm">
+      <p class="note" style="font-size:12pt; color:var(--ink2); margin:0">넷 다 <b style="color:var(--ink)">같은 5층 왼쪽 복도</b>입니다. 찍은 묶음(날 · 폰)이 다르면 색감 · 높이 · 각도가 이만큼 달라집니다.</p>
+      <p class="note" style="font-size:12pt; color:var(--ink2); margin:0"><b style="color:var(--ink)">9월 22~23일</b>, 손의윤 · 문성일이 다른 날 다시 찍었습니다 — <span class="mk">322장</span>.</p>
+    </div>
+  </div>
+  <div class="pull vbot">배운 것 — 현장 사진은 <b>여러 사람이, 다른 날, 다른 폰으로</b> 찍어야 합니다.</div>
+  <div class="pass">다음 발표자에게 → 「사진만이 아니었습니다. <b>현장에서 부딪힌 문제들</b>을 말씀드리겠습니다.」</div>
+  <div class="foot"><span>제작기 · 02 사진을 모으다</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 9 버그 일지 ① ═══════════ -->
+<section class="slide">
+  <div class="run"><span><b>03</b>&nbsp; 부딪히고 배운 것</span><span class="who">발표자 ③</span></div>
+  <h1>버그 일지 ① — <em>갤럭시에서만 화면이 노랗다</em></h1>
+  <div class="cols" style="gap:10mm; flex:1; min-height:0">
+    <div style="flex:1.2">
+      <table>
+      <tr><th style="width:17%">날짜</th><th>일어난 일</th></tr>
+      <tr><td><b>9/24</b></td><td>조원 갤럭시에서 「직접 걸어보기」를 켜면 <b>화면이 노랗게</b> 변한다는 제보</td></tr>
+      <tr><td><b>첫 짐작</b></td><td>위에서 내려다보는 3D가 비쳐 보인다 → 고쳤는데 <b>그대로</b></td></tr>
+      <tr><td><b>9/28</b></td><td>하루에 아홉 번 고치고 재며 원인이 <b>둘</b>이었음을 찾았다</td></tr>
+      <tr><td><b>원인 ①</b></td><td>계산 중 오류로 그리기가 멈춰, <b>직전 화면이 그대로 남아 있었다</b> → 화면 정리를 맨 앞으로, 오류는 기록으로</td></tr>
+      <tr><td><b>원인 ②</b></td><td>폰 그래픽 칩이 <b>빛을 계산하는 재질</b>을 못 그렸다 → 폰에서는 빛 계산 없는 단색으로</td></tr>
+      </table>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:4mm">
+      <div class="col" style="border-top:none; padding-top:0"><div class="k">결정적 단서</div>
+        <p>말로는 원인이 안 갈렸습니다. 폰 <b>화면 사진에서 색을 직접 재 보니</b> 규칙이 한 번에 보였습니다.</p></div>
+      <div class="sw">
+        <div style="background:#E4E1D8">바닥<br><b>정상</b></div>
+        <div style="background:#A86141; color:#fff">나무문<br><b>정상</b></div>
+        <div class="bad" style="background:#FBFC1C">벽<br><b>무너짐</b></div>
+        <div class="bad" style="background:#030915; color:#fff">천장<br><b>무너짐</b></div>
+      </div>
+      <div class="note">무늬(그림)가 입혀진 면은 멀쩡하고, <b style="color:var(--ink)">무늬 없는 면만</b> 틀어져 있었습니다.</div>
+      <div class="pull vbot" style="font-size:14pt">이 일로 앱 설정에 <b>「문제 기록」</b>을 두었습니다 — 폰에서 난 오류가 폰에 남습니다.</div>
+    </div>
+  </div>
+  <div class="foot"><span>제작기 · 03 부딪히고 배운 것</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 10 버그 일지 ② ═══════════ -->
+<section class="slide">
+  <div class="run"><span><b>03</b>&nbsp; 부딪히고 배운 것</span><span class="who">발표자 ③</span></div>
+  <h1>버그 일지 ② — <em>네 장면</em></h1>
+  <div class="log mid">
+    <div class="entry"><div class="dt">9월 19일</div><div class="h">또렷한 번호판을 못 읽는다</div>
+      <dl><dt>증상</dt><dd>사람 눈엔 「13209」가 또렷한데 글자 읽기가 빈칸을 낸다</dd>
+          <dt>원인</dt><dd>글자가 아니라 <b>「어디가 글자 줄인지」 찾기</b>에서 실패 — 로고·테두리가 섞여서</dd>
+          <dt>고침</dt><dd>숫자 덩어리만 잘라 <b>흰 바탕에 검게 다시 그려</b> 읽힌다</dd></dl></div>
+    <div class="entry"><div class="dt">9월 20일</div><div class="h">같은 사진을 다른 사진으로 본다</div>
+      <dl><dt>증상</dt><dd>기준 자료에 들어 있는 사진조차 후보에 못 든다</dd>
+          <dt>원인</dt><dd>앱은 <b>줄인 사진</b>으로, 기준 자료는 <b>원본</b>으로 계산하고 있었다</dd>
+          <dt>고침</dt><dd>두 쪽이 <b>똑같은 방법으로 줄이게</b> 맞췄다</dd></dl></div>
+    <div class="entry"><div class="dt">10월 6일</div><div class="h">복도 끝에서 바닥이 사라진다</div>
+      <dl><dt>증상</dt><dd>조원 폰 사진 24장 — 복도 양 끝에서 <b>바닥·천장이 꺼지고 허공</b></dd>
+          <dt>원인</dt><dd>먼 물체를 안 그리게 했는데, 100m 바닥 한 장의 <b>한가운데까지 거리</b>로 쟀다</dd>
+          <dt>고침</dt><dd>물체의 <b>가장자리까지 거리</b>로 재게 — 밟고 선 바닥은 꺼질 수 없다</dd></dl></div>
+    <div class="entry"><div class="dt">10월 7일</div><div class="h">고쳤는데 사이트가 그대로다</div>
+      <dl><dt>증상</dt><dd>검사는 통과했는데 조원 폰에는 <b>며칠째 옛 판</b></dd>
+          <dt>원인</dt><dd>배포 줄에 <b>멈춘 작업 하나</b>가 뒤의 모든 배포를 막고 있었다</dd>
+          <dt>고침</dt><dd>줄을 새로 만들고, 배포에 <b>15분 제한</b>을 걸었다</dd></dl></div>
+  </div>
+  <div class="foot"><span>제작기 · 03 부딪히고 배운 것</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 11 하지 않기로 한 것 ═══════════ -->
+<section class="slide">
+  <div class="run"><span><b>03</b>&nbsp; 부딪히고 배운 것</span><span class="who">발표자 ③</span></div>
+  <h1>검토했지만 <em>하지 않기로 한 것</em></h1>
+  <div class="cols mid">
+    <div class="col"><div class="k">9월 16일 계획의 첫 주제</div><div class="h">걸음 센서로 위치 따라가기</div>
+      <p>폰의 가속도·자이로로 걸음을 세어 위치를 추정하는 방법. 걸을수록 <b>오차가 쌓여</b> 자주 바로잡아 줄 기준점이 필요합니다.</p>
+      <p>→ 출발점은 <b>출입문 QR</b>, 걷는 동안은 <b>단계마다 사진</b>을 사람이 맞춰 보는 쪽으로.</p></div>
+    <div class="col"><div class="k">9월 17일 조사</div><div class="h">기압계로 몇 층인지 알기</div>
+      <p>웹 브라우저에는 기압계를 읽는 <b>표준 기능이 없습니다.</b> 기압은 날씨에 따라 통째로 변해 「몇 층 올라왔다」만 알 수 있습니다.</p>
+      <p>→ 앱으로 감싸야 가능 — <b>지금은 보류.</b></p></div>
+    <div class="col"><div class="k">9월 17일 사진 감사</div><div class="h">강의실 문 사진 더 찍기</div>
+      <p>강의실 문은 <b>전부 똑같이 생겼습니다.</b> 사진을 늘려도 풀리지 않는 문제였습니다.</p>
+      <p>→ 추가 촬영에서 빼고, 문 옆 <b>호실 번호판의 글자</b>에 맡겼습니다.</p></div>
+  </div>
+  <div class="pull vbot">「안 하기로 한 것」을 정하는 데도 <b>조사와 기록</b>이 필요했습니다 — 셋 다 문서로 남아 있습니다.</div>
+  <div class="foot"><span>제작기 · 03 부딪히고 배운 것</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 12 배운 것 · 다시 한다면 ═══════════ -->
+<section class="slide">
+  <div class="run"><span><b>03</b>&nbsp; 부딪히고 배운 것</span><span class="who">발표자 ③</span></div>
+  <h1>배운 것, 그리고 <em>다시 한다면</em></h1>
+  <div class="cols mid" style="gap:12mm">
+    <div>
+      <table>
+      <tr><th colspan="2">배운 것</th></tr>
+      <tr><td style="width:12mm"><span class="big" style="font-size:22pt">1</span></td><td><b>현장 사진은 여러 사람이, 다른 날</b> 찍어야 한다 — 한 사람의 사진은 한 사람의 눈일 뿐</td></tr>
+      <tr><td><span class="big" style="font-size:22pt">2</span></td><td><b>폰마다 다르다</b> — 노트북에서 멀쩡한 화면이 갤럭시에서 무너진다. 실제 기기 화면을 재 볼 것</td></tr>
+      <tr><td><span class="big" style="font-size:22pt">3</span></td><td><b>고치면 검사, 겪은 일은 기록</b> — 같은 실수를 두 번 하지 않는 가장 싼 방법</td></tr>
+      </table>
+    </div>
+    <div>
+      <table>
+      <tr><th colspan="2">다시 한다면</th></tr>
+      <tr><td style="width:12mm"><span class="big" style="font-size:22pt">1</span></td><td><b>첫 촬영 전에 촬영 안내서</b>부터 — 처음 복도 사진은 자리마다 1장뿐이라 다시 찍으러 갔다</td></tr>
+      <tr><td><span class="big" style="font-size:22pt">2</span></td><td><b>갤럭시 · 아이폰을 첫 달부터</b> 옆에 두고 — 화면 문제를 9월에야 만났다</td></tr>
+      <tr><td><span class="big" style="font-size:22pt">3</span></td><td><b>「문제 기록」 기능을 처음부터</b> — 노란 화면은 원인을 찾는 데 나흘이 걸렸다</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="foot"><span>제작기 · 03 부딪히고 배운 것</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 13 마무리 ═══════════ -->
+<section class="slide fin">
+  <div class="k">마치며</div>
+  <h1 style="font-size:30pt">한 사람은 코드를 쓰고,<br>두 사람은 건물을 걸었습니다.<br><em>그 둘이 매일 만난 것</em>이 이 작품입니다.</h1>
+  <div class="rule"></div>
+  <div class="s">고친 버그와 남긴 기록은 코드 저장소에, 찍은 사진은 원본 폴더에 모두 남겨 두었습니다.<br>다음에 이 건물을 맡을 사람이 처음부터 다시 하지 않아도 되도록.</div>
+  <div class="t">감사합니다 — 질문 받겠습니다</div>
+  <div class="foot"><span>제작기 · 김민종 · 손의윤 · 문성일</span><span class="pg"></span></div>
+</section>
+
+</body>
+</html>

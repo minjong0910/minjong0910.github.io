@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>캡스톤 발표 1 — 이용자편</title>
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     캡스톤 발표 1 · 이용자편 (16:9 · 338.7mm × 190.5mm) — 3인 발표, 13쪽
+     이 작품을 「쓰는 사람」의 눈으로만 말한다. 만든 과정·기술·측정 수치·도면은 넣지 않는다
+     (그건 기존 캡스톤 자료와 2번 제작기편의 몫).
+       1부 누가, 어디서 헤매나  →  2부 무엇이 달라지나  →  3부 졸업 뒤에도 돌아가게
+
+     디자인 : 건물 안내 표지판 — 흰 바탕 + 표지판 파랑 + 노랑 화살표
+       기존 캡스톤(회색 + 먹색 띠 + 호박) · 2번 제작기편(흰 + 바탕체 + 라즈베리)과 겹치지 않게.
+       표지판 파랑 #1F4E9E 흰 글자 대비 8.0:1 · 노랑 #F6C343 은 파랑 위에서만 쓴다(5.2:1)
+
+     ※ 고칠 때는 이 파일을 고친다 → pwsh -File 도구\발표_모의_만들기.ps1 -Kind 1
+     ══════════════════════════════════════════════════════════════ */
+  @page { size: 338.7mm 190.5mm; margin: 0; }
+  :root{
+    --sign:#1F4E9E; --signD:#163A78; --yel:#F6C343; --ink:#16202E; --ink2:#46566B; --dim:#7A8799;
+    --pale:#EEF3FA; --line:#D9E1EC; --no:#B42318; --mid:#A15C07;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:#fff; }
+  body{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; color:var(--ink);
+        -webkit-print-color-adjust:exact; print-color-adjust:exact; counter-reset:sl; }
+  .slide{ width:338.7mm; height:190.5mm; page-break-after:always; position:relative; overflow:hidden;
+          padding:13mm 18mm 16mm; background:#fff; counter-increment:sl; display:flex; flex-direction:column; }
+  .slide:last-child{ page-break-after:auto; }
+
+  /* 머리 — 표지판 한 장 + 제목 */
+  .plate{ align-self:flex-start; display:flex; align-items:center; gap:3mm; background:var(--sign); color:#fff;
+          border-radius:2mm; padding:1.8mm 5mm 1.8mm 3.5mm; font-size:10.5pt; font-weight:700; letter-spacing:1px; margin-bottom:4mm; }
+  .plate .ar{ color:var(--yel); font-size:13pt; line-height:1; }
+  .plate .who{ font-weight:400; opacity:.8; margin-left:2mm; letter-spacing:0; }
+  h1{ font-size:25pt; margin:0 0 6mm; letter-spacing:-0.8px; line-height:1.25; }
+  h1 em{ font-style:normal; color:var(--sign); }
+  .lead{ font-size:13pt; color:var(--ink2); margin:-3mm 0 5mm; line-height:1.55; }
+  .foot{ position:absolute; left:18mm; right:18mm; bottom:6mm; display:flex; justify-content:space-between;
+         font-size:8.5pt; color:var(--dim); border-top:1px solid var(--line); padding-top:2mm; }
+  .foot .pg::after{ content:counter(sl) " / 13"; }
+  .vbot{ margin-top:auto !important; }
+  .mid{ margin-top:auto; margin-bottom:auto; }
+  .grow{ flex:1; min-height:0; }
+
+  .row{ display:flex; gap:6mm; }
+  .row > *{ flex:1; min-width:0; }
+  .card{ border:1.5px solid var(--line); border-radius:3mm; padding:5.5mm 6mm; background:#fff; }
+  .card .t{ font-size:14pt; font-weight:700; margin-bottom:2mm; }
+  .card p{ margin:0; font-size:13pt; line-height:1.62; color:var(--ink2); }
+  .card p b{ color:var(--ink); }
+  .card.s{ background:var(--pale); border-color:#C9D6EA; }
+  .tag{ display:inline-block; font-size:9pt; font-weight:700; letter-spacing:1px; color:var(--sign); margin-bottom:1.5mm; }
+  .need{ margin-top:4mm; padding-top:3.5mm; border-top:1px dashed var(--line); font-size:13pt; font-weight:700; color:var(--ink); }
+  .need::before{ content:"→ "; color:var(--sign); font-weight:700; }
+  .quote{ font-size:15pt; font-weight:700; color:var(--ink); line-height:1.45; margin:1mm 0 2mm; }
+  .quote::before{ content:"「"; color:var(--sign); } .quote::after{ content:"」"; color:var(--sign); }
+  .badge{ width:13mm; height:13mm; border-radius:50%; background:var(--sign); color:#fff; display:flex; align-items:center; justify-content:center;
+          font-size:15pt; font-weight:700; margin-bottom:3mm; }
+  .bar{ background:var(--sign); color:#fff; border-radius:2.5mm; padding:4mm 7mm; font-size:13pt; line-height:1.55; }
+  .bar b{ color:var(--yel); }
+  .pass{ font-size:10.5pt; color:var(--dim); margin-top:2.5mm; }
+  .pass b{ color:var(--sign); }
+
+  table{ width:100%; border-collapse:separate; border-spacing:0; font-size:12pt; }
+  th,td{ padding:2.8mm 3.5mm; border-bottom:1px solid var(--line); text-align:left; vertical-align:middle; color:var(--ink2); }
+  th{ background:var(--sign); color:#fff; font-size:10.5pt; font-weight:700; }
+  th:first-child{ border-top-left-radius:2mm; } th:last-child{ border-top-right-radius:2mm; }
+  td b{ color:var(--ink); }
+  td.c, th.c{ text-align:center; }
+  tr.me td{ background:var(--pale); }
+  tr.me td:first-child{ border-left:2mm solid var(--sign); }
+  .y{ color:var(--sign); font-weight:700; font-size:15pt; } .n{ color:var(--no); font-weight:700; font-size:14pt; } .m{ color:var(--mid); font-weight:700; font-size:14pt; }
+  td .sm{ display:block; font-size:9.5pt; color:var(--dim); line-height:1.3; }
+
+  .pics{ display:flex; gap:4mm; }
+  .pics figure{ flex:1; margin:0; }
+  .pics img{ width:100%; height:86mm; object-fit:cover; border-radius:2.5mm; display:block; }
+  .pics figcaption{ margin-top:2.5mm; font-size:11.5pt; line-height:1.4; }
+  .pics figcaption b{ display:block; font-size:12.5pt; color:var(--ink); margin-bottom:.5mm; }
+  .pics figcaption span{ color:var(--dim); font-size:10pt; }
+
+  /* 층별 안내판 */
+  .dir{ border-radius:3mm; overflow:hidden; border:2px solid var(--sign); display:flex; flex-direction:column; }
+  .dir .r{ flex:1; display:flex; align-items:stretch; border-bottom:1px solid #C9D6EA; }
+  .dir .r:last-child{ border-bottom:none; }
+  .dir .f{ flex:none; width:20mm; background:var(--sign); color:#fff; font-size:16pt; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .dir .r:nth-child(odd) .f{ background:var(--signD); }
+  .dir .k{ flex:none; width:30mm; display:flex; align-items:center; justify-content:center; font-size:12.5pt; font-weight:700; background:var(--pale); color:var(--sign); }
+  .dir .v{ flex:1; padding:2.6mm 5mm; font-size:11.8pt; color:var(--ink2); display:flex; align-items:center; gap:2.5mm; flex-wrap:wrap; }
+  .chip{ display:inline-block; border:1.2px solid var(--line); border-radius:10mm; padding:.6mm 3mm; font-size:10.5pt; color:var(--ink2); background:#fff; }
+  .chip.on{ border-color:var(--sign); color:var(--sign); font-weight:700; }
+
+  /* 두 언어 */
+  .pair{ display:flex; border-radius:2.5mm; overflow:hidden; margin-bottom:3.5mm; border:1px solid #C9D6EA; }
+  .pair .ko, .pair .en{ flex:1; padding:3.5mm 6mm; font-size:14pt; font-weight:700; display:flex; align-items:center; gap:3mm; }
+  .pair .ko{ background:var(--sign); color:#fff; }
+  .pair .en{ background:#fff; color:var(--sign); }
+  .pair .ar{ color:var(--yel); font-size:16pt; }
+  .pair .en .ar{ color:var(--sign); }
+  .pair small{ font-size:9pt; font-weight:400; opacity:.75; margin-left:auto; letter-spacing:.5px; }
+
+  /* 표지 */
+  .cover{ flex-direction:row; padding:0; }
+  .cover .l{ flex:1.1; padding:0 14mm 0 24mm; display:flex; flex-direction:column; justify-content:center; }
+  .cover .k{ font-size:10.5pt; letter-spacing:4px; color:var(--sign); font-weight:700; margin-bottom:7mm; }
+  .cover h1{ font-size:42pt; line-height:1.18; letter-spacing:-1.8px; margin-bottom:8mm; }
+  .cover .s{ font-size:15pt; color:var(--ink2); line-height:1.6; margin-bottom:12mm; }
+  .cover .s b{ color:var(--ink); font-size:18pt; }
+  .cover .m{ font-size:11.5pt; color:var(--dim); letter-spacing:1px; }
+  .cover .r{ flex:1; background:var(--pale); display:flex; align-items:center; justify-content:center; }
+  .bigsign{ width:122mm; background:var(--sign); border-radius:4mm; padding:5mm 0; box-shadow:0 0 0 2.5mm #fff, 0 0 0 3.2mm #C9D6EA; }
+  .bigsign .ln{ display:flex; align-items:center; gap:5mm; padding:4.5mm 8mm; color:#fff; font-size:17pt; font-weight:700; border-bottom:1px solid rgba(255,255,255,.18); }
+  .bigsign .ln:last-child{ border-bottom:none; }
+  .bigsign .ar{ color:var(--yel); font-size:22pt; width:9mm; text-align:center; flex:none; }
+  .bigsign small{ font-size:10.5pt; font-weight:400; opacity:.75; margin-left:auto; }
+
+  .fin{ background:var(--sign); color:#fff; justify-content:center; align-items:center; text-align:center; }
+  .fin .ar{ font-size:44pt; color:var(--yel); line-height:1; margin-bottom:7mm; }
+  .fin h1{ color:#fff; font-size:36pt; line-height:1.3; margin-bottom:8mm; }
+  .fin h1 em{ color:var(--yel); }
+  .fin .s{ font-size:14pt; line-height:1.85; color:rgba(255,255,255,.85); }
+  .fin .t{ margin-top:11mm; font-size:14pt; letter-spacing:4px; color:var(--yel); font-weight:700; }
+  .fin .foot{ border-top-color:rgba(255,255,255,.25); color:rgba(255,255,255,.55); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ 1 표지 ═══════════ -->
+<section class="slide cover">
+  <div class="l">
+    <div class="k">캡스톤 디자인 발표 · 이용자편</div>
+    <h1>길을 묻지 않아도<br>되는 <em>3호관</em></h1>
+    <div class="s"><b>공대 3호관 길안내</b><br>쓰는 사람의 눈으로 말씀드립니다</div>
+    <div class="m">김민종 · 손의윤 · 문성일</div>
+  </div>
+  <div class="r">
+    <div class="bigsign">
+      <div class="ln"><span class="ar">←</span>13101 강의실<small>1F</small></div>
+      <div class="ln"><span class="ar">→</span>화장실<small>1F</small></div>
+      <div class="ln"><span class="ar">↑</span>엘리베이터<small>2F – 5F</small></div>
+      <div class="ln"><span class="ar">↓</span>크리에이티브 존<small>B1</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 2 발표 순서 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>발표 순서</div>
+  <h1>세 사람이 <em>세 갈래</em>로 말씀드립니다</h1>
+  <div class="row">
+    <div class="card s"><div class="badge">1</div><div class="t">누가, 어디서 헤매나</div>
+      <p>이 건물을 찾는 <b>네 사람</b> · 헤매는 <b>다섯 순간</b> · 지금 쓰는 방법은 왜 모자라나</p>
+      <div class="need">발표자 ① · 3~5쪽</div></div>
+    <div class="card s"><div class="badge">2</div><div class="t">무엇이 달라지나</div>
+      <p>쓰기 <b>전과 후</b> · <b>어디까지</b> 안내하나 · <b>영어</b> 안내 · <b>모으지 않는</b> 정보</p>
+      <div class="need">발표자 ② · 6~9쪽</div></div>
+    <div class="card s"><div class="badge">3</div><div class="t">졸업 뒤에도 돌아가게</div>
+      <p>누가 <b>무엇을 맡나</b> · 직접 <b>써 보게 하는</b> 시험 · <b>앞으로 1년</b></p>
+      <div class="need">발표자 ③ · 10~12쪽</div></div>
+  </div>
+  <div class="bar vbot">이 자료에는 기술 설명과 측정 결과를 넣지 않았습니다. <b>처음 온 사람이 무엇을 겪고, 무엇이 달라지는지</b>만 말씀드립니다.</div>
+  <div class="foot"><span>공대 3호관 길안내 · 이용자편</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 3 네 사람 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>1부 · 누가, 어디서 헤매나<span class="who">발표자 ①</span></div>
+  <h1>이 건물을 찾는 <em>네 사람</em></h1>
+  <div class="row mid">
+    <div class="card"><span class="tag">신입생 · 편입생</span>
+      <div class="quote">시간표에 「13405」라고만 적혀 있다</div>
+      <p>첫 주, 수업 5분 전. 몇 층인지, 엘리베이터에서 <b>어느 쪽</b>인지 모른다.</p>
+      <div class="need">호실 번호 하나로 가는 길</div></div>
+    <div class="card"><span class="tag">방문객 · 학부모 · 면접 응시자</span>
+      <div class="quote">어느 문으로 들어왔는지도 모른다</div>
+      <p>3호관 문은 <b>정문·후문·동문·서문</b> 넷. 들어온 문에 따라 왼쪽·오른쪽이 바뀐다.</p>
+      <div class="need">들어온 문을 기준으로 한 안내</div></div>
+    <div class="card"><span class="tag">외국인 유학생</span>
+      <div class="quote">안내판이 한국어뿐이다</div>
+      <p>층 안내도도 호실 표지도 한국어. 번역기로는 <b>방향</b>을 알 수 없다.</p>
+      <div class="need">같은 안내를 영어로</div></div>
+    <div class="card s"><span class="tag">학과 사무실 · 관리자</span>
+      <div class="quote">같은 길을 묻는 질문, 바뀐 안내</div>
+      <p>길 질문에 답하고, 공사·게시물로 <b>모습이 바뀌면</b> 안내도 고쳐야 한다.</p>
+      <div class="need">바뀐 곳만 확인하는 관리</div></div>
+  </div>
+  <div class="bar vbot">네 사람의 공통점 — <b>「지금 어디에 있고, 어느 쪽으로 가야 하는지」</b>를 건물이 알려 주지 않습니다.</div>
+  <div class="foot"><span>1부 · 누가, 어디서 헤매나</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 4 다섯 순간 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>1부 · 누가, 어디서 헤매나<span class="who">발표자 ①</span></div>
+  <h1>3호관에서 <em>헤매는 다섯 순간</em></h1>
+  <div class="pics">
+    <figure><img data-photo="site:GATE_BACK_STAIR/01.jpg" alt="후문 계단">
+      <figcaption><b>「이 계단은 어디로?」</b>후문 쪽 계단<br><span>후문 · 1층</span></figcaption></figure>
+    <figure><img data-photo="site:EMS3/01.jpg" alt="비상계단 문">
+      <figcaption><b>「여기가 몇 층?」</b>층마다 똑같은 비상계단 문<br><span>3층 비상계단</span></figcaption></figure>
+    <figure><img data-photo="site:HALL3R/01.jpg" alt="복도">
+      <figcaption><b>「13306은 왼쪽? 오른쪽?」</b>끝이 안 보이는 복도<br><span>3층 오른쪽 복도</span></figcaption></figure>
+    <figure><img data-photo="site:WC3/01.jpg" alt="화장실 앞">
+      <figcaption><b>「화장실은 이 끝?」</b>좁고 막힌 듯한 통로<br><span>3층 화장실 앞</span></figcaption></figure>
+    <figure><img data-photo="site:B1PATH/01.jpg" alt="지하 통로">
+      <figcaption><b>「나가는 문은?」</b>지하에서는 바깥이 안 보인다<br><span>지하 1층</span></figcaption></figure>
+  </div>
+  <div class="bar vbot">다섯 장 모두 저희가 3호관에서 직접 찍은 사진입니다. <b>지도에는 없고, 물어볼 사람도 없는 자리</b>들입니다.</div>
+  <div class="foot"><span>1부 · 누가, 어디서 헤매나</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 5 지금 쓰는 방법 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>1부 · 누가, 어디서 헤매나<span class="who">발표자 ①</span></div>
+  <h1>지금 쓰는 방법은 <em>한 칸씩 모자랍니다</em></h1>
+  <div class="row grow" style="gap:6mm; align-items:flex-start">
+    <table style="flex:1">
+    <tr><th style="width:24%">방법</th><th class="c">아무 때나</th><th class="c">몇 층·몇 호</th><th class="c">들어온 문 기준</th>
+        <th class="c">인터넷 없이</th><th class="c">설치 없이</th><th class="c">바뀌면 바로</th></tr>
+    <tr><td><b>지나가는 사람에게 묻기</b></td><td class="c"><span class="n">✕</span><span class="sm">밤·주말엔 없음</span></td>
+        <td class="c"><span class="m">△</span><span class="sm">아는 사람만</span></td><td class="c"><span class="y">○</span></td><td class="c"><span class="y">○</span></td><td class="c"><span class="y">○</span></td><td class="c"><span class="y">○</span></td></tr>
+    <tr><td><b>벽의 층 안내도</b><span class="sm">비상대피 경로도</span></td><td class="c"><span class="y">○</span></td>
+        <td class="c"><span class="m">△</span><span class="sm">층마다 한 장</span></td><td class="c"><span class="n">✕</span></td><td class="c"><span class="y">○</span></td><td class="c"><span class="y">○</span></td><td class="c"><span class="n">✕</span><span class="sm">다시 인쇄</span></td></tr>
+    <tr><td><b>지도 앱</b><span class="sm">GPS</span></td><td class="c"><span class="y">○</span></td>
+        <td class="c"><span class="n">✕</span><span class="sm">건물 입구까지</span></td><td class="c"><span class="n">✕</span></td><td class="c"><span class="n">✕</span></td><td class="c"><span class="y">○</span></td><td class="c"><span class="n">✕</span></td></tr>
+    <tr><td><b>실내 측위 앱</b><span class="sm">비콘·와이파이</span></td><td class="c"><span class="y">○</span></td>
+        <td class="c"><span class="y">○</span></td><td class="c"><span class="y">○</span></td><td class="c"><span class="m">△</span></td><td class="c"><span class="n">✕</span><span class="sm">장치·배터리</span></td><td class="c"><span class="m">△</span></td></tr>
+    <tr class="me"><td><b>공대 3호관 길안내</b></td><td class="c"><span class="y">○</span></td>
+        <td class="c"><span class="y">○</span></td><td class="c"><span class="y">○</span></td><td class="c"><span class="y">○</span><span class="sm">길안내</span></td><td class="c"><span class="y">○</span><span class="sm">문에 QR</span></td><td class="c"><span class="y">○</span><span class="sm">이용자 제보</span></td></tr>
+    </table>
+    <figure style="flex:none; width:52mm; margin:0"><img data-photo="site:SIGN1/01.jpg" alt="1층 비상대피 경로도"
+        style="width:100%; border-radius:2.5mm; display:block">
+      <figcaption style="font-size:10pt; color:var(--dim); margin-top:2mm; line-height:1.4">지금 3호관의 층 안내 — 1층 비상대피 경로도. 호실 번호는 눈으로 찾기 어렵습니다</figcaption></figure>
+  </div>
+  <div class="bar vbot" style="font-size:12.5pt">이용자에게 필요한 <b>여섯 칸을 한 번에 채우는 것</b>이 목표였습니다.</div>
+  <div class="pass">다음 발표자에게 → 「그렇다면 네 사람에게 <b>실제로 무엇이 달라지는지</b> 말씀드리겠습니다.」</div>
+  <div class="foot"><span>1부 · 누가, 어디서 헤매나</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 6 전과 후 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>2부 · 무엇이 달라지나<span class="who">발표자 ②</span></div>
+  <h1>네 사람에게 <em>달라지는 것</em></h1>
+  <table>
+  <tr><th style="width:21%">누가</th><th style="width:37%">쓰기 전</th><th>쓰고 나서</th></tr>
+  <tr><td><b>신입생 · 편입생</b></td><td>복도 끝까지 걸으며 문 번호를 하나씩 확인</td>
+      <td><b>호실 번호 하나</b>로 층 · 방향 · 몇 번째 문까지</td></tr>
+  <tr><td><b>방문객 · 학부모</b></td><td>어느 문으로 들어왔는지 몰라 왼쪽·오른쪽부터 헷갈림</td>
+      <td>문에 붙은 <b>QR 한 번</b> — 그 문을 기준으로 왼쪽·오른쪽을 말해 줌</td></tr>
+  <tr><td><b>면접 · 행사 손님</b></td><td>교수님 연구실 호실을 미리 알아야 함</td>
+      <td><b>교수님 성함</b>으로도 찾기</td></tr>
+  <tr><td><b>외국인 유학생</b></td><td>한국어 안내판 앞에서 번역기</td>
+      <td>같은 안내를 <b>영어로</b> — 화면과 안내 문구 모두</td></tr>
+  <tr class="me"><td><b>학과 사무실</b></td><td>바뀐 곳을 직접 찾아가 사진을 다시 찍어야 함</td>
+      <td>지나가던 이용자가 올린 사진을 보고 <b>승인만</b></td></tr>
+  </table>
+  <div class="row vbot" style="margin-top:5mm; gap:5mm">
+    <div class="card s" style="padding:4mm 5.5mm"><p><b>설치는 주소 하나</b> — 앱스토어를 거치지 않고, 원하면 홈 화면에 아이콘으로 둡니다.</p></div>
+    <div class="card s" style="padding:4mm 5.5mm"><p><b>지하와 계단에서도</b> — 한 번 열어 두면 신호가 없어도 길안내는 됩니다.</p></div>
+  </div>
+  <div class="foot"><span>2부 · 무엇이 달라지나</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 7 어디까지 안내하나 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>2부 · 무엇이 달라지나<span class="who">발표자 ②</span></div>
+  <h1>어디까지 안내하나 — <em>층별 안내판</em>으로 보면</h1>
+  <div class="row grow" style="gap:7mm">
+    <div class="dir" style="flex:1.7">
+      <div class="r"><div class="f">5F</div><div class="k">호실 20곳</div><div class="v"><span class="chip">화장실</span><span class="chip">비상계단</span><span class="chip">라운지</span><span class="chip">엘리베이터</span></div></div>
+      <div class="r"><div class="f">4F</div><div class="k">호실 19곳</div><div class="v"><span class="chip">화장실</span><span class="chip">비상계단</span><span class="chip">라운지</span><span class="chip">엘리베이터</span><span class="chip on">KTC 프로그래밍 동아리실</span></div></div>
+      <div class="r"><div class="f">3F</div><div class="k">호실 19곳</div><div class="v"><span class="chip">화장실</span><span class="chip">비상계단</span><span class="chip">라운지</span><span class="chip">엘리베이터</span></div></div>
+      <div class="r"><div class="f">2F</div><div class="k">호실 21곳</div><div class="v"><span class="chip">화장실</span><span class="chip">비상계단</span><span class="chip">라운지</span><span class="chip">엘리베이터</span></div></div>
+      <div class="r"><div class="f">1F</div><div class="k">호실 21곳</div><div class="v"><span class="chip">화장실</span><span class="chip">비상계단</span><span class="chip">라운지</span><span class="chip">엘리베이터</span><span class="chip on">출입문 4곳</span></div></div>
+      <div class="r"><div class="f">B1</div><div class="k">—</div><div class="v"><span class="chip on">크리에이티브 존</span><span class="chip">엘리베이터</span></div></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:4mm">
+      <div class="card s"><div class="t">찾는 방법 세 가지</div>
+        <p><b>호실 번호</b> · <b>교수님 성함</b> · <b>종류</b>(강의실·화장실·비상계단·크리에이티브 존)</p></div>
+      <div class="card"><div class="t">출발점 네 곳</div>
+        <p><b>정문 · 후문 · 동문 · 서문</b> — 어느 문에서 출발해도 지하 1층부터 5층까지</p></div>
+
+    </div>
+  </div>
+  <div class="foot"><span>2부 · 무엇이 달라지나</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 8 영어 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>2부 · 무엇이 달라지나<span class="who">발표자 ②</span></div>
+  <h1>같은 안내, <em>두 언어</em></h1>
+  <div class="lead">한국어 · English 단추 하나로 <b>화면과 안내 문구가 함께</b> 바뀝니다. 아래는 앱에 실제로 들어 있는 문장입니다.</div>
+  <div class="pair"><div class="ko"><span class="ar">→</span>1층 라운지에서 우회전 하세요<small>후문</small></div>
+    <div class="en"><span class="ar">→</span>In the lobby, turn right</div></div>
+  <div class="pair"><div class="ko"><span class="ar">↑</span>엘리베이터 앞으로 가세요<small>정문</small></div>
+    <div class="en"><span class="ar">↑</span>Head to the elevator</div></div>
+  <div class="pair"><div class="ko"><span class="ar">↙</span>좌측에 보이는 계단을 통해 내려가세요<small>지하로</small></div>
+    <div class="en"><span class="ar">↙</span>Take the stairs on your left down</div></div>
+  <div class="pair"><div class="ko"><span class="ar">●</span>크리에이티브 존에 도착했습니다<small>도착</small></div>
+    <div class="en"><span class="ar">●</span>You have arrived at the Creative Zone</div></div>
+  <div class="bar vbot">번역기에 맡기지 않고 <b>한 문장씩 두 언어로 적었습니다</b> — 방향 말(왼쪽·오른쪽·내려가세요)이 틀리면 길 전체가 틀리기 때문입니다.</div>
+  <div class="foot"><span>2부 · 무엇이 달라지나</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 9 모으지 않는 정보 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>2부 · 무엇이 달라지나<span class="who">발표자 ②</span></div>
+  <h1>길안내는 하지만, <em>당신을 따라다니지 않습니다</em></h1>
+  <div class="row grow">
+    <div style="flex:1.15; display:flex; flex-direction:column; gap:3.5mm">
+      <div class="card"><div class="t"><span class="n">✕</span>&nbsp; 위치 권한을 쓰지 않습니다</div>
+        <p>GPS·위치 정보를 읽는 코드가 없습니다. 출발점은 <b>이용자가 찍은 QR</b>로 정합니다.</p></div>
+      <div class="card"><div class="t"><span class="n">✕</span>&nbsp; 가입도 로그인도 없습니다</div>
+        <p>이름·전화번호·이메일을 묻지 않습니다. <b>로그인은 관리자만</b> 합니다.</p></div>
+      <div class="card"><div class="t"><span class="n">✕</span>&nbsp; 방문 기록을 모으지 않습니다</div>
+        <p>이용 통계·광고 분석 도구를 넣지 않았습니다. <b>최근 검색·즐겨찾기는 그 폰 안에만</b> 남습니다.</p></div>
+    </div>
+    <div class="card s" style="flex:1"><div class="t">제보할 때만, 이것만 보냅니다</div>
+      <table style="font-size:11.5pt; margin-top:2mm">
+      <tr><td><b>사진</b></td><td>이용자가 「올리기」를 눌렀을 때만</td></tr>
+      <tr><td><b>메모</b></td><td>쓰고 싶을 때만</td></tr>
+      <tr><td><b>보낸 시각 · 들어온 문</b></td><td>어느 안내가 낡았는지 알려고</td></tr>
+      <tr><td><b>브라우저 종류</b></td><td>특정 폰에서만 나는 문제를 찾으려고</td></tr>
+      </table>
+      <p style="margin-top:3.5mm">올라온 사진은 <b>관리자가 승인하기 전까지 아무에게도 보이지 않습니다.</b>
+         사진 속 얼굴을 자동으로 가리는 기능을 다음에 붙입니다.</p></div>
+  </div>
+  <div class="pass">다음 발표자에게 → 「이 앱이 <b>저희가 졸업한 뒤에도</b> 돌아가려면 무엇이 필요한지 말씀드리겠습니다.」</div>
+  <div class="foot"><span>2부 · 무엇이 달라지나</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 10 누가 무엇을 맡나 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>3부 · 졸업 뒤에도 돌아가게<span class="who">발표자 ③</span></div>
+  <h1>졸업 뒤에는 <em>누가 무엇을</em> 맡나</h1>
+  <div class="row">
+    <div class="card"><div class="badge">이</div><div class="t">이용자</div>
+      <p>안내 사진과 <b>모습이 달라진 곳</b>을 보면 찍어 올린다</p>
+      <div class="need">필요한 것 — 폰 하나</div></div>
+    <div class="card s"><div class="badge">관</div><div class="t">관리자 한 명</div>
+      <p>올라온 사진을 보고 <b>승인하거나 지운다.</b> 승인 전 사진은 관리자만 본다</p>
+      <div class="need">필요한 것 — 관리자 계정</div></div>
+    <div class="card"><div class="badge">앱</div><div class="t">앱</div>
+      <p>승인된 사진을 <b>모든 이용자에게</b> 나눠 준다. 새 판이 나오면 <b>바뀐 것만</b> 받는다</p>
+      <div class="need">필요한 것 — 무료 호스팅</div></div>
+  </div>
+  <div class="card vbot" style="margin-top:5mm; border-color:var(--sign)"><div class="t" style="color:var(--sign)">졸업 전에 학과 사무실로 넘길 것 — 인계 목록</div>
+    <table style="font-size:11.8pt">
+    <tr><td style="width:4%" class="c"><span class="y" style="font-size:12pt">☐</span></td><td><b>관리자 등록</b> — 학과 사무실 담당자를 관리자 명단에</td>
+        <td style="width:4%" class="c"><span class="y" style="font-size:12pt">☐</span></td><td><b>출입문 QR 원본</b> — 떨어지면 다시 인쇄할 A4 한 장</td></tr>
+    <tr><td class="c"><span class="y" style="font-size:12pt">☐</span></td><td><b>관리자 안내서 한 장</b> — 승인·삭제 방법</td>
+        <td class="c"><span class="y" style="font-size:12pt">☐</span></td><td><b>코드 저장소 주소</b> — 다음 학생이 이어받도록</td></tr>
+    </table></div>
+  <div class="foot"><span>3부 · 졸업 뒤에도 돌아가게</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 11 써 보게 하는 시험 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>3부 · 졸업 뒤에도 돌아가게<span class="who">발표자 ③</span></div>
+  <h1>처음 온 사람에게 <em>직접 써 보게 합니다</em> — 11월</h1>
+  <div class="row mid">
+    <div class="card"><span class="tag">누구에게</span><div class="t">3호관이 처음인 사람</div>
+      <p>다른 단과대 학생 · 외국인 유학생. <b>저희 조원과 아는 사람은 빼고</b> 고릅니다.</p></div>
+    <div class="card"><span class="tag">무엇을</span><div class="t">문에서 출발해 세 곳 찾기</div>
+      <p><b>강의실 · 화장실 · 비상계단</b>. 앱을 쓰는 사람과 벽의 안내도만 보는 사람으로 나눕니다.</p></div>
+    <div class="card"><span class="tag">무엇을 보나</span><div class="t">도착 · 시간 · 물어봤나</div>
+      <p>도착했는지, 얼마나 걸렸는지, <b>길을 물었는지</b>, 어디서 멈칫했는지를 옆에서 적습니다.</p></div>
+    <div class="card s"><span class="tag">그다음</span><div class="t">멈칫한 자리를 고친다</div>
+      <p>사람들이 머뭇거린 단계의 <b>사진과 안내 문구</b>를 바꾸고, 다시 걸어 봅니다.</p></div>
+  </div>
+  <div class="bar vbot">지금까지는 저희가 만든 것을 <b>저희가</b> 확인했습니다. 마지막 확인은 <b>처음 온 사람</b>이 해야 합니다.</div>
+  <div class="foot"><span>3부 · 졸업 뒤에도 돌아가게</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 12 앞으로 1년 ═══════════ -->
+<section class="slide">
+  <div class="plate"><span class="ar">→</span>3부 · 졸업 뒤에도 돌아가게<span class="who">발표자 ③</span></div>
+  <h1>앞으로 1년, <em>이런 날에 쓰이도록</em></h1>
+  <div class="row mid">
+    <div class="card"><span class="tag">3월</span><div class="t">신입생 오리엔테이션</div>
+      <p>OT 안내 자료에 <b>주소와 QR</b>을 함께. 첫 주의 「강의실 어디예요?」를 줄입니다.</p></div>
+    <div class="card"><span class="tag">입시 · 면접 날</span><div class="t">처음 오는 손님</div>
+      <p>면접장·대기실을 <b>교수님 성함·호실</b>로 바로 찾게. 안내 요원 대신 문마다 QR.</p></div>
+    <div class="card"><span class="tag">상시</span><div class="t">학과 홈페이지 · 출입문</div>
+      <p>홈페이지 「찾아오는 길」에 주소를, <b>네 문</b>에 QR을 붙여 둡니다.</p></div>
+    <div class="card s"><span class="tag">공사 · 이전 때</span><div class="t">바뀐 곳은 바로</div>
+      <p>호실이 옮겨지거나 공사가 있으면 <b>지나가던 사람의 사진</b>으로 안내가 따라갑니다.</p></div>
+  </div>
+  <div class="bar vbot" style="margin-top:5mm">다른 건물로 넓히기보다, <b>3호관 한 곳에서 제대로 쓰이는 것</b>을 먼저 하겠습니다.</div>
+  <div class="foot"><span>3부 · 졸업 뒤에도 돌아가게</span><span class="pg"></span></div>
+</section>
+
+<!-- ═══════════ 13 마무리 ═══════════ -->
+<section class="slide fin">
+  <div class="ar">→</div>
+  <h1>3호관에 처음 온 사람이<br><em>아무에게도 묻지 않고</em> 도착하는 날까지</h1>
+  <div class="s">길은 저희가 그려 두었고, 바뀐 길은 지나가는 사람들이 고쳐 줍니다.</div>
+  <div class="t">감사합니다 · 질문 받겠습니다</div>
+  <div class="foot"><span>공대 3호관 길안내 · 김민종 · 손의윤 · 문성일</span><span class="pg"></span></div>
+</section>
+
+</body>
+</html>

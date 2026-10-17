@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>졸업작품 발표 — 공대 3호관 길안내 (가치형)</title>
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     졸업작품 발표 — 교수님이 주신 「발표자료 스토리라인 예시 Type 3」
+       서비스가 이용자에게 주는 「가치」와 「혜택」을 앞세우는 구성 (IR 발표형)
+       1 표지(캐치프레이즈) · 2 Intro · 3 Our Solution · 4 How it works? · 5 Live DEMO
+       6 핵심 가치 1 · 7 핵심 가치 2 · 8 활용 방안 및 확장성 · 9 Summary · 10 Q&A
+
+     색 : 앞선 자료들과 겹치지 않게 짙은 먹색 + 청록.
+       청록 글자 #0B7A70 흰 바탕 대비 5.2:1 · 밝은 청록 #19B3A3 은 어두운 바탕(#12161C) 위 7.0:1
+       표지 · 시연 · Q&A 는 어두운 바탕 — 시연 쪽이 「무대」처럼 보이게.
+
+     ※ 고칠 때는 문서\발표_가치형.html 이 아니라 이 파일을 고친다 (도구\발표_스토리라인_만들기.ps1 -Type 3).
+     ══════════════════════════════════════════════════════════════ */
+  @page { size: 338.7mm 190.5mm; margin: 0; }
+  :root{
+    --bg:#FFFFFF; --soft:#F3F6F6; --line:#D8E0DF;
+    --ink:#14181F; --ink2:#414A52; --dim:#66717A;
+    --ac:#0B7A70; --acB:#19B3A3; --acS:#E6F4F2;
+    --dk:#12161C; --dk2:#1D232B;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--bg); }
+  body{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; color:var(--ink);
+        -webkit-print-color-adjust:exact; print-color-adjust:exact; counter-reset:sl; }
+
+  .slide{ width:338.7mm; height:190.5mm; page-break-after:always; position:relative; overflow:hidden;
+          padding:40mm 20mm 16mm; background:var(--bg); counter-increment:sl;
+          display:flex; flex-direction:column; }
+  .slide:last-child{ page-break-after:auto; }
+  .vbot{ margin-top:auto !important; }
+
+  .kick{ position:absolute; left:20mm; top:12.5mm; font-size:9.5pt; font-weight:700; color:var(--ac); letter-spacing:2.5px; }
+  .kick small{ font-size:9.5pt; color:var(--dim); letter-spacing:1px; margin-left:2mm; font-weight:400; }
+  h1{ position:absolute; left:20mm; right:20mm; top:19mm; margin:0; font-size:24pt; line-height:1.25;
+      color:var(--ink); letter-spacing:-.8px; font-weight:700; }
+  h1 em{ font-style:normal; color:var(--ac); }
+  .foot{ position:absolute; left:20mm; right:20mm; bottom:6mm; display:flex; justify-content:space-between;
+         font-size:8.5pt; color:var(--dim); letter-spacing:.5px; }
+  .foot .pg::after{ content:counter(sl, decimal-leading-zero) " / 10"; }
+
+  /* 어두운 쪽 */
+  .dk{ background:var(--dk); color:#fff; }
+  .dk .kick{ color:var(--acB); } .dk .kick small{ color:rgba(255,255,255,.6); }
+  .dk h1{ color:#fff; } .dk h1 em{ color:var(--acB); }
+  .dk .foot{ color:rgba(255,255,255,.55); }
+
+  .lbl{ font-size:9.5pt; font-weight:700; letter-spacing:2px; color:var(--dim); margin-bottom:3mm; }
+  b.ac{ color:var(--ac); }
+  .chip{ display:inline-block; font-size:9.5pt; color:var(--ac); background:var(--acS); border-radius:1.2mm; padding:.6mm 2.2mm; margin:0 1mm 1mm 0; font-weight:700; }
+  .band{ background:var(--soft); border-radius:2mm; padding:4.5mm 7mm; font-size:13pt; line-height:1.6; color:var(--ink2); }
+  .band b{ color:var(--ink); } .band b.ac{ color:var(--ac); }
+
+  /* 1 표지 */
+  .cover{ padding:0; flex-direction:row; align-items:center; }
+  .cover .l{ flex:1; padding:0 6mm 0 24mm; }
+  .cover .k{ font-size:11pt; letter-spacing:4px; color:rgba(255,255,255,.65); margin-bottom:10mm; }
+  .cover .t{ font-size:58pt; font-weight:700; letter-spacing:-2px; line-height:1.12; }
+  .cover .t em{ font-style:normal; color:var(--acB); }
+  .cover .s{ font-size:15pt; line-height:1.6; color:rgba(255,255,255,.85); margin:9mm 0 15mm; }
+  .cover .s b{ color:#fff; }
+  .cover .m{ display:flex; gap:7mm; align-items:center; font-size:12pt; color:rgba(255,255,255,.72); }
+  .cover .m .team{ font-size:15pt; font-weight:700; color:#fff; border:1.5px solid var(--acB); border-radius:1.5mm; padding:1.5mm 4.5mm; }
+  .cover .m div{ line-height:1.75; }
+  .cover .r{ flex:0 0 108mm; height:100%; display:flex; align-items:center; justify-content:center; background:var(--dk2); }
+  .cover .r img{ height:152mm; width:auto; border-radius:6mm; border:2.2mm solid #000; display:block; }
+
+  /* 2 Intro */
+  .stmt{ margin-top:10mm; border-left:2.5mm solid var(--ac); padding:3mm 0 3mm 9mm; font-size:34pt; font-weight:700; line-height:1.42;
+         letter-spacing:-1px; color:var(--ink); }
+  .stmt em{ font-style:normal; color:var(--ac); }
+  .facts{ display:flex; gap:5mm; }
+  .fact{ flex:1; border-top:1px solid var(--line); padding-top:4.5mm; }
+  .fact .n{ font-size:28pt; font-weight:700; color:var(--ac); letter-spacing:-1px; line-height:1.1; }
+  .fact .n small{ font-size:13pt; margin-left:.8mm; }
+  .fact .w{ font-size:12pt; font-weight:700; color:var(--ink); margin-top:2mm; }
+  .fact .d{ font-size:10.5pt; color:var(--ink2); line-height:1.5; margin-top:1mm; }
+
+  /* 3 Our Solution */
+  .sol{ display:flex; gap:12mm; align-items:flex-start; }
+  .sol .ph img{ height:122mm; width:auto; border-radius:3.5mm; border:1.6mm solid var(--dk); display:block; }
+  .sol .ph .cp{ font-size:9.5pt; color:var(--dim); text-align:center; margin-top:2mm; }
+  .dl{ flex:1; min-width:0; align-self:stretch; display:flex; flex-direction:column; }
+  .dl .row{ display:flex; gap:5mm; padding:3.4mm 0; border-bottom:1px solid var(--line); }
+  .dl .row:first-child{ padding-top:0; }
+  .dl .k{ flex:0 0 22mm; font-size:10.5pt; font-weight:700; color:var(--ac); letter-spacing:1px; padding-top:.8mm; }
+  .dl .v{ font-size:13pt; line-height:1.55; color:var(--ink2); }
+  .dl .v b{ color:var(--ink); }
+  .promise{ display:flex; gap:4mm; margin-top:auto; margin-bottom:7mm; }
+  .promise div{ flex:1; background:var(--dk); color:#fff; border-radius:2mm; padding:5.5mm 6mm; }
+  .promise div b{ display:block; font-size:17pt; color:var(--acB); margin-bottom:1.2mm; }
+  .promise div span{ font-size:11.5pt; color:rgba(255,255,255,.8); line-height:1.5; }
+
+  /* 4 How it works */
+  .prin{ display:flex; gap:6mm; flex:1; margin-bottom:7mm; }
+  .pr{ flex:1; border:1px solid var(--line); border-radius:2.5mm; padding:6.5mm 7mm; display:flex; flex-direction:column; }
+  .pr .no{ font-size:30pt; font-weight:700; color:var(--acB); line-height:1; letter-spacing:-1px; }
+  .pr h3{ margin:3.5mm 0 4mm; font-size:18pt; color:var(--ink); }
+  .pr p{ margin:0 0 4mm; font-size:13pt; line-height:1.65; color:var(--ink2); }
+  .pr p b{ color:var(--ink); }
+  .pr .tech{ margin-top:auto; }
+  .arch{ display:flex; align-items:stretch; gap:0; }
+  .arch .bx{ border:1.5px solid var(--ink); border-radius:2mm; padding:3mm 5mm; font-size:11pt; color:var(--ink2); line-height:1.45; }
+  .arch .bx b{ display:block; font-size:12.5pt; color:var(--ink); }
+  .arch .bx.main{ flex:1.3; background:var(--acS); border-color:var(--ac); }
+  .arch .bx.main b{ color:var(--ac); }
+  .arch .bx.side{ flex:1; }
+  .arch .ar{ flex:0 0 30mm; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:9.5pt; color:var(--dim); text-align:center; line-height:1.3; }
+  .arch .ar em{ font-style:normal; font-size:15pt; color:var(--ac); font-weight:700; line-height:1; }
+
+  /* 5 Live DEMO */
+  .live{ display:flex; gap:9mm; align-items:flex-start; }
+  .qrc{ flex:0 0 80mm; background:#fff; color:var(--ink); border-radius:3mm; padding:6mm; text-align:center; }
+  .qrc img{ width:66mm; height:66mm; display:block; margin:0 auto; image-rendering:pixelated; }
+  .qrc .h{ font-size:13.5pt; font-weight:700; color:var(--ac); margin-bottom:3mm; }
+  .qrc p{ margin:3mm 0 0; font-size:10.5pt; line-height:1.5; color:var(--ink2); }
+  .qrc code{ display:block; margin-top:2mm; font-family:Consolas,monospace; font-size:11pt; font-weight:700; color:var(--ink); }
+  .steps{ flex:1; min-width:0; list-style:none; margin:0; padding:0; }
+  .steps li{ display:flex; gap:4mm; align-items:flex-start; padding:3.4mm 0; border-bottom:1px solid rgba(255,255,255,.14); }
+  .steps li:first-child{ padding-top:0; }
+  .steps li i{ font-style:normal; flex:none; width:8mm; height:8mm; border-radius:50%; border:1.5px solid var(--acB); color:var(--acB);
+               font-size:11pt; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .steps li div{ font-size:13pt; line-height:1.5; color:rgba(255,255,255,.85); }
+  .steps li div b{ color:#fff; }
+  .steps li div small{ display:block; font-size:10pt; color:rgba(255,255,255,.55); margin-top:.6mm; }
+  .backup{ flex:0 0 80mm; }
+  .backup .lb{ font-size:9.5pt; color:rgba(255,255,255,.55); letter-spacing:1px; margin-bottom:2.5mm; }
+  .backup .two{ display:flex; gap:3.5mm; }
+  .backup img{ width:38mm; height:82.2mm; border-radius:2mm; display:block; border:1px solid rgba(255,255,255,.2); }
+  .backup .cp{ font-size:9.5pt; color:rgba(255,255,255,.7); margin-top:1.5mm; text-align:center; }
+
+  /* 6 핵심 가치 1 */
+  .v1{ display:flex; gap:10mm; align-items:stretch; }
+  .hero{ flex:0 0 92mm; background:var(--dk); color:#fff; border-radius:3mm; padding:8mm 8mm; display:flex; flex-direction:column; justify-content:center; }
+  .hero .n{ font-size:84pt; font-weight:700; color:var(--acB); line-height:1; letter-spacing:-3px; }
+  .hero .n small{ font-size:30pt; letter-spacing:0; margin-left:1mm; }
+  .hero .w{ font-size:15pt; font-weight:700; margin-top:5mm; }
+  .hero .d{ font-size:11pt; color:rgba(255,255,255,.75); line-height:1.6; margin-top:2mm; }
+  table.cmp{ width:100%; border-collapse:collapse; font-size:12.5pt; }
+  .cmp th{ font-size:10pt; letter-spacing:1px; color:var(--dim); text-align:left; padding:0 4mm 2.5mm; border-bottom:2px solid var(--ink); }
+  .cmp th.us{ color:var(--ac); }
+  .cmp td{ padding:4.4mm 4mm; border-bottom:1px solid var(--line); color:var(--ink2); line-height:1.45; vertical-align:top; }
+  .cmp td.k{ font-weight:700; color:var(--ink); width:20%; }
+  .cmp td.them{ color:var(--dim); width:36%; }
+  .cmp td.us b{ color:var(--ac); }
+  .cmp td small{ display:block; font-size:10pt; color:var(--dim); margin-top:.5mm; }
+
+  /* 7 핵심 가치 2 */
+  .v2{ display:flex; gap:8mm; flex:1; margin-bottom:7mm; }
+  .v2 .col{ flex:1; border-radius:2.5mm; padding:5.5mm 6.5mm; }
+  .v2 .col.cv{ border:1px solid var(--line); }
+  .v2 .col.ac{ background:var(--acS); }
+  .v2 .col .h{ font-size:10pt; font-weight:700; letter-spacing:2px; color:var(--ac); margin-bottom:1mm; }
+  .v2 .col h3{ margin:0 0 3.5mm; font-size:17pt; color:var(--ink); }
+  .v2 .it{ display:flex; gap:4mm; padding:3.6mm 0; border-top:1px solid var(--line); }
+  .v2 .col.ac .it{ border-top-color:#C5E3DF; }
+  .v2 .it .t{ flex:0 0 33mm; font-size:13pt; font-weight:700; color:var(--ink); }
+  .v2 .it .t.big{ font-size:22pt; color:var(--ac); letter-spacing:-.5px; line-height:1.1; }
+  .v2 .it .x{ font-size:12.5pt; line-height:1.55; color:var(--ink2); }
+  .v2 .it .x b{ color:var(--ink); }
+
+  /* 8 활용 방안 및 확장성 */
+  .use{ display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:4mm; flex:1; }
+  .uc{ border:1px solid var(--line); border-radius:2.5mm; padding:4.5mm 5.5mm; }
+  .uc .who{ font-size:10pt; font-weight:700; color:var(--ac); letter-spacing:1px; }
+  .uc h3{ margin:2mm 0 3mm; font-size:16pt; color:var(--ink); }
+  .uc p{ margin:0; font-size:12.5pt; line-height:1.55; color:var(--ink2); }
+  .uc p b{ color:var(--ink); }
+  .scale{ flex:0 0 140mm; display:flex; flex-direction:column; gap:4mm; }
+  .scale .card{ border-radius:2.5mm; padding:4.5mm 6mm; background:var(--soft); }
+  .scale .card h3{ margin:0 0 3mm; font-size:14pt; color:var(--ink); }
+  .scale .two{ display:flex; gap:4mm; }
+  .scale .two div{ flex:1; background:#fff; border-radius:1.8mm; padding:3.5mm 4.5mm; font-size:11.5pt; line-height:1.6; color:var(--ink2); }
+  .scale .two div .h{ font-size:9.5pt; font-weight:700; letter-spacing:1px; margin-bottom:1mm; }
+  .scale .two div.same .h{ color:var(--ac); } .scale .two div.new .h{ color:var(--dim); }
+  .scale ul{ margin:0; padding-left:5mm; font-size:11.5pt; line-height:1.65; color:var(--ink2); }
+  .scale ul b{ color:var(--ink); }
+
+  /* 9 Summary */
+  .psv{ display:flex; align-items:stretch; flex:1; margin-bottom:9mm; }
+  .psv .bk{ flex:1; border-radius:2.5mm; padding:8mm 8mm; display:flex; flex-direction:column; justify-content:center; }
+  .psv .bk .h{ font-size:10.5pt; font-weight:700; letter-spacing:3px; margin-bottom:3mm; }
+  .psv .bk p{ margin:0; font-size:17pt; line-height:1.6; }
+  .psv .p{ border:1px solid var(--line); } .psv .p .h{ color:var(--dim); } .psv .p p{ color:var(--ink2); } .psv .p p b{ color:var(--ink); }
+  .psv .s{ background:var(--acS); } .psv .s .h{ color:var(--ac); } .psv .s p{ color:var(--ink2); } .psv .s p b{ color:var(--ac); }
+  .psv .v{ background:var(--dk); color:#fff; } .psv .v .h{ color:var(--acB); } .psv .v p{ color:rgba(255,255,255,.85); } .psv .v p b{ color:#fff; }
+  .psv .ar{ flex:0 0 12mm; display:flex; align-items:center; justify-content:center; font-size:18pt; color:var(--ac); font-weight:700; }
+  .nums{ display:flex; border-top:2px solid var(--ink); }
+  .nums div{ flex:1; padding:4mm 4mm 0; border-left:1px solid var(--line); }
+  .nums div:first-child{ border-left:none; padding-left:0; }
+  .nums b{ display:block; font-size:24pt; color:var(--ac); letter-spacing:-.6px; line-height:1.1; }
+  .nums b small{ font-size:12pt; margin-left:.6mm; }
+  .nums span{ font-size:10.5pt; color:var(--ink2); }
+
+  /* 10 Q&A */
+  .qa{ padding:0; flex-direction:row; align-items:center; }
+  .qa .l{ flex:1; padding:0 24mm; }
+  .qa .big{ font-size:84pt; font-weight:700; letter-spacing:-2px; line-height:1; }
+  .qa .big em{ font-style:normal; color:var(--acB); }
+  .qa .s{ font-size:18pt; margin-top:6mm; color:rgba(255,255,255,.88); }
+  .qa .cat{ margin-top:12mm; font-size:15pt; color:var(--acB); font-weight:700; }
+  .qa .m{ margin-top:3mm; font-size:12pt; line-height:1.9; color:rgba(255,255,255,.7); }
+  .qa .m b{ color:#fff; }
+  .qa .r{ flex:0 0 100mm; margin-right:24mm; background:#fff; border-radius:3mm; padding:7mm; text-align:center; color:var(--ink); }
+  .qa .r .h{ font-size:12.5pt; font-weight:700; color:var(--ac); margin-bottom:3mm; }
+  .qa .r img{ width:76mm; height:76mm; display:block; margin:0 auto; image-rendering:pixelated; }
+  .qa .r code{ display:block; margin-top:3mm; font-family:Consolas,monospace; font-size:11pt; color:var(--ink); font-weight:700; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ 1 표지 ══════════════════ -->
+<section class="slide dk cover">
+  <div class="l">
+    <div class="k">공대 3호관 길안내 · 졸업작품 발표</div>
+    <div class="t">QR 한 장이면,<br><em>문 앞까지.</em></div>
+    <div class="s">군산대학교 공과대학 3호관 —<br><b>처음 온 사람도 묻지 않고 찾아가는</b> 실내 길안내 앱</div>
+    <div class="m"><span class="team">팀 공3길</span>
+      <div>김민종 · 손의윤 · 문성일<br>지도교수 강규창 교수님</div></div>
+  </div>
+  <div class="r"><img data-pic="흐름10_도착" alt="도착 화면 — 왼쪽에서 네 번째 방"></div>
+</section>
+
+<!-- ══════════════════ 2 Intro ══════════════════ -->
+<section class="slide">
+  <div class="kick">02 — INTRO<small>우리가 해결하려는 문제</small></div>
+  <h1>한 문장으로 말하면</h1>
+  <div class="stmt">처음 온 사람은 3호관 안에서<br><em>목적지 문 앞까지</em> 스스로 찾아갈 방법이 없습니다.</div>
+  <div class="facts vbot">
+    <div class="fact"><div class="n">4<small>곳</small></div><div class="w">출입문</div>
+      <div class="d">어느 문으로 들어왔느냐에 따라<br>가는 길이 다릅니다</div></div>
+    <div class="fact"><div class="n">152<small>곳</small></div><div class="w">찾아갈 곳</div>
+      <div class="d">강의실 · 교수 연구실 ·<br>화장실 · 비상계단</div></div>
+    <div class="fact"><div class="n">B1~5<small>층</small></div><div class="w">층마다 비슷한 복도</div>
+      <div class="d">엘리베이터에서 내리면<br>몇 층인지, 어느 쪽인지 헷갈립니다</div></div>
+    <div class="fact"><div class="n">GPS ✕</div><div class="w">실내에서는 안 됩니다</div>
+      <div class="d">지도 앱은<br>건물 입구까지입니다</div></div>
+  </div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 3 Our Solution ══════════════════ -->
+<section class="slide">
+  <div class="kick">03 — OUR SOLUTION<small>공대 3호관 길안내</small></div>
+  <h1>문 QR을 찍으면, <em>사진을 따라 문 앞까지</em></h1>
+  <div class="sol">
+    <div class="ph"><img data-pic="흐름08_1단계" alt="1단계 — 정문으로 들어오세요"><div class="cp">단계마다 그 자리의 실제 사진</div></div>
+    <div class="dl">
+      <div class="row"><div class="k">무엇</div><div class="v"><b>설치형 웹앱(PWA)</b> — 앱스토어 없이 QR · 주소로 열고, 홈 화면에 설치</div></div>
+      <div class="row"><div class="k">누구에게</div><div class="v">처음 온 <b>신입생 · 방문객 · 유학생</b> — 한국어 / 영어</div></div>
+      <div class="row"><div class="k">어디까지</div><div class="v"><b>네 문 × 지하 1층~5층</b> — 강의실 · 화장실 · 비상계단, 안내 <b>754가지</b></div></div>
+      <div class="row"><div class="k">어떻게</div><div class="v"><b>3D 경로 → 1인칭 미리 걷기 → 단계마다 실제 사진</b> — 눈앞 풍경과 대조하며 걷는다</div></div>
+      <div class="promise">
+        <div><b>장치 없이</b><span>측위 장치 0대<br>문에 QR 스티커뿐</span></div>
+        <div><b>인터넷 없이</b><span>한 번 받아 두면<br>비행기 모드에서도</span></div>
+        <div><b>낡지 않게</b><span>이용자가 찍고<br>AI가 가린다</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 4 How it works? ══════════════════ -->
+<section class="slide">
+  <div class="kick">04 — HOW IT WORKS?<small>핵심 작동 원리 및 아키텍처</small></div>
+  <h1>세 가지 원리로 <em>움직입니다</em></h1>
+  <div class="prin">
+    <div class="pr"><div class="no">01</div><h3>출발점은 묻는다</h3>
+      <p>내 위치를 재지 않습니다. 출입문 QR로 <b>「어느 문으로 들어왔나」</b>만 알면 길이 정해집니다.</p>
+      <div class="tech"><span class="chip">jsQR</span><span class="chip">출입문 QR 4장</span></div></div>
+    <div class="pr"><div class="no">02</div><h3>길은 휴대폰이 만든다</h3>
+      <p>건물 좌표표에서 <b>3D와 단계별 안내를 그 자리에서</b> 만듭니다. 처음 한 번 <b>15.6MB</b>를 저장해 두면 신호가 없어도 됩니다.</p>
+      <div class="tech"><span class="chip">three.js</span><span class="chip">Service Worker</span></div></div>
+    <div class="pr"><div class="no">03</div><h3>사진은 함께 고친다</h3>
+      <p>이용자 제보 → 폰 안의 AI가 <b>1·2위 격차</b>로 위치 판정 → <b>관리자 승인</b> → 모두의 화면에 반영됩니다.</p>
+      <div class="tech"><span class="chip">TensorFlow.js · MobileNet v2</span><span class="chip">Tesseract.js</span></div></div>
+  </div>
+  <div class="arch vbot">
+    <div class="bx side"><b>배포</b>GitHub Pages · Actions<br>올리면 자동 배포</div>
+    <div class="ar"><em>→</em>앱 · 안내 사진<br>처음 한 번</div>
+    <div class="bx main"><b>이용자 휴대폰 — 계산은 전부 여기서</b>QR · 길 만들기 · 3D · 사진 단계 · AI 판정 · 오프라인 저장</div>
+    <div class="ar"><em>⇄</em>제보 사진 →<br>← 승인 사진</div>
+    <div class="bx side"><b>서버 — Firebase</b>제보 대기함 · 승인 사진<br>관리자 로그인 · 보안 규칙</div>
+  </div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 5 Live DEMO ══════════════════ -->
+<section class="slide dk">
+  <div class="kick">05 — LIVE DEMO<small>백문이 불여일견</small></div>
+  <h1>직접 <em>보여 드립니다</em></h1>
+  <div class="live">
+    <div class="qrc">
+      <div class="h">지금 휴대폰으로 찍어 보세요</div>
+      <img data-qr="정문_MAIN.png" alt="정문 QR">
+      <p>정문에 붙인 것과 같은 QR입니다.<br>찍으면 <b>정문에서 출발</b>합니다.</p>
+      <code>minjong0910.github.io</code>
+    </div>
+    <ol class="steps">
+      <li><i>1</i><div><b>정문 QR을 찍는다</b><small>「여기가 맞나요?」 — 사진으로 출발점 확인</small></div></li>
+      <li><i>2</i><div><b>「13101」을 검색한다</b><small>3D 건물 위에 경로가 그려집니다</small></div></li>
+      <li><i>3</i><div><b>1인칭으로 미리 걷고, 사진 단계를 따라간다</b><small>「정문으로 들어오세요」 → 「왼쪽에서 네 번째 방」</small></div></li>
+      <li><i>4</i><div><b>비행기 모드를 켜고 다시</b><small>그대로 안내됩니다 — 지하 · 계단과 같은 조건</small></div></li>
+      <li><i>5</i><div><b>인터넷을 켜고, 사진을 찍어 제보한다</b><small>AI의 답 — 「아마 여기예요」 / 「층은 3층 같아요」 / 「어디인지 알 수 없어요」</small></div></li>
+    </ol>
+    <div class="backup">
+      <div class="lb">연결이 안 될 때는 이 화면으로</div>
+      <div class="two">
+        <div><img data-pic="흐름07_1인칭" alt="1인칭 걷기"><div class="cp">3 · 1인칭 걷기</div></div>
+        <div><img data-pic="흐름12_사진올림" alt="사진 제보"><div class="cp">5 · 사진 제보</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 6 핵심 가치 1 ══════════════════ -->
+<section class="slide">
+  <div class="kick">06 — CORE VALUE 1<small>비용 절감</small></div>
+  <h1>설치비도, 운영비도 <em>0원</em></h1>
+  <div class="v1">
+    <div class="hero">
+      <div class="n">0<small>원</small></div>
+      <div class="w">장치 0대 · 서버비 0원</div>
+      <div class="d">문에 붙인 QR 스티커 4장이 설치의 전부.<br>서버와 배포는 무료 한도 안에서 돕니다.</div>
+    </div>
+    <div style="flex:1; min-width:0">
+      <table class="cmp">
+        <tr><th></th><th>보통의 측위 장치 방식</th><th class="us">공대 3호관 길안내</th></tr>
+        <tr><td class="k">설치</td><td class="them">장치 수십 대 · 설치 공사 · 허가</td>
+            <td class="us"><b>QR 스티커 4장</b><small>출입문마다 한 장</small></td></tr>
+        <tr><td class="k">유지</td><td class="them">배터리 교체 · 장치 점검</td>
+            <td class="us"><b>관리할 장치가 없음</b><small>스티커가 떨어지면 다시 붙이면 됩니다</small></td></tr>
+        <tr><td class="k">서버 · 호스팅</td><td class="them">운영 서버 · 사용료</td>
+            <td class="us"><b>0원</b><small>계산은 휴대폰이 · Firebase · GitHub Pages 무료 한도</small></td></tr>
+        <tr><td class="k">사진 갱신</td><td class="them">담당자가 다시 찍고 분류</td>
+            <td class="us"><b>이용자 제보 + AI 판정</b><small>관리자는 확인하고 승인만</small></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="band vbot"><b>돈이 들지 않는다는 것</b>은 곧 <b class="ac">만든 사람이 졸업한 뒤에도 앱이 살아 있을 수 있다</b>는 뜻입니다.</div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 7 핵심 가치 2 ══════════════════ -->
+<section class="slide">
+  <div class="kick">07 — CORE VALUE 2<small>편의성 · 정확성</small></div>
+  <h1>묻지 않아도 되고, <em>틀린 길로 보내지 않습니다</em></h1>
+  <div class="v2">
+    <div class="col cv">
+      <div class="h">CONVENIENCE</div><h3>편의성 — 누구나, 어디서나</h3>
+      <div class="it"><div class="t">설치 없이</div><div class="x">앱스토어도 가입도 없이 <b>QR · 주소로 바로</b> 열립니다</div></div>
+      <div class="it"><div class="t">신호 없이</div><div class="x">지하 · 계단 · 엘리베이터 안, <b>비행기 모드에서도</b> 안내</div></div>
+      <div class="it"><div class="t">말이 안 통해도</div><div class="x">단계마다 <b>실제 사진</b> — 한국어 / 영어</div></div>
+      <div class="it"><div class="t">급할 때</div><div class="x"><b>가장 가까운 화장실 · 비상계단</b>으로 바로 안내</div></div>
+    </div>
+    <div class="col ac">
+      <div class="h">ACCURACY</div><h3>정확성 — 확신할 때만 답한다</h3>
+      <div class="it"><div class="t big">92.9%</div><div class="x">AI가 <b>가장 확신한 사진(상위 10%)</b>의 자리 적중<br>시험 사진 1,844장 · 전부 답하면 55.6%</div></div>
+      <div class="it"><div class="t big">97%</div><div class="x">엘리베이터 안 — <b>층 표시 글자를 읽어</b> 맞힘 · 틀린 층을 말한 적 <b>0건</b></div></div>
+      <div class="it"><div class="t big">승인</div><div class="x">관리자가 승인하기 전에는 <b>누구의 화면에도 반영되지 않습니다</b> — 틀린 사진이 퍼지지 않게</div></div>
+    </div>
+  </div>
+  <div class="band"><b>편해도 틀리면 쓸 수 없습니다</b> — 그래서 AI는 확신이 모자라면 <b class="ac">층만 말하거나 「모르겠다」</b>고 답합니다.</div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 8 활용 방안 및 확장성 ══════════════════ -->
+<section class="slide">
+  <div class="kick">08 — USE CASES &amp; SCALABILITY<small>활용 방안 및 확장성</small></div>
+  <h1>이렇게 쓰이고, <em>이렇게 넓어질 수 있습니다</em></h1>
+  <div style="display:flex; gap:8mm; flex:1; margin-bottom:2mm">
+    <div style="flex:1; min-width:0; display:flex; flex-direction:column">
+      <div class="lbl">활용 방안</div>
+      <div class="use">
+        <div class="uc"><div class="who">신입생 · 편입생</div><h3>첫 수업 주간</h3>
+          <p>시간표의 <b>호실 번호</b>만 넣으면 들어온 문에서부터 안내</p></div>
+        <div class="uc"><div class="who">외부 방문객</div><h3>입학설명회 · 학회 · 면담</h3>
+          <p>교수님 연구실을 <b>성함으로</b> 찾아갑니다</p></div>
+        <div class="uc"><div class="who">외국인 유학생</div><h3>한국어가 서툴러도</h3>
+          <p><b>영어 안내</b>와 단계마다 실제 사진</p></div>
+        <div class="uc"><div class="who">모든 이용자</div><h3>급할 때</h3>
+          <p>지금 층에서 <b>가장 가까운 화장실 · 비상계단</b></p></div>
+      </div>
+    </div>
+    <div class="scale">
+      <div class="lbl" style="margin-bottom:-1mm">확장성</div>
+      <div class="card" style="flex:1"><h3>다른 건물로</h3>
+        <div class="two">
+          <div class="same"><div class="h">그대로 쓰는 것</div>앱 화면 · AI 판정 방식<br>제보 · 승인 흐름<br>서버 · 자동 배포</div>
+          <div class="new"><div class="h">새로 만들 것</div>건물 좌표표 · 문별 안내 절차<br>자리마다 사진 · AI 기준 자료<br>출입문 QR</div>
+        </div></div>
+      <div class="card"><h3>더 나은 서비스로</h3>
+        <ul><li><b>스토어 앱으로 감싸기</b> — AI 판정까지 인터넷 없이</li>
+            <li>제보 사진 속 <b>얼굴 자동 가림</b></li></ul></div>
+    </div>
+  </div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 9 Summary ══════════════════ -->
+<section class="slide">
+  <div class="kick">09 — SUMMARY<small>우리가 제안하는 솔루션과 그 가치</small></div>
+  <h1>QR 한 장이면, <em>문 앞까지</em></h1>
+  <div class="psv">
+    <div class="bk p"><div class="h">PROBLEM</div>
+      <p>처음 온 사람은 3호관 안에서 <b>목적지 문 앞까지</b> 찾아갈 방법이 없다</p></div>
+    <div class="ar">→</div>
+    <div class="bk s"><div class="h">SOLUTION</div>
+      <p>출발점은 <b>문 QR</b>로 묻고, 길은 <b>휴대폰</b>이 만들고, 사진은 <b>이용자와 AI</b>가 함께 고친다</p></div>
+    <div class="ar">→</div>
+    <div class="bk v"><div class="h">VALUE</div>
+      <p><b>돈이 들지 않고</b>, <b>신호가 없어도</b> 되며, <b>확신할 때만</b> 답하는 길안내</p></div>
+  </div>
+  <div class="nums vbot">
+    <div><b>0<small>원</small></b><span>설치비 · 운영비</span></div>
+    <div><b>15.6<small>MB</small></b><span>한 번 받으면 오프라인</span></div>
+    <div><b>754<small>가지</small></b><span>네 문 × 지하 1층~5층 안내</span></div>
+    <div><b>92.9<small>%</small></b><span>AI가 확신한 상위 10%의 자리 적중</span></div>
+  </div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 10 Q&A ══════════════════ -->
+<section class="slide dk qa">
+  <div class="l">
+    <div class="big">Q <em>&amp;</em> A</div>
+    <div class="s">질의응답 — 감사합니다</div>
+    <div class="cat">QR 한 장이면, 문 앞까지.</div>
+    <div class="m"><b>공대 3호관 길안내</b> · 팀 공3길<br>김민종 · 손의윤 · 문성일　|　지도교수 강규창 교수님</div>
+  </div>
+  <div class="r">
+    <div class="h">지금 바로 써 보기</div>
+    <img data-qr="정문_MAIN.png" alt="정문 QR">
+    <code>minjong0910.github.io</code>
+  </div>
+</section>
+
+</body>
+</html>

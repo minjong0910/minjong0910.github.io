@@ -1,13 +1,15 @@
 # 졸업작품 발표 — 교수님이 주신 「발표자료 스토리라인 예시」를 따른 자료
 #
 #   pwsh -File 도구\발표_스토리라인_만들기.ps1              (둘 다)
-#   pwsh -File 도구\발표_스토리라인_만들기.ps1 -Type 2
+#   pwsh -File 도구\발표_스토리라인_만들기.ps1 -Type 2      (1 · 2 · 3 중 하나만)
 #   → 문서\발표_*.html · 캡스톤_발표_*.pdf (저장소 뿌리 + 바탕화면)
 #
 #   1 : 표준형 11장 (도구\발표_표준형_틀.html)
 #       표지 · 개요 · 배경 · 문제(As-Is) · 솔루션(To-Be) · 아키텍처 · 핵심 기능 · 시연 · 기대 효과 · 결론 · Q&A
 #   2 : 해결형 12장 (도구\발표_해결형_틀.html) — 문제 해결 과정을 강조하는 이야기 구성
 #       표지 · 들어가며 · 문제점 · 해결 아이디어 · 설계 및 구현 · 시연 + 기능 1 · 기능 2 · 변화 · 발전 방향 · 마무리 · Q&A
+#   3 : 가치형 10장 (도구\발표_가치형_틀.html) — 서비스가 주는 가치와 혜택 (IR 발표형)
+#       표지 · Intro · Our Solution · How it works · Live DEMO · 핵심 가치 1 · 핵심 가치 2 · 활용과 확장 · Summary · Q&A
 #   실제 발표용 표준 구성이라 구조도·앱 화면·측정 수치를 쓴다 (모의 발표 자료의 금지 조건과 다르다).
 #
 #   하는 일
@@ -17,7 +19,7 @@
 #     ③ Edge 로 PDF, 쪽 수가 정해진 장 수와 같은지 센다
 #
 #   ※ 고칠 때는 문서\발표_*.html 이 아니라 도구\발표_*_틀.html 을 고친다.
-param([ValidateSet('전부','1','2')][string]$Type = '전부')
+param([ValidateSet('전부','1','2','3')][string]$Type = '전부')
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 Add-Type -AssemblyName System.Drawing
@@ -28,6 +30,7 @@ $DESK = [Environment]::GetFolderPath('Desktop')
 $DECKS = @(
   @{ k='1'; tpl='발표_표준형_틀.html'; html='문서\발표_표준형.html'; pdf='캡스톤_발표_표준형.pdf'; n=11 }
   @{ k='2'; tpl='발표_해결형_틀.html'; html='문서\발표_해결형.html'; pdf='캡스톤_발표_해결형.pdf'; n=12 }
+  @{ k='3'; tpl='발표_가치형_틀.html'; html='문서\발표_가치형.html'; pdf='캡스톤_발표_가치형.pdf'; n=10 }
 )
 
 function Shrink([string]$path){

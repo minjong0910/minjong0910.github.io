@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>졸업작품 발표 — 공대 3호관 길안내 (해결형)</title>
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     졸업작품 발표 — 교수님이 주신 「발표자료 스토리라인 예시 Type 2」
+       문제 해결 과정을 강조하는 이야기 구성 — 「어떤 어려움을 어떻게 풀었나」
+       1 표지 · 2 들어가며 · 3 문제점 · 4 해결 아이디어 · 5 설계 및 구현
+       6 시연 + 6-1 기능 1 · 6-2 기능 2 · 7 변화 · 8 발전 방향 · 9 마무리 · 10 Q&A   (모두 12장)
+
+     색 : 앞선 자료 여섯 벌과 겹치지 않게 인디고 + 주황.
+       인디고 #3B2F8F 흰 바탕 대비 10.6:1 · 주황 글자 #C2410C 5.2:1 · 흐린 글자 #6E6A80 5.2:1
+       밝은 주황 #F26B3A 는 막대·장식에만 (짙은 인디고 위 글자로는 4.9:1)
+     쪽 아래 이야기 줄(공감 → 문제 → … → 마무리)은 스크립트가 data-ph 를 보고 그린다.
+
+     ※ 고칠 때는 문서\발표_해결형.html 이 아니라 이 파일을 고친다 (도구\발표_스토리라인_만들기.ps1 -Type 2).
+     ══════════════════════════════════════════════════════════════ */
+  @page { size: 338.7mm 190.5mm; margin: 0; }
+  :root{
+    --bg:#FFFFFF; --soft:#F6F5FB; --line:#DEDCEA;
+    --ink:#1A1726; --ink2:#454157; --dim:#6E6A80;
+    --in:#3B2F8F; --inD:#261D63; --inS:#EEECFA;
+    --co:#C2410C; --coB:#F26B3A; --coS:#FFF1EA;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--bg); }
+  body{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; color:var(--ink);
+        -webkit-print-color-adjust:exact; print-color-adjust:exact; counter-reset:sl; }
+
+  .slide{ width:338.7mm; height:190.5mm; page-break-after:always; position:relative; overflow:hidden;
+          padding:37mm 18mm 16mm; background:var(--bg); counter-increment:sl;
+          display:flex; flex-direction:column; }
+  .slide:last-child{ page-break-after:auto; }
+  .vbot{ margin-top:auto !important; }
+
+  .ch{ position:absolute; left:18mm; top:11mm; font-size:10pt; font-weight:700; color:var(--co); letter-spacing:1.5px; }
+  .ch::before{ content:""; display:inline-block; width:9mm; height:1.3mm; background:var(--coB); vertical-align:middle; margin:-.8mm 3mm 0 0; }
+  h1{ position:absolute; left:18mm; right:18mm; top:17mm; margin:0; font-size:23pt; line-height:1.25;
+      color:var(--in); letter-spacing:-.7px; font-weight:700; }
+  h1 em{ font-style:normal; color:var(--co); }
+
+  /* 쪽 아래 — 이야기 줄 + 쪽 번호 */
+  .foot{ position:absolute; left:18mm; right:18mm; bottom:6mm; display:flex; justify-content:space-between; align-items:center;
+         font-size:8.5pt; color:var(--dim); border-top:1px solid var(--line); padding-top:2.2mm; }
+  .foot .arc span{ margin-right:1.2mm; }
+  .foot .arc span.on{ color:var(--co); font-weight:700; }
+  .foot .arc i{ font-style:normal; margin-right:1.2mm; color:#B9B5CC; }
+  .foot .pg::after{ content:counter(sl) " / 12"; }
+
+  b.co{ color:var(--co); } b.in{ color:var(--in); }
+  .hook{ background:var(--inS); border-radius:2mm; padding:4.5mm 7mm; font-size:13pt; line-height:1.65; color:var(--ink2); }
+  .hook b{ color:var(--in); }
+  .hook.co{ background:var(--coS); } .hook.co b{ color:var(--co); }
+  .tag{ display:inline-block; font-size:9.5pt; font-weight:700; letter-spacing:1px; border-radius:1.2mm; padding:.6mm 2.4mm; }
+
+  /* 1 표지 */
+  .cover{ padding:0; flex-direction:row; align-items:center; background:var(--inD); color:#fff; }
+  .cover .l{ flex:1; padding:0 8mm 0 24mm; }
+  .cover .k{ font-size:11pt; letter-spacing:4px; color:rgba(255,255,255,.7); margin-bottom:9mm; }
+  .cover .t{ font-size:50pt; font-weight:700; letter-spacing:-1.5px; line-height:1.1; }
+  .cover .s{ font-size:17pt; line-height:1.55; margin:7mm 0 8mm; color:rgba(255,255,255,.9); }
+  .cover .s em{ font-style:normal; color:var(--coB); font-weight:700; }
+  .cover .tags{ display:flex; gap:2.5mm; margin-bottom:14mm; }
+  .cover .tags span{ border:1px solid rgba(255,255,255,.45); border-radius:5mm; padding:1.2mm 4.5mm; font-size:11.5pt; color:#fff; }
+  .cover .m{ font-size:12pt; line-height:2; color:rgba(255,255,255,.72); }
+  .cover .m b{ color:#fff; }
+  .cover .r{ flex:0 0 112mm; height:100%; position:relative; display:flex; align-items:center; justify-content:center; }
+  .cover .r::before{ content:""; position:absolute; width:96mm; height:96mm; border-radius:50%; background:var(--coB); }
+  .cover .r img{ position:relative; height:150mm; width:auto; border-radius:6mm; border:2.2mm solid #0E0A2B; display:block; }
+
+  /* 2 들어가며 */
+  .qs{ display:flex; gap:7mm; }
+  .q{ flex:1; margin:0; }
+  .q img{ width:100%; height:80mm; object-fit:cover; object-position:center 45%; border-radius:2.5mm; display:block; }
+  .q figcaption{ margin-top:3.5mm; }
+  .q figcaption b{ display:block; font-size:13.5pt; color:var(--ink); line-height:1.45; }
+  .q figcaption span{ display:block; font-size:10pt; color:var(--dim); margin-top:1.2mm; }
+
+  /* 3 문제점 */
+  .pains{ display:flex; gap:6mm; flex:1; margin-bottom:7mm; }
+  .pain{ flex:1; border:1px solid var(--line); border-radius:2.5mm; padding:7mm 7mm 6mm; display:flex; flex-direction:column; }
+  .pain .no{ font-size:10pt; font-weight:700; letter-spacing:2px; color:var(--dim); }
+  .pain h3{ margin:2.5mm 0 5mm; font-size:19pt; color:var(--in); letter-spacing:-.4px; }
+  .pain p{ margin:0 0 4mm; font-size:13.5pt; line-height:1.75; color:var(--ink2); }
+  .pain p b{ color:var(--ink); }
+  .pain .was{ margin-top:auto; font-size:10pt; color:var(--dim); border-top:1px dashed var(--line); padding-top:2.5mm; }
+  .pain.hot{ border:1.5px solid var(--coB); background:var(--coS); }
+  .pain.hot .no, .pain.hot h3{ color:var(--co); }
+
+  /* 4 해결 아이디어 */
+  .ideas{ display:flex; gap:6mm; flex:1; margin-bottom:7mm; }
+  .idea{ flex:1; border-top:2mm solid var(--in); background:var(--soft); border-radius:0 0 2.5mm 2.5mm; padding:7mm 7mm 6.5mm; display:flex; flex-direction:column; }
+  .idea .fix{ font-size:10pt; color:var(--dim); font-weight:700; }
+  .idea .v{ font-size:36pt; font-weight:700; color:var(--in); letter-spacing:-1px; margin:2.5mm 0 3mm; }
+  .idea p{ margin:0 0 5mm; font-size:14pt; line-height:1.65; color:var(--ink2); }
+  .idea p b{ color:var(--ink); }
+  .idea .how{ margin-top:auto; font-size:13pt; line-height:1.55; color:var(--ink); background:#fff; border-radius:1.8mm; padding:3mm 4mm; }
+  .idea .how b{ color:var(--in); }
+  .idea.hot{ border-top-color:var(--coB); background:var(--coS); }
+  .idea.hot .v{ color:var(--co); }
+  .idea.hot .how b{ color:var(--co); }
+
+  /* 5 설계 및 구현 */
+  .sys{ display:grid; grid-template-columns:1fr 36mm 92mm; grid-template-rows:auto auto; gap:4mm 0; }
+  .zone{ border:1.5px solid var(--in); border-radius:2.5mm; padding:4mm 5mm; }
+  .zone .zh{ font-size:13pt; font-weight:700; color:var(--in); margin-bottom:3mm; }
+  .zone .zh small{ font-size:10pt; font-weight:400; color:var(--dim); margin-left:2mm; }
+  .zone.ph{ grid-row:1 / span 2; grid-column:1; }
+  .zone.fb{ grid-row:1; grid-column:3; }
+  .zone.gh{ grid-row:2; grid-column:3; border-style:dashed; }
+  .grp{ display:flex; gap:3mm; align-items:flex-start; padding:2.6mm 0; border-top:1px solid var(--line); }
+  .grp .gh2{ flex:0 0 19mm; font-size:10.5pt; font-weight:700; color:var(--co); padding-top:1.4mm; }
+  .mods{ display:flex; flex-wrap:wrap; gap:2mm; }
+  .mods span{ background:var(--soft); border:1px solid var(--line); border-radius:1.5mm; padding:1.4mm 3mm; font-size:11pt; color:var(--ink); font-weight:700; }
+  .mods span i{ display:block; font-style:normal; font-weight:400; font-size:9pt; color:var(--dim); margin-top:.3mm; }
+  .mods.col{ flex-direction:column; }
+  .zone .adm{ margin-top:3mm; font-size:10.5pt; color:var(--ink2); }
+  .zone .adm b{ color:var(--in); }
+  .links{ grid-column:2; display:flex; flex-direction:column; justify-content:center; gap:5mm; padding:0 2mm; }
+  .links.r1{ grid-row:1; } .links.r2{ grid-row:2; }
+  .ln{ text-align:center; font-size:10pt; color:var(--ink2); line-height:1.3; }
+  .ln em{ display:block; font-style:normal; font-size:17pt; color:var(--co); font-weight:700; line-height:1; }
+  .ln small{ display:block; font-size:8.5pt; color:var(--dim); }
+  .stats{ display:flex; gap:5mm; }
+  .stats div{ flex:1; border-left:1.6mm solid var(--coB); padding:1mm 0 1mm 4.5mm; font-size:11pt; color:var(--ink2); line-height:1.4; }
+  .stats div b{ font-size:21pt; color:var(--in); margin-right:1mm; }
+  .stats div span{ display:block; font-size:10pt; color:var(--dim); }
+
+  /* 6 시연 */
+  .shots{ display:flex; gap:7.7mm; }
+  .shot{ width:44mm; }
+  .shot img{ width:44mm; height:95.2mm; display:block; border-radius:2.5mm; border:1px solid var(--line); }
+  .shot .cp{ margin-top:2.4mm; font-size:10.5pt; line-height:1.45; color:var(--ink2); }
+  .shot .cp b{ color:var(--in); }
+  .shot .cp i{ font-style:normal; display:inline-flex; width:5.2mm; height:5.2mm; border-radius:50%; background:var(--co); color:#fff;
+               font-size:9pt; font-weight:700; align-items:center; justify-content:center; margin-right:1.4mm; vertical-align:-.6mm; }
+
+  /* 6-1 · 6-2 기능 — 문제에서 결과까지 */
+  .story{ list-style:none; margin:0; padding:0; }
+  .story li{ display:flex; gap:4mm; align-items:baseline; padding:3.6mm 0; border-bottom:1px solid var(--line); font-size:13pt; line-height:1.6; color:var(--ink2); }
+  .story li:first-child{ padding-top:0; }
+  .story li b{ color:var(--ink); }
+  .story .tag{ flex:none; width:21mm; text-align:center; white-space:nowrap; }
+  .t-p{ background:#F1EFF6; color:var(--ink2); }
+  .t-w{ background:var(--coS); color:var(--co); }
+  .t-s{ background:var(--inS); color:var(--in); }
+  .t-r{ background:var(--in); color:#fff; }
+  .side{ flex:none; display:flex; gap:4mm; }
+  .side img{ height:110mm; width:auto; border-radius:2.5mm; border:1px solid var(--line); display:block; }
+  .side .cp{ font-size:10pt; color:var(--ink2); margin-top:2mm; text-align:center; }
+  .panel{ border:1px solid var(--line); border-radius:2.5mm; padding:4.5mm 5.5mm; }
+  .panel .h{ font-size:11pt; font-weight:700; color:var(--in); margin-bottom:3.5mm; }
+  .panel .h small{ font-weight:400; color:var(--dim); margin-left:1.5mm; font-size:9.5pt; }
+  .bar{ margin-bottom:3.5mm; }
+  .bar .lb{ display:flex; justify-content:space-between; font-size:10.5pt; color:var(--ink2); margin-bottom:1.2mm; }
+  .bar .lb b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+  .bar .tr{ height:6mm; background:#F1EFF6; border-radius:0 1mm 1mm 0; }
+  .bar .fl{ height:100%; background:#A9A3C6; border-radius:0 1mm 1mm 0; }
+  .bar.hi .fl{ background:var(--coB); }
+  .bar.hi .lb b{ color:var(--co); }
+  .ans{ display:flex; flex-direction:column; gap:2mm; }
+  .ans div{ display:flex; justify-content:space-between; align-items:center; background:var(--soft); border-radius:1.5mm; padding:2mm 3.5mm; font-size:11.5pt; font-weight:700; color:var(--ink); }
+  .ans div small{ font-size:9.5pt; font-weight:400; color:var(--dim); }
+
+  /* 7 변화 */
+  table.ba{ width:100%; border-collapse:collapse; font-size:12.5pt; }
+  .ba th{ font-size:10.5pt; color:var(--dim); text-align:left; letter-spacing:1px; padding:0 4mm 2.5mm; border-bottom:2px solid var(--in); }
+  .ba td{ padding:4.4mm 4mm; border-bottom:1px solid var(--line); vertical-align:middle; color:var(--ink2); line-height:1.45; }
+  .ba td.k{ font-weight:700; color:var(--ink); width:17%; }
+  .ba td.bf{ color:var(--dim); width:30%; }
+  .ba td.ar{ color:var(--co); font-weight:700; font-size:15pt; width:8mm; text-align:center; }
+  .ba td.af b{ color:var(--in); }
+  .ba td.af small{ display:block; font-size:10pt; color:var(--dim); margin-top:.5mm; }
+
+  /* 8 발전 방향 */
+  .road{ display:flex; gap:6mm; position:relative; }
+  .stage{ flex:1; position:relative; padding-top:11mm; }
+  .stage::before{ content:""; position:absolute; left:0; right:-6mm; top:3.4mm; height:1mm; background:var(--line); }
+  .stage:last-child::before{ right:0; }
+  .stage .dot{ position:absolute; left:0; top:0; width:7.8mm; height:7.8mm; border-radius:50%; background:#fff; border:2mm solid var(--in); }
+  .stage.now .dot{ background:var(--in); }
+  .stage.next .dot{ border-color:var(--coB); }
+  .stage .when{ font-size:10.5pt; font-weight:700; letter-spacing:1.5px; color:var(--dim); }
+  .stage h3{ margin:1.5mm 0 3.5mm; font-size:16pt; color:var(--in); }
+  .stage.next h3{ color:var(--co); }
+  .stage ul{ margin:0; padding:0; list-style:none; }
+  .stage li{ font-size:13pt; line-height:1.55; color:var(--ink2); padding:2.6mm 0 2.6mm 4.5mm; border-bottom:1px solid var(--line); position:relative; }
+  .stage li::before{ content:""; position:absolute; left:0; top:5.2mm; width:1.6mm; height:1.6mm; border-radius:50%; background:var(--in); }
+  .stage.next li::before{ background:var(--coB); }
+  .stage li b{ color:var(--ink); }
+
+  /* 9 마무리 */
+  table.rc{ width:100%; border-collapse:collapse; font-size:12.5pt; }
+  .rc th{ font-size:10.5pt; color:var(--dim); text-align:left; letter-spacing:1px; padding:0 4mm 2.5mm; border-bottom:2px solid var(--in); }
+  .rc td{ padding:5.5mm 4mm; font-size:13.5pt; border-bottom:1px solid var(--line); color:var(--ink2); line-height:1.5; vertical-align:top; }
+  .rc td:first-child{ color:var(--ink); font-weight:700; width:24%; }
+  .rc td.mid b{ color:var(--in); }
+  .rc td.end b{ color:var(--co); }
+  .close{ background:var(--inD); color:#fff; border-radius:2.5mm; padding:6mm 9mm; font-size:15pt; line-height:1.6; }
+  .close b{ color:var(--coB); }
+
+  /* 10 Q&A */
+  .qa{ padding:0; flex-direction:row; align-items:center; background:var(--inD); color:#fff; }
+  .qa .l{ flex:1; padding:0 24mm; }
+  .qa .big{ font-size:82pt; font-weight:700; letter-spacing:-2px; line-height:1; }
+  .qa .big em{ font-style:normal; color:var(--coB); }
+  .qa .s{ font-size:18pt; margin-top:6mm; color:rgba(255,255,255,.9); }
+  .qa .ln2{ width:36mm; height:1.6mm; background:var(--coB); margin:9mm 0 8mm; }
+  .qa .m{ font-size:12pt; line-height:2; color:rgba(255,255,255,.72); }
+  .qa .m b{ color:#fff; }
+  .qa .r{ flex:0 0 100mm; margin-right:24mm; background:#fff; border-radius:3mm; padding:7mm; text-align:center; color:var(--ink); }
+  .qa .r .h{ font-size:12.5pt; font-weight:700; color:var(--in); margin-bottom:3mm; }
+  .qa .r img{ width:76mm; height:76mm; display:block; margin:0 auto; image-rendering:pixelated; }
+  .qa .r code{ display:block; margin-top:3mm; font-family:Consolas,monospace; font-size:11pt; color:var(--in); font-weight:700; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ 1 표지 ══════════════════ -->
+<section class="slide cover">
+  <div class="l">
+    <div class="k">군산대학교 공과대학 · 졸업작품 발표</div>
+    <div class="t">공대 3호관 길안내</div>
+    <div class="s">건물 안에서 길을 잃는 문제를 해결하기 위한<br><em>새로운 제안</em></div>
+    <div class="tags"><span>장치 없이</span><span>인터넷 없이</span><span>낡지 않게</span></div>
+    <div class="m"><b>팀 공3길</b>　김민종 · 손의윤 · 문성일<br>지도교수　<b>강규창 교수님</b></div>
+  </div>
+  <div class="r"><img data-pic="흐름06_3D경로" alt="앱의 3D 경로 화면"></div>
+</section>
+
+<!-- ══════════════════ 2 들어가며 ══════════════════ -->
+<section class="slide" data-ph="공감">
+  <div class="ch">들어가며</div>
+  <h1>혹시 이런 불편함, <em>겪어 보셨나요?</em></h1>
+  <div class="qs">
+    <figure class="q"><img data-photo="site:EVIN3/01.jpg" alt="3층 엘리베이터 안">
+      <figcaption><b>「문이 열렸는데…<br>왼쪽이야, 오른쪽이야?」</b><span>3층 엘리베이터 안</span></figcaption></figure>
+    <figure class="q"><img data-photo="site:GATE_E/01.jpg" alt="1층 동문 복도">
+      <figcaption><b>「찾는 강의실이<br>이 복도 끝에 있긴 한 걸까?」</b><span>1층 동문으로 들어오자마자</span></figcaption></figure>
+    <figure class="q"><img data-photo="site:SIGN3/01.jpg" alt="3층 비상대피 경로도">
+      <figcaption><b>「안내도는 있는데,<br>내가 찾는 호실은 어디?」</b><span>3층 비상대피 경로도</span></figcaption></figure>
+  </div>
+  <div class="hook vbot">수업 5분 전, 처음 가 보는 강의실. <b>지도 앱은 건물 앞에서 끝납니다.</b>
+    그다음은 — 지나가는 사람에게 묻는 수밖에 없습니다.</div>
+  <div class="foot"><span class="arc"></span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 3 우리가 발견한 문제점 ══════════════════ -->
+<section class="slide" data-ph="문제">
+  <div class="ch">우리가 발견한 문제점</div>
+  <h1>길안내는 <em>건물 앞에서</em> 멈춥니다</h1>
+  <div class="pains">
+    <div class="pain"><div class="no">PAIN POINT 1</div><h3>내 위치를 모른다</h3>
+      <p><b>GPS</b>는 건물 안에서 층도 방향도 모릅니다.
+         <b>비콘 · Wi-Fi 측위</b>는 장치 수십 대와 공사가 필요한데, 학생은 설치 허가를 받을 수 없습니다.</p>
+      <div class="was">기존 방식 — 지도 앱 · 실내 측위 장치</div></div>
+    <div class="pain"><div class="no">PAIN POINT 2</div><h3>헤매는 곳은 신호가 없다</h3>
+      <p>길을 잃는 곳은 하필 <b>지하 · 계단 · 엘리베이터 안</b>입니다.
+         인터넷이 있어야 도는 앱은 정작 거기서 멈춥니다.</p>
+      <div class="was">기존 방식 — 온라인 지도 · 웹 안내 페이지</div></div>
+    <div class="pain hot"><div class="no">PAIN POINT 3</div><h3>안내는 금방 낡는다</h3>
+      <p>게시판 · 가구 · 공사로 공간이 바뀌면 <b>사진도 안내도도 틀려집니다.</b>
+         누군가 다시 찍고 어디 사진인지 분류해야 하는데, <b>그 일을 할 사람이 없습니다.</b></p>
+      <div class="was">기존 방식 — 벽의 층 안내도 · 사진 안내</div></div>
+  </div>
+  <div class="hook co vbot"><b>가장 아픈 곳은 PAIN POINT 3</b> — 만드는 것보다 <b>계속 맞게 유지하는 것</b>이 어렵습니다.
+    학생이 만든 앱은 만든 사람이 졸업하면 멈춥니다.</div>
+  <div class="foot"><span class="arc"></span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 4 우리의 해결 아이디어 ══════════════════ -->
+<section class="slide" data-ph="아이디어">
+  <div class="ch">우리의 해결 아이디어</div>
+  <h1>그래서 우리는 <em>이렇게</em> 생각했습니다</h1>
+  <div class="ideas">
+    <div class="idea"><div class="fix">PAIN 1 · 내 위치를 모른다</div><div class="v">묻는다</div>
+      <p>위치를 <b>재지 말고</b>,<br>어느 문으로 들어왔는지 <b>묻자</b></p>
+      <div class="how">→ 출입문 4곳에 <b>QR 스티커</b> 한 장씩</div></div>
+    <div class="idea"><div class="fix">PAIN 2 · 신호가 없다</div><div class="v">담아 둔다</div>
+      <p>필요한 것을 처음 한 번에<br><b>휴대폰에 통째로</b> 담아 두자</p>
+      <div class="how">→ <b>설치형 웹앱(PWA)</b> — 비행기 모드에서도 안내</div></div>
+    <div class="idea hot"><div class="fix">PAIN 3 · 안내가 낡는다</div><div class="v">함께 고친다</div>
+      <p>낡은 사진은 <b>지나가는 이용자</b>가 찍어 올리고,<br>어디 사진인지는 <b>AI</b>가 가리자</p>
+      <div class="how">→ 단, AI는 <b>확신할 때만</b> 답한다</div></div>
+  </div>
+  <div class="hook vbot"><b>한 문장으로</b> — 건물에 장치를 다는 대신, <b>모두가 이미 들고 있는 휴대폰</b>으로 길을 안내합니다.</div>
+  <div class="foot"><span class="arc"></span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 5 솔루션 설계 및 구현 ══════════════════ -->
+<section class="slide" data-ph="구현">
+  <div class="ch">솔루션 설계 및 구현</div>
+  <h1>공대 3호관 길안내의 <em>전체 구조</em>와 개발 기술</h1>
+  <div class="sys">
+    <div class="zone ph">
+      <div class="zh">이용자 휴대폰<small>설치형 웹앱 (PWA) — 계산은 전부 여기서</small></div>
+      <div class="grp"><div class="gh2">길안내</div>
+        <div class="mods"><span>QR 읽기<i>jsQR</i></span><span>목적지 찾기<i>호실 · 교수님 성함</i></span>
+          <span>길 만들기<i>guide.js</i></span><span>3D 건물<i>three.js (WebGL)</i></span><span>실제 사진 단계<i>1인칭 걷기</i></span></div></div>
+      <div class="grp"><div class="gh2">사진 제보</div>
+        <div class="mods"><span>흔들림 · 밝기 검사</span><span>번호판 글자 읽기<i>Tesseract.js</i></span>
+          <span>모양 비교 · 1·2위 격차<i>TensorFlow.js · MobileNet v2</i></span></div></div>
+      <div class="grp"><div class="gh2">저장</div>
+        <div class="mods"><span>Service Worker<i>230개 파일 15.6MB를 폰에</i></span></div></div>
+    </div>
+    <div class="links r1">
+      <div class="ln"><b>제보 사진</b><em>→</em></div>
+      <div class="ln"><em>←</em><b>승인 사진</b></div>
+    </div>
+    <div class="links r2">
+      <div class="ln"><em>←</em><b>앱 · 안내 사진</b><small>처음 한 번</small></div>
+    </div>
+    <div class="zone fb">
+      <div class="zh">서버<small>Firebase</small></div>
+      <div class="mods col"><span>문지기<i>보안 규칙 — 관리자만 승인</i></span><span>제보 대기함 · 승인 사진 창고<i>Firestore</i></span>
+        <span>관리자 로그인<i>Authentication</i></span></div>
+      <div class="adm">관리자는 <b>확인하고 승인만</b> 합니다</div>
+    </div>
+    <div class="zone gh">
+      <div class="zh">배포<small>GitHub Pages · Actions</small></div>
+      <div class="adm" style="margin-top:0">올리면 자동 배포 — 앱스토어 없이 주소로</div>
+    </div>
+  </div>
+  <div class="stats vbot">
+    <div><b>36</b>개 파일 · <b>2만 4천</b>줄<span>직접 쓴 코드 — 번들러 없이 순수 JavaScript</span></div>
+    <div><b>60</b>줄<span>서버에 올린 우리 코드는 보안 규칙이 전부</span></div>
+    <div><b>0</b>원<span>서버 · 배포 비용 (무료 한도 안)</span></div>
+  </div>
+  <div class="foot"><span class="arc"></span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 6 핵심 기능 시연 ══════════════════ -->
+<section class="slide" data-ph="시연">
+  <div class="ch">핵심 기능 시연</div>
+  <h1>공대 3호관 길안내는 <em>이렇게 동작합니다</em></h1>
+  <div class="shots">
+    <div class="shot"><img data-pic="흐름01_첫화면" alt="첫 화면">
+      <div class="cp"><i>1</i><b>앱을 연다</b><br>앱스토어 없이 주소로</div></div>
+    <div class="shot"><img data-pic="흐름02_QR스캔" alt="QR 스캔">
+      <div class="cp"><i>2</i><b>문 QR을 찍는다</b><br>안 되면 네 문 중 직접</div></div>
+    <div class="shot"><img data-pic="흐름04_무엇을찾으세요" alt="무엇을 찾으세요">
+      <div class="cp"><i>3</i><b>무엇을 찾나</b><br>강의실 · 화장실 · 비상계단</div></div>
+    <div class="shot"><img data-pic="흐름06_3D경로" alt="3D 경로">
+      <div class="cp"><i>4</i><b>길을 통째로 본다</b><br>3D 건물 위의 경로</div></div>
+    <div class="shot"><img data-pic="흐름07_1인칭" alt="1인칭 걷기">
+      <div class="cp"><i>5</i><b>미리 걸어 본다</b><br>1인칭 걷기</div></div>
+    <div class="shot"><img data-pic="흐름09_복도" alt="복도 단계">
+      <div class="cp"><i>6</i><b>사진을 따라 걷는다</b><br>「복도를 따라 직진하세요」</div></div>
+  </div>
+  <div class="hook vbot">다음 두 장에서 — 이 기능들이 <b>어떤 문제를 어떻게 풀었는지</b> 하나씩 보여 드립니다.</div>
+  <div class="foot"><span class="arc"></span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 6-1 기능 1 ══════════════════ -->
+<section class="slide" data-ph="시연">
+  <div class="ch">핵심 기능 시연 · 기능 1</div>
+  <h1>「내 위치를 모른다」를 해결하는 <em>QR 출발 안내</em></h1>
+  <div style="display:flex; gap:9mm">
+    <ol class="story" style="flex:1; min-width:0">
+      <li><span class="tag t-p">문제</span><span>실내에서는 위치를 잴 수 없습니다. 재려면 장치가 필요하고, <b>장치는 달 수 없습니다.</b></span></li>
+      <li><span class="tag t-w">발상 전환</span><span>「지금 어디인가」 대신 <b>「어느 문으로 들어왔나」</b>를 묻습니다.
+          출입문 4곳에 QR — 안 읽히면 네 문 가운데서 직접 고릅니다.</span></li>
+      <li><span class="tag t-s">해결</span><span>그다음은 단계마다 <b>그 자리의 실제 사진</b>을 보여 줍니다.
+          눈앞 풍경과 다르면 잘못 든 것 — 이용자가 스스로 대조합니다.</span></li>
+      <li><span class="tag t-s">해결</span><span>신호가 없는 곳을 위해 앱 전체를 <b>처음 한 번 휴대폰에 저장</b>합니다 (230개 파일 15.6MB).</span></li>
+      <li><span class="tag t-r">결과</span><span><b>장치 0대</b> · 네 문 × 지하 1층~5층 <b>안내 754가지</b> · 비행기 모드에서도 동작</span></li>
+    </ol>
+    <div class="side">
+      <div><img data-pic="흐름02_QR스캔" alt="QR 스캔"><div class="cp">카메라가 막혀도 — 아래 네 문</div></div>
+      <div><img data-pic="흐름08_1단계" alt="1단계 안내"><div class="cp">「정문으로 들어오세요」</div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="arc"></span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 6-2 기능 2 ══════════════════ -->
+<section class="slide" data-ph="시연">
+  <div class="ch">핵심 기능 시연 · 기능 2</div>
+  <h1>「사진이 낡는다」를 개선하는 <em>제보 + AI 판정</em></h1>
+  <div style="display:flex; gap:8mm">
+    <ol class="story" style="flex:1; min-width:0">
+      <li><span class="tag t-p">문제</span><span>사진이 낡는데 다시 찍을 사람이 없습니다 → <b>이용자가 찍어 올리게</b> 했습니다 (건의함).</span></li>
+      <li><span class="tag t-p">새 문제</span><span>올라온 사진이 어디인지 누가 가립니까? → AI가 사진을 <b>숫자 1,280개</b>로 바꿔 기준 사진과 비교합니다.</span></li>
+      <li><span class="tag t-w">부딪힌 벽</span><span>전부 답하게 하니 <b>자리 정답 55.6%</b>. 복도 · 엘리베이터 앞은 층마다 같아서 헷갈립니다.</span></li>
+      <li><span class="tag t-s">해결 ①</span><span>1위 점수가 아니라 <b>1·2위 격차</b>로 확신을 재고, 확신한 만큼만 답합니다.</span></li>
+      <li><span class="tag t-s">해결 ②</span><span>번호판 · 층 표시가 보이면 <b>글자를 먼저</b> 읽습니다 → 엘리베이터 안 <b>97%</b>, 틀린 층 <b>0건</b>.</span></li>
+      <li><span class="tag t-r">안전장치</span><span>관리자가 승인하기 전에는 <b>누구의 화면에도 반영되지 않습니다.</b></span></li>
+    </ol>
+    <div style="flex:0 0 104mm; display:flex; flex-direction:column; gap:4mm">
+      <div class="panel"><div class="h">자리를 맞힌 비율<small>시험 사진 1,844장</small></div>
+        <div class="bar"><div class="lb"><span>전부 답할 때 · 1,844장</span><b>55.6%</b></div>
+          <div class="tr"><div class="fl" style="width:55.6%"></div></div></div>
+        <div class="bar hi" style="margin-bottom:0"><div class="lb"><span>확신 상위 10%만 · 184장</span><b>92.9%</b></div>
+          <div class="tr"><div class="fl" style="width:92.9%"></div></div></div></div>
+      <div class="panel"><div class="h">이용자가 받는 답<small>확신한 만큼만</small></div>
+        <div class="ans">
+          <div>「아마 여기예요 : 13101호」<small>확신 높음</small></div>
+          <div>「층은 3층 같아요」<small>층만 확실</small></div>
+          <div>「어디인지 알 수 없어요」<small>모름</small></div>
+        </div></div>
+    </div>
+  </div>
+  <div class="hook co vbot"><b>55.6%와 92.9%는 같은 AI, 같은 사진입니다</b> — 다른 것은 <b>「답할지 말지를 정하는 기준」</b> 하나뿐입니다.</div>
+  <div class="foot"><span class="arc"></span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 7 우리가 만든 변화 ══════════════════ -->
+<section class="slide" data-ph="변화">
+  <div class="ch">우리가 만든 변화</div>
+  <h1>공대 3호관 길안내로 <em>달라지는 것</em></h1>
+  <table class="ba">
+    <tr><th>무엇이</th><th>지금까지</th><th></th><th>공대 3호관 길안내</th></tr>
+    <tr><td class="k">길 찾기</td><td class="bf">지나가는 사람에게 묻고 헤맨다</td><td class="ar">→</td>
+        <td class="af"><b>QR 한 번 찍고 문 앞까지</b><small>네 문 × 지하 1층~5층 · 안내 754가지 · 한국어 / 영어</small></td></tr>
+    <tr><td class="k">설치 · 운영비</td><td class="bf">측위 장치 수십 대 · 공사 · 배터리</td><td class="ar">→</td>
+        <td class="af"><b>0원 · 장치 0대</b><small>QR 스티커 4장 · 무료 호스팅</small></td></tr>
+    <tr><td class="k">지하 · 계단</td><td class="bf">신호가 없으면 멈춘다</td><td class="ar">→</td>
+        <td class="af"><b>비행기 모드에서도 안내</b><small>처음 한 번 15.6MB 저장</small></td></tr>
+    <tr><td class="k">사진 관리</td><td class="bf">관리자가 다시 찍고 분류한다</td><td class="ar">→</td>
+        <td class="af"><b>이용자가 찍고 AI가 가린다</b><small>관리자는 승인만</small></td></tr>
+    <tr><td class="k">AI의 답</td><td class="bf">전부 답하면 자리 정답 55.6%</td><td class="ar">→</td>
+        <td class="af"><b>확신할 때만 답한다 — 92.9%</b><small>확신 상위 10% · 나머지는 층만, 또는 「모르겠다」</small></td></tr>
+  </table>
+  <div class="hook vbot"><b>숫자보다 큰 변화</b> — 만든 사람이 졸업해도, <b>이용자가 사진을 고쳐 가며</b> 앱이 계속 맞게 돌아갑니다.</div>
+  <div class="foot"><span class="arc"></span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 8 향후 발전 방향 ══════════════════ -->
+<section class="slide" data-ph="다음">
+  <div class="ch">향후 발전 방향</div>
+  <h1>더 나은 서비스를 위한 <em>다음 단계</em></h1>
+  <div class="road">
+    <div class="stage now"><div class="dot"></div><div class="when">지금 · 10월</div><h3>여기까지 왔습니다</h3>
+      <ul><li><b>네 문 × 지하 1층~5층</b> 안내 754가지</li>
+          <li>사진 제보 · <b>AI 위치 판정</b> 동작</li>
+          <li>공개 주소로 배포 중</li></ul></div>
+    <div class="stage"><div class="dot"></div><div class="when">11월 · 최종 발표 전</div><h3>다듬습니다</h3>
+      <ul><li><b>약한 자리 사진 보강</b> — 5층처럼 비슷한 곳을 더 찍고 정확도 다시 측정</li>
+          <li><b>현장 최종 점검</b> — 네 문에서 각 층까지 직접 걸으며 확인</li>
+          <li>최종 보고서 · 시연 연습</li></ul></div>
+    <div class="stage next"><div class="dot"></div><div class="when">그다음</div><h3>넓힙니다</h3>
+      <ul><li><b>처음 온 사람</b>이 실제로 찾아가는지 사용성 시험</li>
+          <li>제보 사진 속 <b>얼굴 자동 가림</b></li>
+          <li><b>스토어 앱으로 감싸기</b> — AI 판정까지 인터넷 없이 (설치 40MB 안팎)</li></ul></div>
+  </div>
+  <div class="hook vbot"><b>목표는 하나</b> — 처음 온 사람이 <b>누구에게도 묻지 않고</b> 3호관 어느 문 앞이든 찾아가는 것입니다.</div>
+  <div class="foot"><span class="arc"></span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 9 마무리하며 ══════════════════ -->
+<section class="slide" data-ph="마무리">
+  <div class="ch">마무리하며</div>
+  <h1>세 가지 문제, <em>세 가지 답</em></h1>
+  <table class="rc">
+    <tr><th>우리가 발견한 문제</th><th>우리의 답</th><th>그래서</th></tr>
+    <tr><td>내 위치를 모른다</td><td class="mid">위치를 재지 않고 <b>들어온 문을 묻는다</b> — 출입문 QR</td>
+        <td class="end">장치 <b>0대</b>로 문 앞까지</td></tr>
+    <tr><td>헤매는 곳은 신호가 없다</td><td class="mid">처음 한 번 <b>휴대폰에 통째로 담는다</b> — 설치형 웹앱</td>
+        <td class="end"><b>비행기 모드</b>에서도 안내</td></tr>
+    <tr><td>안내는 금방 낡는다</td><td class="mid"><b>이용자가 찍고 AI가 가린다</b> — 확신할 때만</td>
+        <td class="end">확신 상위 10%에서 <b>92.9%</b></td></tr>
+  </table>
+  <div class="close vbot">이 앱의 AI는 모르면 <b>「어디인지 알 수 없어요」</b>라고 말합니다.<br>
+    틀린 길을 자신 있게 알려 주는 것보다, <b>모른다고 말하는 길안내</b>가 믿고 따라갈 수 있다고 생각했습니다.</div>
+  <div class="foot"><span class="arc"></span><span class="pg"></span></div>
+</section>
+
+<!-- ══════════════════ 10 Q&A ══════════════════ -->
+<section class="slide qa">
+  <div class="l">
+    <div class="big">Q <em>&amp;</em> A</div>
+    <div class="s">질의응답 — 들어 주셔서 감사합니다</div>
+    <div class="ln2"></div>
+    <div class="m"><b>공대 3호관 길안내</b> · 팀 공3길<br>김민종 · 손의윤 · 문성일　|　지도교수 강규창 교수님</div>
+  </div>
+  <div class="r">
+    <div class="h">지금 바로 써 보기</div>
+    <img data-qr="정문_MAIN.png" alt="정문 QR">
+    <code>minjong0910.github.io</code>
+  </div>
+</section>
+
+<script>
+  /* 쪽 아래 이야기 줄 — 지금 장의 단계만 주황 */
+  (function(){
+    var ARC = ['공감','문제','아이디어','구현','시연','변화','다음','마무리'];
+    var all = document.querySelectorAll('section.slide[data-ph]');
+    for(var k = 0; k < all.length; k++){
+      var s = all[k], ph = s.getAttribute('data-ph'), box = s.querySelector('.foot .arc'), h = '';
+      for(var i = 0; i < ARC.length; i++){
+        if(i) h += '<i>›</i>';
+        h += '<span' + (ARC[i] === ph ? ' class="on"' : '') + '>' + ARC[i] + '</span>';
+      }
+      if(box) box.innerHTML = h;
+    }
+  })();
+</script>
+</body>
+</html>

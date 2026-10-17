@@ -2,23 +2,24 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>졸업작품 발표 — 공대 3호관 길안내 (연구·제품 발표형)</title>
+<title>졸업작품 발표 — 공대 3호관 길안내 (미션·제품 발표형)</title>
 <style>
   /* ══════════════════════════════════════════════════════════════
-     졸업작품 발표 — 개발자 행사 기조연설 흐름
-       미션 → 문제의 크기 → 연구 질문 세 개(답 하나씩) → 제품 둘 → 만든 방식 → 책임 → 출시 범위 → 미션
-       1 제목 · 2 미션 · 3 문제 · 4 연구 질문 · 5 연구 ① · 6 연구 ② · 7 연구 ③ · 8 제품 ① · 9 제품 ②
-       10 만든 방식 · 11 책임 · 12 출시 범위 · 13 마무리
+     졸업작품 발표 — 개발자 행사 기조연설 흐름 · 주인공은 「길안내 앱」
+       미션 → 문제 → 앱 한눈에(다섯 단계) → 제품 여섯 장(출발 · 찾기 · 보기 · 걷기 · 어디서나 · 함께 고치기)
+       → 만든 방식 → 믿을 수 있게 → 출시 → 미션
+       1 제목 · 2 미션 · 3 문제 · 4 앱 한눈에 · 5 출발 · 6 찾기 · 7 보기 · 8 걷기 · 9 어디서나
+       10 함께 고치기(AI 는 이 한 장) · 11 만든 방식 · 12 믿을 수 있게 · 13 출시 · 14 마무리
+     2026-10-17 사용자 : 「주 이야기가 AI 로 되어 있다 — 발표할 것은 최종적으로 다 만든 길안내 앱이다. AI 는 1~2쪽만」
 
      회사 로고 · 브랜드 색 · 회사 이름은 넣지 않는다 — 흐름만 따른다.
-     색 : 흰 바탕 + 초록 하나(#188038, 흰 바탕 대비 5.0:1). 그래프 두 계열은 초록 실선 / 회색 점선 — 색만으로 가르지 않는다.
-     6쪽 곡선 값은 도구\발표_캡스톤_틀.html 의 측정 곡선(eval_all.html, 시험 사진 1,844장)에서 그대로 옮겼다.
+     색 : 흰 바탕 + 초록 하나(#188038, 흰 바탕 대비 5.0:1).
 
      ※ 고칠 때는 문서\발표_구글식.html 이 아니라 이 파일을 고친다 (도구\발표_스토리라인_만들기.ps1 -Type 구글).
      ══════════════════════════════════════════════════════════════ */
   @page { size: 338.7mm 190.5mm; margin: 0; }
   :root{ --bg:#FFFFFF; --card:#F1F3F4; --line:#DADCE0; --ink:#202124; --ink2:#3C4043; --dim:#5F6368;
-         --ac:#188038; --acS:#E6F4EA; --s2:#5F6B7A; }
+         --ac:#188038; --acS:#E6F4EA; }
   *{ box-sizing:border-box; }
   html,body{ margin:0; background:var(--bg); }
   body{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; color:var(--ink);
@@ -33,15 +34,13 @@
       letter-spacing:-.8px; font-weight:700; }
   h1 em{ font-style:normal; color:var(--ac); }
   .foot{ position:absolute; left:20mm; right:20mm; bottom:6mm; display:flex; justify-content:space-between; font-size:8.5pt; color:var(--dim); }
-  .foot .pg::after{ content:counter(sl) " / 13"; }
+  .foot .pg::after{ content:counter(sl) " / 14"; }
   .card{ background:var(--card); border-radius:5mm; padding:6mm 7mm; }
   .card h3{ margin:0 0 2.5mm; font-size:15pt; color:var(--ink); }
   .card p{ margin:0; font-size:12pt; line-height:1.65; color:var(--ink2); }
   .card p b{ color:var(--ink); }
-  .row{ display:flex; gap:6mm; }
-  .row > *{ flex:1; min-width:0; }
-  .note{ font-size:12pt; color:var(--dim); line-height:1.55; }
-  .note b{ color:var(--ink2); }
+  .note{ font-size:13pt; color:var(--ink2); line-height:1.55; }
+  .note b{ color:var(--ink); }
   b.ac{ color:var(--ac); }
   .phone{ border-radius:4mm; border:1.4mm solid var(--ink); display:block; }
 
@@ -57,7 +56,7 @@
   .title .r .blob{ position:absolute; border-radius:50%; }
   .title .r img{ position:absolute; height:138mm; width:auto; top:26mm; left:30mm; border-radius:5mm; border:1.6mm solid var(--ink); }
 
-  /* 2 미션 · 13 마무리 */
+  /* 2 미션 · 14 마무리 */
   .mission{ align-items:center; justify-content:center; text-align:center; padding:0 30mm; }
   .mission .q{ font-size:40pt; font-weight:700; line-height:1.35; letter-spacing:-1.4px; }
   .mission .q em{ font-style:normal; color:var(--ac); }
@@ -73,72 +72,49 @@
   .gaps div{ flex:1; border-left:1.5mm solid var(--ac); padding:1mm 0 1mm 5mm; font-size:13pt; line-height:1.55; color:var(--ink2); }
   .gaps div b{ display:block; color:var(--ink); font-size:14pt; }
 
-  /* 4 연구 질문 */
-  .qs .card{ display:flex; flex-direction:column; padding:7mm 7.5mm; }
-  .qs .no{ font-size:12pt; font-weight:700; color:var(--ac); letter-spacing:1px; }
-  .qs h3{ font-size:19pt; line-height:1.4; margin:3mm 0 4mm; letter-spacing:-.5px; }
-  .qs p{ margin-top:auto; }
-  .qs .go{ margin-top:5mm; font-size:11pt; color:var(--ac); font-weight:700; }
+  /* 4 앱 한눈에 */
+  .journey{ display:flex; align-items:flex-start; justify-content:space-between; }
+  .journey .st{ text-align:center; width:46mm; }
+  .journey .st .no{ display:inline-block; font-size:12pt; font-weight:700; color:var(--ac); background:var(--acS); border-radius:4mm; padding:1mm 4mm; margin-bottom:3mm; }
+  .journey .st img{ width:46mm; height:99.5mm; border-radius:3mm; border:1.2mm solid var(--ink); display:block; margin:0 auto; }
+  .journey .st b{ display:block; font-size:13.5pt; margin-top:3mm; }
+  .journey .st span{ display:block; font-size:11pt; color:var(--dim); margin-top:.8mm; line-height:1.4; }
+  .journey > i{ font-style:normal; color:var(--ac); font-size:20pt; font-weight:700; align-self:center; margin-top:-10mm; }
 
-  /* 5 연구 ① */
-  .pipe{ display:flex; align-items:stretch; gap:3mm; margin-bottom:8mm; }
-  .pipe span{ flex:1; background:var(--card); border-radius:3mm; padding:5mm 4mm; font-size:14pt; display:flex; flex-direction:column; justify-content:center; font-weight:700; text-align:center; line-height:1.35; }
-  .pipe span small{ display:block; font-weight:400; font-size:10.5pt; margin-top:1mm; color:var(--dim); }
-  .pipe i{ font-style:normal; color:var(--ac); font-weight:700; font-size:16pt; align-self:center; }
-  .kpi{ display:flex; gap:5mm; flex:1; margin-bottom:7mm; }
-  .kpi div{ flex:1; border:1px solid var(--line); border-radius:5mm; padding:8mm 8mm; display:flex; flex-direction:column; justify-content:center; }
-  .kpi b{ display:block; font-size:50pt; letter-spacing:-1px; line-height:1.05; color:var(--ink); }
-  .kpi b.ac{ color:var(--ac); }
-  .kpi span{ display:block; font-size:15pt; color:var(--ink); font-weight:700; margin-top:1.5mm; }
-  .kpi small{ display:block; font-size:11.5pt; color:var(--dim); margin-top:1mm; line-height:1.45; }
+  /* 5~10 제품 */
+  .prod{ display:flex; gap:10mm; align-items:flex-start; }
+  .prod .tx{ flex:1; min-width:0; }
+  .prod .shots{ flex:none; display:flex; gap:6mm; }
+  .prod .shots div{ text-align:center; }
+  .prod .shots img{ height:124mm; width:auto; }
+  .prod .shots span{ display:block; font-size:10.5pt; color:var(--dim); margin-top:2mm; }
+  .prod .shots.three{ gap:5mm; }
+  .prod .shots.three img{ height:108mm; }
+  .prod .shots.three .qrimg{ width:44mm; height:auto; }
+  .feat{ list-style:none; margin:0; padding:0; }
+  .feat li{ padding:4.4mm 0 4.4mm 9mm; border-bottom:1px solid var(--line); position:relative; font-size:13.5pt; line-height:1.55; color:var(--ink2); }
+  .feat li:first-child{ padding-top:0; }
+  .feat li::before{ content:""; position:absolute; left:0; top:6.6mm; width:3.6mm; height:3.6mm; border-radius:50%; background:var(--ac); }
+  .feat li:first-child::before{ top:2.2mm; }
+  .feat li b{ display:block; color:var(--ink); font-size:15pt; margin-bottom:.5mm; }
+  .qrimg{ width:60mm; height:auto; display:block; border-radius:2mm; border:1px solid var(--line); }
+  .ans{ display:flex; flex-direction:column; gap:2.4mm; margin-top:2mm; }
+  .ans div{ display:flex; justify-content:space-between; align-items:center; background:var(--card); border-radius:2.5mm; padding:2.6mm 4.5mm; font-size:12.5pt; font-weight:700; color:var(--ink); }
+  .ans div small{ font-size:10.5pt; font-weight:400; color:var(--dim); }
 
-  /* 6 연구 ② 그래프 */
-  .plotwrap{ display:flex; gap:8mm; align-items:stretch; }
-  .plotwrap svg{ flex:none; height:100mm; width:auto; display:block; }
-  .plotwrap svg text{ font-family:"Malgun Gothic","맑은 고딕",sans-serif; }
-  .side{ flex:1; display:flex; flex-direction:column; gap:4mm; }
-  .side .card{ padding:6mm 7mm; flex:1; display:flex; flex-direction:column; justify-content:center; }
-  .side .card p{ font-size:12.5pt; }
-  .side .card b.big{ display:block; font-size:30pt; color:var(--ac); letter-spacing:-1px; line-height:1.05; }
-
-  /* 7 연구 ③ */
-  .ocr{ display:flex; gap:8mm; align-items:center; }
-  .ocr figure{ margin:0; text-align:center; }
-  .ocr img{ height:96mm; width:auto; border-radius:3mm; display:block; }
-  .ocr figcaption{ font-size:11pt; color:var(--ink2); margin-top:2.5mm; }
-  .ocr figcaption b{ color:#B3261E; }
-  .ocr .arrow{ font-size:26pt; color:var(--ac); font-weight:700; }
-  .ocr .res{ flex:1; }
-  .ocr .res b.big{ display:block; font-size:54pt; color:var(--ac); letter-spacing:-2px; line-height:1; }
-
-  /* 8 제품 ① */
-  .shots{ display:flex; gap:8mm; justify-content:center; }
-  .shot{ width:48mm; }
-  .shot img{ width:48mm; height:103.9mm; border-radius:3mm; border:1.2mm solid var(--ink); display:block; }
-  .shot .cp{ font-size:11pt; margin-top:2.5mm; line-height:1.45; color:var(--ink2); }
-  .shot .cp b{ display:block; color:var(--ink); }
-
-  /* 9 제품 ② */
-  table.rule{ width:100%; border-collapse:collapse; font-size:12.5pt; }
-  .rule th{ text-align:left; font-size:10.5pt; color:var(--dim); padding:0 4mm 2.5mm; border-bottom:2px solid var(--ink); }
-  .rule td{ padding:4mm; border-bottom:1px solid var(--line); vertical-align:middle; color:var(--ink2); line-height:1.45; }
-  .rule td.say{ font-weight:700; color:var(--ink); }
-  .rule code{ font-family:Consolas,monospace; font-size:11.5pt; background:var(--card); border-radius:1.2mm; padding:.5mm 2mm; color:var(--ink); }
-
-  /* 10 만든 방식 · 11 책임 */
+  /* 11 만든 방식 · 12 믿을 수 있게 */
   .grid4{ display:grid; grid-template-columns:1fr 1fr; gap:5mm; }
   .grid4 .card{ padding:8mm 9mm; }
-  .grid4 .card h3{ font-size:17pt; margin-bottom:4mm; }
-  .grid4 .card p{ font-size:13.5pt; line-height:1.7; }
-  .grid4 .card h3{ display:flex; align-items:center; gap:3mm; }
+  .grid4 .card h3{ font-size:17pt; margin-bottom:4mm; display:flex; align-items:center; gap:3mm; }
   .grid4 .card h3 i{ font-style:normal; width:8mm; height:8mm; border-radius:50%; background:var(--ac); color:#fff; font-size:11pt;
                      display:flex; align-items:center; justify-content:center; flex:none; }
+  .grid4 .card p{ font-size:13.5pt; line-height:1.7; }
   .resp{ display:grid; grid-template-columns:repeat(5, 1fr); gap:4mm; }
-  .resp .card{ padding:6mm 5.5mm; display:flex; flex-direction:column; }
+  .resp .card{ padding:7mm 6mm; display:flex; flex-direction:column; }
   .resp .card h3{ font-size:17pt; line-height:1.35; margin-bottom:5mm; }
   .resp .card p{ font-size:13pt; line-height:1.7; }
 
-  /* 12 출시 범위 */
+  /* 13 출시 */
   .avail{ display:flex; gap:9mm; }
   .avail .now{ flex:0 0 138mm; border:1.5px solid var(--ac); border-radius:5mm; padding:7mm; display:flex; gap:6mm; align-items:center; }
   .avail .now img{ width:56mm; height:56mm; flex:none; image-rendering:pixelated; display:block; }
@@ -159,14 +135,14 @@
   <div class="l">
     <span class="k">졸업작품 발표</span>
     <div class="t">공대 3호관 길안내</div>
-    <div class="s">모르면 모른다고 말하는<br>실내 길안내</div>
+    <div class="s">처음 온 사람을 문 앞까지 데려다주는<br>실내 길안내 앱</div>
     <div class="m"><b>팀 공3길</b>　김민종 · 손의윤 · 문성일<br>지도교수　<b>강규창 교수님</b></div>
   </div>
   <div class="r">
     <div class="blob" style="width:110mm; height:110mm; left:6mm; top:36mm; background:#E6F4EA"></div>
     <div class="blob" style="width:42mm; height:42mm; left:84mm; top:18mm; background:#CEEAD6"></div>
     <div class="blob" style="width:24mm; height:24mm; left:14mm; top:150mm; background:#CEEAD6"></div>
-    <img data-pic="흐름10_도착" alt="도착 화면">
+    <img data-pic="화면_3D_3층" alt="3D 건물 화면">
   </div>
 </section>
 
@@ -184,208 +160,216 @@
   <div class="stats">
     <div class="card"><b>4</b><span>출입문</span><small>들어온 문마다 가는 길이 다르다</small></div>
     <div class="card"><b>6</b><span>개 층</span><small>지하 1층 ~ 5층, 층마다 비슷한 복도</small></div>
-    <div class="card"><b>152</b><span>곳</span><small>강의실 · 교수 연구실 · 화장실 · 계단</small></div>
+    <div class="card"><b>100</b><span>곳의 호실</span><small>강의실 · 교수 연구실 · 학과 사무실</small></div>
     <div class="card"><b>754</b><span>가지 길</span><small>네 문에서 각 층의 목적지까지</small></div>
   </div>
   <div class="gaps vbot">
     <div><b>GPS가 닿지 않는다</b>지도 앱은 건물 입구에서 끝납니다</div>
     <div><b>장치를 달 수 없다</b>측위 장치는 공사와 비용, 허가가 필요합니다</div>
-    <div><b>안내는 낡는다</b>공간이 바뀌면 사진도 안내도도 틀려집니다</div>
+    <div><b>헤매는 곳은 신호도 약하다</b>지하 · 계단 · 엘리베이터 안</div>
   </div>
   <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
 </section>
 
-<!-- 4 연구 질문 -->
+<!-- 4 앱 한눈에 -->
 <section class="slide">
-  <span class="chip">연구</span>
-  <h1>세 가지 질문에서 <em>시작했습니다</em></h1>
-  <div class="row qs" style="flex:1">
-    <div class="card"><div class="no">QUESTION 1</div><h3>사진 한 장으로<br>위치를 알 수 있을까?</h3>
-      <p>이용자가 찍어 올린 사진이 어디인지 사람이 가리면, 앱은 오래가지 못합니다.</p><div class="go">→ 5쪽</div></div>
-    <div class="card"><div class="no">QUESTION 2</div><h3>그 답을<br>언제 믿어도 될까?</h3>
-      <p>틀린 위치가 안내에 섞이면 앱 전체를 믿을 수 없게 됩니다.</p><div class="go">→ 6쪽</div></div>
-    <div class="card"><div class="no">QUESTION 3</div><h3>모양이 똑같은 곳은<br>어떻게 가를까?</h3>
-      <p>엘리베이터 안은 층마다 사람 눈으로도 구별이 안 됩니다.</p><div class="go">→ 7쪽</div></div>
+  <span class="chip">제품 한눈에</span>
+  <h1>앱 하나, <em>다섯 단계</em>면 문 앞입니다</h1>
+  <div class="journey">
+    <div class="st"><span class="no">1 출발</span><img data-pic="흐름03_여기가맞나요" alt=""><b>문 QR을 찍는다</b><span>「여기가 맞나요?」</span></div><i>→</i>
+    <div class="st"><span class="no">2 찾기</span><img data-pic="흐름04_무엇을찾으세요" alt=""><b>무엇을 찾나</b><span>강의실 · 화장실 · 비상계단</span></div><i>→</i>
+    <div class="st"><span class="no">3 보기</span><img data-pic="화면_3D_3층" alt=""><b>3D로 본다</b><span>가야 할 층 · 목적지</span></div><i>→</i>
+    <div class="st"><span class="no">4 걷기</span><img data-pic="흐름08_1단계" alt=""><b>사진을 따라 걷는다</b><span>단계마다 실제 사진</span></div><i>→</i>
+    <div class="st"><span class="no">5 도착</span><img data-pic="흐름10_도착" alt=""><b>문 앞</b><span>「왼쪽에서 네 번째 방」</span></div>
   </div>
   <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
 </section>
 
-<!-- 5 연구 ① -->
+<!-- 5 출발 -->
 <section class="slide">
-  <span class="chip">연구 ① · 사진 한 장으로 위치를</span>
-  <h1>학습 없이, <em>닮은 사진 찾기</em>로 풉니다</h1>
-  <div class="pipe">
-    <span>찍은 사진</span><i>→</i>
-    <span>MobileNet v2<small>휴대폰에서 도는 작은 모델</small></span><i>→</i>
-    <span>숫자 1,280개<small>사진의 특징</small></span><i>→</i>
-    <span>기준 사진과 비교<small>장소마다 여러 장</small></span><i>→</i>
-    <span style="background:var(--acS); color:var(--ac)">가장 닮은 자리</span>
-  </div>
-  <div class="kpi">
-    <div><b>55.6%</b><span>정확한 자리</span><small>전부 답할 때</small></div>
-    <div><b>66.8%</b><span>층</span><small>전부 답할 때</small></div>
-    <div><b class="ac">+34.6%p</b><span>단순한 방식보다</span><small>95% 구간 +27.9 ~ +39.1%p<br>(9월 기준선 실험)</small></div>
-  </div>
-  <div class="note vbot"><b>어떻게 쟀나</b> — 강의실을 뺀 47개 자리, 시험 사진 1,844장.
-    <b>기준 사진을 찍은 사람과 다른 사람이 찍은 사진</b>으로만 시험했습니다. 실제 이용자가 찍는 조건과 같게 하기 위해서입니다.</div>
-  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
-</section>
-
-<!-- 6 연구 ② -->
-<section class="slide">
-  <span class="chip">연구 ② · 언제 믿어도 되나</span>
-  <h1>점수가 높다고, <em>맞는 것은 아니었습니다</em></h1>
-  <div class="plotwrap">
-    <svg viewBox="0 0 1000 440" role="img" aria-label="답하는 비율에 따른 정확한 자리 비율 — 1·2등 격차로 고를 때와 1등 점수로 고를 때">
-      <g stroke="#E8EAED" stroke-width="1.2">
-        <line x1="90" y1="40" x2="960" y2="40"/><line x1="90" y1="104" x2="960" y2="104"/>
-        <line x1="90" y1="168" x2="960" y2="168"/><line x1="90" y1="232" x2="960" y2="232"/>
-        <line x1="90" y1="296" x2="960" y2="296"/>
-      </g>
-      <line x1="90" y1="360" x2="960" y2="360" stroke="#9AA0A6" stroke-width="1.6"/>
-      <g font-size="17" fill="#5F6368" text-anchor="end">
-        <text x="78" y="46">100%</text><text x="78" y="110">90%</text><text x="78" y="174">80%</text>
-        <text x="78" y="238">70%</text><text x="78" y="302">60%</text><text x="78" y="366">50%</text>
-      </g>
-      <g font-size="17" fill="#5F6368" text-anchor="middle">
-        <text x="90" y="388">10%</text><text x="476.7" y="388">50%</text><text x="960" y="388">100%</text>
-        <text x="525" y="428" font-size="18">얼마나 자주 답하나 — 확신이 큰 사진부터 (왼쪽일수록 아껴서 답함)</text>
-      </g>
-      <text x="90" y="22" font-size="17" fill="#5F6368">정확한 자리를 맞힌 비율</text>
-      <!-- 1등 점수로 고를 때 -->
-      <polyline fill="none" stroke="#5F6B7A" stroke-width="3" stroke-dasharray="12 8" stroke-linejoin="round"
-        points="90,265.9 186.7,265.3 283.3,259.5 380,269.8 476.7,281.3 573.3,285.8 670,296 766.7,301.8 863.3,310.7 960,324.2"/>
-      <!-- 1·2등 격차로 고를 때 -->
-      <polyline fill="none" stroke="#188038" stroke-width="4" stroke-linejoin="round"
-        points="90,85.4 186.7,120 283.3,147.5 380,184 476.7,207.7 573.3,232 670,258.2 766.7,276.8 863.3,303 960,324.2"/>
-      <circle cx="90" cy="265.9" r="8" fill="#5F6B7A" stroke="#fff" stroke-width="2"/>
-      <circle cx="90" cy="85.4" r="9" fill="#188038" stroke="#fff" stroke-width="2"/>
-      <circle cx="960" cy="324.2" r="8" fill="#188038" stroke="#fff" stroke-width="2"/>
-      <text x="110" y="78" font-size="24" font-weight="700" fill="#202124">92.9%</text>
-      <text x="110" y="255" font-size="20" font-weight="700" fill="#3C4043">64.7%</text>
-      <text x="948" y="350" font-size="17" text-anchor="end" fill="#3C4043">둘 다 55.6%</text>
-      <g transform="translate(560,70)">
-        <line x1="0" y1="0" x2="44" y2="0" stroke="#188038" stroke-width="4"/>
-        <text x="56" y="6" font-size="18" fill="#202124">1·2등 <tspan font-weight="700">격차</tspan>로 고름</text>
-        <line x1="0" y1="34" x2="44" y2="34" stroke="#5F6B7A" stroke-width="3" stroke-dasharray="12 8"/>
-        <text x="56" y="40" font-size="18" fill="#3C4043">1등 <tspan font-weight="700">점수</tspan>로 고름</text>
-      </g>
-    </svg>
-    <div class="side">
-      <div class="card"><b class="big">+28.2%p</b><p>확신이 가장 큰 10%만 답할 때,<br><b>같은 AI · 같은 사진</b>으로</p></div>
-      <div class="card"><b class="big">97.8%</b><p>같은 10%에서 <b>층</b>을 맞힌 비율</p></div>
+  <span class="chip">제품 ① · 출발</span>
+  <h1>위치를 재지 않고, <em>들어온 문을 묻습니다</em></h1>
+  <div class="prod">
+    <div class="tx">
+      <ul class="feat">
+        <li><b>출입문 QR 4장</b>정문 · 후문 · 동문 · 서문에 스티커 한 장씩 — 장치도 공사도 없습니다</li>
+        <li><b>기본 카메라로 찍어도 된다</b>QR이 곧 앱 주소라, 찍으면 앱이 열리고 「○문에 계신가요?」를 묻습니다</li>
+        <li><b>찍을 수 없으면 직접 고른다</b>카메라가 막혀 있어도 네 문 가운데서 고르면 됩니다</li>
+        <li><b>사진으로 한 번 더 확인</b>「여기가 맞나요?」 — 그 문의 실제 사진과 눈앞을 맞춰 봅니다</li>
+      </ul>
     </div>
-  </div>
-  <div class="note vbot" style="font-size:13pt; color:var(--ink2)"><b>「1등 90점」이어도 2등이 89점이면 사실은 헷갈린 것입니다.</b> 그래서 확신은 점수가 아니라 <b class="ac">1등과 2등의 차이</b>로 잽니다.</div>
-  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
-</section>
-
-<!-- 7 연구 ③ -->
-<section class="slide">
-  <span class="chip">연구 ③ · 똑같이 생긴 곳</span>
-  <h1>모양이 같으면, <em>글자를 읽습니다</em></h1>
-  <div class="ocr">
-    <figure><img data-pic="증거1_엘리3층" alt="3층 엘리베이터 안"><figcaption>3층 엘리베이터 안 · 모양으로는 <b>자리 0%</b></figcaption></figure>
-    <figure><img data-pic="증거2_엘리4층" alt="4층 엘리베이터 안"><figcaption>4층 엘리베이터 안 · 모양으로는 <b>자리 0%</b></figcaption></figure>
-    <div class="arrow">→</div>
-    <div class="res">
-      <div class="card" style="margin-bottom:4mm"><p>다른 것은 문 위 표시기의 작은 숫자 하나뿐입니다. 사진을 224×224로 줄이면 그 숫자가 뭉개집니다.</p></div>
-      <div class="card" style="background:var(--acS)"><p style="margin-bottom:2mm"><b>층 표시 · 호실 번호판 글자를 먼저 읽고</b> (Tesseract.js), 읽히면 모양보다 글자를 믿습니다.</p>
-        <b class="big">97%</b><p>엘리베이터 안에서 층을 맞힌 비율 · <b>틀린 층을 말한 적 0건</b></p></div>
+    <div class="shots three">
+      <div><img class="qrimg" data-qr="정문_MAIN.png" alt="정문 QR"><span>정문에 붙인 QR</span></div>
+      <div><img class="phone" data-pic="흐름02_QR스캔" alt="QR 스캔"><span>앱 안 스캐너 · 네 문 고르기</span></div>
+      <div><img class="phone" data-pic="흐름03_여기가맞나요" alt="여기가 맞나요"><span>「여기가 맞나요?」</span></div>
     </div>
   </div>
   <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
 </section>
 
-<!-- 8 제품 ① -->
+<!-- 6 찾기 -->
 <section class="slide">
-  <span class="chip">제품 ① · 길안내</span>
-  <h1>문 QR 하나로, <em>문 앞까지</em></h1>
-  <div class="shots">
-    <div class="shot"><img data-pic="흐름03_여기가맞나요" alt=""><div class="cp"><b>1 · 출발점</b>문 QR → 「여기가 맞나요?」</div></div>
-    <div class="shot"><img data-pic="흐름05_검색" alt=""><div class="cp"><b>2 · 목적지</b>호실 번호 · 교수님 성함</div></div>
-    <div class="shot"><img data-pic="흐름06_3D경로" alt=""><div class="cp"><b>3 · 3D 경로</b>건물 위에 길 전체</div></div>
-    <div class="shot"><img data-pic="흐름07_1인칭" alt=""><div class="cp"><b>4 · 미리 걷기</b>1인칭으로 한 번</div></div>
-    <div class="shot"><img data-pic="흐름10_도착" alt=""><div class="cp"><b>5 · 도착</b>단계마다 실제 사진</div></div>
-  </div>
-  <div class="note vbot" style="font-size:13pt; color:var(--ink2)"><b class="ac">인터넷 없이</b> — 처음 한 번 15.6MB를 받아 두면, 비행기 모드에서도 1~5가 그대로 됩니다.</div>
-  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
-</section>
-
-<!-- 9 제품 ② -->
-<section class="slide">
-  <span class="chip">제품 ② · 사진 제보와 AI</span>
-  <h1>연구 결과가 <em>그대로 이용자의 말</em>이 됩니다</h1>
-  <div style="display:flex; gap:10mm; align-items:flex-start">
-    <img class="phone" data-pic="흐름12_사진올림" alt="사진 제보 화면" style="height:118mm; width:auto">
-    <div style="flex:1; min-width:0">
-      <table class="rule">
-        <tr><th style="width:36%">AI가 본 것</th><th>이용자에게 보이는 말</th></tr>
-        <tr><td>호실 번호판 · 층 표시를 읽음</td><td class="say">「번호판으로 확인했어요 : …」</td></tr>
-        <tr><td>1·2등 격차 <code>≥ 0.22</code></td><td class="say">「아마 여기예요 : 3층 라운지」</td></tr>
-        <tr><td>1·2등 격차 <code>≥ 0.16</code></td><td class="say">「층은 3층 같아요」</td></tr>
-        <tr><td>그보다 작음</td><td class="say">「어디인지 알 수 없어요」<br><span style="font-weight:400; color:var(--dim); font-size:11pt">번호판이 보이게 한 장 더 찍어 달라고 부탁합니다</span></td></tr>
-      </table>
-      <div class="card vbot" style="margin-top:6mm; background:var(--acS)"><p><b>어느 경우든 관리자가 확인한 뒤에만</b> 그 자리의 안내 사진이 바뀌고, 모든 이용자의 화면에 반영됩니다.</p></div>
+  <span class="chip">제품 ② · 찾기</span>
+  <h1>번호도, 이름도, <em>「가장 가까운 곳」</em>도</h1>
+  <div class="prod">
+    <div class="tx">
+      <ul class="feat">
+        <li><b>호실 번호 · 교수님 성함 · 학과 사무실</b>무엇으로 찾아도 같은 방으로 갑니다</li>
+        <li><b>가장 가까운 화장실 · 비상계단</b>지금 서 있는 층에서 가장 가까운 곳으로 바로 안내합니다</li>
+        <li><b>크리에이티브 존</b>지하 1층 자유 열람 공간도 한 번에</li>
+        <li><b>즐겨찾기 ☆</b>자주 가는 강의실은 별표 한 번으로 저장해 둡니다</li>
+      </ul>
+    </div>
+    <div class="shots">
+      <div><img class="phone" data-pic="흐름04_무엇을찾으세요" alt="무엇을 찾으세요"><span>무엇을 찾으세요?</span></div>
+      <div><img class="phone" data-pic="흐름05_검색" alt="검색"><span>번호 하나로 검색</span></div>
     </div>
   </div>
   <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
 </section>
 
-<!-- 10 만든 방식 -->
+<!-- 7 보기 -->
+<section class="slide">
+  <span class="chip">제품 ③ · 보기</span>
+  <h1>건물 전체를 <em>3D로</em>, 한 층은 <em>평면도로</em></h1>
+  <div class="prod">
+    <div class="tx">
+      <ul class="feat">
+        <li><b>지하 1층 ~ 5층 3D 건물</b>손가락으로 돌리고 키웁니다 — 목적지는 빨강, 가야 할 층은 노랑</li>
+        <li><b>엘리베이터 · 계단 · 출입문이 보인다</b>어느 문에서 들어와 어디로 올라갈지 한눈에</li>
+        <li><b>층을 누르면 평면도</b>엘리베이터에서 목적지까지 <b class="ac" style="display:inline">빨간 화살표 동선</b></li>
+        <li><b>화장실 · 비상계단 · 휴지통까지</b>평면도에 함께 표시합니다</li>
+      </ul>
+    </div>
+    <div class="shots">
+      <div><img class="phone" data-pic="화면_3D_3층" alt="3D 건물"><span>13306호 · 3층</span></div>
+      <div><img class="phone" data-pic="화면_층상세_3층" alt="층 상세"><span>3층 상세 — 빨간 동선</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- 8 걷기 -->
+<section class="slide">
+  <span class="chip">제품 ④ · 걷기</span>
+  <h1>먼저 걸어 보고, <em>사진을 따라</em> 걷습니다</h1>
+  <div class="prod">
+    <div class="tx">
+      <ul class="feat">
+        <li><b>▶ 경로 미리보기</b>출발점에서 목적지까지 1인칭으로 끝까지 재생합니다</li>
+        <li><b>🚶 직접 걸어보기</b>화면을 누르며 한 걸음씩 — 계단 · 지하 · 옥상까지</li>
+        <li><b>단계마다 실제 사진과 한 문장</b>「내려서 왼쪽으로 도세요」 「오른쪽에서 두 번째 방」</li>
+        <li><b>네 문 × 지하 1층~5층 = 안내 754가지</b>문마다, 층마다 사람이 직접 확인해 정한 순서입니다</li>
+      </ul>
+    </div>
+    <div class="shots three">
+      <div><img class="phone" data-pic="흐름07_1인칭" alt="1인칭"><span>1인칭 미리보기</span></div>
+      <div><img class="phone" data-pic="흐름09_복도" alt="복도"><span>3 / 4 단계</span></div>
+      <div><img class="phone" data-pic="흐름10_도착" alt="도착"><span>도착</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- 9 어디서나 -->
+<section class="slide">
+  <span class="chip">제품 ⑤ · 어디서나</span>
+  <h1>인터넷이 없어도, <em>한국어가 아니어도</em></h1>
+  <div class="prod">
+    <div class="tx">
+      <ul class="feat">
+        <li><b>인터넷 없이</b>처음 한 번 230개 파일 15.6MB를 저장 — 지하 · 계단 · 비행기 모드에서도 엽니다</li>
+        <li><b>홈 화면에 설치</b>설정 → 앱 다운로드 — 삼성은 버튼 한 번, 아이폰은 그림 세 단계</li>
+        <li><b>한국어 · English</b>안내 문장 754가지가 두 언어로 모두 준비되어 있습니다</li>
+        <li><b>앱스토어도, 가입도 없이</b>QR · 주소만 있으면 됩니다. 새 판은 열 때 저절로 받습니다</li>
+      </ul>
+    </div>
+    <div class="shots">
+      <div><img class="phone" data-pic="화면_영어_1단계" alt="영어 안내"><span>English</span></div>
+      <div><img class="phone" data-pic="화면_아이폰설치" alt="설치 안내"><span>아이폰 설치 안내</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- 10 함께 고치기 (AI 는 이 한 장) -->
+<section class="slide">
+  <span class="chip">제품 ⑥ · 함께 고치기</span>
+  <h1>낡은 사진은 <em>이용자가 찍고</em>, 관리자가 확인합니다</h1>
+  <div class="prod">
+    <div class="tx">
+      <ul class="feat">
+        <li><b>건의함</b>안내 사진이 실제와 다르면 지금 모습을 찍어 올립니다</li>
+        <li><b>휴대폰 안의 AI가 어디인지 짐작</b>확신할 때만 답하고, 모르면 모른다고 말합니다</li>
+      </ul>
+      <div class="ans">
+        <div>「아마 여기예요 : 3층 라운지」<small>확신이 클 때</small></div>
+        <div>「층은 3층 같아요」<small>층만 확실할 때</small></div>
+        <div>「어디인지 알 수 없어요」<small>모를 때</small></div>
+      </div>
+      <p class="note" style="margin:5mm 0 0">관리자가 승인해야 그 자리의 사진이 바뀌고, <b>모든 이용자의 화면</b>에 반영됩니다.
+        <span style="color:var(--dim)">(AI가 가장 확신한 사진 10%의 자리 적중 92.9%)</span></p>
+    </div>
+    <div class="shots">
+      <div><img class="phone" data-pic="흐름11_건의함" alt="건의함"><span>건의함</span></div>
+      <div><img class="phone" data-pic="흐름12_사진올림" alt="사진 제보"><span>사진 제보</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
+</section>
+
+<!-- 11 만든 방식 -->
 <section class="slide">
   <span class="chip">만든 방식</span>
-  <h1>작게 만들고, <em>매번 검사하고</em>, 공개합니다</h1>
+  <h1>작게 만들고, <em>매번 검사하고</em>, 직접 찍었습니다</h1>
   <div class="grid4" style="flex:1">
     <div class="card"><h3><i>1</i>휴대폰에서 다 돈다</h3>
-      <p>설치형 웹앱(PWA) · 번들러 없이 화면 코드 25개 파일 · three.js · TensorFlow.js · Tesseract.js · jsQR.
+      <p>설치형 웹앱(PWA) · 화면 코드 25개 파일 · three.js가 <b>좌표표에서 3D 건물을 그 자리에서</b> 그립니다.
          서버에 올라가는 우리 코드는 <b>보안 규칙 60줄</b>이 전부입니다.</p></div>
-    <div class="card"><h3><i>2</i>오프라인을 보장한다</h3>
-      <p>Service Worker가 <b>230개 파일 15.6MB</b>를 저장합니다. 새 판이 나오면 바뀐 파일만 받고,
-         <b>SHA-256</b>으로 대조해 옛 파일이 섞이면 다시 받습니다.</p></div>
+    <div class="card"><h3><i>2</i>직접 찍은 사진</h3>
+      <p>세 사람이 3호관을 걸으며 찍은 사진 <b>2,075장</b>. 그중 안내에는 자리마다 가장 알아보기 쉬운 사진을 골라 씁니다.</p></div>
     <div class="card"><h3><i>3</i>검사를 통과해야 배포된다</h3>
-      <p>올리면 자동 검사가 돌고, 통과해야만 공개 주소에 반영됩니다. 안전망이 <b>길안내 754가지와 3D 그림 15장</b>을 매번 기록과 대조합니다.</p></div>
-    <div class="card"><h3><i>4</i>측정 도구를 공개한다</h3>
-      <p>오늘 숫자는 누구나 다시 잴 수 있습니다 — <b>minjong0910.github.io/eval_all.html</b>
-         (빠른 측정 7초 · 전체 약 2분 30초).</p></div>
+      <p>올리면 자동 검사가 돌고, 통과해야만 공개 주소에 반영됩니다. 매번 <b>길안내 754가지</b>를 기록과 대조하고, 올리기 전에는 <b>3D 그림 15장 · 1인칭 경로 9가지</b>도 확인합니다.</p></div>
+    <div class="card"><h3><i>4</i>새 판은 저절로</h3>
+      <p>앱을 열면 <b>바뀐 파일만</b> 받아 최신 판이 됩니다. 받은 파일은 SHA-256으로 대조해 옛 파일이 섞이지 않게 합니다.</p></div>
   </div>
   <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
 </section>
 
-<!-- 11 책임 -->
+<!-- 12 믿을 수 있게 -->
 <section class="slide">
-  <span class="chip">책임 있는 AI</span>
-  <h1>잘 맞히는 것보다, <em>믿을 수 있는 것</em></h1>
+  <span class="chip">믿을 수 있게</span>
+  <h1>잘 되는 것보다, <em>믿고 따라갈 수 있는 것</em></h1>
   <div class="resp" style="flex:1">
-    <div class="card"><h3>모르면<br>모른다고</h3><p>확신이 모자라면 층만 말하거나 「어디인지 알 수 없어요」라고 답합니다.</p></div>
-    <div class="card"><h3>마지막은<br>사람이</h3><p>AI는 혼자 확정하지 않습니다. 관리자가 승인해야 반영됩니다.</p></div>
     <div class="card"><h3>위치를<br>따라가지 않는다</h3><p>출발점은 문 QR로만 정합니다. GPS를 쓰지 않습니다.</p></div>
-    <div class="card"><h3>잰 숫자로<br>기능을 지운다</h3><p>자동 확정은 처음 정답 100%로 보였지만 새 사진으로 다시 재니 <b>0%</b> — 그래서 지웠습니다.</p></div>
-    <div class="card"><h3>약한 곳부터<br>고친다</h3><p>측정으로 가장 약한 자리(3층 창밖 · 4층 엘리베이터 안)를 찾아 사진을 보강합니다.</p></div>
+    <div class="card"><h3>급할 때<br>비상계단까지</h3><p>지금 층에서 가장 가까운 비상계단으로 바로 안내합니다.</p></div>
+    <div class="card"><h3>사람이<br>확인해 정했다</h3><p>안내 순서는 문마다 층마다 사람이 직접 확인해 정한 것입니다.</p></div>
+    <div class="card"><h3>틀린 사진은<br>퍼지지 않는다</h3><p>관리자가 승인하기 전에는 누구의 화면에도 반영되지 않습니다.</p></div>
+    <div class="card"><h3>매번<br>검사한다</h3><p>754가지 안내가 하나라도 바뀌면 배포가 멈춥니다.</p></div>
   </div>
   <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
 </section>
 
-<!-- 12 출시 범위 -->
+<!-- 13 출시 -->
 <section class="slide">
   <span class="chip">출시</span>
   <h1>오늘부터 <em>쓸 수 있습니다</em></h1>
   <div class="avail" style="flex:1">
     <div class="now">
       <img data-qr="정문_MAIN.png" alt="정문 QR">
-      <div><b>지금</b><span>네 문 × 지하 1층~5층<br>한국어 · 영어<br>앱스토어 · 가입 없이<br><code>minjong0910.github.io</code></span></div>
+      <div><b>지금</b><span>네 문 × 지하 1층~5층<br>한국어 · English<br>앱스토어 · 가입 없이<br><code>minjong0910.github.io</code></span></div>
     </div>
     <div class="tl">
       <div class="card"><div class="when">11월 · 최종 발표 전</div>
-        <ul><li><b>약한 자리 사진 보강</b>, 정확도 다시 측정</li><li><b>현장 최종 점검</b> — 네 문에서 각 층까지 직접 걸으며</li></ul></div>
+        <ul><li><b>현장 최종 점검</b> — 네 문에서 각 층까지 직접 걸으며</li><li><b>약한 자리 사진 보강</b></li></ul></div>
       <div class="card"><div class="when">그다음</div>
-        <ul><li><b>스토어 앱으로 감싸기</b> — AI 판정까지 인터넷 없이</li><li>제보 사진 속 <b>얼굴 자동 가림</b></li></ul></div>
+        <ul><li><b>스토어 앱으로 감싸기</b> — 사진 판정까지 인터넷 없이</li><li>제보 사진 속 <b>얼굴 자동 가림</b></li></ul></div>
     </div>
   </div>
   <div class="foot"><span>공대 3호관 길안내 · 팀 공3길</span><span class="pg"></span></div>
 </section>
 
-<!-- 13 마무리 -->
+<!-- 14 마무리 -->
 <section class="slide mission">
   <div class="q">처음 온 건물에서도,<br>누구나 <em>묻지 않고</em> 찾아가게.</div>
   <div class="s" style="margin-top:12mm; font-size:20pt; color:var(--ink); font-weight:700">감사합니다 · 질문 받겠습니다</div>

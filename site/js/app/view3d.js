@@ -130,7 +130,12 @@ function init3D(){
   /* 2026-10-18(2차) : 「건물 주변이 안개 낀 것처럼 뿌옇다」(사용자 폰) — 중간 밝기의 탁한 청록(0x0B2A37) 한 가지가
      바닥·먼 곳·하늘을 다 덮어 대비가 낮았다. 한 단계 짙은 청록(0x081D27)으로 — 검정은 아니라 바닥은 그대로 보인다.
      바닥판(holoGround)·조감도 하늘(overview3d.js HOLO_SKY_HEX)도 같은 색이라 지평선에서 끊기지 않는다. */
-  scene.fog=new THREE.Fog(0x081D27, 340, 900);
+  /* 2026-10-18(3차) : 그래도 「주변 배경 때문에 건물이 잘 안 보인다」 — 어두운 청록 배경과 건물(청록 테두리·반투명 상자)의
+     밝기·색이 비슷했다. 배경을 여러 가지로 폰 크기 사진을 찍어 보여 주고 사용자가 고른 것 :
+     **밝은 무대 + 조금 선명한 파란 바닥**(「선명하고 눈이 편하다」). 안개 색 = 바닥판 = 조감도 하늘 = 0x96B2DA.
+     안개 거리는 overview3d.js holoFloorTune 이 거리에 맞춰 잡는다(건물은 안개에 안 걸리고 먼 격자만 하늘색으로 스러진다).
+     걷기(1인칭)에서는 예전 거리(340~900)라 보이지 않는다. */
+  scene.fog=new THREE.Fog(0x96B2DA, 340, 900);
   // Z-파이팅 원인 3: 실내 씬은 far=1000까지 필요 없다 —
   // far를 줄여 깊이버퍼 정밀도(far/near 비율)를 높여서 겹치는 유리·프레임의 깜빡임을 줄인다.
   // 버그 수정: far를 150으로 낮췄더니, 두 손가락으로 최대한
@@ -164,11 +169,12 @@ function init3D(){
      카메라가 320 거리까지만 그려서(far) 바닥이 그 거리에서 잘리고, 격자판도 560 이라 거기서 끝났다.
      → 격자판을 2400 으로 넓히고(칸 크기 5 는 그대로), 그 밑에 같은 청록 바닥판(holoGround)을 지평선까지 깐다.
        조감도에서는 overview3d.js holoFloorTune() 이 far 를 거리에 맞춰 늘린다. */
-  fpHoloGrid=new THREE.GridHelper(2400, 480, 0x1E7A94, 0x0D2A33);
+  /* 2026-10-18(3차) : 파란 바닥 위의 격자 — 같은 계열의 한 단계 짙은 파랑 (청록 선 → 파란 선) */
+  fpHoloGrid=new THREE.GridHelper(2400, 480, 0x5A7BAA, 0x7F9CC6);
   var grid = fpHoloGrid;
-  grid.position.y=-0.4; grid.material.transparent=true; grid.material.opacity=0.55;   // .38 → .55 : 짙어진 바닥 위에서 격자가 또렷하게
+  grid.position.y=-0.4; grid.material.transparent=true; grid.material.opacity=0.6;
   scene.add(grid);
-  holoGround=new THREE.Mesh(new THREE.CircleGeometry(6000, 64), new THREE.MeshBasicMaterial({color:0x081D27}));
+  holoGround=new THREE.Mesh(new THREE.CircleGeometry(6000, 64), new THREE.MeshBasicMaterial({color:0x96B2DA}));
   holoGround.rotation.x=-Math.PI/2; holoGround.position.y=-0.6;
   scene.add(holoGround);
   // 격자 밑에 은은하게 번지는 시안색 빛웅덩이 — 건물이 홀로그램 발판 위에 떠 있는 듯한

@@ -951,11 +951,19 @@ function ghostSlabTune(){
    하늘(배경색 0x040814)이 거의 검정이라 청록 바닥과 지평선에서 뚝 끊겼다. 노트북은 가로로 넓어 하늘이 잘 안 보인다.
    → 조감도에서는 하늘도 먼 바닥(안개)과 같은 청록으로 — 바닥이 끊김 없이 하늘로 이어진다.
      걷기(1인칭)에서는 예전 배경색 그대로. */
-var HOLO_SKY_HEX = 0x081D27, FP_SKY_HEX = 0x040814;   // 조감도 하늘 = 안개·바닥판 색 (view3d.js — 2차에서 한 단계 짙게)
+/* 2026-10-18(3차) : 밝은 무대 — 조감도 하늘 = 안개 = 바닥판 = 파랑(0x96B2DA, view3d.js). 사용자가 사진을 보고 고름.
+   안개는 건물보다 멀리서부터만(거리의 1.8배~7배) — 건물은 또렷하고, 먼 격자만 하늘색으로 스러져 지평선이 매끈하다. */
+var HOLO_SKY_HEX = 0x96B2DA, FP_SKY_HEX = 0x040814;
+var HOLO_EDGE_HEX = 0x30404F;   // 건물 선 : 밝은 바닥에서 보이게 청록 → 짙은 회청 (highlight3D 끝에서 칠한다)
+var CUR_FLOOR_HEX = 0x7DB8F5;   // 지금 층 방 상자 : 흰색은 밝은 바닥에 묻혀서 하늘색 (index.html 범례 legend3d 도 같은 색)
 function holoFloorTune(inFP){
   if(holoGround) holoGround.visible = !inFP;
   var sky = inFP ? FP_SKY_HEX : HOLO_SKY_HEX;
   if(scene.background && scene.background.getHex() !== sky) scene.background.setHex(sky);
+  if(scene.fog){
+    var fn = inFP ? 340 : Math.max(180, radius*1.8), ff = inFP ? 900 : Math.max(650, radius*7);
+    if(Math.abs(scene.fog.near-fn) > 0.5 || Math.abs(scene.fog.far-ff) > 0.5){ scene.fog.near = fn; scene.fog.far = ff; }
+  }
   var n = inFP ? 0.3 : Math.max(0.3, radius*0.02);
   var f = inFP ? 320 : Math.max(320, radius*14);
   if(Math.abs(camera.near-n) > 1e-4 || Math.abs(camera.far-f) > 1e-3){
@@ -990,7 +998,8 @@ function highlight3D(){
         o.visible = true;
         o.material.opacity = isTgtFloor ? 1 : (isFirst ? 0.85 : 0.32);
         // 층 번호 글자 색으로도 "목적지 층 / 현재 위치 층"이 한눈에 구분되게(노랑=가야 할 층, 흰색=현재 층)
-        o.material.color.setHex(isTgtFloor ? 0xFFD400 : 0xFFFFFF);
+        /* 밝은 무대(2026-10-18 3차) : 흰 글자·노란 글자는 밝은 바닥에 묻혀서 — 가야 할 층은 짙은 주황, 나머지는 짙은 남색 */
+        o.material.color.setHex(isTgtFloor ? 0xB45309 : 0x1E293B);
         return;
       }
       /* 글씨(EV·계단 등)는 이제 모든 층에서 항상 보이게 한다 — 어느 층에서든
@@ -1040,8 +1049,8 @@ function highlight3D(){
         }else if(isTgtFloor){          // 가야 할 층 : 노란색으로, 살짝 반짝이게(animate()에서 처리)
           setMatColor(o,0xF2C05A); o.material.opacity=0.85;
           pulseFloorTargets.push(o);
-        }else if(isFirst){             // 현재 위치 층 : 흰색(가야 할 층의 노란색과 바로 구분되게)
-          setMatColor(o,0xFFFFFF); o.material.opacity=firstOp;
+        }else if(isFirst){             // 현재 위치 층 : 하늘색(가야 할 층의 노란색과 바로 구분되게 · 밝은 바닥에서도 보이게)
+          setMatColor(o,CUR_FLOOR_HEX); o.material.opacity=firstOp;
         }else{                         // 나머지 층 : 완전히 투명하면 건물이 뻥 뚫린 것처럼 보여서
                                         // 가독성이 떨어지므로, 구조가 은은하게라도 보이게 올림
           o.material.color.setHex(o.userData.zone?0x8E7CC3:0x9FB4CC); o.material.opacity=0.05;
@@ -1065,6 +1074,8 @@ function highlight3D(){
       }
     });
   });
+  /* 밝은 무대 : 건물의 모든 선(방 상자 테두리 · 층 외곽선 등)을 짙은 회청으로 — 청록 선은 밝은 바닥에서 안 보인다 */
+  buildingRoot.traverse(function(o){ if(o.isLineSegments && o.material && o.material.color) o.material.color.setHex(HOLO_EDGE_HEX); });
   ghostSlabTune();
 }
 function fitRadius(cam, halfW, halfH){

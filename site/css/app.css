@@ -533,6 +533,8 @@
     left:calc(0.625rem + env(safe-area-inset-left));display:none;align-items:center;gap:0.5rem;z-index:5;}
   .fsBar .iconBtn{background:rgba(8,12,20,.85);}
   .fsBar .trip{padding:0.5625rem 0.875rem;font-size:0.7812rem;}
+  /* 2026-10-18 : 3D 바닥이 밝은 파랑이 되자 테두리만 있는 버튼(직접 걸어보기 · 일시정지) 글자가 바닥에 묻혔다 → 어두운 바탕 */
+  .fsBar .trip.ghost2{background:rgba(8,12,20,.85);}
   #s4.fsMode{padding:0;}
   #s4.fsMode>.bar,#s4.fsMode>.tip,#s4.fsMode>.triprow,#s4.fsMode>.fprow,
   #s4.fsMode>.startfloor,#s4.fsMode>.big{display:none;}

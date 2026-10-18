@@ -59,8 +59,8 @@ var HOWTO = [
   { t:['3D 건물 보기', '3D building'], img:'g06_3d',
     lead:['찾은 곳이 건물 어디에 있는지 3D로 보여 줘요.', 'Shows where the place is in the building, in 3D.'],
     items:[
-      ['색깔 뜻', '빨강 = 가는 곳 · 노랑 = 가야 할 층 · 흰색 = 지금 있는 층 · 주황 = 엘리베이터 · 초록 = 계단',
-       'Colors', 'Red = destination · yellow = floor to go · white = current floor · orange = elevator · green = stairs'],
+      ['색깔 뜻', '빨강 = 가는 곳 · 노랑 = 가야 할 층 · 하늘색 = 지금 있는 층 · 주황 = 엘리베이터 · 초록 = 계단',
+       'Colors', 'Red = destination · yellow = floor to go · light blue = current floor · orange = elevator · green = stairs'],
       ['☆ 별', '누르면 ★로 바뀌며 즐겨찾기에 저장돼요.', '☆ Star', 'Tap to save it to favorites.'],
       ['⛶ 크게 보기', '3D를 화면 가득 크게 봐요. 왼쪽 위 ←로 돌아와요.', '⛶ Full screen', 'See the 3D full screen. Tap ← to come back.'],
       ['경로 미리보기 · 직접 걸어보기', '▶ 경로 미리보기 : 걷는 눈높이로 가는 길을 자동으로 보여 줘요.  🚶 직접 걸어보기 : 바닥을 눌러 직접 걸어 다녀 볼 수 있어요.',

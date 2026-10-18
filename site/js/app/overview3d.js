@@ -951,7 +951,7 @@ function ghostSlabTune(){
    하늘(배경색 0x040814)이 거의 검정이라 청록 바닥과 지평선에서 뚝 끊겼다. 노트북은 가로로 넓어 하늘이 잘 안 보인다.
    → 조감도에서는 하늘도 먼 바닥(안개)과 같은 청록으로 — 바닥이 끊김 없이 하늘로 이어진다.
      걷기(1인칭)에서는 예전 배경색 그대로. */
-var HOLO_SKY_HEX = 0x0B2A37, FP_SKY_HEX = 0x040814;
+var HOLO_SKY_HEX = 0x081D27, FP_SKY_HEX = 0x040814;   // 조감도 하늘 = 안개·바닥판 색 (view3d.js — 2차에서 한 단계 짙게)
 function holoFloorTune(inFP){
   if(holoGround) holoGround.visible = !inFP;
   var sky = inFP ? FP_SKY_HEX : HOLO_SKY_HEX;

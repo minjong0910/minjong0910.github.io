@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '840b0267c139';   // 파일 245개 · 16.4MB
+var VERSION = '971b7bc0df77';   // 파일 245개 · 16.4MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','a7d3296539e2',81225],
+  ['css/app.css','99d4b8b2071f',81390],
   ['css/boot.css','b3a18297534a',1353],
   ['css/easy.css','5d140824ad02',6895],
   ['data/photos.js','c1c98972f145',16161],
@@ -235,7 +235,7 @@ var FILES = [
   ['js/app/floor-detail.js','9d10c5aa9ba7',19078],
   ['js/app/guide.js','751701fe520e',43548],
   ['js/app/howto.js','08c641fb9539',16190],
-  ['js/app/overview3d.js','0fdd1c55bb9f',107181],
+  ['js/app/overview3d.js','4e54d0ba10f3',107272],
   ['js/app/photos.js','399816b6eec5',52474],
   ['js/app/pwa.js','f7e6549ff5fc',42816],
   ['js/app/qrnav.js','1ab04e81bfc1',20800],
@@ -253,7 +253,7 @@ var FILES = [
   ['js/app/sugdb.js','df49ab439b73',17964],
   ['js/app/suggest.js','dd852f0fd5de',46898],
   ['js/app/ui.js','bf968d110bc6',26506],
-  ['js/app/view3d.js','6ab09d641dab',48140],
+  ['js/app/view3d.js','8d3b5ee59f03',48980],
   ['js/app/zoom.js','0bc33c826b8c',8395],
   ['js/vendor/jsqr.min.js','a07c909282f1',130501],
   ['js/vendor/jszip.min.js','57fff0459a39',97676],

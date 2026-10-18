@@ -245,9 +245,12 @@ var EASY = (function(){
   }
   function toggle(){ set(!on); }
 
-  /* ── 처음 한 번 묻기 ── QR 로 들어왔든 그냥 열었든, 부팅 연출이 끝나고 첫 화면이 보이면 */
+  /* ── 처음 한 번 묻기 ── QR 로 들어오든 그냥 열든, **앱이 켜지자마자** 묻는다.
+     예전에는 켜는 화면(검은 글자 화면 · boot.js)이 다 끝난 뒤에 물어서 폰에서는 몇 초 늦게 떴다(사용자 지적).
+     → 이 파일이 읽히는 순간(화면 틀은 이미 다 있다) 켜는 화면 위에 바로 띄우고,
+       답을 고르면 켜는 화면도 바로 걷어 앱으로 들어간다. */
   function ask(){
-    if(lsGet(KEY_ASK) === '1' || !phone) return;
+    if(lsGet(KEY_ASK) === '1' || !phone || $('.ezAsk')) return;   // 이미 떠 있으면 또 띄우지 않는다
     var a = document.createElement('div'); a.className = 'ezAsk';
     a.innerHTML = '<div class="card"><div class="ic">👆</div>'
       + '<b>' + T('처음이세요?', 'First time here?') + '</b>'
@@ -258,9 +261,14 @@ var EASY = (function(){
     a.addEventListener('click', function(e){
       var b = e.target.closest('button[data-a]'); if(!b) return;
       a.remove(); set(b.getAttribute('data-a') === '1');
+      var boot = $('.fx-boot'); if(boot) boot.click();                // 켜는 화면이 떠 있으면 건너뛴다 (boot.js 의 탭하여 건너뛰기)
+      else if(document.readyState === 'loading'){                    // 아직 안 떴으면(boot.js 를 아직 안 읽음) 아예 안 띄운다
+        try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(err){}  //  — boot.js 가 이 표시를 보고 켜는 화면을 건너뛴다
+      }
     });
     phone.appendChild(a);
   }
+  if(!on){ if(build()) ask(); }                                  // 지금 바로 — 켜는 화면을 기다리지 않는다
   function whenReady(){
     var t0 = Date.now();
     (function wait(){

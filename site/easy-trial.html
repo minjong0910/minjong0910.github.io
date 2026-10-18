@@ -618,6 +618,10 @@
   </section>
 </div>
 
+<!-- 쉬운 사용모드 (시험판) — 화면마다 누를 곳을 알려 준다.
+     3D 같은 큰 파일보다 먼저 읽는다 : 화면 틀이 그려지자마자 「처음이세요?」를 띄우려고 (사용자 : QR 찍자마자 떠야 한다).
+     다른 파일에 기대지 않는다 — 다른 파일의 값(LANG · appBooted · steps)은 쓸 때마다 그때 본다. -->
+<script src="js/app/easy.js"></script>
 <script src="js/vendor/three.min.js"></script>
 <script src="js/vendor/jszip.min.js"></script>
 <script src="js/app/building.js"></script>
@@ -704,7 +708,7 @@
   <div class="izHint" id="izHint"></div>
 </div>
 <script src="js/app/zoom.js"></script>
-<!-- 쉬운 사용모드 (시험판) — 화면마다 누를 곳을 알려 준다 -->
-<script src="js/app/easy.js"></script>
+<!-- 이용안내를 실제 화면 사진과 쉬운 설명으로 (시험판) — ui.js 의 이용안내를 갈아 끼운다 -->
+<script src="js/app/howto.js"></script>
 </body>
 </html>

@@ -1,16 +1,18 @@
 rules_version = '2';
 
-// 공대 3호관 길안내 — Firestore 보안 규칙 (2026-09-22, v84)
+// 공대 3호관 길안내 — Firestore 보안 규칙 (2026-09-22 v84 · 2026-10-18 방 정보·하루 3번 추가)
 //
 // 원칙
 //   · 관리자는 "로그인한 사람"이 아니라 "admins 명단에 UID 가 있는 사람"이다.
 //     (예전 규칙은 request.auth != null 이라, 계정만 만들면 누구나 관리자였다)
 //   · admins 명단은 앱에서 아무도 못 바꾼다. Firebase 콘솔에서만 추가·삭제한다.
-//   · 제보는 로그인 없이 올릴 수 있지만, 정해진 칸·형식·크기만 받는다.
-//   · 승인된 사진은 누구나 읽고(앱이 내려받아야 하므로), 관리자만 쓴다.
+//   · 제보는 익명 로그인(개인정보 없음)한 폰만, 한 폰에서 하루(한국 날짜) 3번까지 올릴 수 있다.
+//     정해진 칸·형식·크기만 받는다. 관리자는 횟수 제한이 없다.
+//   · 승인된 사진·고친 방 정보는 누구나 읽고(앱이 내려받아야 하므로), 관리자만 쓴다.
 //
-// 콘솔 : Firestore Database → 규칙 → 이 파일 내용을 통째로 붙여넣고 [게시]
-// 시험 : 같은 화면의 [규칙 플레이그라운드] — 서버/보안_설정_안내.txt 5번
+// 콘솔 : ① Authentication → 로그인 방법 → 익명 [사용 설정] (먼저!)
+//        ② Firestore Database → 규칙 → 이 파일 내용을 통째로 붙여넣고 [게시]
+// 시험 : 같은 화면의 [규칙 플레이그라운드] — 서버/보안_설정_안내.txt
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -19,9 +21,21 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    // 제보 한 건의 모양 — 앱(pushOne)이 보내는 8칸만 받는다
+    // 한국 날짜 '2026-10-18' 모양 (달·날에 0 을 채우지 않는다 — 앱의 sugDay() 와 같은 모양)
+    function dayOf(t) {
+      return string(t.year()) + '-' + string(t.month()) + '-' + string(t.day());
+    }
+    function kstDay() {
+      return dayOf(request.time + duration.value(9, 'h'));
+    }
+    // 이 폰(익명 UID)이 오늘 올린 횟수를 적는 문서
+    function quotaDoc(uid, day) {
+      return /databases/$(database)/documents/quota/$(uid + '_' + day);
+    }
+
+    // 제보 한 건의 모양 — 앱(pushOne)이 보내는 칸만 받는다
     function validSuggestion(d) {
-      return d.keys().hasOnly(['u', 'note', 'ts', 'status', 'ai', 'qr', 'ua', 'cid'])
+      return d.keys().hasOnly(['u', 'note', 'ts', 'status', 'ai', 'qr', 'ua', 'cid', 'uid', 'day'])
         && d.keys().hasAll(['u', 'status'])
         && d.status == 'pending'
         && d.u is string && d.u.size() < 950000
@@ -31,7 +45,34 @@ service cloud.firestore {
         && (!('ai' in d)   || d.ai == null || d.ai is map)
         && (!('qr' in d)   || d.qr == null || (d.qr is string && d.qr.size() <= 20))
         && (!('ua' in d)   || (d.ua is string && d.ua.size() <= 120))
-        && (!('cid' in d)  || (d.cid is string && d.cid.size() <= 60));
+        && (!('cid' in d)  || (d.cid is string && d.cid.size() <= 60))
+        && (!('uid' in d)  || (d.uid is string && d.uid.size() <= 128))
+        && (!('day' in d)  || (d.day is string && d.day.size() <= 12));
+    }
+
+    // 하루 3번 : 제보 문서 번호는 「익명UID_날짜_몇번째」이고,
+    //            같은 일괄 쓰기(batch)에서 횟수 문서를 꼭 1 올려야 한다 (3 을 넘으면 못 올림)
+    function withinQuota(id, d) {
+      return request.auth != null
+        && d.uid == request.auth.uid
+        && d.day == kstDay()
+        && getAfter(quotaDoc(request.auth.uid, d.day)).data.n <= 3
+        && id == request.auth.uid + '_' + d.day + '_' + string(getAfter(quotaDoc(request.auth.uid, d.day)).data.n)
+        && ((!exists(quotaDoc(request.auth.uid, d.day))
+              && getAfter(quotaDoc(request.auth.uid, d.day)).data.n == 1)
+          || (exists(quotaDoc(request.auth.uid, d.day))
+              && getAfter(quotaDoc(request.auth.uid, d.day)).data.n == get(quotaDoc(request.auth.uid, d.day)).data.n + 1));
+    }
+
+    // 관리자가 고친 방 정보 한 건의 모양 (앱 roomfix.js 가 보내는 칸)
+    function validRoom(d) {
+      return d.keys().hasOnly(['no', 'name', 'en', 'memo', 'show', 'ts'])
+        && (!('no' in d)   || (d.no is string && d.no.size() <= 10))
+        && (!('name' in d) || (d.name is string && d.name.size() <= 40))
+        && (!('en' in d)   || (d.en is string && d.en.size() <= 60))
+        && (!('memo' in d) || (d.memo is string && d.memo.size() <= 80))
+        && (!('show' in d) || d.show is map)
+        && (!('ts' in d)   || d.ts is number);
     }
 
     // 관리자 명단 : 자기 칸만 읽을 수 있다 (앱이 "나는 관리자인가"를 확인할 때). 쓰기는 콘솔에서만.
@@ -40,16 +81,45 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // 제보 : 누구나 올릴 수 있지만 모양이 맞아야 한다. 읽기·승인·삭제는 관리자만.
+    // 제보 : 익명 로그인한 폰이 하루 3번까지(관리자는 제한 없음). 모양이 맞아야 한다.
+    //        읽기·승인·삭제는 관리자만.
     match /suggestions/{id} {
-      allow create: if validSuggestion(request.resource.data);
+      allow create: if validSuggestion(request.resource.data)
+        && (withinQuota(id, request.resource.data) || isAdmin());
       allow read, update, delete: if isAdmin();
+    }
+
+    // 오늘 올린 횟수 : 자기 것(오늘 날짜)만 읽고, 1 씩만 올릴 수 있다. 줄이거나 지울 수 없다.
+    match /quota/{qid} {
+      allow read: if request.auth != null && qid == request.auth.uid + '_' + kstDay();
+      allow create: if request.auth != null && qid == request.auth.uid + '_' + kstDay()
+        && request.resource.data.keys().hasOnly(['n'])
+        && request.resource.data.n == 1;
+      allow update: if request.auth != null && qid == request.auth.uid + '_' + kstDay()
+        && request.resource.data.keys().hasOnly(['n'])
+        && request.resource.data.n is int
+        && request.resource.data.n == resource.data.n + 1
+        && request.resource.data.n <= 3;
+      allow delete: if false;
     }
 
     // 승인된 사진 : 누구나 읽고, 관리자만 올리기·고치기·지우기
     match /photos/{id} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
+    }
+
+    // 고친 방 정보(구성 및 변경) : 누구나 읽고, 관리자만 고치기·원래대로(지우기)
+    match /rooms/{key} {
+      allow read: if true;
+      allow create, update: if isAdmin() && key.size() <= 20 && validRoom(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // 방 정보를 누가·언제·무엇을 고쳤는지 기록 : 관리자만 읽고 남긴다. 고치거나 지울 수 없다.
+    match /roomlog/{id} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
     }
 
     // 그 밖의 모든 곳은 막는다

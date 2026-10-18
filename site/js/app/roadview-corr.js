@@ -280,7 +280,7 @@ function fpMakeCorr(lv){
          문만 봐도 바로 구분된다. */
       var sideAc = (c.z >= ev.z) ? '#00E5FF' : '#FFB33C';
       put((c.x>0?1:-1), fpDoorZ(full, c.z*ST), {
-        plate: full, plateSub: nm || '',
+        plate: (typeof RFIX!=='undefined' ? RFIX.dispNo(full) : full), plateSub: nm || '',   // 문패 = 화면에 보이는 번호
         roomName: ROOM_NAME[full] || '', kind: fpRoomKind(ROOM_NAME[full]),
         accent: isT ? '#FF2E88' : sideAc, target: !!isT,
         labelFlip: !!WC_ADJ_FLIP[full]

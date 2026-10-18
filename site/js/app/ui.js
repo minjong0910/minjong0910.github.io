@@ -29,6 +29,7 @@ function applyLang(){
   if(document.getElementById('cats') && typeof buildCats==='function') buildCats();
   if(typeof target!=='undefined' && target && document.getElementById('t4') && typeof t4TitleFor==='function'){
     document.getElementById('t4').textContent = t4TitleFor(target);
+    if(typeof RFIX!=='undefined') RFIX.paint4();
   }
   // 층 상세 버튼의 '옥상 / Roof' 글자도 언어를 따라가게
   if(typeof target!=='undefined' && target && document.getElementById('fp') && typeof buildFloorPicker==='function') buildFloorPicker();
@@ -127,6 +128,7 @@ function openTarget(t, floor){
   /* v42 : QR로 출입문을 스캔했으면 그 문의 층에서 출발한다. 스캔 안 했으면 기존대로 1층. */
   startFloor = (typeof QRNAV!=='undefined' && QRNAV.floor()) || 1;   // 기본 출발층 = 1층(정문). 첫 방문자는 대개 정문에서 시작하므로. 다른 층이면 사용자가 직접 선택.
   document.getElementById('t4').textContent=t4TitleFor(t);
+  if(typeof RFIX!=='undefined') RFIX.paint4();   // 관리자가 메모를 적은 곳이면 제목 아래 회색 한 줄
   // 카메라가 항상 건물 한가운데(0, 건물 Z중앙)만 보고 있어서, 목적지가 건물 양 끝(정문·서문 쪽)에
   // 있으면 목적지 이름표·강의실이 화면 가장자리에 걸려 잘리는 문제가 있었음 → 목적지 쪽으로
   // 시선을 어느 정도 옮긴다(완전히 목적지로만 쏠리면 건물 전체 모양이 안 보이므로 60%만 이동).
@@ -181,9 +183,11 @@ function buildCats(){
     var b=document.createElement('button');
     var nm = (LANG==='ko') ? c.name.ko : c.name.en;
     var sb = c.sub ? ((LANG==='ko') ? c.sub.ko : c.sub.en) : '';
+    /* 크리에이티브 존은 검색 대신 여기서 고르므로, 관리자 메모(여는 시간 등)를 이 버튼에 */
+    var zm = (c.name.en==='Creative Zone' && typeof RFIX!=='undefined') ? RFIX.memoHtml('ZONE', 's') : '';
     b.innerHTML='<span class="ic">'+c.ic+'</span>'
       +'<span class="txt"><span class="nm">'+nm+'</span>'
-      +(sb?'<small>'+sb+'</small>':'')+'</span>';
+      +(sb?'<small>'+sb+'</small>':'')+zm+'</span>';
     if(c.act) b.onclick=c.act; else b.style.opacity='0.45';
     box.appendChild(b);
   });
@@ -313,6 +317,27 @@ function renderRecent(){
    한글·영문·숫자 전환이 자유롭다 → 번호칸과 이름칸을 나눌 이유가 없어져 하나로 합쳤다.
    숫자만 입력하면 호실번호에서, 글자가 섞이면 이름·용도에서 찾는다. */
 var searchHits = [];
+/* 2026-10-18 초성 검색 : 검색어 글자마다 — 초성(ㄱ~ㅎ)이면 이름 글자의 초성과, 아니면 글자 그대로 비교한다.
+   섞어 써도 된다(ㅎㄱ사무실 → 학과사무실). 띄어쓰기는 무시하고, 이름 어디에 붙어 있어도 찾는다. */
+var CHO_LIST = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+function choOf(ch){ var c = ch.charCodeAt(0); return (c >= 0xAC00 && c <= 0xD7A3) ? CHO_LIST.charAt(Math.floor((c - 0xAC00) / 588)) : ch; }
+function hasCho(q){ for(var i = 0; i < q.length; i++) if(CHO_LIST.indexOf(q.charAt(i)) >= 0) return true; return false; }
+function choMatch(name, q){
+  var n = String(name || '').toLowerCase().replace(/\s+/g, ''), L = q.length;
+  for(var i = 0; i + L <= n.length; i++){
+    var ok = true;
+    for(var j = 0; j < L; j++){
+      var a = q.charAt(j), b = n.charAt(i + j);
+      if(CHO_LIST.indexOf(a) >= 0 ? choOf(b) !== a : a !== b){ ok = false; break; }
+    }
+    if(ok) return true;
+  }
+  return false;
+}
+function nameHit(text, q){
+  if(!text) return false;
+  return hasCho(q) ? choMatch(text, q) : String(text).toLowerCase().replace(/\s+/g, '').indexOf(q) >= 0;
+}
 function roomSearch(qraw){
   var box=document.getElementById('nres');
   var err=document.getElementById('err');
@@ -326,12 +351,15 @@ function roomSearch(qraw){
   }
   if(recentWrap) recentWrap.classList.add('hidden');
   var isNum = /^[0-9]+$/.test(q);
+  var hasFix = (typeof RFIX!=='undefined');
   Object.keys(VALID_FULL5).forEach(function(code){
     var nm = ROOM_NAME[code] || '';
-    var ok = isNum ? (code.indexOf(q) >= 0)
-                   : (nm && nm.toLowerCase().replace(/\s+/g,'').indexOf(q) >= 0);
+    /* 관리자가 바꾼 번호(화면에 보이는 번호)와 원래 번호 둘 다로 찾는다 · 메모 글자로도 찾는다 */
+    var no = hasFix ? RFIX.dispNo(code) : code;
+    var ok = isNum ? (code.indexOf(q) >= 0 || no.indexOf(q) >= 0)
+                   : (nameHit(nm, q) || (hasFix && nameHit(RFIX.memo(code), q)));
     if(ok) searchHits.push({code:code, nm:nm, floor:VALID_FULL5[code].floor,
-                            head:(isNum && code.indexOf(q)===0) ? 0 : 1});
+                            head:(isNum && (no.indexOf(q)===0 || code.indexOf(q)===0)) ? 0 : 1});
   });
   // 번호가 앞에서부터 맞는 것 → 낮은 층 → 호실 순
   searchHits.sort(function(a,b){ return a.head-b.head || a.floor-b.floor || (a.code<b.code?-1:1); });
@@ -348,8 +376,9 @@ function roomSearch(qraw){
   }
   searchHits.slice(0,40).forEach(function(h){
     var b=document.createElement('button');
-    b.innerHTML='<span class="nm">'+(rn(h.nm) || ((LANG==='ko')?'강의실':'Room'))+'</span>'
-              + '<span class="rc">'+lvName(h.floor)+' '+h.code+'</span>';
+    b.innerHTML='<span class="nm">'+(rn(h.nm) || ((LANG==='ko')?'강의실':'Room'))
+              + (hasFix ? RFIX.memoHtml(h.code, 's') : '')+'</span>'      // 메모를 적은 방만 회색 한 줄
+              + '<span class="rc">'+lvName(h.floor)+' '+(hasFix ? RFIX.dispNo(h.code) : h.code)+'</span>';
     b.onclick=function(){ openSearchHit(h); };
     box.appendChild(b);
   });

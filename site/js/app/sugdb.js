@@ -48,10 +48,11 @@ var SUGDB = (function(){
         return new Promise(function(res){
           var done = false;
           auth.onAuthStateChanged(function(u){
-            /* v84 : 로그인돼 있어도 admins 명단에 없으면 관리자로 보지 않고 로그아웃시킨다 */
-            (u ? isAdminUid(u.uid) : Promise.resolve(false)).then(function(ok){
+            /* v84 : 로그인돼 있어도 admins 명단에 없으면 관리자로 보지 않고 로그아웃시킨다
+               2026-10-18 : 익명 로그인(건의함 하루 3번 세기용)은 관리자가 아닐 뿐 그대로 둔다 */
+            (u && !u.isAnonymous ? isAdminUid(u.uid) : Promise.resolve(false)).then(function(ok){
               curUser = ok ? u : null;
-              if(u && !ok) auth.signOut();
+              if(u && !ok && !u.isAnonymous) auth.signOut();
               uiAuth();
               if(!done){ done = true; res(true); }
             });
@@ -107,7 +108,7 @@ var SUGDB = (function(){
         ua: (navigator.userAgent || '').slice(0, 120),
         cid: rec.id
       };
-      return db.collection(COL_SUG).add(doc);
+      return sendDoc(doc);
     }).then(function(ref){
       rec.fid = ref.id; rec.synced = true;
       if(typeof sugSaveQueue === 'function') sugSaveQueue();
@@ -119,8 +120,60 @@ var SUGDB = (function(){
     })['catch'](function(e){
       rec.synced = false;
       if(typeof sugSaveQueue === 'function') sugSaveQueue();
+      /* 서버가 「오늘 3번 다 올렸다」고 하면 (이 폰 기록이 지워졌을 때 등) 폰의 횟수도 맞춘다.
+         제보는 폰에 남아 있다가 다음에 앱을 열 때(날짜가 바뀌면) 다시 보낸다. */
+      if(e && e.code === 'b3/quota'){
+        if(typeof sugQuotaFull === 'function') sugQuotaFull();
+        syncMsg('');
+        return false;
+      }
       syncMsg('인터넷이 없어 이 폰에 저장했어요. 연결되면 자동으로 보냅니다.', 'off');
       return false;
+    });
+  }
+
+  /* ── 2026-10-18 : 건의함 하루 3번 (한 폰 = 익명 로그인 하나) ──
+     폰 안의 횟수(suggest.js sugQuota*)가 먼저 막고, 서버 규칙(서버/firestore.rules)이 한 번 더 막는다.
+     익명 로그인은 이름·이메일 없이 폰마다 번호(UID)만 받는 것이다 — 개인정보를 모으지 않는다.
+     · 제보 문서 번호 = 「UID_날짜_몇번째」, 같은 일괄 쓰기에서 quota/「UID_날짜」 의 n 을 1 올린다.
+     · 콘솔에서 익명 로그인을 아직 안 켰거나 규칙이 옛것이면 예전 방식(로그인 없이 add)으로 보낸다
+       — 앱을 먼저 올려도, 규칙을 먼저 붙여도 제보가 끊기지 않게. */
+  var DAY_MAX = 3;
+  function anon(){
+    if(auth.currentUser) return Promise.resolve(auth.currentUser);
+    return auth.signInAnonymously().then(function(c){ return c.user; });
+  }
+  function quotaRef(uid, day){ return db.collection('quota').doc(uid + '_' + day); }
+  function legacyAdd(doc){
+    delete doc.uid; delete doc.day;
+    return db.collection(COL_SUG).add(doc);
+  }
+  function sendDoc(doc){
+    var day = (typeof sugDay === 'function') ? sugDay() : '';
+    return anon().then(function(user){
+      doc.uid = user.uid; doc.day = day;
+      if(curUser) return db.collection(COL_SUG).add(doc)['catch'](function(e){   // 관리자는 횟수 제한 없음
+        if(e && e.code === 'permission-denied') return legacyAdd(doc);        // 규칙이 아직 옛것
+        throw e;
+      });
+      var qref = quotaRef(user.uid, day);
+      return qref.get().then(function(s){
+        var n = s.exists ? (Number(s.data().n) || 0) : 0;
+        if(n >= DAY_MAX){ var q = new Error('하루 ' + DAY_MAX + '번'); q.code = 'b3/quota'; throw q; }
+        var sref = db.collection(COL_SUG).doc(user.uid + '_' + day + '_' + (n + 1));
+        var b = db.batch();
+        if(s.exists) b.update(qref, {n: n + 1}); else b.set(qref, {n: 1});
+        b.set(sref, doc);
+        return b.commit().then(function(){ return sref; });
+      }, function(e){
+        /* 횟수 문서를 읽는 것부터 거절 = 서버 규칙이 아직 옛것 */
+        if(e && e.code === 'permission-denied') return legacyAdd(doc);
+        throw e;
+      });
+    }, function(e){
+      /* 익명 로그인이 꺼져 있음(operation-not-allowed) · 콘솔에서 가입을 막아 둠(admin-restricted-operation) */
+      if(e && /operation-not-allowed|admin-restricted|configuration-not-found/.test(e.code || '')) return legacyAdd(doc);
+      throw e;
     });
   }
 
@@ -303,6 +356,39 @@ var SUGDB = (function(){
         });
       });
   }
+  /* ── 2026-10-18 : 구성 및 변경 — 관리자가 고친 방 정보 (js/app/roomfix.js) ──
+     rooms/{방 코드} 는 누구나 읽고(앱이 내려받아 이름·번호·메모를 덮어쓴다) 관리자만 쓴다.
+     roomlog 에 누가·언제·무엇을 남긴다(관리자만 읽음). */
+  function saveRoom(key, data, before){
+    return ensure().then(function(){
+      if(!curUser) throw Object.assign(new Error('관리자 로그인이 필요해요'), {code:'b3/login'});
+      var b = db.batch();
+      if(data) b.set(db.collection('rooms').doc(key), data);
+      else b['delete'](db.collection('rooms').doc(key));
+      b.set(db.collection('roomlog').doc(), {key:key, before:before || null, after:data || null,
+                                             by:curUser.email || curUser.uid, ts:Date.now()});
+      return b.commit();
+    });
+  }
+  function roomsSdk(){
+    return ensure().then(function(){ return db.collection('rooms').get(); }).then(function(snap){
+      var out = {};
+      snap.forEach(function(d){ out[d.id] = d.data(); });
+      return out;
+    });
+  }
+  /* 공개 읽기라 SDK 없이 REST 한 번으로 받는다 (길안내만 쓰는 사람 폰에 SDK 를 내려받지 않게) */
+  function roomsRest(){
+    if(!online() || typeof fetch !== 'function') return Promise.reject('offline');
+    var url = 'https://firestore.googleapis.com/v1/projects/' + CFG.projectId + '/databases/(default)/documents/rooms' +
+              '?pageSize=300&key=' + encodeURIComponent(CFG.apiKey);
+    return fetch(url, {cache:'no-store'}).then(function(r){ if(!r.ok) throw 'http' + r.status; return r.json(); }).then(function(j){
+      var out = {};
+      (j.documents || []).forEach(function(d){ out[String(d.name || '').split('/').pop()] = fromFields(d.fields || {}); });
+      return out;
+    });
+  }
+
   function logout(){
     if(!auth) return Promise.resolve();
     return auth.signOut().then(function(){ curUser = null; unwatchAdmin(); SUG_REMOTE = []; uiAuth(); });
@@ -331,7 +417,8 @@ var SUGDB = (function(){
            publishPhoto:publishPhoto, loadPhotos:loadPhotos,
            get lastPubErr(){ return lastPubErr; },                   /* v71 */
            unpublishPhoto:unpublishPhoto, hidePhoto:hidePhoto, unhidePhoto:unhidePhoto,
-           login:login, logout:logout, user:user, fit:fit, CFG:CFG };
+           login:login, logout:logout, user:user, fit:fit, CFG:CFG,
+           saveRoom:saveRoom, roomsRest:roomsRest, roomsSdk:roomsSdk };
 })();
 
 /* ── 로그인 화면 동작 ── */

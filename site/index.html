@@ -258,11 +258,12 @@
   <section class="screen" id="s3">
     <div class="bar"><button class="back" onclick="go('scat')">←</button><h3 id="t3" data-ko="강의실 찾기" data-en="Find a Room">강의실 찾기</h3></div>
     <div class="nsearch"><input id="nq" type="search" enterkeyhint="search"
-      placeholder="강의실 번호, 교수님 성함, 기타 등" data-ko-placeholder="강의실 번호, 교수님 성함, 기타 등" data-en-placeholder="Room number, professor name, etc."
+      placeholder="강의실 번호, 교수님 성함, 초성도 돼요" data-ko-placeholder="강의실 번호, 교수님 성함, 초성도 돼요" data-en-placeholder="Room number, professor name, etc."
       oninput="roomSearch(this.value)" onfocus="showRecentIfEmpty()" onkeydown="if(event.key==='Enter'){this.blur();searchEnter();}"
       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
     <div class="err" id="err"></div>
     <div class="recentWrap" id="recentWrap">
+      <div class="choTip" data-ko="💡 초성만 써도 찾아요 — <b>ㅎㄱㅅㅁㅅ</b> → 학과사무실" data-en="💡 Type a room number or a name — e.g. 13115">💡 초성만 써도 찾아요 — <b>ㅎㄱㅅㅁㅅ</b> → 학과사무실</div>
       <div class="recentLabel" data-ko="최근 기록" data-en="Recent">최근 기록</div>
       <div class="recentList" id="recentList"></div>
     </div>
@@ -449,6 +450,9 @@
   <section class="screen" id="sph">
     <div class="bar"><button class="back" onclick="go('sset')">←</button><h3>사진 등록</h3></div>
     <div class="row">
+      <button class="big" onclick="RFIX.enter()">🗺 구성 및 변경 — 방 번호·이름·메모 고치기 →</button>
+    </div>
+    <div class="row">
       <button class="big" onclick="go('sadmin')">건의함 검토<span id="sugAdminBadge"></span> →</button>
     </div>
     <div class="row">
@@ -625,6 +629,7 @@
 <script src="js/app/overview3d.js"></script>
 <script src="js/app/floor-detail.js"></script>
 <script src="js/app/photos.js"></script>
+<script src="js/app/roomfix.js"></script>
 <script src="js/app/guide.js"></script>
 <script src="js/app/start.js"></script>
 <script src="js/app/boot.js"></script>

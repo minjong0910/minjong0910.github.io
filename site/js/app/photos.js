@@ -148,8 +148,9 @@ function roomTitle(code, forceLang){
   /* KTC 처럼 5자리 호실번호가 아닌 곳은 '호'를 붙이지 않는다 — phCap() 과 같은 규칙.
      이름이 있으면 'KTC 프로그래밍 동아리실' 처럼 곧바로 이어 붙인다. */
   if(!/^\d{5}/.test(code)) return nm ? (code+' '+nm) : code;
-  if(lang==='en') return nm ? ('Room '+code+' · '+nm) : ('Room '+code);
-  return nm ? (code+'호 · '+nm) : (code+'호');
+  var no = (typeof RFIX!=='undefined') ? RFIX.dispNo(code) : code;   // 관리자가 바꾼 번호(화면에 보이는 번호)
+  if(lang==='en') return nm ? ('Room '+no+' · '+nm) : ('Room '+no);
+  return nm ? (no+'호 · '+nm) : (no+'호');
 }
 /* 한국어 주격 조사(이/가) — 앞 글자 받침 여부로 결정 */
 function subjParticle(word){

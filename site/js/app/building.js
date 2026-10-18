@@ -422,6 +422,9 @@ function stZOf(lv){
 /* 검색 입력(5자리 전체 호실번호, 예: 13101) → 실제 방 정보 */
 function parseRoomInput(s){
   if(!/^\d{5}$/.test(s)) return null;
+  /* 관리자가 번호를 바꾼 방은 새 번호로도 (옛 번호는 아래에서 그대로) */
+  var moved = (typeof RFIX!=='undefined') ? RFIX.codeOfNo(s) : null;
+  if(moved && VALID_FULL5[moved]) s = moved;
   var info = VALID_FULL5[s];
   if(!info) return null;
   return {floor:info.floor, code:info.code};

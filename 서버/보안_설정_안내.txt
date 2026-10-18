@@ -2,6 +2,7 @@
   서버 보안 설정 — Firebase 콘솔에서 직접 해 주셔야 하는 일
   (2026-09-22 · 앱 v84 와 함께)
 ================================================================
+  ※ 2026-10-18 규칙이 바뀌었습니다(건의함 하루 3번 · 구성 및 변경) → 하루3번_방정보_설정_안내.txt 를 먼저 보세요.
 
 왜 하나
   1) 관리자 비밀번호 7자리가 앱 코드에 글자 그대로 적혀 있었다.
@@ -67,7 +68,7 @@
 
    #  시뮬레이션  위치(경로)             인증        넣을 것                         결과
    1  get         /suggestions/test     꺼짐        -                              거부 ✕
-   2  create      /suggestions/test     꺼짐        문서: {"u":"data:image/jpeg;base64,AAAA", "status":"pending"}   허용 ○
+   2  create      /suggestions/test     꺼짐        문서: {"u":"data:image/jpeg;base64,AAAA", "status":"pending"}   거부 ✕ (2026-10-18 부터 — 익명 로그인 필요)
    3  create      /suggestions/test     꺼짐        문서: {"u":"hello", "status":"pending"}                         거부 ✕
    4  create      /suggestions/test     꺼짐        문서: {"u":"data:image/jpeg;base64,AAAA", "status":"approved"}  거부 ✕
    5  get         /suggestions/test     켜짐 · UID 아무거나(예 abc)  -          거부 ✕

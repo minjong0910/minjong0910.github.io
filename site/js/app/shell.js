@@ -187,6 +187,7 @@ function go(id){
   }
   if(id==='ssug' && typeof SUGAI!=='undefined') SUGAI.warmup();
   if(id==='ssug' && typeof SUGDB!=='undefined') SUGDB.prepSubmit();
+  if(id==='ssug' && typeof sugQuotaRender==='function') sugQuotaRender();   /* 하루 3번 — 남은 횟수 */
   if(id==='sadmin' && typeof SUGDB!=='undefined') SUGDB.watchAdmin();
   if(id!=='sadmin' && typeof SUGDB!=='undefined') SUGDB.unwatchAdmin();
   if(id==='sph'){ phRender(); if(typeof sugBadgeSync==='function') sugBadgeSync();

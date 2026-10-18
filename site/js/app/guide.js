@@ -492,6 +492,7 @@ function refreshGuideTitles(){
   if(!t6 || !target) return;
   t6.textContent = (LANG==='ko') ? (targetLabel()+' 가는 길') : ('Directions to '+targetLabel());
   t7.textContent = (LANG==='ko') ? (targetLabel()+' 도착') : ('Arrived at '+targetLabel());
+  if(typeof RFIX!=='undefined') RFIX.paint7();   // 관리자가 메모를 적은 곳이면 방 이름 아래 회색 한 줄
 }
 function startGuide(){
   steps=buildSteps(); si=0;

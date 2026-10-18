@@ -114,8 +114,68 @@ function sugFixPlace(){
   });
 }
 
+/* ── 2026-10-18 건의함 하루 3번 (한 휴대폰 기준, 사용자 요청) ──
+   이 폰에 「오늘(한국 날짜) 몇 번 올렸나」를 적어 두고 먼저 막는다. 서버도 한 번 더 막는다(sugdb.js · 서버/firestore.rules).
+   AI 가 사진 자체를 거절한 것(흐림·범위 밖)은 세지 않는다 — 실제로 접수된 것만 센다. 관리자는 제한 없음. */
+var SUG_DAY_MAX = 3, SUG_QKEY = 'b3nav_sugQuota', sugQuotaMem = null;
+function sugDay(t){                                    // '2026-10-18' — 서버 규칙 kstDay() 와 같은 모양(0 을 채우지 않음)
+  var d = new Date((t || Date.now()) + 9 * 3600000);
+  return d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate();
+}
+function sugQuotaAdmin(){ return typeof SUGDB !== 'undefined' && SUGDB.user && !!SUGDB.user(); }
+function sugQuotaUsed(){
+  var o = sugQuotaMem;
+  try{ o = JSON.parse(localStorage.getItem(SUG_QKEY) || 'null') || o; }catch(e){}
+  return (o && o.day === sugDay()) ? Math.max(0, o.n | 0) : 0;
+}
+function sugQuotaSet(n){
+  sugQuotaMem = {day:sugDay(), n:n};
+  try{ localStorage.setItem(SUG_QKEY, JSON.stringify(sugQuotaMem)); }catch(e){}
+  sugQuotaRender();
+}
+function sugQuotaLeft(){ return sugQuotaAdmin() ? SUG_DAY_MAX : Math.max(0, SUG_DAY_MAX - sugQuotaUsed()); }
+function sugQuotaFull(){ sugQuotaSet(SUG_DAY_MAX); }
+/* 올리기 단추 위 「오늘 올릴 수 있는 횟수 2 / 3」 · 다 쓰면 단추를 흐리게 하고 아래에 경고 상자 */
+function sugQuotaRender(){
+  var btn = document.querySelector('#ssug button[onclick="sugSubmit()"]');
+  if(!btn) return;
+  var pill = document.getElementById('sugQuota'), box = document.getElementById('sugQuotaFull');
+  if(!pill){
+    pill = document.createElement('div'); pill.id = 'sugQuota'; pill.className = 'sugQuota';
+    btn.parentNode.insertBefore(pill, btn);
+  }
+  if(!box){
+    box = document.createElement('div'); box.id = 'sugQuotaFull'; box.className = 'sugQuotaFull';
+    box.setAttribute('data-ko', '<b class="t">⚠ 오늘은 ' + SUG_DAY_MAX + '번 모두 올렸어요</b>내일(밤 12시가 지나면) 다시 올릴 수 있어요.' +
+      '<b class="warn">⚠ 사진 한 장이 다른 사람의 길이 됩니다.</b>' +
+      '<small>악용의 가능성을 막기 위해 한 휴대폰에서 하루 ' + SUG_DAY_MAX + '번까지만 받습니다.</small>');
+    box.setAttribute('data-en', '<b class="t">⚠ You\'ve used all ' + SUG_DAY_MAX + ' uploads today</b>You can upload again after midnight.' +
+      '<b class="warn">⚠ One photo can guide someone else.</b>' +
+      '<small>To prevent misuse, we accept up to ' + SUG_DAY_MAX + ' uploads per phone per day.</small>');
+    btn.parentNode.insertBefore(box, btn.nextSibling);
+  }
+  var admin = sugQuotaAdmin(), left = sugQuotaLeft(), full = !admin && left <= 0;
+  pill.style.display = admin ? 'none' : '';
+  pill.classList.toggle('full', full);
+  pill.setAttribute('data-ko', '📮 오늘 올릴 수 있는 횟수 <b>' + left + ' / ' + SUG_DAY_MAX + '</b>');
+  pill.setAttribute('data-en', '📮 Uploads left today <b>' + left + ' / ' + SUG_DAY_MAX + '</b>');
+  pill.innerHTML = pill.getAttribute(LANG === 'ko' ? 'data-ko' : 'data-en');
+  box.classList.toggle('on', full);
+  if(!box.innerHTML) box.innerHTML = box.getAttribute(LANG === 'ko' ? 'data-ko' : 'data-en');
+  btn.classList.toggle('sugOff', full);
+  btn.setAttribute('data-ko', full ? '오늘은 다 올렸어요' : '건의함에 올리기');
+  btn.setAttribute('data-en', full ? 'Today\'s limit reached' : 'Submit to Suggestion Box');
+  btn.innerHTML = btn.getAttribute(LANG === 'ko' ? 'data-ko' : 'data-en');
+}
 function sugSubmit(){
   var stat = document.getElementById('sugStat');
+  if(sugQuotaLeft() <= 0){
+    sugQuotaRender();
+    if(stat){ stat.textContent = ''; stat.classList.remove('on'); }
+    var fullBox = document.getElementById('sugQuotaFull');
+    if(fullBox && fullBox.scrollIntoView) fullBox.scrollIntoView({block:'nearest', behavior:'smooth'});
+    return;
+  }
   if(!sugPickedFile){
     if(stat){
       stat.style.color = '#FF6B6B';
@@ -227,6 +287,7 @@ function sugFinishSubmit(url, noteVal, ai, stat, noteEl){
     SUG_QUEUE.push(rec);
     sugSaveQueue();
     sugBadgeSync();
+    if(!sugQuotaAdmin()) sugQuotaSet(sugQuotaUsed() + 1);   /* 하루 3번 — 접수된 것만 센다 */
     /* v49 : 서버로 보낸다. 실패하면 이 폰에 남겨뒀다가 연결되면 다시 보낸다. */
     if(typeof SUGDB !== 'undefined') SUGDB.pushOne(rec);
     SUGAI.showCard(ai);

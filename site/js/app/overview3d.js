@@ -224,6 +224,7 @@ function addLevelContents(g, lv, detail){
         g.add(tile);
       }else if(c.code){
         var lbl = c.label || c.code;
+        if(lbl === c.code && typeof RFIX!=='undefined') lbl = RFIX.dispNo(c.code);   // 관리자가 바꾼 번호
         var lines = lbl.split('\n');
         /* 호실 번호만으로는 무슨 방인지 알 수 없어서, 아래에 용도를 한 줄 더 적는다.
            이름은 사진 파일명에서 자동으로 뽑힌 것(ROOM_NAME)을 쓴다.
@@ -669,7 +670,10 @@ function restoreFlyCamera(){
   flyBefore=null;
   spinResume();
 }
-function backFromS5(){ restoreFlyCamera(); go(4); }
+function backFromS5(){
+  if(typeof RFIX!=='undefined' && RFIX.editing()){ RFIX.exit(); return; }   // 관리자 「구성 및 변경」에서 나가기 → 사진 등록 화면
+  restoreFlyCamera(); go(4);
+}
 
 /* 건물 3D 전체 시점 버튼 : 자유 회전·이동(팬)·확대로 보다가 길을 잃었을 때,
    누르면 처음 이 화면을 열었을 때 보이던 기본 각도·중심·확대 상태로 그대로 되돌아간다. */
@@ -828,7 +832,7 @@ function updateTargetTag(){
   else if(target.kind==='emstair') txt = lvName(target.floor)+((LANG==='ko')?' 비상계단':' Emergency Stairs');
   else {
     var nm = rn(ROOM_NAME[target.code]);
-    txt = target.code + (nm ? (' · ' + nm) : ((LANG==='ko')?'호':''));
+    txt = (typeof RFIX!=='undefined' ? RFIX.dispNo(target.code) : target.code) + (nm ? (' · ' + nm) : ((LANG==='ko')?'호':''));
   }
   if(txt.length > 18) txt = txt.slice(0,17) + '…';   // 너무 길면 줄임
   var p = targetPos();

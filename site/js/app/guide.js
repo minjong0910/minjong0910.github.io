@@ -606,7 +606,13 @@ function render6(instant){
 }
 function prev(){
   if(si>0){ si--; render6(); }
-  else go(5);          // 첫 단계 : 층 상세 화면으로 빠져나감
+  /* 첫 단계 : 층 상세 화면으로 빠져나감 — 2026-10-19 : 예전엔 go(5) 로 화면만 넘겨서, 3D 에서 층 상세를 한 번도
+     안 열었으면 지도가 그려지지 않아 빈 화면이었다(사용자 폰). 목적지 층의 지도를 그려서 연다. */
+  else if(typeof target!=='undefined' && target && typeof showFloorDetail==='function'){
+    curFloor = target.floor;
+    showFloorDetail(curFloor);
+  }
+  else go(5);
 }
 function next(){
   if(si<steps.length-1){ si++; render6(); }

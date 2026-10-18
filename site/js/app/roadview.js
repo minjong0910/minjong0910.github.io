@@ -427,6 +427,11 @@ function fpSetPanel(txt){
 var FP_WALL_X  = CORR_HALF;          // 복도 벽 X(중앙에서 좌우로)
 var FP_GATE_X    = -GLOBAL_HALF_X;   // 정문(건물 서쪽 외벽) X
 var FP_GATE_OUT  = FP_GATE_X - 4.8;  // 정문 앞 광장(로드뷰 출발 지점)
+/* 정문은 유리문 두 개 사이에 가운데 기둥이 있다(roadview-corr.js). 경로 미리보기가 한가운데(z=0)로 걸어 들어가면
+   카메라가 기둥을 뚫고 지나가 잠깐 회색 화면이 됐다 → 오른쪽 문 한가운데로 지나간다 (2026-10-19 사용자).
+   정문으로 들어와 +X 를 볼 때 +Z 가 오른쪽이다. */
+var FP_MAIN_GATE_W = 2.55, FP_MAIN_PIER_W = 1.10;
+var FP_MAIN_DOOR_Z = FP_MAIN_GATE_W/2 + FP_MAIN_PIER_W/2;   // 오른쪽 문 가운데 Z
 var FP_HALL_HW = 3.90;              // 정문 현관 통로 반폭(Z)
 var FP_DOOR_W  = 1.14;               // 문 폭
 var FP_DOOR_H  = 2.10;               // 문 높이

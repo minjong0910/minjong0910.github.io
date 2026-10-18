@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '754c96255395';   // 파일 248개 · 16.5MB
+var VERSION = '91dc421a60e1';   // 파일 248개 · 16.5MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -38,7 +38,7 @@ var FILES = [
   ['3d/tex/21.png','5185337f5f27',7799],
   ['css/app.css','62ccf65cdbea',102990],
   ['css/boot.css','b3a18297534a',1353],
-  ['css/easy.css','5d140824ad02',6895],
+  ['css/easy.css','5c9d2cc27db6',7903],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
   ['data/photos/13102/01.jpg','2b1331ee4ba3',58742],
@@ -233,7 +233,7 @@ var FILES = [
   ['js/app/building.js','95b01af4110d',23489],
   ['js/app/easy.js','dfcbce9f49fd',21379],
   ['js/app/floor-detail.js','59f52121571a',19195],
-  ['js/app/guide.js','08d6c596fb09',43673],
+  ['js/app/guide.js','bb680e14fd22',44048],
   ['js/app/howto.js','fc21c5dcdc4c',16198],
   ['js/app/icons.js','4cb6e33c5920',21136],
   ['js/app/overview3d.js','35ad3a4e8f9a',108858],
@@ -242,12 +242,12 @@ var FILES = [
   ['js/app/qrnav.js','1ab04e81bfc1',20800],
   ['js/app/roadview-1f.js','14696e0f4c2a',46207],
   ['js/app/roadview-b1.js','7d5ac6c79e08',157916],
-  ['js/app/roadview-corr.js','36a5696c9e2f',51038],
+  ['js/app/roadview-corr.js','99c04eefa56c',51166],
   ['js/app/roadview-free.js','c0d1249f0b54',92167],
-  ['js/app/roadview-play.js','8532c01564db',23533],
+  ['js/app/roadview-play.js','80b285a273bb',23711],
   ['js/app/roadview-roof.js','21f2a5e8678f',119576],
   ['js/app/roadview-stairs.js','7f992b896804',70498],
-  ['js/app/roadview.js','32902047f3c9',132774],
+  ['js/app/roadview.js','7c27eb33cc6b',133277],
   ['js/app/roomfix.js','1b886c300886',22082],
   ['js/app/shell.js','2fa63d8c3e52',19673],
   ['js/app/start.js','4065777331b0',1505],

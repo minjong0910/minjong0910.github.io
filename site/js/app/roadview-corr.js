@@ -542,7 +542,7 @@ function fpMakeCorr(lv){
     // 브로슈어 거치대(fpMakeRack)는 삭제 — 함수 정의는 남겨 둔다.
     // 정문 외벽(문 좌우 벽 + 문 위 상인방) — 문 폭 3.3 만 비워 둔다
     /* 사진처럼 정문은 한 덩어리가 아니라 가운데 기둥을 두고 두 개로 나눠져 있다 */
-    var gw=2.55, pierW=1.10;
+    var gw=FP_MAIN_GATE_W, pierW=FP_MAIN_PIER_W;     // 정문 문 폭 · 가운데 기둥 폭 (roadview.js — 경로 미리보기도 같은 값을 쓴다)
     var gzc=gw/2+pierW/2, sidew=hw-(gzc+gw/2);
     /* 문이 벽면보다 살짝 안쪽(gx-0.012)에 있어서, 기둥·옆벽을 문 폭에 딱 맞춰 세우면
        뒤돌아볼 때(반대쪽에서 볼 때) 문과 기둥/옆벽 사이에 아주 얇은 틈이 비쳐 보였다.

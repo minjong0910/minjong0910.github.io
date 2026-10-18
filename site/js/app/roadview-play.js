@@ -98,12 +98,13 @@ function fpBuildScript(){
     }
   }else if(fromGate){
     /* 정문 — 예전과 같은 '광장에서 출발' 연출(밖에 광장·하늘이 지어져 있는 유일한 문) */
-    fpPos = {x: FP_GATE_OUT, y: yS, z: 0};
+    /* 2026-10-19 : 두 문 사이 가운데 기둥(z=0)이 아니라 오른쪽 문 앞에 서서 그 문으로 곧장 들어간다 (FP_MAIN_DOOR_Z) */
+    fpPos = {x: FP_GATE_OUT, y: yS, z: FP_MAIN_DOOR_Z};
     fpYaw = Math.PI/2;                              // +X(건물 정문) 쪽을 바라봄
     fpDoorK = 0;
     S.push({dur:1.8, panel:lvLabel(startFloor),
             label: ko ? '공대 3호관 정문 앞' : 'At the main gate'});
-    S.push({to:{x: FP_GATE_X + 3.2, z: 0},
+    S.push({to:{x: FP_GATE_X + 2.0, z: FP_MAIN_DOOR_Z},
             label: ko ? '정문으로 들어갑니다' : 'Entering through the main gate'});
     S.push({to:{x: -CORR_HALF - 1.2, z: 0},
             label: ko ? '현관을 지나 로비로' : 'Through the entrance hall'});

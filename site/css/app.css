@@ -1227,9 +1227,10 @@
   /* ── 버튼 테두리 3px (사용자 : 「지금도 너무 얇다, 3px 까지만」) — 어두운 화면 · 밝은 화면 모두 ── */
   .back,.ghost,.iconBtn,.cats button,.nresults button,.recentItem .rrow,.floorpick button,.sfbtns button,
   .trip,.trip.ghost2,.navrow .big#pv,#s1 .qrStart,.binfo,.nsearch input,.sugFloorRow button,#sfav .favItem{border-width:3px;border-style:solid;}
-  /* 어두운 화면 : 회색 테두리가 검은 바탕에 묻히지 않게 한 단계 밝게 */
-  .cats button,.nresults button,.recentItem .rrow,.binfo,.nsearch input,#sfav .favItem{border-color:#34465E;}
-  .floorpick button,.sfbtns button,.trip,.sugFloorRow button{border-color:#3A4C64;}
+  /* 누르는 칸의 테두리 색 = 차분한 하늘색 (2026-10-19 사용자가 회색 · 하늘색 · 보라 사진을 보고 고름 — 앱 대표색 #00E5FF 와 한 가족,
+     선택된 버튼(꽉 찬 하늘색) · 목적지 층(분홍)은 따로). 어두운 화면 #1FA9C9 · 밝은 화면 #2B88C8(아래 「밝은 화면」 묶음) */
+  .cats button,.nresults button,.recentItem .rrow,.binfo,.nsearch input,#sfav .favItem{border-color:#1FA9C9;}
+  .floorpick button,.sfbtns button,.trip,.sugFloorRow button{border-color:#1FA9C9;}
 
   /* ── 밝은 화면 (html.lt) : 흰 바탕 · 진한 남색 글자 · 강조는 진한 파랑 #0B6FB8 · 글자 크기는 그대로 ──
      관리자 화면 · QR 카메라 화면은 어두운 채로 둔다(topmenu.js 가 .dk 를 붙인다). 3D 건물 바탕(하늘색)·사진은 그대로. */
@@ -1261,32 +1262,32 @@
   html.lt #s1 .qrStart{color:#0E8A45;border-color:#0E8A45;background:#FFFFFF;}
   html.lt #s1 .appHint{color:#A26A00;text-decoration-color:rgba(162,106,0,.45);}
   /* 무엇을 찾으세요? */
-  html.lt .screen:not(.dk) .cats button{background:#FFFFFF;border-color:#AEBCCD;color:#0F1B2D;box-shadow:0 1px 3px rgba(15,27,45,.06);}
+  html.lt .screen:not(.dk) .cats button{background:#FFFFFF;border-color:#2B88C8;color:#0F1B2D;box-shadow:0 1px 3px rgba(15,27,45,.06);}
   html.lt .screen:not(.dk) .cats button small{color:#44546A;}
   html.lt .cats .lc-door-open{color:#D9700F;} html.lt .cats .lc-toilet{color:#1F78B4;} html.lt .cats .lc-book-open{color:#6B4FC0;}
   html.lt .cats .lc-siren{color:#D92D2D;} html.lt .cats .lc-wrench{color:#64748B;}
   /* 검색 */
-  html.lt .nsearch input{background:#FFFFFF;border-color:#AEBCCD;color:#0F1B2D;}
+  html.lt .nsearch input{background:#FFFFFF;border-color:#2B88C8;color:#0F1B2D;}
   html.lt .nsearch input:focus{border-color:#0B6FB8;box-shadow:0 0 0 3px rgba(11,111,184,.15);}
   html.lt .nsearch input::placeholder{color:#6B7A8E;}
-  html.lt .nresults button{background:#FFFFFF;border-color:#AEBCCD;color:#0F1B2D;}
+  html.lt .nresults button{background:#FFFFFF;border-color:#2B88C8;color:#0F1B2D;}
   html.lt .nresults button .rc{color:#0B6FB8;}
   html.lt .nresults .none,html.lt .recentLabel{color:#44546A;}
-  html.lt .recentItem .rrow{background:#FFFFFF;border-color:#AEBCCD;}
+  html.lt .recentItem .rrow{background:#FFFFFF;border-color:#2B88C8;}
   html.lt .recentItem .rtxt{color:#2A3A4E;}
   html.lt .recentItem .ric,html.lt .recentItem .rx,html.lt .recentEmpty{color:#6B7A8E;}
   html.lt .choTip{background:#FFF6D6;border-color:#E6B800;color:#5C4400;}
   /* 3D 화면 */
   html.lt #c3d{border-color:#C5D0DC;}
   html.lt .legend3d{background:rgba(255,255,255,.9);color:#0F1B2D;border-color:#C5D0DC;}
-  html.lt .screen:not(.dk) .trip{background:#FFFFFF;border-color:#A3B3C6;color:#0B6FB8;}
+  html.lt .screen:not(.dk) .trip{background:#FFFFFF;border-color:#2B88C8;color:#0B6FB8;}
   html.lt .screen:not(.dk) .trip.ghost2{background:#FFFFFF;border-color:#0B6FB8;color:#0B6FB8;}
   html.lt .screen:not(.dk) .trip.on{background:linear-gradient(90deg,#00E5FF,#7B5CFF);border-color:#00E5FF;color:#05060A;}
-  html.lt .floorpick button{background:#FFFFFF;border-color:#A3B3C6;color:#44546A;}
+  html.lt .floorpick button{background:#FFFFFF;border-color:#2B88C8;color:#44546A;}
   html.lt .floorpick button.tgt{border-color:#E0115F;color:#0F1B2D;}
   html.lt .floorpick button.on{background:#0B6FB8;color:#FFFFFF;border-color:#0B6FB8;}
   html.lt .startfloor{border-top-color:#D3DCE6;}
-  html.lt .sfbtns button{background:#FFFFFF;border-color:#A3B3C6;color:#44546A;}
+  html.lt .sfbtns button{background:#FFFFFF;border-color:#2B88C8;color:#44546A;}
   html.lt .sfbtns button.on{background:rgba(11,111,184,.12);color:#0B6FB8;border-color:#0B6FB8;}
   html.lt .entryChip{background:rgba(14,138,69,.08);border-color:rgba(14,138,69,.45);color:#0E8A45;}
   /* 층 상세 (지도 바탕은 topmenu.js 가 바꾼다) */
@@ -1304,7 +1305,7 @@
   html.lt #s7 #arriveGrad stop:first-child{stop-color:#0891B2;}
   html.lt #s7 #arriveGrad stop:last-child{stop-color:#0E9F4F;}
   /* 여기가 맞나요? (건물 · QR) */
-  html.lt .binfo{background:#FFFFFF;border-color:#AEBCCD;box-shadow:0 1px 3px rgba(15,27,45,.06);}
+  html.lt .binfo{background:#FFFFFF;border-color:#2B88C8;box-shadow:0 1px 3px rgba(15,27,45,.06);}
   html.lt .binfo p{color:#44546A;}
   html.lt .binfo p span{color:#3B6A9A !important;}
   html.lt #sqrok .okName{color:#0E8A45;}
@@ -1317,7 +1318,7 @@
   html.lt #sset .offStat{color:#53647A;}
   html.lt #sguide h4{color:#0B6FB8;}
   html.lt #sguide p,html.lt #sguide li{color:#2A3A4E;}
-  html.lt #sfav .favItem{background:#FFFFFF;border-color:#AEBCCD;color:#0F1B2D;}
+  html.lt #sfav .favItem{background:#FFFFFF;border-color:#2B88C8;color:#0F1B2D;}
   html.lt #sfav .favEmpty,html.lt #sfav .favRemove{color:#6B7A8E;}
   /* 건의함 */
   html.lt #ssug .card{background:#FFFFFF;border-color:#D3DCE6;}
@@ -1328,7 +1329,7 @@
   html.lt #ssug .shot2{border-color:#8FA9C8;color:#2E5A8A;}
   html.lt #ssug textarea{background:#FFFFFF;border-color:#AEBCCD;color:#0F1B2D;}
   html.lt .sugFloorRow{color:#44546A;}
-  html.lt .sugFloorRow button{background:#FFFFFF;color:#2E5A8A;border-color:#A3B3C6;}
+  html.lt .sugFloorRow button{background:#FFFFFF;color:#2E5A8A;border-color:#2B88C8;}
   html.lt .sugFloorRow button.on{background:rgba(14,138,69,.10);color:#0E8A45;border-color:#0E8A45;}
   html.lt .sugTip{background:#F6F9FC;border-color:#AEBCCD;color:#44546A;}
   html.lt .sugTip b{color:#2E5A8A;}

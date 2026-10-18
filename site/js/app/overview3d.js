@@ -974,6 +974,11 @@ function highlight3D(){
   pulseTargets.length=0;
   pulseFloorTargets.length=0;
   ghostSlabs.length=0; _ghostK=-1;
+  /* 2026-10-18 : 폰에서 3D 가 안개 낀 듯 뿌옇다(사용자 폰 사진) — 가야 할 층(노랑 .55)·지금 층(흰색 .5)의 방 상자가
+     반쯤 비쳐서 밑의 청록 바닥·빛웅덩이가 그대로 비쳐 올라왔다. → 노랑 .85 · 흰색 .8 로 또렷하게.
+     다만 지금 층이 가야 할 층보다 위면, 진한 흰 상자가 밑의 노란 층을 가리므로 그때만 예전처럼 옅게(.5). */
+  var tgtIdx = target ? LEVELS.indexOf(target.floor) : -1, startIdx = LEVELS.indexOf(startFloor);
+  var firstOp = (tgtIdx >= 0 && startIdx > tgtIdx) ? 0.5 : 0.8;
   floorGroups.forEach(function(g,i){
     var lv=LEVELS[i];
     var isTgtFloor = target && lv===target.floor;
@@ -1033,10 +1038,10 @@ function highlight3D(){
           setMatColor(o,0xE0553F); o.material.opacity=0.97;
           pulseTargets.push(o);
         }else if(isTgtFloor){          // 가야 할 층 : 노란색으로, 살짝 반짝이게(animate()에서 처리)
-          setMatColor(o,0xF2C05A); o.material.opacity=0.55;
+          setMatColor(o,0xF2C05A); o.material.opacity=0.85;
           pulseFloorTargets.push(o);
         }else if(isFirst){             // 현재 위치 층 : 흰색(가야 할 층의 노란색과 바로 구분되게)
-          setMatColor(o,0xFFFFFF); o.material.opacity=0.5;
+          setMatColor(o,0xFFFFFF); o.material.opacity=firstOp;
         }else{                         // 나머지 층 : 완전히 투명하면 건물이 뻥 뚫린 것처럼 보여서
                                         // 가독성이 떨어지므로, 구조가 은은하게라도 보이게 올림
           o.material.color.setHex(o.userData.zone?0x8E7CC3:0x9FB4CC); o.material.opacity=0.05;

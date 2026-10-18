@@ -174,8 +174,9 @@ function init3D(){
     var gcv=document.createElement('canvas'); gcv.width=gcv.height=256;
     var gx=gcv.getContext('2d');
     var rg=gx.createRadialGradient(128,128,0,128,128,128);
-    rg.addColorStop(0.00,'rgba(0,229,255,0.30)');
-    rg.addColorStop(0.45,'rgba(0,229,255,0.12)');
+    /* 2026-10-18 : 폰에서 3D 가 뿌옇다는 말 — 빛웅덩이를 절반으로 (.30/.12 → .15/.06). 건물 밑이 우윳빛으로 번지지 않게 */
+    rg.addColorStop(0.00,'rgba(0,229,255,0.15)');
+    rg.addColorStop(0.45,'rgba(0,229,255,0.06)');
     rg.addColorStop(1.00,'rgba(0,229,255,0)');
     gx.fillStyle=rg; gx.fillRect(0,0,256,256);
     var poolMat=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(gcv),

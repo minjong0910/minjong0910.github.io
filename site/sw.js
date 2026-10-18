@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '0a938328e66e';   // 파일 248개 · 16.5MB
+var VERSION = '754c96255395';   // 파일 248개 · 16.5MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','31a7b5fc7799',102469],
+  ['css/app.css','62ccf65cdbea',102990],
   ['css/boot.css','b3a18297534a',1353],
   ['css/easy.css','5d140824ad02',6895],
   ['data/photos.js','c1c98972f145',16161],
@@ -210,7 +210,7 @@ var FILES = [
   ['data/photos/WIN5L/01.jpg','512c0a61c2a1',99074],
   ['data/photos/WIN5R/01.jpg','f1dc31f7a5f9',125944],
   ['data/places.js','02bc4d37cb3f',1500],
-  ['easy-trial.html','859128fb06ab',55592],
+  ['easy-trial.html','12ef2a1c96c4',55849],
   ['guide/g01_first.jpg','c53eba1cd38b',61803],
   ['guide/g02_easy.jpg','c0a81dc2c293',82886],
   ['guide/g03_qrok.jpg','bb632b703dfd',77435],
@@ -227,7 +227,7 @@ var FILES = [
   ['img/icon-192.png','a6893220bee4',5036],
   ['img/icon-512.png','de753e3f6802',14880],
   ['img/icon.svg','99ad3cbde680',2002],
-  ['index.html','51631560197d',53798],
+  ['index.html','25bc4a936ef2',54055],
   ['js/app/aid.js','daa92696b9a7',32661],
   ['js/app/boot.js','c49829682f30',8075],
   ['js/app/building.js','95b01af4110d',23489],

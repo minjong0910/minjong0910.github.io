@@ -6,6 +6,11 @@
      데스크톱(폰 액자 상태)에서는 16px 로 고정 — 설계한 390×790 그대로 보인다.
      실제 폰에서는 아래쪽 @media 에서 화면 크기를 따라가게 만든다. */
   html{font-size:16px;}
+  /* 폰 브라우저 「다크 모드」(삼성 인터넷 · 크롬 자동 어둡게)가 이 앱 색을 억지로 바꾸지 않게 — 2026-10-19 사용자 폰에서
+     밝은 화면이 뿌옇게(흰 바탕 → 회색, 밝은 버튼 → 남색) 보였다. 어두운 화면은 「이미 어둡다」, 밝은 화면은 「밝게만」으로 알린다. */
+  :root{color-scheme:dark;}
+  html.lt{color-scheme:only light;}
+  @media (prefers-color-scheme: dark){ :root{color-scheme:dark;} html.lt{color-scheme:only light;} }
 
   html,body{height:100%;background:#0B0E13;font-family:'Pretendard',"맑은 고딕","Malgun Gothic","Noto Sans CJK KR",sans-serif;
     display:flex;align-items:center;justify-content:center;gap:2.25rem;color:#E7F6FF;}

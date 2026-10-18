@@ -746,6 +746,36 @@
   /* ============ 반응형 : 폰(갤럭시·아이폰)에서 전체화면 ============ */
   /* 데스크톱에서는 폰 목업 액자 + 설명 패널을 그대로 보여주고,
      화면이 좁으면(실제 휴대폰) 액자를 벗겨 앱이 화면을 꽉 채우게 한다. */
+  /* ══ Lucide 아이콘 (js/app/icons.js) ══════════════════════════════════
+     이모지·기호 글자를 Lucide 그림(<svg class="lc lc-이름">)으로 바꾼 것의 크기·색. 기본은 글자 크기에 맞춘다(1.15em).
+     lcL = 글자 앞에 붙은 그림(오른쪽 간격) · lcR = 글자 뒤에 붙은 그림(왼쪽 간격) · lcFill = 채운 별(★) */
+  .lc{width:1.15em;height:1.15em;vertical-align:-0.2em;stroke-width:2.2;flex:none;display:inline-block;}
+  .lc.lcL{margin-right:0.3em;}
+  .lc.lcR{margin-left:0.25em;}
+  .lc.lcFill{fill:currentColor;}
+  .topIcons .iconBtn .lc{width:1.3rem;height:1.3rem;margin:0;vertical-align:middle;}
+  .topIcons .iconBtn .lc-house,.topIcons .iconBtn .lc-settings{color:#E7F6FF;}
+  .topIcons .iconBtn .lc-star{color:#FFD43B;}
+  #netBtn i{display:none;}                                   /* 인터넷 상태 : 녹색 점 → 와이파이 그림 */
+  #netBtn .lcNetOn{color:#39FF88;width:1.15rem;height:1.15rem;}
+  #netBtn .lcNetOff{display:none;color:#FFB33C;width:1.05rem;height:1.05rem;}
+  #netBtn.netOff .lcNetOn{display:none;}
+  #netBtn.netOff .lcNetOff{display:inline-block;}
+  .back .lc,.fsBar .iconBtn .lc{width:1.35rem;height:1.35rem;margin:0;vertical-align:middle;}
+  #s1 .logo .lc{width:5rem;height:5rem;color:#00E5FF;stroke-width:1.5;margin:0;}
+  .cats button .ic .lc{width:2.4rem;height:2.4rem;stroke-width:1.8;margin:0;vertical-align:middle;}
+  .cats .lc-door-open{color:#F2A65A;}                        /* 장소 종류 색 = 3D 색깔과 같은 계열 */
+  .cats .lc-toilet{color:#5FA8D3;}
+  .cats .lc-book-open{color:#A48BE0;}
+  .cats .lc-siren{color:#FF6B6B;}
+  .cats .lc-wrench{color:#7C8AA0;}
+  #ar .lc{width:1em;height:1em;stroke-width:2.6;vertical-align:middle;margin:0;}
+  #walkTrack .lc{width:1.1rem;height:1.1rem;vertical-align:middle;margin:0;}
+  #walker .lc{width:1.35rem;height:1.35rem;color:#E7F6FF;}
+  #sqrok .okTick .lc{width:3rem;height:3rem;color:#FF2E88;stroke-width:2;margin:0;}
+  .favFloat .lc,.fsBtn .lc{width:1.25rem;height:1.25rem;margin:0;vertical-align:middle;}
+  .ezBubble .ezIc .lc{width:1.7rem;height:1.7rem;color:#1F2A37;stroke-width:2;margin:0;}
+  .izBtn .lc{margin:0;}
   @media (max-width: 640px){
     /* ---- 기기마다 화면 크기가 달라도 같은 비율로 보이게 ----
        설계 기준은 390 x 790 (1rem = 16px).

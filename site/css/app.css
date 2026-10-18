@@ -25,10 +25,10 @@
   /* v51 : 보이지 않는 화면 안의 CSS 애니메이션(스캔 레이저·배너 등)은 멈춰 둔다 */
   .screen:not(.on) *{animation-play-state:paused !important;}
 
-  /* 위쪽 줄(뒤로가기 + 제목) — 오른쪽 위 아이콘 세 개(집·즐겨찾기·설정)가 늘 떠 있으므로
+  /* 위쪽 줄(뒤로가기 + 제목) — 오른쪽 위 아이콘(인터넷 · 세 줄 메뉴)이 늘 떠 있으므로
      그만큼 자리를 비워 둔다. 좁은 폰에서 제목이 아이콘 밑으로 파고들던 것을 막는다.
      제목이 그래도 길면 말줄임(…)으로 자른다. */
-  .bar{display:flex;align-items:center;gap:0.625rem;margin-bottom:0.75rem;flex:0 0 auto;padding-right:7.5rem;}
+  .bar{display:flex;align-items:center;gap:0.625rem;margin-bottom:0.75rem;flex:0 0 auto;padding-right:5.75rem;}   /* 오른쪽 위 [인터넷][☰] 두 개 자리 (2026-10-19 : 아이콘 4개 → 2개) */
   .bar h3{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .back{background:transparent;border:1px solid #00E5FF;color:#00E5FF;border-radius:0.375rem;
     padding:0.375rem 0.6875rem;font-size:0.9375rem;cursor:pointer;font-family:inherit;
@@ -1186,3 +1186,159 @@
   .rfItemEx{color:#8FA3BC;font-size:0.75rem;margin-top:0.25rem;line-height:1.45;word-break:keep-all;}
   .rfItemTs{color:#7C8AA0;font-size:0.75rem;margin-top:0.375rem;}
   .rfEmpty{text-align:center;color:#7C8AA0;font-size:0.75rem;margin:0.25rem 0;}
+
+  /* ══ 2026-10-19 : 오른쪽 위 세 줄(☰) 메뉴 · 버튼 테두리 3px · 밝은 화면 (js/app/topmenu.js) ══
+     사용자가 사진 견본(밝은화면_견본 9~11)과 움직이는 견본(펼치는 속도 0.12~0.4초)을 보고 고른 것. */
+
+  /* ── 세 줄(☰) 메뉴 : 오른쪽 위 모서리에서 커지며 나타나고, 줄이 위에서부터 차례로 ── */
+  :root{--tmDur:220ms;}                                   /* 펼치는 데 0.22초 (사용자) · 닫힐 때는 0.7배 */
+  .tmMenu{position:relative;}
+  .tmBtn{color:#E7F6FF;transition:background .15s,color .15s;}
+  .tmMenu.tmOpen .tmBtn{background:#00E5FF;color:#04121A;border-color:#00E5FF;}
+  .tmList{position:absolute;top:calc(100% + 0.5rem);right:0;width:13.25rem;padding:0.375rem;display:flex;flex-direction:column;
+    background:#121822;border:3px solid #34465E;border-radius:0.875rem;box-shadow:0 10px 28px rgba(0,0,0,.55);
+    transform-origin:top right;transform:scale(.6);opacity:0;visibility:hidden;pointer-events:none;
+    transition:transform calc(var(--tmDur) * .7) ease-in,opacity calc(var(--tmDur) * .7) ease-in,visibility 0s linear calc(var(--tmDur) * .7);}
+  .tmMenu.tmOpen .tmList{transform:none;opacity:1;visibility:visible;pointer-events:auto;
+    transition:transform var(--tmDur) cubic-bezier(.2,.9,.3,1.12),opacity var(--tmDur) ease-out,visibility 0s;}
+  .tmList .ln{display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.75rem 0.625rem;border:0;border-radius:0.625rem;
+    background:none;color:#E7F6FF;font-family:inherit;font-size:0.9375rem;font-weight:700;text-align:left;cursor:pointer;
+    opacity:0;transform:translateY(-8px);transition:opacity calc(var(--tmDur) * .5),transform calc(var(--tmDur) * .5);}
+  .tmList .ln + .ln{border-top:1px solid #1C2532;border-radius:0;}
+  .tmList .ln:active{background:rgba(0,229,255,.12);}
+  .tmMenu.tmOpen .tmList .ln{opacity:1;transform:none;transition:opacity var(--tmDur) ease-out,transform var(--tmDur) cubic-bezier(.2,.9,.3,1);}
+  .tmMenu.tmOpen .tmList .ln:nth-child(1){transition-delay:calc(var(--tmDur) * .15);}
+  .tmMenu.tmOpen .tmList .ln:nth-child(2){transition-delay:calc(var(--tmDur) * .3);}
+  .tmMenu.tmOpen .tmList .ln:nth-child(3){transition-delay:calc(var(--tmDur) * .45);}
+  .tmMenu.tmOpen .tmList .ln:nth-child(4){transition-delay:calc(var(--tmDur) * .6);}
+  .tmList .ln .lc{width:1.25rem;height:1.25rem;margin:0;flex:none;color:#E7F6FF;}
+  .tmList .ln .lc-sun,.tmList .ln .lc-star{color:#FFD43B;}
+  .tmSw{margin-left:auto;width:2.5rem;height:1.4375rem;border-radius:0.75rem;background:#3A4C64;position:relative;flex:none;transition:background .15s;}
+  .tmSw::after{content:"";position:absolute;top:3px;left:3px;width:1.0625rem;height:1.0625rem;border-radius:50%;background:#FFFFFF;transition:left .15s;}
+  .tmSw.on{background:#0B6FB8;}
+  .tmSw.on::after{left:calc(100% - 1.0625rem - 3px);}
+  @media (prefers-reduced-motion: reduce){ .tmList,.tmList .ln,.tmMenu.tmOpen .tmList,.tmMenu.tmOpen .tmList .ln{transition:none !important;} }
+
+  /* ── 버튼 테두리 3px (사용자 : 「지금도 너무 얇다, 3px 까지만」) — 어두운 화면 · 밝은 화면 모두 ── */
+  .back,.ghost,.iconBtn,.cats button,.nresults button,.recentItem .rrow,.floorpick button,.sfbtns button,
+  .trip,.trip.ghost2,.navrow .big#pv,#s1 .qrStart,.binfo,.nsearch input,.sugFloorRow button,#sfav .favItem{border-width:3px;border-style:solid;}
+  /* 어두운 화면 : 회색 테두리가 검은 바탕에 묻히지 않게 한 단계 밝게 */
+  .cats button,.nresults button,.recentItem .rrow,.binfo,.nsearch input,#sfav .favItem{border-color:#34465E;}
+  .floorpick button,.sfbtns button,.trip,.sugFloorRow button{border-color:#3A4C64;}
+
+  /* ── 밝은 화면 (html.lt) : 흰 바탕 · 진한 남색 글자 · 강조는 진한 파랑 #0B6FB8 · 글자 크기는 그대로 ──
+     관리자 화면 · QR 카메라 화면은 어두운 채로 둔다(topmenu.js 가 .dk 를 붙인다). 3D 건물 바탕(하늘색)·사진은 그대로. */
+  html.lt,html.lt body{background:#EEF3F8;color:#0F1B2D;}
+  html.lt .phone{background:#EEF3F8;}
+  html.lt .screen.dk{background:#0B0E13;color:#E7F6FF;}
+  html.lt .topIcons .iconBtn{background:rgba(255,255,255,.94);border-color:#0B6FB8;color:#0B6FB8;box-shadow:0 1px 4px rgba(15,27,45,.12);}
+  html.lt #netBtn .lcNetOn{color:#16A34A;}
+  html.lt .tmBtn{color:#0F1B2D;}
+  html.lt .tmMenu.tmOpen .tmBtn{background:#0B6FB8;color:#FFFFFF;border-color:#0B6FB8;}
+  html.lt .tmList{background:#FFFFFF;border-color:#AEBCCD;box-shadow:0 10px 28px rgba(15,27,45,.18);}
+  html.lt .tmList .ln{color:#0F1B2D;}
+  html.lt .tmList .ln + .ln{border-top-color:#E3E9F0;}
+  html.lt .tmList .ln .lc{color:#0F1B2D;}
+  html.lt .tmList .ln .lc-sun,html.lt .tmList .ln .lc-star{color:#D99A00;}
+  html.lt .tmList .ln:active{background:rgba(11,111,184,.10);}
+  html.lt .tmSw{background:#C5D0DC;}
+  html.lt .tmSw.on{background:#0B6FB8;}
+  html.lt .screen:not(.dk) .back{background:#FFFFFF;border-color:#0B6FB8;color:#0B6FB8;}
+  html.lt .screen:not(.dk) .ghost{background:#FFFFFF;color:#0B6FB8;border-color:#0B6FB8;}
+  html.lt .screen:not(.dk) .ghost.langActive{background:linear-gradient(90deg,#00E5FF,#7B5CFF);color:#05060A;border-color:transparent;}
+  html.lt .screen:not(.dk) .tip,html.lt .screen:not(.dk) .tripst,html.lt .screen:not(.dk) .stepno,
+  html.lt .screen:not(.dk) .sflabel,html.lt .screen:not(.dk) .legend2{color:#44546A;}
+  html.lt .screen:not(.dk) .rfMemo{color:#53647A;}
+  html.lt #t4memo,html.lt #t7memo{color:#44546A;}
+  /* 첫 화면 */
+  html.lt #s1 p,html.lt #s1 .qrHint{color:#44546A;}
+  html.lt #s1 .logo .lc{color:#0891B2;}
+  html.lt #s1 .qrStart{color:#0E8A45;border-color:#0E8A45;background:#FFFFFF;}
+  html.lt #s1 .appHint{color:#A26A00;text-decoration-color:rgba(162,106,0,.45);}
+  /* 무엇을 찾으세요? */
+  html.lt .screen:not(.dk) .cats button{background:#FFFFFF;border-color:#AEBCCD;color:#0F1B2D;box-shadow:0 1px 3px rgba(15,27,45,.06);}
+  html.lt .screen:not(.dk) .cats button small{color:#44546A;}
+  html.lt .cats .lc-door-open{color:#D9700F;} html.lt .cats .lc-toilet{color:#1F78B4;} html.lt .cats .lc-book-open{color:#6B4FC0;}
+  html.lt .cats .lc-siren{color:#D92D2D;} html.lt .cats .lc-wrench{color:#64748B;}
+  /* 검색 */
+  html.lt .nsearch input{background:#FFFFFF;border-color:#AEBCCD;color:#0F1B2D;}
+  html.lt .nsearch input:focus{border-color:#0B6FB8;box-shadow:0 0 0 3px rgba(11,111,184,.15);}
+  html.lt .nsearch input::placeholder{color:#6B7A8E;}
+  html.lt .nresults button{background:#FFFFFF;border-color:#AEBCCD;color:#0F1B2D;}
+  html.lt .nresults button .rc{color:#0B6FB8;}
+  html.lt .nresults .none,html.lt .recentLabel{color:#44546A;}
+  html.lt .recentItem .rrow{background:#FFFFFF;border-color:#AEBCCD;}
+  html.lt .recentItem .rtxt{color:#2A3A4E;}
+  html.lt .recentItem .ric,html.lt .recentItem .rx,html.lt .recentEmpty{color:#6B7A8E;}
+  html.lt .choTip{background:#FFF6D6;border-color:#E6B800;color:#5C4400;}
+  /* 3D 화면 */
+  html.lt #c3d{border-color:#C5D0DC;}
+  html.lt .legend3d{background:rgba(255,255,255,.9);color:#0F1B2D;border-color:#C5D0DC;}
+  html.lt .screen:not(.dk) .trip{background:#FFFFFF;border-color:#A3B3C6;color:#0B6FB8;}
+  html.lt .screen:not(.dk) .trip.ghost2{background:#FFFFFF;border-color:#0B6FB8;color:#0B6FB8;}
+  html.lt .screen:not(.dk) .trip.on{background:linear-gradient(90deg,#00E5FF,#7B5CFF);border-color:#00E5FF;color:#05060A;}
+  html.lt .floorpick button{background:#FFFFFF;border-color:#A3B3C6;color:#44546A;}
+  html.lt .floorpick button.tgt{border-color:#E0115F;color:#0F1B2D;}
+  html.lt .floorpick button.on{background:#0B6FB8;color:#FFFFFF;border-color:#0B6FB8;}
+  html.lt .startfloor{border-top-color:#D3DCE6;}
+  html.lt .sfbtns button{background:#FFFFFF;border-color:#A3B3C6;color:#44546A;}
+  html.lt .sfbtns button.on{background:rgba(11,111,184,.12);color:#0B6FB8;border-color:#0B6FB8;}
+  html.lt .entryChip{background:rgba(14,138,69,.08);border-color:rgba(14,138,69,.45);color:#0E8A45;}
+  /* 층 상세 (지도 바탕은 topmenu.js 가 바꾼다) */
+  html.lt #cfd{background:#DCE4EE;border-color:#C5D0DC;}
+  /* 길안내 · 도착 */
+  html.lt .instr{color:#0F1B2D;}
+  html.lt .arrow{color:#E0115F;text-shadow:none;}
+  html.lt .arrow.done{color:#0E9F4F;text-shadow:none;}
+  html.lt .prog i{background:#D3DCE6;}
+  html.lt .prog i.on{background:#0B6FB8;box-shadow:none;}
+  html.lt #walker .lc{color:#0F1B2D;}
+  html.lt .screen:not(.dk) .photo{background:#FFFFFF;}
+  html.lt .navrow .big#pv{background:#FFFFFF;border-color:#0B6FB8;color:#0B6FB8;}
+  html.lt #s7 p{color:#44546A;}
+  html.lt #s7 #arriveGrad stop:first-child{stop-color:#0891B2;}
+  html.lt #s7 #arriveGrad stop:last-child{stop-color:#0E9F4F;}
+  /* 여기가 맞나요? (건물 · QR) */
+  html.lt .binfo{background:#FFFFFF;border-color:#AEBCCD;box-shadow:0 1px 3px rgba(15,27,45,.06);}
+  html.lt .binfo p{color:#44546A;}
+  html.lt .binfo p span{color:#3B6A9A !important;}
+  html.lt #sqrok .okName{color:#0E8A45;}
+  html.lt #sqrok .okSub{color:#44546A;}
+  html.lt #sqrok .okPhoto{border-color:#C5D0DC;}
+  html.lt #sqrok .okChip{background:rgba(14,138,69,.08);border-color:rgba(14,138,69,.45);color:#0E8A45;}
+  /* 설정 · 이용안내 · 즐겨찾기 */
+  html.lt #sset .row,html.lt #sguide .card{background:#FFFFFF;border-color:#D3DCE6;}
+  html.lt #sset .row b{color:#0F1B2D;}
+  html.lt #sset .offStat{color:#53647A;}
+  html.lt #sguide h4{color:#0B6FB8;}
+  html.lt #sguide p,html.lt #sguide li{color:#2A3A4E;}
+  html.lt #sfav .favItem{background:#FFFFFF;border-color:#AEBCCD;color:#0F1B2D;}
+  html.lt #sfav .favEmpty,html.lt #sfav .favRemove{color:#6B7A8E;}
+  /* 건의함 */
+  html.lt #ssug .card{background:#FFFFFF;border-color:#D3DCE6;}
+  html.lt #ssug .card p{color:#2A3A4E;}
+  html.lt #ssug .card h4{color:#0B6FB8;}
+  html.lt #ssug .shot{background:#F6F9FC;border-color:#AEBCCD;color:#44546A;}
+  html.lt #ssug .shot.has{border-color:#0B6FB8;}
+  html.lt #ssug .shot2{border-color:#8FA9C8;color:#2E5A8A;}
+  html.lt #ssug textarea{background:#FFFFFF;border-color:#AEBCCD;color:#0F1B2D;}
+  html.lt .sugFloorRow{color:#44546A;}
+  html.lt .sugFloorRow button{background:#FFFFFF;color:#2E5A8A;border-color:#A3B3C6;}
+  html.lt .sugFloorRow button.on{background:rgba(14,138,69,.10);color:#0E8A45;border-color:#0E8A45;}
+  html.lt .sugTip{background:#F6F9FC;border-color:#AEBCCD;color:#44546A;}
+  html.lt .sugTip b{color:#2E5A8A;}
+  html.lt #ssug .sugStat,html.lt #ssug .sugSync{filter:brightness(.55) saturate(1.3);}   /* 글자 색을 코드가 정하므로(초록·빨강) 어둡게만 */
+  html.lt #ssug .aiPrep{color:#53647A;}
+  html.lt #ssug .aiCard{background:#F6F9FC;border-color:#D3DCE6;}
+  html.lt #ssug .aiCard .body{color:#2E5A8A;}
+  html.lt #ssug .aiCard .why{color:#53647A;}
+  html.lt .sugQuota{background:rgba(11,111,184,.08);border-color:#0B6FB8;color:#0B6FB8;}
+  html.lt .sugQuota b{color:#0F1B2D;}
+  html.lt .sugQuota.full{background:rgba(211,47,47,.06);border-color:#D32F2F;color:#B42323;}
+  html.lt .sugQuota.full b{color:#7A1414;}
+  html.lt .sugQuota.admin{background:#FFF6D6;border-color:#E6B800;color:#5C4400;}
+  html.lt .sugQuota.admin .inf{color:#A26A00;}
+  html.lt .sugQuotaFull{background:#FFF4E0;border-color:#E69A00;color:#5C3D00;}
+  html.lt .sugQuotaFull .t{color:#B86E00;}
+  html.lt .sugQuotaFull .warn{color:#D32F2F;}
+  html.lt .sugQuotaFull small{color:#6B5A3A;}

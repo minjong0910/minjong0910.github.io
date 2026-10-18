@@ -1,5 +1,14 @@
 "use strict";
 
+/* 밝은 화면 (2026-10-19) — 이 파일이 head 에서 가장 먼저 읽히므로 여기서 붙여야 앱이 켜질 때 어두운 화면이 번쩍이지 않는다.
+   켜고 끄기는 오른쪽 위 ☰ 메뉴(js/app/topmenu.js) */
+try{
+  if(localStorage.getItem('b3nav_theme') === 'light'){
+    document.documentElement.classList.add('lt');
+    var themeMeta = document.querySelector('meta[name="theme-color"]'); if(themeMeta) themeMeta.setAttribute('content', '#EEF3F8');
+  }
+}catch(e){}
+
 /* ══════════ DIAG — 문제 기록 (2026-09-25) ══════════
    특정 기기에서만 나는 문제를 손에 잡히게 하려고 둔다.
    이 파일은 head 에서 가장 먼저 읽히므로, 여기서 잡아야 앱이 켜지는 동안 난 오류까지 걸린다.

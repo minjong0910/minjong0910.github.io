@@ -154,6 +154,7 @@ function bld3DEnter(){
 window.addEventListener('load', function(){ setTimeout(mountBld3D, 2500); });   // v51 : 첫 화면이 자리 잡은 뒤
 
 function go(id){
+  if(typeof TOPMENU!=='undefined') TOPMENU.close();      /* 화면이 바뀌면 오른쪽 위 ☰ 메뉴는 닫는다 */
   if(typeof id==='number') id='s'+id;
   var target=document.getElementById(id);
   SCREENS.forEach(function(sid){
@@ -222,6 +223,8 @@ function findAnother(){ clearSearch(); go('scat'); }
      앱 안에서 한 단계만 뒤로 간 뒤 그 칸을 다시 채운다.
      첫 화면(s1)에서는 다시 채우지 않고 그대로 흘려보내 앱이 종료되게 한다. */
 function appBackStep(){
+  // ⓪ 오른쪽 위 ☰ 메뉴가 펼쳐져 있으면 그것부터 닫는다 (2026-10-19)
+  if(typeof TOPMENU!=='undefined' && TOPMENU.isOpen()){ TOPMENU.close(); return true; }
   // ① 직접 그린 확인창(삭제 확인 등)이 떠 있으면 그것부터 닫는다
   var cf = document.querySelector('.appConfirmOverlay');
   if(cf && cf.parentNode){ cf.parentNode.removeChild(cf); return true; }

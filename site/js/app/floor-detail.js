@@ -14,7 +14,8 @@ function initB(){
   var __isMobB = ('ontouchstart' in window) || navigator.maxTouchPoints>0 || /Mobi|Android|iPhone|iPad/.test(navigator.userAgent);
   rB=new THREE.WebGLRenderer({canvas:cv,antialias:!__isMobB,powerPreference:'high-performance'});
   rB.setPixelRatio(Math.min(devicePixelRatio, __isMobB?1.75:2));
-  sB=new THREE.Scene(); sB.background=new THREE.Color(0x0E1217);
+  sB=new THREE.Scene();
+  sB.background=new THREE.Color(document.documentElement.classList.contains('lt') ? 0xDCE4EE : 0x0E1217);   // 밝은 화면이면 밝은 바탕 (topmenu.js)
   cB=new THREE.PerspectiveCamera(65,1,0.3,150);
   sB.add(new THREE.AmbientLight(0xffffff,0.8));
   var d=new THREE.DirectionalLight(0xffffff,0.7); d.position.set(30,70,40); sB.add(d);

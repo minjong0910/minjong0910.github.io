@@ -66,6 +66,8 @@ var LUCIDE = (function(){
     "chevron-down":[["path",{"d":"m6 9 6 6 6-6"}]],
     "x":[["path",{"d":"M18 6 6 18"}],["path",{"d":"m6 6 12 12"}]],
     "infinity":[["path",{"d":"M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"}]],
+    "menu":[["line",{"x1":"4","x2":"20","y1":"12","y2":"12"}],["line",{"x1":"4","x2":"20","y1":"6","y2":"6"}],["line",{"x1":"4","x2":"20","y1":"18","y2":"18"}]],
+    "sun":[["circle",{"cx":"12","cy":"12","r":"4"}],["path",{"d":"M12 2v2"}],["path",{"d":"M12 20v2"}],["path",{"d":"m4.93 4.93 1.41 1.41"}],["path",{"d":"m17.66 17.66 1.41 1.41"}],["path",{"d":"M2 12h2"}],["path",{"d":"M20 12h2"}],["path",{"d":"m6.34 17.66-1.41 1.41"}],["path",{"d":"m19.07 4.93-1.41 1.41"}]],
     "camera":[["path",{"d":"M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"}],["circle",{"cx":"12","cy":"13","r":"3"}]],
     "plus":[["path",{"d":"M5 12h14"}],["path",{"d":"M12 5v14"}]],
     "circle-check":[["circle",{"cx":"12","cy":"12","r":"10"}],["path",{"d":"m9 12 2 2 4-4"}]],
@@ -103,7 +105,7 @@ var LUCIDE = (function(){
     '🔢':'hash', '↻':'rotate-cw', '↺':'rotate-ccw', '📖':'book-open', '👋':'hand', '🙋':'hand', '🕓':'clock', '🖼️':'image', '🖼':'image',
     '📥':'download', '🆕':'sparkles', 'ⓘ':'info', '⋮':'ellipsis-vertical', '⋯':'ellipsis', '⊕':'circle-plus', '🎉':'party-popper',
     '👣':'footprints', '🗺️':'map', '🗺':'map', '🛗':'arrow-up-down', '📝':'notebook-pen', '📶':'signal', '🏛️':'landmark', '🏛':'landmark',
-    '🟢':'wifi'
+    '🟢':'wifi', '☰':'menu', '☀️':'sun', '☀':'sun'
   };
   /* 화살표는 「버튼·안내 칸의 맨 앞이나 맨 끝」에 붙은 것만 그림으로 — 문장 속 「1층 → 5층」은 글자라서 그대로 (사용자) */
   var ARR = { '→':'chevron-right', '›':'chevron-right', '‹':'chevron-left', '←':'arrow-left', '↑':'arrow-up', '↓':'arrow-down' };

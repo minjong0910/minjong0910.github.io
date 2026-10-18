@@ -352,20 +352,21 @@
   <div class="gbox">
     <div class="gt">① 켜기</div><div class="gs">앱이 시작될 때 · 4개</div>
     <div class="grid">
-      <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">610줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
+      <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">619줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
       <button class="b p" data-id="f_boot"><span class="n">boot.js</span><span class="d">150줄 · 첫 화면 연출</span></button>
       <button class="b p" data-id="f_start"><span class="n">start.js</span><span class="d">32줄 · 글꼴 기다렸다 시작</span></button>
-      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">425줄 · 오프라인 저장소</span></button>
+      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">426줄 · 오프라인 저장소</span></button>
     </div>
   </div>
 
   <div class="gbox">
-    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 4개</div>
+    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 5개</div>
     <div class="grid">
-      <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">369줄 · 화면 전환 go()</span></button>
+      <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">372줄 · 화면 전환 go()</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
-      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">703줄 · 화면 21개</span></button>
+      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">711줄 · 화면 21개</span></button>
       <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">185줄 · 사진 확대</span></button>
+      <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">56줄 · ☰ 메뉴 · 밝은 화면</span></button>
     </div>
   </div>
 
@@ -705,6 +706,14 @@ f_zoom:{t:'zoom.js — 사진 확대',z:'p',zl:'폰 안에서 돈다',
  how:'Pointer Events 로 두 손가락 거리를 재고 CSS transform 으로 사진 요소만 변환합니다.',
  tech:['Pointer Events','CSS transform'],
  src:[['site/js/app/zoom.js','사진 확대 전부']]},
+
+f_topmenu:{t:'topmenu.js — 세 줄(☰) 메뉴 · 밝은 화면',z:'p',zl:'폰 안에서 돈다',
+ kid:'오른쪽 위 <b>세 줄 버튼</b>을 누르면 처음으로 · 즐겨찾기 · 설정 · <b>밝은 화면</b>이 펼쳐져요.',
+ why:'오른쪽 위에 아이콘이 4개나 떠 있어 붐비고 화면 제목이 잘렸습니다. 거기에 밝기 버튼까지 놓으면 더 붐비므로, 인터넷 상태만 밖에 두고 나머지는 메뉴 안으로 넣었습니다.<br>밝은 화면은 <b>햇빛 아래</b>에서 어두운 화면이 잘 안 보인다는 이유로 만들었습니다 — 글자 크기는 그대로, 색만 바꿉니다.',
+ where:['모든 화면 <b>오른쪽 위</b> [인터넷] [☰]','메뉴의 <b>밝은 화면</b> 스위치 — 이 폰에 기억'],
+ how:'메뉴는 0.22초 동안 오른쪽 위 모서리에서 커지며 줄이 차례로 나타납니다(사용자가 움직이는 견본으로 속도를 고름). 밝은 화면은 <code>&lt;html class="lt"&gt;</code> 하나로 app.css 의 「밝은 화면」 묶음이 켜지고, 앱이 켜질 때 깜빡이지 않게 head 의 pwa.js 가 먼저 붙입니다. 관리자·QR 카메라 화면은 어두운 채로 둡니다.',
+ tech:['CSS transition','localStorage','CSS 변수 --tmDur'],
+ src:[['site/js/app/topmenu.js','메뉴 · 밝은 화면'],['site/css/app.css','「밝은 화면」 묶음 · 테두리 3px']]},
 
 f_photos:{t:'photos.js — 장소 사진 — 파일 169개',z:'p',zl:'폰 안에서 돈다',
  kid:'각 방이 <b>실제로 어떻게 생겼는지</b> 사진으로 보여 줘요.',

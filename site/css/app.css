@@ -1115,6 +1115,11 @@
   .sugQuota b{color:#E7F6FF;font-size:0.9375rem;}
   .sugQuota.full{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.5);color:#FFB4B4;}
   .sugQuota.full b{color:#FFE1E1;}
+  /* 관리자 : 금색 「관리자」 딱지 + 숫자 대신 무한(∞) — 2026-10-19 사용자가 사진 ③ 을 고름 */
+  .sugQuota.admin{background:rgba(255,212,59,.10);border-color:rgba(255,212,59,.6);color:#FFE9A3;}
+  .sugQuota .adm{background:#FFD43B;color:#1A1500;font-size:0.7188rem;padding:0.125rem 0.5rem;border-radius:2rem;margin-right:0.125rem;}
+  .sugQuota .inf{display:inline-flex;color:#FFD43B;}
+  .sugQuota .inf .lc{width:1.75em;height:1.75em;margin:-0.25rem 0;stroke-width:2.4;vertical-align:middle;}
   .sugQuotaFull{display:none;margin-top:0.625rem;padding:0.75rem 0.875rem;border-radius:0.75rem;background:rgba(255,179,60,.10);
     border:1px solid #FFB33C;color:#FFE1B0;font-size:0.875rem;line-height:1.55;word-break:keep-all;}
   .sugQuotaFull.on{display:block;}

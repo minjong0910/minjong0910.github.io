@@ -15,7 +15,7 @@ var SUGDB = (function(){
   var MAX_BYTES = 900000;            // Firestore 문서 1MB 한도 안에서 사진 크기 상한
 
   var app = null, db = null, auth = null;
-  var loading = null, failed = false, unsub = null, curUser = null;
+  var loading = null, failed = false, unsub = null, curUser = null, authKnown = false;
   var pushing = false;
 
   function online(){ return location.protocol === 'http:' || location.protocol === 'https:'; }
@@ -51,7 +51,7 @@ var SUGDB = (function(){
             /* v84 : 로그인돼 있어도 admins 명단에 없으면 관리자로 보지 않고 로그아웃시킨다
                2026-10-18 : 익명 로그인(건의함 하루 3번 세기용)은 관리자가 아닐 뿐 그대로 둔다 */
             (u && !u.isAnonymous ? isAdminUid(u.uid) : Promise.resolve(false)).then(function(ok){
-              curUser = ok ? u : null;
+              curUser = ok ? u : null; authKnown = true;
               if(u && !ok && !u.isAnonymous) auth.signOut();
               uiAuth();
               if(!done){ done = true; res(true); }
@@ -397,6 +397,10 @@ var SUGDB = (function(){
 
   function uiAuth(){
     var b = $('sugLogoutBtn'); if(b) b.style.display = curUser ? '' : 'none';
+    /* 2026-10-19 : 관리자인지 알게 되면 건의함 횟수 칸을 다시 그린다(관리자 = 금색 「관리자」 + ∞).
+       다음에 앱을 열었을 때 확인 전에도 맞게 그리도록 이 폰에 적어 둔다 */
+    try{ if(curUser) localStorage.setItem('b3nav_admin', '1'); else localStorage.removeItem('b3nav_admin'); }catch(e){}
+    if(typeof sugQuotaRender === 'function') sugQuotaRender();
   }
   function dbState(state, txt){
     var el = $('sugDbState'), t = $('sugDbStateTxt');
@@ -417,7 +421,7 @@ var SUGDB = (function(){
            publishPhoto:publishPhoto, loadPhotos:loadPhotos,
            get lastPubErr(){ return lastPubErr; },                   /* v71 */
            unpublishPhoto:unpublishPhoto, hidePhoto:hidePhoto, unhidePhoto:unhidePhoto,
-           login:login, logout:logout, user:user, fit:fit, CFG:CFG,
+           login:login, logout:logout, user:user, authKnown:function(){ return authKnown; }, fit:fit, CFG:CFG,
            saveRoom:saveRoom, roomsRest:roomsRest, roomsSdk:roomsSdk };
 })();
 

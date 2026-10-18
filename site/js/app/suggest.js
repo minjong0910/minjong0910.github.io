@@ -122,7 +122,14 @@ function sugDay(t){                                    // '2026-10-18' — 서�
   var d = new Date((t || Date.now()) + 9 * 3600000);
   return d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate();
 }
-function sugQuotaAdmin(){ return typeof SUGDB !== 'undefined' && SUGDB.user && !!SUGDB.user(); }
+/* 관리자인가 — 서버 로그인 확인은 몇 초 걸리므로, 확인 전에는 이 폰이 지난번에 관리자였는지(b3nav_admin)로 먼저 그린다
+   (예전엔 확인 전에 「3 / 3」을 그려 놓고 다시 안 그려서, 관리자 폰에서 올려도 숫자가 그대로였다 — 2026-10-19 사용자) */
+function sugQuotaAdmin(){
+  if(typeof SUGDB === 'undefined' || !SUGDB.user) return false;
+  if(SUGDB.user()) return true;
+  if(SUGDB.authKnown && SUGDB.authKnown()) return false;
+  try{ return localStorage.getItem('b3nav_admin') === '1'; }catch(e){ return false; }
+}
 function sugQuotaUsed(){
   var o = sugQuotaMem;
   try{ o = JSON.parse(localStorage.getItem(SUG_QKEY) || 'null') || o; }catch(e){}
@@ -155,10 +162,17 @@ function sugQuotaRender(){
     btn.parentNode.insertBefore(box, btn.nextSibling);
   }
   var admin = sugQuotaAdmin(), left = sugQuotaLeft(), full = !admin && left <= 0;
-  pill.style.display = admin ? 'none' : '';
   pill.classList.toggle('full', full);
-  pill.setAttribute('data-ko', '📮 오늘 올릴 수 있는 횟수 <b>' + left + ' / ' + SUG_DAY_MAX + '</b>');
-  pill.setAttribute('data-en', '📮 Uploads left today <b>' + left + ' / ' + SUG_DAY_MAX + '</b>');
+  pill.classList.toggle('admin', admin);
+  if(admin){
+    /* 관리자는 횟수 제한이 없다 — 금색 「관리자」 딱지 + 숫자 대신 무한(∞) 그림 (2026-10-19 사용자가 사진 ③ 을 고름) */
+    var inf = '<b class="inf">' + ((typeof LUCIDE !== 'undefined') ? LUCIDE.svg('infinity') : '∞') + '</b>';
+    pill.setAttribute('data-ko', '<b class="adm">관리자</b> 오늘 올릴 수 있는 횟수 ' + inf);
+    pill.setAttribute('data-en', '<b class="adm">Admin</b> Uploads left today ' + inf);
+  } else {
+    pill.setAttribute('data-ko', '📮 오늘 올릴 수 있는 횟수 <b>' + left + ' / ' + SUG_DAY_MAX + '</b>');
+    pill.setAttribute('data-en', '📮 Uploads left today <b>' + left + ' / ' + SUG_DAY_MAX + '</b>');
+  }
   pill.innerHTML = pill.getAttribute(LANG === 'ko' ? 'data-ko' : 'data-en');
   box.classList.toggle('on', full);
   if(!box.innerHTML) box.innerHTML = box.getAttribute(LANG === 'ko' ? 'data-ko' : 'data-en');

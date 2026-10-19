@@ -355,18 +355,19 @@
       <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">619줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
       <button class="b p" data-id="f_boot"><span class="n">boot.js</span><span class="d">150줄 · 첫 화면 연출</span></button>
       <button class="b p" data-id="f_start"><span class="n">start.js</span><span class="d">32줄 · 글꼴 기다렸다 시작</span></button>
-      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">426줄 · 오프라인 저장소</span></button>
+      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">427줄 · 오프라인 저장소</span></button>
     </div>
   </div>
 
   <div class="gbox">
-    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 5개</div>
+    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 6개</div>
     <div class="grid">
-      <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">372줄 · 화면 전환 go()</span></button>
+      <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">374줄 · 화면 전환 go()</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
-      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">713줄 · 화면 21개</span></button>
+      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">714줄 · 화면 21개</span></button>
       <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">185줄 · 사진 확대</span></button>
       <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">56줄 · ☰ 메뉴 · 밝은 화면</span></button>
+      <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">135줄 · 길안내 이어 하기</span></button>
     </div>
   </div>
 
@@ -383,7 +384,7 @@
   <div class="gbox">
     <div class="gt">④ 길안내와 사진</div><div class="gs">실제로 길을 알려 주는 부분 · 4개</div>
     <div class="grid">
-      <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">637줄 · 안내 단계 만들기</span></button>
+      <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">638줄 · 안내 단계 만들기</span></button>
       <button class="b p" data-id="f_photos"><span class="n">photos.js</span><span class="d">1,065줄 · 사진 목록 · 사진 상자</span></button>
       <button class="b p" data-id="qr"><span class="n">qrnav.js</span><span class="d">434줄 · 출입문 QR</span></button>
       <button class="b p" data-id="f_roomfix"><span class="n">roomfix.js</span><span class="d">398줄 · 구성 및 변경 · 메모</span></button>
@@ -714,6 +715,14 @@ f_topmenu:{t:'topmenu.js — 세 줄(☰) 메뉴 · 밝은 화면',z:'p',zl:'폰
  how:'메뉴는 0.22초 동안 오른쪽 위 모서리에서 커지며 줄이 차례로 나타납니다(사용자가 움직이는 견본으로 속도를 고름). 밝은 화면은 <code>&lt;html class="lt"&gt;</code> 하나로 app.css 의 「밝은 화면」 묶음이 켜지고, 앱이 켜질 때 깜빡이지 않게 head 의 pwa.js 가 먼저 붙입니다. 관리자·QR 카메라 화면은 어두운 채로 둡니다.',
  tech:['CSS transition','localStorage','CSS 변수 --tmDur'],
  src:[['site/js/app/topmenu.js','메뉴 · 밝은 화면'],['site/css/app.css','「밝은 화면」 묶음 · 테두리 3px']]},
+
+f_resume:{t:'resume.js — 길안내 이어 하기',z:'p',zl:'폰 안에서 돈다',
+ kid:'길안내 중에 앱이 꺼졌다 켜지면 「아까 보던 길안내가 있어요」 하고 그 단계부터 다시 보여 줘요.',
+ why:'길안내 중에 카카오톡을 보러 나갔다 오면, 폰이 앱을 새로 읽어 첫 화면으로 돌아갈 때가 있습니다. 처음부터 다시 찾게 하면 길 위에서 헤매게 됩니다.',
+ where:['길안내 단계를 넘길 때마다 <b>이 폰에만</b> 적어 둠(서버로 보내지 않음)','다시 열면 첫 화면 아래 <b>카드</b> — [이어서 보기] [괜찮아요, 새로 찾을게요]'],
+ how:'순서는 초록 켜는 화면 → (시험 페이지) 쉬운 사용모드 「처음이세요?」 → 이 카드. 30분이 지났거나, 다 왔거나, 출입문 QR 로 새로 들어왔으면 묻지 않습니다. 첫 화면·찾기·검색·도착 화면으로 가면 기억을 지웁니다.',
+ tech:['localStorage','길안내 다시 만들기(startGuide)'],
+ src:[['site/js/app/resume.js','기억 · 묻기 · 이어 보기'],['site/js/app/guide.js','단계마다 적어 두기(render6)']]},
 
 f_photos:{t:'photos.js — 장소 사진 — 파일 169개',z:'p',zl:'폰 안에서 돈다',
  kid:'각 방이 <b>실제로 어떻게 생겼는지</b> 사진으로 보여 줘요.',

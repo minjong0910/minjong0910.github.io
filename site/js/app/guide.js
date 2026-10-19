@@ -603,6 +603,7 @@ function render6(instant){
     ? ((LANG==='ko')?'‹ 층 상세':'‹ Floor view')
     : ((LANG==='ko')?'‹ 이전':'‹ Prev');
   if(s.type==='arrive') spawnParticles('stepFx');   // 마지막(도착) 단계 파티클 효과
+  if(typeof RESUME!=='undefined') RESUME.save();    // 길안내 이어 하기 — 지금 단계를 이 폰에 적어 둔다 (resume.js)
 }
 function prev(){
   if(si>0){ si--; render6(); }

@@ -1348,3 +1348,29 @@
   html.lt .sugQuotaFull .t{color:#B86E00;}
   html.lt .sugQuotaFull .warn{color:#D32F2F;}
   html.lt .sugQuotaFull small{color:#6B5A3A;}
+
+  /* ══ 2026-10-19 : 길안내 이어 하기 (js/app/resume.js) — 첫 화면 아래 카드 · 이어서 볼 때 위에 잠깐 뜨는 안내 ══ */
+  .rsCard{position:absolute;left:0.75rem;right:0.75rem;bottom:calc(0.75rem + env(safe-area-inset-bottom));z-index:70;
+    background:#121822;border:3px solid #1FA9C9;border-radius:1.125rem;padding:0.875rem 0.875rem 0.75rem;
+    box-shadow:0 -0.5rem 2rem rgba(0,0,0,.55);color:#E7F6FF;animation:rsUp .28s cubic-bezier(.2,.9,.3,1.05);}
+  @keyframes rsUp{ from{transform:translateY(1.5rem);opacity:0;} to{transform:none;opacity:1;} }
+  .rsHead{display:flex;align-items:center;gap:0.5rem;font-weight:800;font-size:1rem;color:#9FEFFF;}
+  .rsHead .lc{width:1.3rem;height:1.3rem;margin:0;}
+  .rsBody{display:flex;gap:0.75rem;align-items:center;margin:0.625rem 0 0.75rem;padding:0.5rem;border-radius:0.75rem;background:rgba(0,229,255,.06);}
+  .rsBody img{width:4.25rem;height:4.25rem;object-fit:cover;border-radius:0.5rem;border:2px solid #FF2E88;flex:none;}
+  .rsBody b{display:block;font-size:1.0625rem;line-height:1.35;word-break:keep-all;}
+  .rsBody small{display:block;font-size:0.8125rem;color:#9FB2C8;margin-top:0.1875rem;line-height:1.4;word-break:keep-all;}
+  .rsBody .pg{display:inline-block;margin-top:0.3125rem;padding:0.125rem 0.5rem;border-radius:1rem;background:#00E5FF;color:#04121A;font-size:0.75rem;font-weight:800;}
+  .rsCard .big{margin:0;padding:0.875rem;font-size:1rem;}
+  .rsCard .big + .big{margin-top:0.5rem;}
+  .rsToast{position:absolute;left:50%;top:calc(4.25rem + env(safe-area-inset-top));transform:translateX(-50%);z-index:70;white-space:nowrap;
+    background:#0E3B2A;border:2px solid #39FF88;color:#BFF5D3;font-weight:800;font-size:0.875rem;padding:0.5rem 0.875rem;border-radius:2rem;
+    box-shadow:0 0.375rem 1.25rem rgba(0,0,0,.45);transition:opacity .4s;pointer-events:none;}
+  .rsToast.out{opacity:0;}
+  html.lt .rsCard{background:#FFFFFF;border-color:#2B88C8;color:#0F1B2D;box-shadow:0 -0.5rem 2rem rgba(15,27,45,.22);}
+  html.lt .rsHead{color:#0B6FB8;}
+  html.lt .rsBody{background:rgba(11,111,184,.07);}
+  html.lt .rsBody small{color:#44546A;}
+  html.lt .rsBody .pg{background:#0B6FB8;color:#FFFFFF;}
+  html.lt .rsCard .ghost{background:#FFFFFF;color:#0B6FB8;border-color:#0B6FB8;}
+  html.lt .rsToast{background:#E6F6EC;border-color:#0E8A45;color:#0E5A2E;}

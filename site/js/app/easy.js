@@ -186,7 +186,7 @@ var EASY = (function(){
   function update(){
     if(!on){ hide(); return; }
     if(!layer && !build()) return;
-    if($('.ezAsk')){ hide(); return; }                       // 「처음이세요?」를 묻는 동안은 쉰다
+    if($('.ezAsk') || $('.rsCard')){ hide(); return; }      // 「처음이세요?」 · 「아까 보던 길안내」를 묻는 동안은 쉰다
     var scr = $('.screen.on'); var fn = scr && HINTS[scr.id];
     if(!fn || document.querySelector('.fx-overlay')){ hide(); return; }   // 설정·즐겨찾기 같은 화면, 부팅 연출 중
     var h = fn(); var el = shown(h.el);
@@ -266,16 +266,17 @@ var EASY = (function(){
     phone.appendChild(a);
   }
   /* 켜는 화면이 사라지면 곧바로 — 묻기(처음인 사람) · 말풍선 시작(이미 켜 둔 사람) */
+  var askFired = false;   // 켜는 화면이 끝나 「처음이세요?」 차례가 지났는가 — resume.js 가 그다음에 묻는다(EASY.busy)
   function whenReady(){
-    var t0 = Date.now(), sawBoot = false, fired = false;
+    var t0 = Date.now(), sawBoot = false;
     function fire(){
-      if(fired) return; fired = true;
+      if(askFired) return; askFired = true;
       if(!phone) build();
       syncButtons();
       if(!on) ask(); else loop();                                 // 이미 켜 둔 사람에게는 묻지 않는다
     }
     (function wait(){
-      if(fired) return;
+      if(askFired) return;
       var boot = $('.fx-boot');
       if(boot){ sawBoot = true; }
       else if(sawBoot){ fire(); return; }                         // 켜는 화면이 막 사라졌다 (끝났거나 건너뜀)
@@ -292,5 +293,7 @@ var EASY = (function(){
 
   /* ask : 「처음이세요?」를 다시 띄운다 (설정의 '처음 안내 다시 보기' 등에 쓸 수 있다) */
   function askAgain(){ try{ localStorage.removeItem(KEY_ASK); }catch(e){} if(!phone) build(); ask(); }
-  return { set:set, toggle:toggle, isOn:function(){ return on; }, update:update, ask:askAgain, HINTS:HINTS };
+  /* busy : 아직 「처음이세요?」 차례이거나 묻는 중 — 길안내 이어 하기 카드(resume.js)는 이게 끝난 뒤에 뜬다 */
+  function busy(){ return !askFired || !!$('.ezAsk'); }
+  return { set:set, toggle:toggle, isOn:function(){ return on; }, update:update, ask:askAgain, busy:busy, HINTS:HINTS };
 })();

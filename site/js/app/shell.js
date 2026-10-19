@@ -155,6 +155,7 @@ window.addEventListener('load', function(){ setTimeout(mountBld3D, 2500); });   
 
 function go(id){
   if(typeof TOPMENU!=='undefined') TOPMENU.close();      /* 화면이 바뀌면 오른쪽 위 ☰ 메뉴는 닫는다 */
+  if(typeof RESUME!=='undefined') RESUME.onScreen(typeof id==='number' ? 's'+id : id);   /* 길안내 이어 하기 — 새로 시작했거나 다 왔으면 지운다 */
   if(typeof id==='number') id='s'+id;
   var target=document.getElementById(id);
   SCREENS.forEach(function(sid){
@@ -225,6 +226,7 @@ function findAnother(){ clearSearch(); go('scat'); }
 function appBackStep(){
   // ⓪ 오른쪽 위 ☰ 메뉴가 펼쳐져 있으면 그것부터 닫는다 (2026-10-19)
   if(typeof TOPMENU!=='undefined' && TOPMENU.isOpen()){ TOPMENU.close(); return true; }
+  if(typeof RESUME!=='undefined' && RESUME.isAsking()){ RESUME.dismiss(); return true; }   // 「아까 보던 길안내」 카드
   // ① 직접 그린 확인창(삭제 확인 등)이 떠 있으면 그것부터 닫는다
   var cf = document.querySelector('.appConfirmOverlay');
   if(cf && cf.parentNode){ cf.parentNode.removeChild(cf); return true; }

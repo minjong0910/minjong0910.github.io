@@ -245,10 +245,11 @@ var EASY = (function(){
   }
   function toggle(){ set(!on); }
 
-  /* ── 처음 한 번 묻기 ── QR 로 들어오든 그냥 열든, **앱이 켜지자마자** 묻는다.
-     예전에는 켜는 화면(검은 글자 화면 · boot.js)이 다 끝난 뒤에 물어서 폰에서는 몇 초 늦게 떴다(사용자 지적).
-     → 이 파일이 읽히는 순간(화면 틀은 이미 다 있다) 켜는 화면 위에 바로 띄우고,
-       답을 고르면 켜는 화면도 바로 걷어 앱으로 들어간다. */
+  /* ── 처음 한 번 묻기 ── 순서 : 앱을 켠다 → 초록 글자 켜는 화면(boot.js) → 「처음이세요?」 → 앱 첫 화면 (2026-10-19 사용자).
+     켜는 화면이 저절로 끝나든 「탭하여 건너뛰기」로 넘기든, 그 화면이 사라지는 순간 바로 묻는다.
+     켜는 화면이 아예 없으면(새 판으로 조용히 바꿔 단 직후 — b3nav_quiet) 앱이 뜨자마자 묻는다.
+     (10-18 에는 「너무 늦게 뜬다」고 해서 켜는 화면보다 먼저 띄웠는데, 켜는 화면 앞에 뜨는 것도 어색하다 —
+      예전에 늦었던 건 켜는 화면이 끝난 뒤에도 3D 준비(appBooted)와 0.45초를 더 기다렸기 때문이라, 이제는 기다리지 않는다) */
   function ask(){
     if(lsGet(KEY_ASK) === '1' || !phone || $('.ezAsk')) return;   // 이미 떠 있으면 또 띄우지 않는다
     var a = document.createElement('div'); a.className = 'ezAsk';
@@ -261,20 +262,27 @@ var EASY = (function(){
     a.addEventListener('click', function(e){
       var b = e.target.closest('button[data-a]'); if(!b) return;
       a.remove(); set(b.getAttribute('data-a') === '1');
-      var boot = $('.fx-boot'); if(boot) boot.click();                // 켜는 화면이 떠 있으면 건너뛴다 (boot.js 의 탭하여 건너뛰기)
-      else if(document.readyState === 'loading'){                    // 아직 안 떴으면(boot.js 를 아직 안 읽음) 아예 안 띄운다
-        try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(err){}  //  — boot.js 가 이 표시를 보고 켜는 화면을 건너뛴다
-      }
     });
     phone.appendChild(a);
   }
-  if(!on){ if(build()) ask(); }                                  // 지금 바로 — 켜는 화면을 기다리지 않는다
+  /* 켜는 화면이 사라지면 곧바로 — 묻기(처음인 사람) · 말풍선 시작(이미 켜 둔 사람) */
   function whenReady(){
-    var t0 = Date.now();
+    var t0 = Date.now(), sawBoot = false, fired = false;
+    function fire(){
+      if(fired) return; fired = true;
+      if(!phone) build();
+      syncButtons();
+      if(!on) ask(); else loop();                                 // 이미 켜 둔 사람에게는 묻지 않는다
+    }
     (function wait(){
-      var ready = (typeof appBooted !== 'undefined' && appBooted) && !document.querySelector('.fx-overlay') && $('.screen.on');
-      if(ready){ setTimeout(function(){ if(!phone) build(); if(!on) ask(); syncButtons(); if(on) loop(); }, 450); return; }   // 이미 켜 둔 사람에게는 묻지 않는다
-      if(Date.now() - t0 < 180000) setTimeout(wait, 250);       // 부팅 연출을 오래 보고 있어도 놓치지 않게 (3분까지)
+      if(fired) return;
+      var boot = $('.fx-boot');
+      if(boot){ sawBoot = true; }
+      else if(sawBoot){ fire(); return; }                         // 켜는 화면이 막 사라졌다 (끝났거나 건너뜀)
+      else if(document.readyState !== 'loading'){                 // boot.js 까지 다 읽었는데 켜는 화면이 없다 = 건너뛴 판
+        if($('.screen.on')){ fire(); return; }
+      }
+      if(Date.now() - t0 < 180000) setTimeout(wait, 50);         // 켜는 화면을 오래 보고 있어도 놓치지 않게 (3분까지)
     })();
   }
   whenReady();

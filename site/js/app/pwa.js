@@ -626,7 +626,7 @@ var PWA = (function(){
   document.addEventListener('DOMContentLoaded', function(){ sync(); netSync(); });
 
   return {
-    install:install, doPrompt:doPrompt, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, sync:sync,
+    install:install, doPrompt:doPrompt, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, cameFromGate:function(){ return !!(gateFromUrl || gateTaken); }, sync:sync,
     netInfo:netInfo, netSync:netSync, netOn:netOn,
     get offline(){ return {state:off.state, done:off.done, total:off.total, bytes:off.bytes, version:off.version, text:offText()}; },
     /* 저장해 둔 것이 지켜지는가 — 설정 화면과 검사(tests/pwa.html)가 본다 */

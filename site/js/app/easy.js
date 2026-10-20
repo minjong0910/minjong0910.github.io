@@ -23,6 +23,13 @@ var EASY = (function(){
   if(/[?&]easy=1(&|$)/.test(qs)){ on = true;  lsSet(KEY_ON, '1'); lsSet(KEY_ASK, '1'); }
   if(/[?&]easy=0(&|$)/.test(qs)){ on = false; lsSet(KEY_ON, '0'); lsSet(KEY_ASK, '1'); }
   if(/[?&]easyask=1(&|$)/.test(qs)){ try{ localStorage.removeItem(KEY_ASK); }catch(e){} }
+  /* 2026-10-20 사용자 순서 (정문 · 후문 · 동문 · 서문 모두 — NFC 도 같은 주소라 같다) :
+       출입문 QR 을 찍는다 → 초록 켜는 화면 → 쉬운 사용모드(「처음이세요?」 켜기/끄기) → 「여기가 맞나요?」
+     시험판 QR(?easyask=1)처럼, 예전에 답한 폰이라도 출입문 QR 로 들어오면 **매번** 묻는다.
+     이미 켜 둔 사람은 묻지 않고 켜진 채로 「여기가 맞나요?」부터 안내한다. ?gate= 는 pwa.js 가 먼저 떼어 두므로 PWA 에 묻는다. */
+  var forceAsk = false;
+  try{ forceAsk = !!(typeof PWA !== 'undefined' && PWA.cameFromGate && PWA.cameFromGate()) && !/[?&]easy=[01](&|$)/.test(qs); }catch(e){}
+  function asked(){ return !forceAsk && lsGet(KEY_ASK) === '1'; }
 
   function ko(){ return typeof LANG === 'undefined' || LANG !== 'en'; }
   function T(k, e){ return ko() ? k : e; }
@@ -241,7 +248,7 @@ var EASY = (function(){
     document.querySelectorAll('.ezToggle').forEach(function(b){ b.classList.toggle('isOn', on); });
   }
   function set(v){
-    on = !!v; lsSet(KEY_ON, on ? '1' : '0'); lsSet(KEY_ASK, '1');
+    on = !!v; lsSet(KEY_ON, on ? '1' : '0'); lsSet(KEY_ASK, '1'); forceAsk = false;   // 이번 QR 에서는 답했다
     syncButtons(); lastKey = ''; fSig = '';
     if(on) loop(); else stop();
   }
@@ -253,7 +260,7 @@ var EASY = (function(){
      (10-18 에는 「너무 늦게 뜬다」고 해서 켜는 화면보다 먼저 띄웠는데, 켜는 화면 앞에 뜨는 것도 어색하다 —
       예전에 늦었던 건 켜는 화면이 끝난 뒤에도 3D 준비(appBooted)와 0.45초를 더 기다렸기 때문이라, 이제는 기다리지 않는다) */
   function ask(){
-    if(lsGet(KEY_ASK) === '1' || !phone || $('.ezAsk')) return;   // 이미 떠 있으면 또 띄우지 않는다
+    if(asked() || !phone || $('.ezAsk')) return;   // 이미 떠 있으면 또 띄우지 않는다
     var a = document.createElement('div'); a.className = 'ezAsk';
     a.innerHTML = '<div class="card"><div class="ic">👆</div>'
       + '<b>' + T('처음이세요?', 'First time here?') + '</b>'
@@ -274,7 +281,7 @@ var EASY = (function(){
      물을 게 없으면(이미 답함 · 켜 둠) false — boot.js 가 바로 걷는다. */
   var afterAsk = null;
   function askFirst(cb){
-    if(askFired || on || lsGet(KEY_ASK) === '1') return false;
+    if(askFired || on || asked()) return false;
     if(!phone) build();
     syncButtons();
     ask();

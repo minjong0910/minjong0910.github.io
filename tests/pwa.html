@@ -21,6 +21,7 @@
      gate     출입문 QR 주소(?gate=)로 열면 "○문에 계신가요?" 확인 화면 → 확정하면 그 문에서 출발
               — 새 판으로 갈아타며 새로 고쳐도(applyUpdate) 넘겨받은 문으로 확인 화면이 다시 뜨는가 (2026-10-20)
      order    처음 여는 폰이 출입문 QR 로 열면 : 초록 켜는 화면 → 「처음이세요?」(초록 화면 위) → 답하면 → 「여기가 맞나요?」
+              전에 「아니요」 한 폰도 정문·후문·동문·서문 모두 QR 이면 매번 묻는다(「네」면 말풍선) · 켜 둔 폰은 묻지 않고 켜진 채
               QR 로 들어오자마자 새 판으로 갈아타도 초록 화면부터 · 그냥 조용히 갈아탈 때는 초록 화면 없이 (2026-10-20 사용자 순서)
      hint     첫 화면 "지금 계신 위치가 자동으로 설정돼요." 바로 아래에 눈에 띄는 색의 "앱을 다운로드 하시려면 설정에 들어가주세요"
               — 누르면 설정이 열린다. 앱이 먼저 설치를 조르지 않는다 (브라우저 설치 알림도 막는다)
@@ -78,41 +79,70 @@ function loadWatch(q, keepAsk){
   })();
   return loadApp(q, keepAsk).then(function(w){ stop = true; return {w:w, seen:seen}; });
 }
+/* 문 하나를 QR 로 열고 사용자 순서를 본다 : 초록 켜는 화면 → 쉬운 사용모드 「처음이세요?」(초록 위) → 답 → 「여기가 맞나요? ○문」 */
+function gateFlow(key, name, yes, who){
+  return loadWatch('?gate=' + key, true).then(function(r){
+    var w = r.w, d = w.document;
+    check('order', r.seen.boot, who + name + ' QR 인데 초록 켜는 화면이 안 보였음');
+    check('order', !r.seen.appFirst, who + name + ' QR — 초록 켜는 화면보다 앱 화면이 먼저 보였음');
+    return waitFor(function(){ return !!d.querySelector('.ezAsk'); }, 60000, who + name + ' QR 인데 쉬운 사용모드(「처음이세요?」)가 안 뜸').then(function(){
+      check('order', !!d.querySelector('.fx-boot'), who + name + ' — 「처음이세요?」가 초록 켜는 화면이 걷힌 뒤에 떴음');
+      d.querySelector('.ezAsk button[data-a="' + (yes ? 1 : 0) + '"]').click();
+      return waitFor(function(){ return !d.querySelector('.fx-boot'); }, 30000, who + name + ' — 답했는데 초록 켜는 화면이 안 걷힘');
+    }).then(function(){
+      return waitFor(function(){ return booted(w) && screenOf(w) === 'sqrok'; }, 30000, who + name + ' — 답한 뒤 「여기가 맞나요?」가 안 뜸 : ' + screenOf(w));
+    }).then(function(){
+      check('order', txt(w, 'qrOkName') === name, who + '「여기가 맞나요?」의 문이 ' + name + ' 이 아님 : ' + txt(w, 'qrOkName'));
+      if(yes) return waitFor(function(){ return w.EASY.isOn() && !!d.querySelector('.ezLayer.on .ezBubble'); }, 15000, who + name + ' — 「네」를 눌렀는데 쉬운 사용모드 안내(말풍선)가 안 나옴');
+    }).then(function(){ return w; });
+  });
+}
 function testOrder(){
   step = 'order';
   try{ localStorage.removeItem('b3nav_easy_asked2'); localStorage.removeItem('b3nav_easy'); sessionStorage.clear(); }catch(e){}
-  return loadWatch('?gate=EAST', true).then(function(r){
-    var w = r.w, d = w.document;
-    check('order', r.seen.boot, '처음 여는 폰인데 초록 켜는 화면이 안 보였음');
-    check('order', !r.seen.appFirst, '초록 켜는 화면보다 앱 화면이 먼저 보였음 — 사용자 순서는 초록 화면이 먼저');
-    return waitFor(function(){ return !!d.querySelector('.ezAsk'); }, 60000, '처음 여는 폰인데 「처음이세요?」가 안 뜸').then(function(){
-      check('order', !!d.querySelector('.fx-boot'), '「처음이세요?」가 초록 켜는 화면이 걷힌 뒤에 떴음 — 초록 화면 위에서 먼저 물어야 한다');
-      d.querySelector('.ezAsk button[data-a="0"]').click();
-      return waitFor(function(){ return !d.querySelector('.fx-boot'); }, 30000, '답했는데 초록 켜는 화면이 안 걷힘');
-    }).then(function(){
-      return waitFor(function(){ return booted(w) && screenOf(w) === 'sqrok'; }, 30000, '답한 뒤 「여기가 맞나요?」가 안 뜸 : ' + screenOf(w));
-    }).then(function(){
-      check('order', txt(w, 'qrOkName') === '동문', '답한 뒤 「여기가 맞나요?」의 문이 동문이 아님 : ' + txt(w, 'qrOkName'));
-      check('order', w.localStorage.getItem('b3nav_easy_asked2') === '1', '「처음이세요?」 답이 기억되지 않음 — 또 묻는다');
-      /* QR 로 들어오자마자 새 판으로 갈아탄 경우(조용히 + 문을 넘겨받음) — 사용자에게는 앱을 켠 것이므로 초록 화면부터 */
-      try{ sessionStorage.setItem('b3nav_quiet', '1'); sessionStorage.setItem('b3nav_gate_carry', 'BACK'); }catch(e){}
-      return loadWatch('');
-    }).then(function(r2){
-      var w2 = r2.w;
-      check('order', r2.seen.boot, 'QR 로 들어오자마자 새 판으로 갈아탔는데 초록 켜는 화면이 안 보였음');
-      return waitFor(function(){ return booted(w2) && screenOf(w2) === 'sqrok'; }, 30000, '갈아탄 뒤 「여기가 맞나요?」가 안 뜸').then(function(){
-        check('order', txt(w2, 'qrOkName') === '후문', '갈아탄 뒤 넘겨받은 문이 후문이 아님 : ' + txt(w2, 'qrOkName'));
-        w2.QRNAV.clear();
-        return waitFor(function(){ return !w2.document.querySelector('.fx-boot'); }, 30000, '켜는 화면이 안 끝남');
-      }).then(function(){
-        /* 그냥 조용히 갈아탈 때(첫 화면에서 새 판이 옴) — 켜는 화면이 두 번 나오지 않게 건너뛴다 */
-        try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(e){}
-        return loadWatch('');
+  /* ① 처음 여는 폰 */
+  return gateFlow('EAST', '동문', false, '처음 여는 폰 · ').then(function(w){
+    check('order', w.localStorage.getItem('b3nav_easy_asked2') === '1', '「처음이세요?」 답이 기억되지 않음');
+    /* ② 전에 「아니요」로 답한 폰도 문 네 곳 모두 — 출입문 QR 로 들어오면 매번 묻는다 (시험판 QR 과 같게 · 2026-10-20 사용자) */
+    var seq = Promise.resolve();
+    [['MAIN', '정문'], ['BACK', '후문'], ['EAST', '동문'], ['WEST', '서문']].forEach(function(g){
+      seq = seq.then(function(){
+        try{ localStorage.setItem('b3nav_easy_asked2', '1'); localStorage.setItem('b3nav_easy', '0'); }catch(e){}
+        return gateFlow(g[0], g[1], true, '전에 「아니요」 한 폰 · ');
       });
-    }).then(function(r3){
-      check('order', !r3.seen.boot, '조용히 새 판으로 갈아탔는데 초록 켜는 화면이 또 나옴');
-      check('order', r3.w.document.documentElement.classList.contains('bootQuiet'), '조용히 갈아탈 때 맨 앞의 켜는 화면 바탕을 감추지 않음 — 검은 화면이 번쩍인다');
     });
+    return seq;
+  }).then(function(){
+    /* ③ 이미 켜 둔 폰 — 묻지 않고 켜진 채로 「여기가 맞나요?」부터 안내 */
+    try{ localStorage.setItem('b3nav_easy_asked2', '1'); localStorage.setItem('b3nav_easy', '1'); }catch(e){}
+    return loadWatch('?gate=MAIN', true).then(function(r){
+      var w = r.w, d = w.document;
+      check('order', r.seen.boot && !r.seen.appFirst, '켜 둔 폰 · 정문 QR — 초록 켜는 화면이 먼저가 아님');
+      return waitFor(function(){ return !d.querySelector('.fx-boot') && booted(w) && screenOf(w) === 'sqrok'; }, 60000, '켜 둔 폰 · 정문 QR — 「여기가 맞나요?」가 안 뜸').then(function(){
+        check('order', !d.querySelector('.ezAsk'), '켜 둔 폰인데 또 물음');
+        return waitFor(function(){ return !!d.querySelector('.ezLayer.on .ezBubble'); }, 15000, '켜 둔 폰인데 쉬운 사용모드 안내(말풍선)가 안 나옴');
+      });
+    });
+  }).then(function(){
+    /* ④ QR 로 들어오자마자 새 판으로 갈아탄 경우(조용히 + 문을 넘겨받음) — 사용자에게는 앱을 켠 것 : 초록 화면부터, 쉬운 사용모드도 묻는다 */
+    try{ localStorage.setItem('b3nav_easy', '0'); sessionStorage.setItem('b3nav_quiet', '1'); sessionStorage.setItem('b3nav_gate_carry', 'BACK'); }catch(e){}
+    return loadWatch('');
+  }).then(function(r2){
+    var w2 = r2.w, d2 = w2.document;
+    check('order', r2.seen.boot, 'QR 로 들어오자마자 새 판으로 갈아탔는데 초록 켜는 화면이 안 보였음');
+    return waitFor(function(){ return !!d2.querySelector('.ezAsk'); }, 60000, '갈아탄 뒤 쉬운 사용모드(「처음이세요?」)가 안 뜸').then(function(){
+      d2.querySelector('.ezAsk button[data-a="0"]').click();
+      return waitFor(function(){ return !d2.querySelector('.fx-boot') && booted(w2) && screenOf(w2) === 'sqrok'; }, 30000, '갈아탄 뒤 「여기가 맞나요?」가 안 뜸');
+    }).then(function(){
+      check('order', txt(w2, 'qrOkName') === '후문', '갈아탄 뒤 넘겨받은 문이 후문이 아님 : ' + txt(w2, 'qrOkName'));
+      w2.QRNAV.clear();
+      /* ⑤ 그냥 조용히 갈아탈 때(첫 화면에서 새 판이 옴) — 켜는 화면이 두 번 나오지 않게 건너뛴다 */
+      try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(e){}
+      return loadWatch('');
+    });
+  }).then(function(r3){
+    check('order', !r3.seen.boot, '조용히 새 판으로 갈아탔는데 초록 켜는 화면이 또 나옴');
+    check('order', r3.w.document.documentElement.classList.contains('bootQuiet'), '조용히 갈아탈 때 맨 앞의 켜는 화면 바탕을 감추지 않음 — 검은 화면이 번쩍인다');
   });
 }
 function screenOf(w){ var s = w.document.querySelector('.screen.on'); return s ? s.id : ''; }

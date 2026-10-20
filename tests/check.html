@@ -280,7 +280,7 @@ function checkB3D(w, cb){
 /* ?app=다른파일.html 로 다른 빌드를 검사할 수 있다 (검사가 실패를 잡는지 시험할 때 쓴다) */
 var app = (location.search.match(/[?&]app=([^&]+)/) || [])[1] || '../site/index.html';
 F.addEventListener('load', function(){ setTimeout(probe, 300); });
-try{ localStorage.setItem('b3nav_easy_asked', '1'); }catch(e){}   /* 쉬운 사용모드 「처음이세요?」 창이 검사 화면을 가리지 않게 (2026-10-20 본 앱에 들어옴) */
+try{ localStorage.setItem('b3nav_easy_asked2', '1'); }catch(e){}   /* 쉬운 사용모드 「처음이세요?」 창이 검사 화면을 가리지 않게 (2026-10-20 본 앱에 들어옴) */
 F.src = decodeURIComponent(app);
 setTimeout(function(){ if(R.textContent === '검사 중…') probe(); }, 5000);
 })();

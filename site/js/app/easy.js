@@ -13,7 +13,9 @@
    · 시험용 주소 : ?easy=1 켜기 · ?easy=0 끄기 · ?easyask=1 「처음이세요?」를 다시 묻기
 */
 var EASY = (function(){
-  var KEY_ON = 'b3nav_easy', KEY_ASK = 'b3nav_easy_asked';
+  /* 2026-10-20 본 앱으로 옮기며 「물어봤음」 이름을 새로 — 시험 페이지에서 답한 기억이 본 앱으로 넘어와,
+     출입문 QR 로 열어도 「처음이세요?」를 안 묻고 쉬운 사용모드가 꺼진 채일 수 있다(사용자 : QR 로 열었는데 쉬운 사용모드가 없다). 본 앱에서는 모두에게 한 번 새로 묻는다. */
+  var KEY_ON = 'b3nav_easy', KEY_ASK = 'b3nav_easy_asked2';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
   var on = lsGet(KEY_ON) === '1';

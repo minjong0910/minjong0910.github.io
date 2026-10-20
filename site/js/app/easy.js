@@ -254,11 +254,12 @@ var EASY = (function(){
   }
   function toggle(){ set(!on); }
 
-  /* ── 처음 한 번 묻기 ── 순서 : 앱을 켠다 → 초록 글자 켜는 화면(boot.js) → 「처음이세요?」 → 앱 첫 화면 (2026-10-19 사용자).
-     켜는 화면이 저절로 끝나든 「탭하여 건너뛰기」로 넘기든, 걷히기 직전에 초록 화면 위에서 묻는다(아래 askFirst · 2026-10-20).
-     켜는 화면이 아예 없으면(새 판으로 조용히 바꿔 단 직후 — b3nav_quiet) 앱이 뜨자마자 묻는다.
-     (10-18 에는 「너무 늦게 뜬다」고 해서 켜는 화면보다 먼저 띄웠는데, 켜는 화면 앞에 뜨는 것도 어색하다 —
-      예전에 늦었던 건 켜는 화면이 끝난 뒤에도 3D 준비(appBooted)와 0.45초를 더 기다렸기 때문이라, 이제는 기다리지 않는다) */
+  /* ── 처음 묻기 ── 사용자 순서 (2026-10-20 · 한 단계씩) :
+       QR 인식 → 앱 켜짐 → 초록 글 화면(boot.js) → 쉬운 사용모드 켜기/끄기(이 화면) → 「여기가 맞나요?」
+     · 초록 글 화면이 끝나면 boot.js 가 askFirst() 로 이 화면을 초록 화면 **바로 아래**(z 940, 불투명)에 깔고 초록 화면을 걷는다.
+       그래서 초록 글과 함께 뜨지 않고(사용자 : 「동시에 켜지면 안 된다」), 앱도 그 사이에 비치지 않는다. 답하면 이 화면이 사라지고 앱이 보인다.
+     · 켜는 화면이 아예 없으면(새 판으로 조용히 바꿔 단 직후 — b3nav_quiet) 앱이 뜨자마자 이 화면을 띄운다.
+     (10-18 「켜는 화면보다 먼저」 · 10-20 오전 「초록 화면 위에」는 둘 다 사용자가 아니라고 함) */
   function ask(){
     if(asked() || !phone || $('.ezAsk')) return;   // 이미 떠 있으면 또 띄우지 않는다
     var a = document.createElement('div'); a.className = 'ezAsk';
@@ -271,22 +272,17 @@ var EASY = (function(){
     a.addEventListener('click', function(e){
       var b = e.target.closest('button[data-a]'); if(!b) return;
       a.remove(); set(b.getAttribute('data-a') === '1');
-      if(afterAsk){ var f = afterAsk; afterAsk = null; f(); }      // 초록 켜는 화면 위에서 물었으면 이제 걷는다
     });
     phone.appendChild(a);
   }
-  /* 2026-10-20 사용자 「QR 을 찍으면 설명한 순서대로 안 뜬다」 — 켜는 화면이 걷히며(스캔) 앱이 먼저 드러난 다음에 물었다.
-     → boot.js 가 켜는 화면을 걷기 직전에 이것을 부른다. 처음인 사람이면 **초록 화면 위에서** 먼저 묻고, 답하면 그때 걷는다(cb).
-       순서 : 초록 켜는 화면 → 「처음이세요?」 → 앱 첫 화면(출입문 QR 이면 「여기가 맞나요?」) → 길안내 이어 하기
-     물을 게 없으면(이미 답함 · 켜 둠) false — boot.js 가 바로 걷는다. */
-  var afterAsk = null;
-  function askFirst(cb){
+  /* boot.js 가 초록 화면을 걷기 직전에 부른다 — 물을 게 있으면 이 화면을 깔아 두고 true, 없으면(이미 답함 · 켜 둠) false */
+  function askFirst(){
     if(askFired || on || asked()) return false;
     if(!phone) build();
     syncButtons();
     ask();
     if(!$('.ezAsk')) return false;
-    askFired = true; afterAsk = cb;
+    askFired = true;
     return true;
   }
   /* 켜는 화면이 사라지면 곧바로 — 묻기(처음인 사람) · 말풍선 시작(이미 켜 둔 사람) */

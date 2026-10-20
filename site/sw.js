@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = 'daf9d42f2d3e';   // 파일 249개 · 16.5MB
+var VERSION = '9e322db553cc';   // 파일 249개 · 16.5MB
 var FILES = [
   ['3d/realistic.html','fad48337e13a',78531],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','c41292de6545',113534],
+  ['css/app.css','26be76fb790b',113785],
   ['css/boot.css','b77d5cd2fa9b',1658],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
@@ -229,9 +229,9 @@ var FILES = [
   ['img/icon.svg','99ad3cbde680',2002],
   ['index.html','1b276bb22bfe',55969],
   ['js/app/aid.js','daa92696b9a7',32661],
-  ['js/app/boot.js','68597836f635',9466],
+  ['js/app/boot.js','299e2bc8c287',9729],
   ['js/app/building.js','95b01af4110d',23489],
-  ['js/app/easy.js','c0367f4baf67',24222],
+  ['js/app/easy.js','f3a3cdb638ba',23703],
   ['js/app/floor-detail.js','59f52121571a',19195],
   ['js/app/guide.js','bcc83dabb095',44185],
   ['js/app/howto.js','0ad9905c1578',18518],

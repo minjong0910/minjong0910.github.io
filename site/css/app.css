@@ -1418,7 +1418,9 @@
   .ezBubble .ezTx small{display:block;font-size:0.8125rem;color:#5A5440;margin-top:0.1875rem;line-height:1.4;}
   .ezBubble .ezOff{pointer-events:auto;flex:none;width:2.25rem;height:2.25rem;border-radius:50%;border:none;
     background:rgba(0,0,0,.08);color:#5A5440;font-size:1rem;cursor:pointer;font-family:inherit;}
-  .ezAsk{position:absolute;inset:0;z-index:1000;background:rgba(3,5,10,.72);   /* 켜는 화면(.fx-boot 950) 위에 바로 뜬다 */display:flex;align-items:center;justify-content:center;padding:1.25rem;}
+  /* 쉬운 사용모드 켜기/끄기 — 따로 한 단계(사용자 2026-10-20 : 초록 글과 동시에 뜨면 안 된다).
+     앱을 가리는 불투명 바탕 · 켜는 화면(.fx-boot 950) 바로 아래(940) : 초록 화면이 스캔으로 걷히면 이 화면이 드러나고, 답하면 앱이 보인다. */
+  .ezAsk{position:absolute;inset:0;z-index:940;background:#0B0E13;display:flex;align-items:center;justify-content:center;padding:1.25rem;}
   .ezAsk .card{width:100%;background:#121722;border:2px solid #FFD43B;border-radius:1.25rem;padding:1.5rem 1.25rem 1.125rem;text-align:center;
     animation:ezPop .35s ease;}
   .ezAsk .ic{font-size:3.5rem;line-height:1;animation:ezTap 1.4s ease-in-out infinite;}

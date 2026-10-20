@@ -98,10 +98,11 @@ function scanReveal(boot, cb){
   }
   function finishBoot(){
     if(done) return; done = true;
-    function reveal(){ scanReveal(boot, function(){ boot.remove(); }); }
-    /* 처음인 사람 : 걷기 전에 이 초록 화면 위에서 「처음이세요?」를 먼저 묻고, 답하면 걷는다 (easy.js askFirst · 2026-10-20 사용자 순서) */
-    if(typeof EASY !== 'undefined' && EASY.askFirst && EASY.askFirst(reveal)) return;
-    reveal();
+    /* 사용자 순서 (2026-10-20) : QR → 앱 켜짐 → 초록 글 화면 → 쉬운 사용모드 켜기/끄기 → 「여기가 맞나요?」 — 한 단계씩.
+       물어야 하면 쉬운 사용모드 화면(불투명)을 이 초록 화면 **바로 아래**에 먼저 깔아 두고 걷는다 → 스캔이 지나가면
+       앱이 아니라 그 화면이 드러난다. 답하면 그 화면이 사라지며 앱이 보인다(easy.js askFirst). 초록 글과 함께 뜨지 않는다. */
+    if(typeof EASY !== 'undefined' && EASY.askFirst) EASY.askFirst();
+    scanReveal(boot, function(){ boot.remove(); });
   }
   boot.addEventListener('click', finishBoot);
   setTimeout(finishBoot, MAX_MS);   // 안전장치 — 무슨 일이 있어도 이 시간 뒤에는 앱을 보여 준다

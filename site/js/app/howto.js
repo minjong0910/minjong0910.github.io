@@ -1,12 +1,12 @@
 "use strict";
-/* howto.js — 이용안내를 실제 앱 화면 사진과 쉬운 설명으로 (시험판 · 2026-10-18)
+/* howto.js — 이용안내를 실제 앱 화면 사진과 쉬운 설명으로 (2026-10-18 시험판 · 2026-10-20 본 앱으로 옮김)
 
    사용자 요청 : 설정 → 이용안내가 전부 글이다. 실제 우리 앱 화면 사진과 함께 더 자세하고 쉽게.
                  「즐겨찾기 & 팁」은 남기되 더 쉽고 자세하게.
-   · 그림 : guide/g01~g11.jpg — 실제 앱을 폰 크기(375×812)로 찍고, 설명할 곳에 노란 번호표를 붙였다.
+   · 그림 : guide/g01~g12.jpg — 실제 앱을 폰 크기(375×812)로 찍고, 설명할 곳에 노란 번호표를 붙였다.
+            (2026-10-20 오른쪽 위 [인터넷][☰] · 하늘색 테두리로 다시 찍음 — g12 는 ☰ 메뉴를 펼친 모습)
             그림의 번호 = 아래 설명의 번호.
-   · ui.js 의 GUIDE_PAGES · guideRender 를 이 파일이 갈아 끼운다 (ui.js 는 건드리지 않는다 —
-     실제 앱 index.html 은 이 파일을 읽지 않으므로 지금 쓰는 앱은 그대로다).
+   · ui.js 의 GUIDE_PAGES · guideRender 를 이 파일이 갈아 끼운다 (ui.js 는 건드리지 않는다).
    · 그림을 누르면 zoom.js 의 openZoom 으로 크게 본다. */
 var HOWTO = [
   { t:['처음 화면', 'First screen'], img:'g01_first',
@@ -18,8 +18,21 @@ var HOWTO = [
        'Start', 'Start without a QR. The route starts from the 1st floor; you can change it later under "Start floor".'],
       ['출입문 QR 스캔하고 시작', '건물 문(정문·후문·동문·서문)에 붙은 QR을 카메라로 찍어요. 내가 어느 문 앞에 있는지 앱이 알아서, 그 자리부터 길을 알려 줘요. 폰 기본 카메라로 찍어도 돼요.',
        'Scan door QR to start', 'Scan the QR on a building door. The app knows which door you are at and guides you from there. Your phone camera works too.'],
-      ['위쪽 동그라미 네 개', '🟢 인터넷 상태(초록이면 연결됨) · 🏠 처음 화면으로 · ⭐ 즐겨찾기 · ⚙️ 설정',
-       'Four circles at the top', '🟢 internet status · 🏠 back to start · ⭐ favorites · ⚙️ settings']
+      ['인터넷 표시', '초록 와이파이 그림이면 인터넷이 연결된 거예요. 끊기면 그림이 바뀌어요. 누르면 인터넷 없이 쓰는 방법을 알려 줘요.',
+       'Internet', 'A green Wi-Fi icon means you are online. It changes when you go offline. Tap it to see how to use the app offline.'],
+      ['☰ 메뉴', '누르면 밝은 화면 · 처음으로 · 즐겨찾기 · 설정이 아래로 펼쳐져요. 다음 쪽에서 자세히 알려 줘요.',
+       '☰ Menu', 'Tap to open Light mode · Home · Favorites · Settings. See the next page.']
+    ] },
+  { t:['☰ 메뉴', '☰ Menu'], img:'g12_menu',
+    lead:['어느 화면에서든 오른쪽 위 ☰을 누르면 펼쳐져요.', 'Tap ☰ at the top right on any screen.'],
+    items:[
+      ['☰ / ✕', '☰을 누르면 메뉴가 열리고 ✕로 바뀌어요. ✕나 메뉴 바깥을 누르면 닫혀요.',
+       '☰ / ✕', 'Tap ☰ to open; it turns into ✕. Tap ✕ or anywhere outside to close.'],
+      ['밝은 화면', '스위치를 켜면 흰 바탕의 밝은 화면이 돼요. 햇빛 아래에서 잘 보여요. 한 번 바꾸면 다음에 켤 때도 그대로예요.',
+       'Light mode', 'Turn the switch on for a bright white screen, easier to see in sunlight. The app remembers your choice.'],
+      ['처음으로', '처음 화면으로 돌아가요.', 'Home', 'Back to the first screen.'],
+      ['즐겨찾기', '저장해 둔 곳 목록이 나와요.', 'Favorites', 'Shows the places you saved.'],
+      ['설정', '언어 · 쉬운 사용모드 · 이용안내 · 건의함 · 앱 다운로드', 'Settings', 'Language · Easy mode · User guide · Suggestion box · Install app']
     ] },
   { t:['쉬운 사용모드', 'Easy mode'], img:'g02_easy',
     lead:['켜 두면 화면마다 「여기를 누르세요」 하고 알려 줘요.', 'When it is on, every screen tells you where to tap.'],
@@ -29,8 +42,8 @@ var HOWTO = [
       ['노란 테두리와 손가락', '여기를 누르면 돼요. 손가락이 톡톡 움직이며 가리켜요. 다른 버튼도 그대로 누를 수 있어요.',
        'Yellow frame and finger', 'Tap here. The finger taps to show you. Other buttons still work as usual.']
     ],
-    tip:['켜고 끄는 곳 : 처음 화면의 노란 「쉬운 사용모드」 버튼, 또는 ⚙️ 설정 → 쉬운 사용모드. 앱을 처음 열 때 「처음이세요?」라고 물으면 「네, 알려 주세요」를 눌러도 켜져요.',
-         'Turn it on or off with the yellow button on the first screen, or ⚙️ Settings → Easy mode. You can also say "Yes" when the app asks "First time here?".'] },
+    tip:['켜고 끄는 곳 : 처음 화면의 노란 「쉬운 사용모드」 버튼, 또는 ☰ → 설정 → 쉬운 사용모드. 앱을 처음 열 때 「처음이세요?」라고 물으면 「네, 알려 주세요」를 눌러도 켜져요.',
+         'Turn it on or off with the yellow button on the first screen, or ☰ → Settings → Easy mode. You can also say "Yes" when the app asks "First time here?".'] },
   { t:['QR을 찍으면 — 여기가 맞나요?', 'After scanning — is this the place?'], img:'g03_qrok',
     lead:['QR을 찍으면 그 문이 맞는지 사진으로 한 번 확인해요.', 'After scanning, check the photo of the door once.'],
     items:[
@@ -104,11 +117,11 @@ var HOWTO = [
       { h:['⭐ 즐겨찾기 — 자주 가는 곳 저장하기', '⭐ Favorites — save places you visit often'], img:'g10_fav',
         pre:['3D 건물 화면 오른쪽 위 ☆을 누르면 ★로 바뀌며 저장돼요.', 'Tap ☆ at the top right of the 3D screen to save a place.'],
         items:[
-          ['⭐ 버튼', '화면 맨 위 ⭐을 누르면 저장한 곳 목록이 나와요.', '⭐ button', 'Tap ⭐ at the top to see your saved places.'],
+          ['☰ → 즐겨찾기', '오른쪽 위 ☰을 누르고 「즐겨찾기」를 누르면 저장한 곳 목록이 나와요.', '☰ → Favorites', 'Tap ☰ at the top right, then Favorites, to see your saved places.'],
           ['저장한 곳', '「열기 →」를 누르면 바로 그곳 3D가 나와요. ✕를 누르면 목록에서 지워요.', 'Saved place', 'Tap "Open →" to see it in 3D. Tap ✕ to remove it.']
         ],
         tip:['학기 초에 이번 학기 강의실을 미리 저장해 두면 다음부터 검색하지 않고 바로 갈 수 있어요.', 'Save this semester\'s rooms early and skip searching next time.'] },
-      { h:['⚙️ 설정에서 할 수 있는 것', '⚙️ What you can do in Settings'], img:'g11_settings',
+      { h:['⚙️ 설정에서 할 수 있는 것 (☰ → 설정)', '⚙️ What you can do in Settings (☰ → Settings)'], img:'g11_settings',
         items:[
           ['언어', '「한글」 / 「English」를 누르면 앱 전체 말이 바로 바뀌어요.', 'Language', 'Tap 한글 / English to switch the whole app.'],
           ['쉬운 사용모드', '여기서도 켜고 끌 수 있어요.', 'Easy mode', 'Turn it on or off here too.'],
@@ -120,8 +133,10 @@ var HOWTO = [
         ] }
     ],
     tip:['💡 더 알아 두면 좋아요<br>· 지하 1층(B1)에는 크리에이티브 존이 있어요. 3D 화면 「층 상세」에서 B1을 누르면 엘리베이터·계단·나가는 문 위치가 보여요.<br>' +
+         '· 길안내 중에 앱이 꺼져도 30분 안에 다시 열면 「아까 보던 길안내가 있어요」가 떠요. 「이어서 보기」를 누르면 보던 단계부터 다시 안내해요.<br>' +
          '· 검색이 안 되면 숫자를 다시 확인해 보세요.<br>· 방향이 헷갈리면 사진과 눈앞 모습을 나란히 비교해 보세요.<br>· 불편한 점은 언제든 건의함으로 알려 주세요.',
          '💡 Good to know<br>· The Creative Zone is on B1. Tap B1 under "Floor" in the 3D screen to see the elevator, stairs and exit.<br>' +
+         '· If the app closes during navigation, open it again within 30 minutes and tap "Continue" to pick up where you left off.<br>' +
          '· If search finds nothing, check the numbers.<br>· If the direction is confusing, compare the photo with what you see.<br>· Tell us anything inconvenient via the Suggestion Box.'] }
 ];
 
@@ -168,3 +183,6 @@ guideRender = function(idx){
   }
   guideRenderProg();
 };
+/* 읽히자마자 한 번 그려 둔다 — 안 그러면 ui.js 가 언어를 칠하는 때(applyLang)가 이 파일보다 빠르냐 늦느냐에 따라
+   이용안내 칸이 옛 <p> 로 남기도 하고 새 <div> 로 바뀌기도 해서, 안전망 검사가 가끔씩만 달라졌다 (2026-10-20) */
+guideRender(typeof guideIdx === 'number' ? guideIdx : 0);

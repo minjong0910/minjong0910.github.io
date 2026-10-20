@@ -187,8 +187,16 @@ var PWA = (function(){
       history.replaceState(history.state, '', location.pathname + rest + location.hash);
     }
   }catch(e){}
+  /* 2026-10-20 : 옛 판이 깔린 폰으로 출입문 QR 을 찍으면, 「여기가 맞나요?」가 뜨자마자 새 판으로 갈아타며
+     새로 고쳐(아래 applyUpdate) 문 정보를 잃고 첫 화면이 떴다(주소의 ?gate= 는 이미 떼어 냈으므로).
+     → 새로 고치기 직전에 문을 이 탭에만 적어 두고(b3nav_gate_carry), 다시 뜨면 주소로 들어온 것처럼 받는다. */
+  try{
+    var carried = sessionStorage.getItem('b3nav_gate_carry');
+    if(carried){ sessionStorage.removeItem('b3nav_gate_carry'); if(!gateFromUrl && /^[A-Z]+$/.test(carried)) gateFromUrl = carried; }
+  }catch(e){}
   /* QRNAV.fromUrl() 이 한 번 가져간다 */
-  function takeGate(){ var g = gateFromUrl; gateFromUrl = null; return g; }
+  var gateTaken = null;           // 가져간 문 — 「여기가 맞나요?」에서 아직 답하지 않았을 때 새로 고치면 넘겨준다
+  function takeGate(){ var g = gateFromUrl; gateFromUrl = null; gateTaken = g; return g; }
 
   /* ── 기기 알아보기 ── (검사가 여러 기기 흉내를 넣어 볼 수 있게 글자만 받는 함수로) */
   var UA = navigator.userAgent || '';
@@ -560,7 +568,7 @@ var PWA = (function(){
              ① 첫 화면 ② 아직 화면을 한 번도 건드리지 않았을 때(잃을 것이 없다)
              ③ 화면이 안 보이는 동안(길안내·도착·QR 중이 아니면 — 눈에 띄지 않게 갈아탄다) */
         var id = on ? on.id : '';
-        var busy = (id === 's6' || id === 's7' || id === 'sqr');
+        var busy = (id === 's6' || id === 's7' || id === 'sqr' || id === 'sqrok');
         var okNow = (!on || id === 's1')
                  || !userActed
                  || (document.visibilityState === 'hidden' && !busy);
@@ -570,6 +578,9 @@ var PWA = (function(){
         /* 다시 뜰 때 켜는 화면(부팅 연출)을 건너뛰게 표시를 남긴다 — boot.js 가 이것을 본다.
            안 그러면 사용자 눈에 앱이 두 번 켜지는 것처럼 보인다. */
         try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(err){}
+        /* 출입문 QR 로 막 들어와 아직 「여기가 맞나요?」에 답하지 않았으면 그 문을 넘겨준다 (위 ① 참고) */
+        var carry = gateFromUrl || (id === 'sqrok' ? gateTaken : null);
+        if(carry){ try{ sessionStorage.setItem('b3nav_gate_carry', carry); }catch(err){} }
         location.reload();
       }
       navigator.serviceWorker.addEventListener('controllerchange', function(){

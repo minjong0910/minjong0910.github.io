@@ -23,6 +23,7 @@
     if(performance.now() - t0 > 30000) return out({ms: null, text: last, error: '30초 안에 안 끝남'});
     setTimeout(poll, 20);
   })();
+  try{ localStorage.setItem('b3nav_easy_asked', '1'); }catch(e){}   /* 쉬운 사용모드 「처음이세요?」 창이 검사 화면을 가리지 않게 (2026-10-20 본 앱에 들어옴) */
   F.src = app;
 })();
 </script>

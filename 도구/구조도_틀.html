@@ -352,7 +352,7 @@
   <div class="gbox">
     <div class="gt">① 켜기</div><div class="gs">앱이 시작될 때 · 4개</div>
     <div class="grid">
-      <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">619줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
+      <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">630줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
       <button class="b p" data-id="f_boot"><span class="n">boot.js</span><span class="d">150줄 · 첫 화면 연출</span></button>
       <button class="b p" data-id="f_start"><span class="n">start.js</span><span class="d">32줄 · 글꼴 기다렸다 시작</span></button>
       <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">427줄 · 오프라인 저장소</span></button>
@@ -360,11 +360,13 @@
   </div>
 
   <div class="gbox">
-    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 6개</div>
+    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 8개</div>
     <div class="grid">
       <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">374줄 · 화면 전환 go()</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
-      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">714줄 · 화면 21개</span></button>
+      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">729줄 · 화면 21개</span></button>
+      <button class="b p" data-id="f_easy"><span class="n">easy.js</span><span class="d">300줄 · 쉬운 사용모드</span></button>
+      <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">189줄 · 사진 이용안내</span></button>
       <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">185줄 · 사진 확대</span></button>
       <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">56줄 · ☰ 메뉴 · 밝은 화면</span></button>
       <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">135줄 · 길안내 이어 하기</span></button>
@@ -720,9 +722,25 @@ f_resume:{t:'resume.js — 길안내 이어 하기',z:'p',zl:'폰 안에서 돈�
  kid:'길안내 중에 앱이 꺼졌다 켜지면 「아까 보던 길안내가 있어요」 하고 그 단계부터 다시 보여 줘요.',
  why:'길안내 중에 카카오톡을 보러 나갔다 오면, 폰이 앱을 새로 읽어 첫 화면으로 돌아갈 때가 있습니다. 처음부터 다시 찾게 하면 길 위에서 헤매게 됩니다.',
  where:['길안내 단계를 넘길 때마다 <b>이 폰에만</b> 적어 둠(서버로 보내지 않음)','다시 열면 첫 화면 아래 <b>카드</b> — [이어서 보기] [괜찮아요, 새로 찾을게요]'],
- how:'순서는 초록 켜는 화면 → (시험 페이지) 쉬운 사용모드 「처음이세요?」 → 이 카드. 30분이 지났거나, 다 왔거나, 출입문 QR 로 새로 들어왔으면 묻지 않습니다. 첫 화면·찾기·검색·도착 화면으로 가면 기억을 지웁니다.',
+ how:'순서는 초록 켜는 화면 → 쉬운 사용모드 「처음이세요?」(처음인 사람만) → 이 카드. 30분이 지났거나, 다 왔거나, 출입문 QR 로 새로 들어왔으면 묻지 않습니다. 첫 화면·찾기·검색·도착 화면으로 가면 기억을 지웁니다.',
  tech:['localStorage','길안내 다시 만들기(startGuide)'],
  src:[['site/js/app/resume.js','기억 · 묻기 · 이어 보기'],['site/js/app/guide.js','단계마다 적어 두기(render6)']]},
+
+f_easy:{t:'easy.js — 쉬운 사용모드',z:'p',zl:'폰 안에서 돈다',
+ kid:'켜 두면 화면마다 <b>여기를 누르세요</b> 하고 노란 테두리와 손가락으로 알려 줘요.',
+ why:'처음 온 사람(신입생 · 학부모 · 외부 손님)은 어느 버튼부터 눌러야 할지 모릅니다. 설명서를 읽게 하는 대신 화면 위에서 바로 가리킵니다.',
+ where:['앱을 처음 열면 초록 켜는 화면 뒤에 「처음이세요?」','첫 화면의 노란 버튼 · ☰ → 설정 · 말풍선의 ✕ 로 켜고 끄기 — 이 폰에 기억'],
+ how:'화면마다 「누를 곳 · 한 문장 · 작은 한 줄」을 표(HINTS)로 적어 두고, 화면이 바뀔 때 그 버튼 둘레에 테두리와 손가락을 얹습니다. 사진 · 3D 는 가리거나 줄이지 않습니다(사용자 : 「사진이 작아지면 눈이 아프다」). 2026-10-18 시험 페이지에서 만들어 2026-10-20 본 앱으로 옮겼습니다.',
+ tech:['localStorage','getBoundingClientRect','CSS 애니메이션'],
+ src:[['site/js/app/easy.js','묻기 · 화면별 안내 · 켜고 끄기'],['site/css/app.css','「쉬운 사용모드 · 사진으로 보는 이용안내」 묶음']]},
+
+f_howto:{t:'howto.js — 사진으로 보는 이용안내',z:'p',zl:'폰 안에서 돈다',
+ kid:'설정 → 이용안내가 <b>실제 앱 화면 사진</b>에 노란 번호표를 붙여 쉽게 알려 줘요.',
+ why:'글로만 된 이용안내는 읽히지 않았습니다. 사용자 요청 : 실제 우리 앱 화면 사진과 함께 더 자세하고 쉽게.',
+ where:['☰ → 설정 → 이용안내 <b>11쪽</b>','그림을 누르면 크게(zoom.js)'],
+ how:'ui.js 의 이용안내(GUIDE_PAGES · guideRender)를 갈아 끼웁니다. 그림 site/guide/g01~g12.jpg 는 실제 앱을 폰 크기(375×812)로 찍고 번호표를 붙인 것 — 화면이 바뀌면 다시 찍어야 합니다.',
+ tech:['실제 화면 사진(헤드리스 Edge)','JPG 540px'],
+ src:[['site/js/app/howto.js','11쪽 내용 · 그리기'],['site/js/app/ui.js','원래 이용안내']]},
 
 f_photos:{t:'photos.js — 장소 사진 — 파일 169개',z:'p',zl:'폰 안에서 돈다',
  kid:'각 방이 <b>실제로 어떻게 생겼는지</b> 사진으로 보여 줘요.',

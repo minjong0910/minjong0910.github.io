@@ -19,6 +19,7 @@
 <script>
 /* 무엇을 확인하나 (사용자가 2026-09-22 에 요청한 다섯 가지)
      gate     출입문 QR 주소(?gate=)로 열면 "○문에 계신가요?" 확인 화면 → 확정하면 그 문에서 출발
+              — 새 판으로 갈아타며 새로 고쳐도(applyUpdate) 넘겨받은 문으로 확인 화면이 다시 뜨는가 (2026-10-20)
      hint     첫 화면 "지금 계신 위치가 자동으로 설정돼요." 바로 아래에 눈에 띄는 색의 "앱을 다운로드 하시려면 설정에 들어가주세요"
               — 누르면 설정이 열린다. 앱이 먼저 설치를 조르지 않는다 (브라우저 설치 알림도 막는다)
      install  설정의 「앱 다운로드」 — 안드로이드는 버튼 한 번에 브라우저 설치 창, 아이폰은 그림 안내(아이콘·이름),
@@ -49,6 +50,7 @@ function waitFor(fn, ms, what){
   });
 }
 function loadApp(q){
+  try{ localStorage.setItem('b3nav_easy_asked', '1'); }catch(e){}   /* 쉬운 사용모드 「처음이세요?」 창이 검사 화면을 가리지 않게 (2026-10-20 본 앱에 들어옴) */
   return new Promise(function(res){ F.onload = function(){ res(F.contentWindow); }; F.src = '../site/index.html' + (q || ''); });
 }
 function booted(w){ return w && w.appBooted && w.QRNAV && w.PWA && w.document.querySelector('.screen.on'); }
@@ -89,6 +91,16 @@ function testGate(){
       }).then(function(w2){
         return waitFor(function(){ return booted(w2); }, 30000, '앱이 안 켜짐').then(function(){
           return sleep(300).then(function(){ check('gate', screenOf(w2) === 's1', '없는 문(?gate=NOPE)인데 첫 화면이 아님 : ' + screenOf(w2)); });
+        });
+      }).then(function(){
+        /* 새 판으로 갈아타며 새로 고친 경우(pwa.js applyUpdate) — 넘겨받은 문으로 「여기가 맞나요?」가 다시 떠야 한다 */
+        try{ sessionStorage.setItem('b3nav_gate_carry', 'EAST'); }catch(e){}
+        return loadApp('');
+      }).then(function(w3){
+        return waitFor(function(){ return booted(w3) && screenOf(w3) === 'sqrok'; }, 30000, '새로 고치며 넘겨준 문(동문)인데 확인 화면(sqrok)이 안 뜸').then(function(){
+          check('gate', txt(w3, 'qrOkName') === '동문', '넘겨받은 문 이름이 동문이 아님 : ' + txt(w3, 'qrOkName'));
+          var left = null; try{ left = sessionStorage.getItem('b3nav_gate_carry'); }catch(e){}
+          check('gate', left === null, '넘겨받은 문 표시가 지워지지 않음 — 다음에 열 때 또 뜬다');
         });
       });
   });

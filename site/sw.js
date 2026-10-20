@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '2de2dee18e8a';   // 파일 249개 · 16.5MB
+var VERSION = 'ceb3aac1bfcc';   // 파일 249개 · 16.5MB
 var FILES = [
   ['3d/realistic.html','9524531d6645',79368],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -252,7 +252,7 @@ var FILES = [
   ['js/app/roomfix.js','1b886c300886',22082],
   ['js/app/shell.js','943a6865e96e',20230],
   ['js/app/start.js','4065777331b0',1505],
-  ['js/app/sugai.js','f96f8cd6ed74',131937],
+  ['js/app/sugai.js','510d8159462a',132345],
   ['js/app/sugdb.js','b801511229ee',23438],
   ['js/app/suggest.js','27c314357e60',51946],
   ['js/app/topmenu.js','0351042966f1',4319],

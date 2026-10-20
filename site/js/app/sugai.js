@@ -73,7 +73,16 @@ var SUGAI = (function(){
 
   var TFJS = ['lib/tf.min.js',       'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js'];
   var MNET = ['lib/mobilenet.min.js','https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js'];
-  var MODEL_URL = 'https://www.kaggle.com/models/google/mobilenet-v2/TfJs/050-224-classification/2/model.json?tfjs-format=file&tfhub-redirect=true';
+  /* AI 모델(mobilenet_v2_050_224) 받는 곳 — 앞에서부터 차례로 (2026-10-21)
+     ① 우리 서버 ai-model/ : Kaggle 의 파일을 그대로 받아 둔 것(같은 모델 — 지문은 검사.ps1 이 지킨다). 폰 종류와 상관없이 늘 된다.
+     ② Kaggle : 폰 종류(이름표)에 따라 파일 · 웹페이지 · 거절로 다르게 답해서(삼성은 안 됨) 예비로만 둔다.
+     ③ 그래도 안 되면 라이브러리의 옛 tfhub 주소(지금은 404). */
+  var MODEL_URLS = ['ai-model/mobilenet_v2_050_224/model.json',
+                    'https://www.kaggle.com/models/google/mobilenet-v2/TfJs/050-224-classification/2/model.json?tfjs-format=file&tfhub-redirect=true'];
+  function loadModel(i){
+    if(i >= MODEL_URLS.length) return mobilenet.load({version:2, alpha:0.5});
+    return mobilenet.load({version:2, alpha:0.5, modelUrl:MODEL_URLS[i], inputRange:[0, 1]})['catch'](function(){ return loadModel(i + 1); });
+  }
 
   var REF = null, CODES = null, NAMES = null, DIM = 0;
   var net = null, loading = null, failed = false;
@@ -223,13 +232,10 @@ var SUGAI = (function(){
       .then(function(){ return tf.ready(); })
       .then(function(){
         /* 모델은 늘 tfhub 의 원래 모델(mobilenet_v2_050_224)을 쓴다. 기준 자료가 이 모델로 만들어졌다.
-           예전에는 같은 서버의 model/ 을 먼저 찾았는데, 로컬 모델은 값이 달라 판별이 전부 틀어졌고
-           (2026-09-18) 두지 않기로 해서 매번 404 만 남겼다. 앱으로 포장할 때는 tfhub 모델 파일을 그대로 받아 넣는다. */
-        /* 2026-10-20 종합검진 : tfhub.dev 가 Kaggle 로 옮겨 가면서 라이브러리의 옛 주소
-           (tfhub.dev/…/mobilenet_v2_050_224/classification/2/model.json?tfjs-format=file)가 404 가 되어 AI 가 조용히 꺼져 있었다.
-           같은 모델(같은 이름 · 같은 값)을 Kaggle 이 그대로 내준다 — 기준 자료와 값이 같은지 앱 사진으로 확인함. 안 되면 옛 주소도 한 번. */
-        return mobilenet.load({version:2, alpha:0.5, modelUrl:MODEL_URL, inputRange:[0, 1]})
-          ['catch'](function(){ return mobilenet.load({version:2, alpha:0.5}); });
+           예전(2026-09-18)에 같은 서버 model/ 에 두었던 것은 다른 모델이라 값이 달라 판별이 전부 틀어졌다 — 그래서 model/ 은 금지(검사.ps1).
+           2026-10-20 종합검진 : tfhub.dev 가 Kaggle 로 옮겨 가며 옛 주소가 404 → AI 가 조용히 꺼져 있었다.
+           2026-10-21 : Kaggle 이 내주는 **같은 모델 파일 그대로**를 ai-model/ 에 두고 먼저 쓴다(사용자 허락) — 위 MODEL_URLS. */
+        return loadModel(0);
       })
       .then(function(m){
         net = m;

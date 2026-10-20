@@ -47,11 +47,18 @@ Step '1 파일 검사'
 $ga = Join-Path $ROOT '.gitattributes'
 if((Test-Path $ga) -and ((Get-Content $ga -Raw) -match '(?m)^\*\s+-text')){ Ok '.gitattributes 줄바꿈 보호' } else { Bad '.gitattributes 의 "* -text" 가 없습니다 (git 이 줄바꿈을 바꾼다)' }
 if((Test-Path (Join-Path $ROOT 'model')) -or (Test-Path (Join-Path $SITE 'model'))){ Bad 'model\ 폴더가 있습니다 — 앱이 이 로컬 모델을 먼저 써서 판별이 틀어진다 (tfhub 모델과 값이 다름)' } else { Ok 'model\ 폴더 없음' }
-# 2026-10-20 종합검진 : AI 모델 주소가 살아 있는지 — tfhub.dev 가 Kaggle 로 옮기며 옛 주소가 404 가 되어 사진 AI 가 조용히 꺼져 있었다(아무도 몰랐다).
-#   인터넷이 없거나 잠깐 막혀도 배포까지 막지는 않게 [주의]로만 알린다.
-$mu = [regex]::Match([IO.File]::ReadAllText((Join-Path $SITE 'js\app\sugai.js'), $UTF), "var MODEL_URL = '([^']+)'").Groups[1].Value
-if(-not $mu){ Bad 'sugai.js 에서 AI 모델 주소(MODEL_URL)를 찾지 못했습니다' }
-else { try { $mr = Invoke-WebRequest $mu -TimeoutSec 15 -UseBasicParsing -MaximumRedirection 5; if($mr.Content -match 'weightsManifest'){ Ok 'AI 모델 주소(Kaggle)가 모델 파일을 내줍니다' } else { Warn ('AI 모델 주소가 모델 파일이 아닌 것을 내줍니다 — 사진 AI 가 꺼집니다 : ' + $mu) } } catch { Warn ('AI 모델 주소가 응답하지 않습니다 — 사진 AI 가 꺼집니다 : ' + $mu + ' (' + $_.Exception.Message + ')') } }
+# 2026-10-21 : 사진 AI 모델은 우리 서버 site\ai-model\ 에 둔다 (tfhub.dev 404 · Kaggle 은 폰 종류마다 다르게 답함 — 2026-10-20 종합검진).
+#   기준 자료(aivec)가 이 모델로 만들어졌으므로 **한 바이트도 다르면 판별이 틀어진다** — 지문(SHA-256)으로 지킨다.
+#   (예전 model\ 폴더는 다른 모델이었다 — 그래서 위의 model\ 금지는 그대로 둔다)
+$aiDir = Join-Path $SITE 'ai-model\mobilenet_v2_050_224'
+$aiWant = [ordered]@{ 'model.json' = '974a75b75c30ac499229435353c65c64db98781d20c87303e745c69dd99ae4aa';
+                      'group1-shard1of2.bin' = '4d32be7f3ba4c7ff3b7ee7d805715f4d4e48b94712b93b16982b220b4c686dcc';
+                      'group1-shard2of2.bin' = '47fcd534652e923fef5ba671f71bd5453157d7c650ee23f2158937d10210049e' }
+$aiBad = @(); foreach($k in $aiWant.Keys){ $p = Join-Path $aiDir $k; if(-not (Test-Path $p)){ $aiBad += "$k 없음" } elseif((Get-FileHash $p -Algorithm SHA256).Hash.ToLower() -ne $aiWant[$k]){ $aiBad += "$k 지문이 다름" } }
+$aiFirst = [regex]::Match([IO.File]::ReadAllText((Join-Path $SITE 'js\app\sugai.js'), $UTF), "var MODEL_URLS = \['([^']+)'").Groups[1].Value
+if($aiBad.Count){ Bad ('사진 AI 모델 파일이 원래 것과 다릅니다 — 판별이 틀어진다 : ' + ($aiBad -join ' / ')) }
+elseif($aiFirst -ne 'ai-model/mobilenet_v2_050_224/model.json'){ Bad ('sugai.js 가 우리 서버의 AI 모델을 먼저 쓰지 않습니다 : ' + $aiFirst) }
+else { Ok 'AI 모델(mobilenet_v2_050_224) 파일 3개 지문이 원래 것과 같고 앱이 먼저 씀' }
 
 # 화면 틀이 부르는 파일
 $html = [IO.File]::ReadAllText((Join-Path $SITE 'index.html'), $UTF)

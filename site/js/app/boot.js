@@ -149,7 +149,9 @@ function scanReveal(boot, cb){
   /* ② 문서를 다 읽으면 나머지를 적고 닫는다 */
   function afterLoad(){
     loadedAt = Date.now();
-    var g = (typeof QRNAV !== 'undefined' && QRNAV.gate) ? QRNAV.gate() : null;
+    /* 방금 찍은 출입문 QR 이 먼저(아직 「여기가 맞나요?」 전이라도) — 예전에 확정한 문(3시간 기억)보다 앞선다. 「정하지 않음」으로 쓰지 않게 (2026-10-20) */
+    var g = (typeof PWA !== 'undefined' && PWA.peekGate) ? PWA.peekGate() : null;
+    if(!g && typeof QRNAV !== 'undefined' && QRNAV.gate) g = QRNAV.gate();
     var GN = {MAIN:['정문', 'main gate'], BACK:['후문', 'back gate'], EAST:['동문', 'east gate'], WEST:['서문', 'west gate']};
     say(ko ? ('> 출발 위치 ··· ' + (g && GN[g] ? GN[g][0] + ' (QR로 확인)' : '정하지 않음 — 1층에서 출발'))
            : ('> Start ··· ' + (g && GN[g] ? GN[g][1] + ' (from QR)' : 'not set — starting at 1F')));

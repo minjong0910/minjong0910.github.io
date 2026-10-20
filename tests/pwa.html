@@ -58,35 +58,60 @@ function loadApp(q, keepAsk){
 function booted(w){ return w && w.appBooted && w.QRNAV && w.PWA && w.document.querySelector('.screen.on'); }
 
 /* ── order : 켜질 때 순서 (사용자 : 앱 켬 → 초록 켜는 화면 → 쉬운 사용모드 「처음이세요?」 → 앱 화면) ── */
+/* 앱을 열면서 0.02초마다 「맨 위에 무엇이 보이나」를 지켜본다 — 다 읽힌 뒤(onload)에 한 번 보면 느린 컴퓨터(GitHub 검사)에서는
+   켜는 화면이 이미 끝나 있어 틀리게 나온다(2026-10-20 실제로 그랬다). 그래서 처음부터 끝까지 본 것을 모은다.
+     boot     초록 켜는 화면이 한 번이라도 보였나
+     appFirst 켜는 화면이 보이기 전에 앱 화면이 먼저 보였나 (사용자가 말한 「순서대로 안 뜬다」) */
+function loadWatch(q, keepAsk){
+  var old = F.contentDocument, seen = {boot:false, appFirst:false}, stop = false;
+  (function look(){
+    if(stop) return;
+    try{
+      var d = F.contentDocument;
+      if(d && d !== old && d.body){
+        var b = d.querySelector('.fx-boot'), vis = b && F.contentWindow.getComputedStyle(b).display !== 'none';
+        if(vis) seen.boot = true;
+        else if(!seen.boot && d.querySelector('.screen.on') && !d.documentElement.classList.contains('bootQuiet')) seen.appFirst = true;
+      }
+    }catch(e){}
+    setTimeout(look, 20);
+  })();
+  return loadApp(q, keepAsk).then(function(w){ stop = true; return {w:w, seen:seen}; });
+}
 function testOrder(){
   step = 'order';
   try{ localStorage.removeItem('b3nav_easy_asked2'); localStorage.removeItem('b3nav_easy'); sessionStorage.clear(); }catch(e){}
-  return loadApp('?gate=EAST', true).then(function(w){
-    var d = w.document;
-    check('order', !!d.querySelector('.fx-boot'), '다 읽혔을 때 초록 켜는 화면이 없음 — 앱 화면이 먼저 비친다');
-    return waitFor(function(){ return !!d.querySelector('.ezAsk'); }, 40000, '처음 여는 폰인데 「처음이세요?」가 안 뜸').then(function(){
+  return loadWatch('?gate=EAST', true).then(function(r){
+    var w = r.w, d = w.document;
+    check('order', r.seen.boot, '처음 여는 폰인데 초록 켜는 화면이 안 보였음');
+    check('order', !r.seen.appFirst, '초록 켜는 화면보다 앱 화면이 먼저 보였음 — 사용자 순서는 초록 화면이 먼저');
+    return waitFor(function(){ return !!d.querySelector('.ezAsk'); }, 60000, '처음 여는 폰인데 「처음이세요?」가 안 뜸').then(function(){
       check('order', !!d.querySelector('.fx-boot'), '「처음이세요?」가 초록 켜는 화면이 걷힌 뒤에 떴음 — 초록 화면 위에서 먼저 물어야 한다');
-      check('order', screenOf(w) === 'sqrok', '묻는 동안 뒤의 화면이 「여기가 맞나요?」가 아님 : ' + screenOf(w));
       d.querySelector('.ezAsk button[data-a="0"]').click();
       return waitFor(function(){ return !d.querySelector('.fx-boot'); }, 30000, '답했는데 초록 켜는 화면이 안 걷힘');
     }).then(function(){
-      check('order', screenOf(w) === 'sqrok' && txt(w, 'qrOkName') === '동문', '답한 뒤 「여기가 맞나요? 동문」이 아님 : ' + screenOf(w) + ' ' + txt(w, 'qrOkName'));
+      return waitFor(function(){ return booted(w) && screenOf(w) === 'sqrok'; }, 30000, '답한 뒤 「여기가 맞나요?」가 안 뜸 : ' + screenOf(w));
+    }).then(function(){
+      check('order', txt(w, 'qrOkName') === '동문', '답한 뒤 「여기가 맞나요?」의 문이 동문이 아님 : ' + txt(w, 'qrOkName'));
       check('order', w.localStorage.getItem('b3nav_easy_asked2') === '1', '「처음이세요?」 답이 기억되지 않음 — 또 묻는다');
       /* QR 로 들어오자마자 새 판으로 갈아탄 경우(조용히 + 문을 넘겨받음) — 사용자에게는 앱을 켠 것이므로 초록 화면부터 */
       try{ sessionStorage.setItem('b3nav_quiet', '1'); sessionStorage.setItem('b3nav_gate_carry', 'BACK'); }catch(e){}
-      return loadApp('');
-    }).then(function(w2){
-      check('order', !!w2.document.querySelector('.fx-boot'), 'QR 로 들어오자마자 새 판으로 갈아탔는데 초록 켜는 화면이 없음');
+      return loadWatch('');
+    }).then(function(r2){
+      var w2 = r2.w;
+      check('order', r2.seen.boot, 'QR 로 들어오자마자 새 판으로 갈아탔는데 초록 켜는 화면이 안 보였음');
       return waitFor(function(){ return booted(w2) && screenOf(w2) === 'sqrok'; }, 30000, '갈아탄 뒤 「여기가 맞나요?」가 안 뜸').then(function(){
         check('order', txt(w2, 'qrOkName') === '후문', '갈아탄 뒤 넘겨받은 문이 후문이 아님 : ' + txt(w2, 'qrOkName'));
         w2.QRNAV.clear();
+        return waitFor(function(){ return !w2.document.querySelector('.fx-boot'); }, 30000, '켜는 화면이 안 끝남');
+      }).then(function(){
         /* 그냥 조용히 갈아탈 때(첫 화면에서 새 판이 옴) — 켜는 화면이 두 번 나오지 않게 건너뛴다 */
         try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(e){}
-        return loadApp('');
+        return loadWatch('');
       });
-    }).then(function(w3){
-      check('order', !w3.document.querySelector('.fx-boot'), '조용히 새 판으로 갈아탔는데 초록 켜는 화면이 또 나옴');
-      check('order', w3.document.documentElement.classList.contains('bootQuiet'), '조용히 갈아탈 때 맨 앞의 켜는 화면 바탕을 감추지 않음 — 검은 화면이 번쩍인다');
+    }).then(function(r3){
+      check('order', !r3.seen.boot, '조용히 새 판으로 갈아탔는데 초록 켜는 화면이 또 나옴');
+      check('order', r3.w.document.documentElement.classList.contains('bootQuiet'), '조용히 갈아탈 때 맨 앞의 켜는 화면 바탕을 감추지 않음 — 검은 화면이 번쩍인다');
     });
   });
 }

@@ -90,6 +90,7 @@ function loadWatch(q, keepAsk){
 /* 문 하나를 QR 로 열고 사용자 순서를 본다 (한 단계씩) :
    QR → 초록 글 화면 → 쉬운 사용모드 켜기/끄기(따로 한 화면) → 답 → 「여기가 맞나요? ○문」 */
 function gateFlow(key, name, yes, who){
+  try{ sessionStorage.removeItem('b3nav_easy_answered'); }catch(e){}   // QR 을 찍으면 보통 새 탭 — 그 창에서는 아직 안 답했다
   return loadWatch('?gate=' + key, true).then(function(r){
     var w = r.w, d = w.document;
     check('order', r.seen.boot, who + name + ' QR 인데 초록 켜는 화면이 안 보였음');
@@ -135,12 +136,15 @@ function testOrder(){
       });
     });
   }).then(function(){
-    /* ④ QR 로 들어오자마자 새 판으로 갈아탄 경우(조용히 + 문을 넘겨받음) — 사용자에게는 앱을 켠 것 : 초록 화면부터, 쉬운 사용모드도 묻는다 */
-    try{ localStorage.setItem('b3nav_easy', '0'); sessionStorage.setItem('b3nav_quiet', '1'); sessionStorage.setItem('b3nav_gate_carry', 'BACK'); }catch(e){}
+    /* ④ QR 로 들어와 **켜는 화면 도중에** 새 판으로 갈아탄 경우(b3nav_boot_cont + 문을 넘겨받음, 아직 안 답함)
+         — 새 판이 켜는 화면을 「이어서」(줄을 한꺼번에) 보이고, 쉬운 사용모드를 묻고, 「여기가 맞나요? 후문」 (2026-10-21 「초록 화면이 두 번」) */
+    try{ localStorage.setItem('b3nav_easy', '0'); sessionStorage.removeItem('b3nav_easy_answered'); sessionStorage.setItem('b3nav_boot_cont', '1'); sessionStorage.setItem('b3nav_gate_carry', 'BACK'); }catch(e){}
     return loadWatch('');
   }).then(function(r2){
-    var w2 = r2.w, d2 = w2.document;
-    check('order', r2.seen.boot, 'QR 로 들어오자마자 새 판으로 갈아탔는데 초록 켜는 화면이 안 보였음');
+    var w2 = r2.w, d2 = w2.document, logAt = '';
+    check('order', r2.seen.boot, '켜는 화면 도중에 갈아탔는데 새 판에 초록 켜는 화면이 없음');
+    var lg = d2.getElementById('fxBootLog'); logAt = lg ? lg.textContent : '';
+    check('order', logAt.indexOf('▊') < 0 || logAt.split('\n').length >= 3, '켜는 화면을 이어서 보이지 않고 한 글자씩 처음부터 다시 찍음 : ' + logAt.slice(0, 60));
     return waitFor(function(){ return !!d2.querySelector('.ezAsk') && !d2.querySelector('.fx-boot'); }, 60000, '갈아탄 뒤 초록 화면 다음에 쉬운 사용모드(「처음이세요?」)가 안 뜸').then(function(){
       check('order', !r2.seen.together && !r2.seen.gap, '갈아탄 뒤 초록 화면과 쉬운 사용모드가 한 단계씩이 아님');
       r2.stop();
@@ -148,7 +152,17 @@ function testOrder(){
       return waitFor(function(){ return !d2.querySelector('.fx-boot') && booted(w2) && screenOf(w2) === 'sqrok'; }, 30000, '갈아탄 뒤 「여기가 맞나요?」가 안 뜸');
     }).then(function(){
       check('order', txt(w2, 'qrOkName') === '후문', '갈아탄 뒤 넘겨받은 문이 후문이 아님 : ' + txt(w2, 'qrOkName'));
-      w2.QRNAV.clear();
+      /* ④-2 답한 뒤 같은 창에서 조용히 갈아탄 경우(다른 앱에 갔다 옴 · 조용히 + 문을 넘겨받음) — 초록 화면도, 쉬운 사용모드도 다시 나오지 않는다 */
+      try{ sessionStorage.setItem('b3nav_quiet', '1'); sessionStorage.setItem('b3nav_gate_carry', 'BACK'); }catch(e){}
+      return loadWatch('');
+    });
+  }).then(function(r4){
+    var w4 = r4.w, d4 = w4.document;
+    return waitFor(function(){ return booted(w4) && screenOf(w4) === 'sqrok'; }, 30000, '답한 뒤 갈아탔는데 「여기가 맞나요?」가 안 뜸').then(function(){ return sleep(1200); }).then(function(){
+      r4.stop();
+      check('order', !r4.seen.boot, '답한 뒤 같은 창에서 갈아탔는데 초록 켜는 화면이 또 나옴 (두 번)');
+      check('order', !d4.querySelector('.ezAsk') && !r4.seen.ask, '답한 뒤 같은 창에서 갈아탔는데 쉬운 사용모드를 또 물음');
+      w4.QRNAV.clear();
       /* ⑤ 그냥 조용히 갈아탈 때(첫 화면에서 새 판이 옴) — 켜는 화면이 두 번 나오지 않게 건너뛴다 */
       try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(e){}
       return loadWatch('');

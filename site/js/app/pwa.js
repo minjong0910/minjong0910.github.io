@@ -9,12 +9,11 @@ try{
   }
 }catch(e){}
 /* 새 판으로 조용히 바꿔 단 직후면 index.html 맨 앞의 켜는 화면 바탕(#fxPre)을 감춘다 — 켜는 화면을 건너뛰는 때다(boot.js · 2026-10-20).
-   단, 출입문 QR 로 막 들어오자마자 갈아탄 경우(문을 넘겨받음 — 아래 ①)는 사용자에게 「앱을 켠 것」이므로 켜는 화면부터 다시 보여 준다. */
+   (켜는 화면 도중에 갈아탔으면 b3nav_boot_cont — 바탕은 그대로 두고 boot.js 가 켜는 화면을 이어서 보여 준다. 아래 applyUpdate)
+   2026-10-21 : 예전에는 출입문 QR 로 막 들어와 갈아탔으면(문을 넘겨받음) 켜는 화면을 처음부터 다시 보여 줬는데,
+   사용자 폰에서 「초록 화면이 두 번」 떴다 — 그 규칙은 뺐다. */
 try{
-  if(sessionStorage.getItem('b3nav_quiet') === '1'){
-    if(sessionStorage.getItem('b3nav_gate_carry')) sessionStorage.removeItem('b3nav_quiet');
-    else document.documentElement.classList.add('bootQuiet');
-  }
+  if(sessionStorage.getItem('b3nav_quiet') === '1') document.documentElement.classList.add('bootQuiet');
 }catch(e){}
 
 /* ══════════ DIAG — 문제 기록 (2026-09-25) ══════════
@@ -582,18 +581,24 @@ var PWA = (function(){
              ① 첫 화면 ② 아직 화면을 한 번도 건드리지 않았을 때(잃을 것이 없다)
              ③ 화면이 안 보이는 동안(길안내·도착·QR 중이 아니면 — 눈에 띄지 않게 갈아탄다) */
         var id = on ? on.id : '';
-        var busy = (id === 's6' || id === 's7' || id === 'sqr' || id === 'sqrok');
-        var okNow = (!on || id === 's1')
-                 || !userActed
-                 || (document.visibilityState === 'hidden' && !busy);
+        /* 2026-10-21 사용자 「QR 을 읽고 크롬에서 켜지면 초록 화면이 두 번 뜬다」 — 켜는 화면이 끝나고 쉬운 사용모드 화면이나
+           「여기가 맞나요?」를 보고 있을 때 갈아타서, 눈앞에서 앱이 한 번 더 켜졌다(새 판을 올린 직후 · 전에 열어 본 폰). 그래서 :
+             · 켜는 화면이 떠 있는 동안이면 바로 갈아타되, 새 판이 켜는 화면을 「이어서」 보여 준다(b3nav_boot_cont → boot.js).
+             · 켜는 화면이 끝난 뒤 — 쉬운 사용모드를 묻는 중 · 여기가 맞나요? · 길안내 · 도착 · QR 카메라 — 에서는 기다렸다가,
+               첫 화면으로 오거나 화면이 안 보일 때(다른 앱으로 갔을 때) 조용히 갈아탄다. */
+        var bootEl = document.querySelector('.fx-boot');
+        var splash = !!(bootEl && bootEl.style.willChange !== 'clip-path');   // 걷히는 중이면 이미 끝난 것으로 본다
+        var asking = !!document.querySelector('.ezAsk');
+        var busy = (id === 's6' || id === 's7' || id === 'sqr' || id === 'sqrok' || asking);
+        var okNow = splash
+                 || (!busy && ((!on || id === 's1') || !userActed))
+                 || (document.visibilityState === 'hidden' && !(id === 's6' || id === 's7' || id === 'sqr'));
         if(!okNow) return;
         reloaded = true;
         if(timer) clearInterval(timer);
-        /* 다시 뜰 때 켜는 화면(부팅 연출)을 건너뛰게 표시를 남긴다 — boot.js 가 이것을 본다.
+        /* 다시 뜰 때 : 켜는 화면 도중이었으면 이어서(b3nav_boot_cont), 아니면 켜는 화면을 건너뛴다(b3nav_quiet) — boot.js 가 본다.
            안 그러면 사용자 눈에 앱이 두 번 켜지는 것처럼 보인다. */
-        /* 단, 켜는 화면이 아직 떠 있으면(QR 을 찍자마자 새 판으로 갈아탈 때) 표시를 남기지 않는다 —
-           새 판도 초록 켜는 화면부터 다시 보여 줘야 「초록 화면 → 처음이세요? → 앱」 순서가 지켜진다 (2026-10-20) */
-        if(!document.querySelector('.fx-boot')){ try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(err){} }
+        try{ sessionStorage.setItem(splash ? 'b3nav_boot_cont' : 'b3nav_quiet', '1'); }catch(err){}
         /* 출입문 QR 로 막 들어와 아직 「여기가 맞나요?」에 답하지 않았으면 그 문을 넘겨준다 (위 ① 참고) */
         var carry = gateFromUrl || (id === 'sqrok' ? gateTaken : null);
         if(carry){ try{ sessionStorage.setItem('b3nav_gate_carry', carry); }catch(err){} }

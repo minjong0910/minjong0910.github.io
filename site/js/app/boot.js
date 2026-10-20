@@ -56,6 +56,10 @@ function scanReveal(boot, cb){
       return;
     }
   }catch(err){}
+  /* 2026-10-21 : 켜는 화면 도중에 새 판으로 갈아탔으면(pwa.js applyUpdate — b3nav_boot_cont) 처음부터 다시 한 글자씩 찍지 않고
+     줄을 한꺼번에 보이며 이어 간다 — 사용자 눈에는 켜는 화면이 한 번만 뜬다(사용자 : 「초록 화면이 두 번 뜬다」). */
+  var cont = false;
+  try{ cont = sessionStorage.getItem('b3nav_boot_cont') === '1'; if(cont) sessionStorage.removeItem('b3nav_boot_cont'); }catch(err){}
 
   var boot = pre || makeOverlay('fx-boot');
   var preFirst = '';                        // 바탕에 미리 찍혀 있던 첫 줄 (커서 ▊ 뺌)
@@ -79,6 +83,7 @@ function scanReveal(boot, cb){
     if(!queue.length){ typing = false; maybeFinish(); return; }
     typing = true;
     var text = queue.shift(), ci = 0;
+    if(cont){ lines.push(text); paint(); setTimeout(typeNext, 0); return; }   // 이어서 — 한 줄씩 한꺼번에
     (function step(){
       if(done) return;
       if(ci < text.length){ ci += 2; paint(text.slice(0, ci) + '▊'); setTimeout(step, 12); }

@@ -28,7 +28,8 @@ var EASY = (function(){
      시험판 QR(?easyask=1)처럼, 예전에 답한 폰이라도 출입문 QR 로 들어오면 **매번** 묻는다.
      이미 켜 둔 사람은 묻지 않고 켜진 채로 「여기가 맞나요?」부터 안내한다. ?gate= 는 pwa.js 가 먼저 떼어 두므로 PWA 에 묻는다. */
   var forceAsk = false;
-  try{ forceAsk = !!(typeof PWA !== 'undefined' && PWA.cameFromGate && PWA.cameFromGate()) && !/[?&]easy=[01](&|$)/.test(qs); }catch(e){}
+  try{ forceAsk = !!(typeof PWA !== 'undefined' && PWA.cameFromGate && PWA.cameFromGate()) && !/[?&]easy=[01](&|$)/.test(qs)
+                  && sessionStorage.getItem('b3nav_easy_answered') !== '1'; }catch(e){}   // 같은 창에서 이미 답했으면(새 판으로 갈아탄 뒤 등) 또 묻지 않는다
   function asked(){ return !forceAsk && lsGet(KEY_ASK) === '1'; }
 
   function ko(){ return typeof LANG === 'undefined' || LANG !== 'en'; }
@@ -249,6 +250,7 @@ var EASY = (function(){
   }
   function set(v){
     on = !!v; lsSet(KEY_ON, on ? '1' : '0'); lsSet(KEY_ASK, '1'); forceAsk = false;   // 이번 QR 에서는 답했다
+    try{ sessionStorage.setItem('b3nav_easy_answered', '1'); }catch(e){}
     syncButtons(); lastKey = ''; fSig = '';
     if(on) loop(); else stop();
   }

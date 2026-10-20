@@ -45,14 +45,20 @@ function scanReveal(boot, cb){
      pwa.js 가 화면을 새로 고치기 직전에 이 표시를 남긴다 — 그래야 사용자 눈에는
      '앱이 한 번 켜졌다'로만 보이고, 켜는 장면이 두 번 나오지 않는다.
      (앱 자체는 start.js 가 켜므로 이 덮개를 건너뛰어도 화면은 정상으로 뜬다) */
+  /* 2026-10-20 : 이 파일은 3D 같은 큰 파일 뒤에 읽혀서, 그것들을 받는 동안 앱 첫 화면이 먼저 비쳤다
+     (사용자 : 「QR 을 찍으면 설명한 순서대로 안 뜬다」 — 처음 여는 폰은 1초 넘게). 그래서 index.html 맨 앞에
+     켜는 화면의 바탕(#fxPre)을 미리 그려 두고, 여기서 그것을 이어받는다. */
+  var pre = document.getElementById('fxPre');
   try{
     if(sessionStorage.getItem('b3nav_quiet') === '1'){
       sessionStorage.removeItem('b3nav_quiet');
+      if(pre) pre.remove();                 // pwa.js 가 미리 감춰 두었다(html.bootQuiet)
       return;
     }
   }catch(err){}
 
-  var boot = makeOverlay('fx-boot');
+  var boot = pre || makeOverlay('fx-boot');
+  if(pre){ pre.removeAttribute('id'); pre.classList.remove('fx-pre'); }
   var ko = (typeof LANG === 'undefined' || LANG === 'ko');
   boot.innerHTML =
     '<div class="fx-scan-noise"></div>' +
@@ -91,7 +97,10 @@ function scanReveal(boot, cb){
   }
   function finishBoot(){
     if(done) return; done = true;
-    scanReveal(boot, function(){ boot.remove(); });
+    function reveal(){ scanReveal(boot, function(){ boot.remove(); }); }
+    /* 처음인 사람 : 걷기 전에 이 초록 화면 위에서 「처음이세요?」를 먼저 묻고, 답하면 걷는다 (easy.js askFirst · 2026-10-20 사용자 순서) */
+    if(typeof EASY !== 'undefined' && EASY.askFirst && EASY.askFirst(reveal)) return;
+    reveal();
   }
   boot.addEventListener('click', finishBoot);
   setTimeout(finishBoot, MAX_MS);   // 안전장치 — 무슨 일이 있어도 이 시간 뒤에는 앱을 보여 준다

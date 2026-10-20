@@ -15,3 +15,7 @@
 .fx-scan-flash{position:absolute;inset:0;background:#DFF7FF;opacity:0;z-index:4;pointer-events:none;
   transition:opacity .16s ease;}
 .fx-scan-flash.go{opacity:.92;}
+
+/* 2026-10-20 : index.html 맨 앞에 미리 그려 둔 켜는 화면 바탕(#fxPre) — boot.js 가 이어받는다.
+   새 판으로 조용히 바꿔 단 직후(b3nav_quiet)에는 켜는 화면을 건너뛰므로 pwa.js 가 html.bootQuiet 를 붙여 감춘다. */
+html.bootQuiet .fx-pre{display:none;}

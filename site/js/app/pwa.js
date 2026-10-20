@@ -8,6 +8,14 @@ try{
     var themeMeta = document.querySelector('meta[name="theme-color"]'); if(themeMeta) themeMeta.setAttribute('content', '#EEF3F8');
   }
 }catch(e){}
+/* 새 판으로 조용히 바꿔 단 직후면 index.html 맨 앞의 켜는 화면 바탕(#fxPre)을 감춘다 — 켜는 화면을 건너뛰는 때다(boot.js · 2026-10-20).
+   단, 출입문 QR 로 막 들어오자마자 갈아탄 경우(문을 넘겨받음 — 아래 ①)는 사용자에게 「앱을 켠 것」이므로 켜는 화면부터 다시 보여 준다. */
+try{
+  if(sessionStorage.getItem('b3nav_quiet') === '1'){
+    if(sessionStorage.getItem('b3nav_gate_carry')) sessionStorage.removeItem('b3nav_quiet');
+    else document.documentElement.classList.add('bootQuiet');
+  }
+}catch(e){}
 
 /* ══════════ DIAG — 문제 기록 (2026-09-25) ══════════
    특정 기기에서만 나는 문제를 손에 잡히게 하려고 둔다.
@@ -577,7 +585,9 @@ var PWA = (function(){
         if(timer) clearInterval(timer);
         /* 다시 뜰 때 켜는 화면(부팅 연출)을 건너뛰게 표시를 남긴다 — boot.js 가 이것을 본다.
            안 그러면 사용자 눈에 앱이 두 번 켜지는 것처럼 보인다. */
-        try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(err){}
+        /* 단, 켜는 화면이 아직 떠 있으면(QR 을 찍자마자 새 판으로 갈아탈 때) 표시를 남기지 않는다 —
+           새 판도 초록 켜는 화면부터 다시 보여 줘야 「초록 화면 → 처음이세요? → 앱」 순서가 지켜진다 (2026-10-20) */
+        if(!document.querySelector('.fx-boot')){ try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(err){} }
         /* 출입문 QR 로 막 들어와 아직 「여기가 맞나요?」에 답하지 않았으면 그 문을 넘겨준다 (위 ① 참고) */
         var carry = gateFromUrl || (id === 'sqrok' ? gateTaken : null);
         if(carry){ try{ sessionStorage.setItem('b3nav_gate_carry', carry); }catch(err){} }

@@ -28,6 +28,9 @@
 <script src="js/app/pwa.js"></script>
 
 <div class="phone">
+  <!-- 초록 켜는 화면의 바탕 (2026-10-20) — 맨 먼저 그려 둔다. boot.js 는 3D 같은 큰 파일 뒤에 읽혀서
+       그것들을 받는 동안 앱 첫 화면이 먼저 비쳤다(사용자 : QR 을 찍으면 순서대로 안 뜬다). boot.js 가 이것을 이어받는다. -->
+  <div class="fx-overlay fx-boot fx-pre" id="fxPre"><div class="fx-scan-noise"></div><div class="fx-boot-body"><pre>▊</pre></div></div>
   <div class="notch"><i></i></div>
   <div class="topIcons" style="z-index:60;">
     <!-- 인터넷 상태 — 켜져 있으면 녹색 동그라미, 끊겨 있으면 색 없는 동그라미.

@@ -36,7 +36,7 @@ function applyLang(){
   if(typeof syncTripBtn==='function') syncTripBtn();
   if(typeof PWA!=='undefined') PWA.sync();
   if(typeof rebuildAllFloors==='function') rebuildAllFloors();
-  if(typeof curFloor!=='undefined' && curFloor!==undefined && typeof groupB!=='undefined' && groupB && typeof showFloorDetail==='function') showFloorDetail(curFloor);
+  if(typeof curFloor!=='undefined' && curFloor!==undefined && typeof groupB!=='undefined' && groupB && typeof showFloorDetail==='function') showFloorDetail(curFloor, true);   // 2026-10-20 : true — 설정에서 언어를 바꾸면 층 상세 화면으로 튀어 가던 것 (종합검진)
   if(typeof refreshGuideTitles==='function') refreshGuideTitles();
   if(typeof refreshAllPhotoLang==='function') refreshAllPhotoLang();
   if(typeof steps!=='undefined' && steps && steps.length && typeof render6==='function' && document.getElementById('ins')) render6(true);

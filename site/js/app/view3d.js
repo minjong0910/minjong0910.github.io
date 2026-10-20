@@ -30,6 +30,26 @@ var BUILDING_MID_Z = (GLOBAL_TOP_Z+GLOBAL_BOT_Z)/2;
 var BUILDING_Z_STRETCH = 1.45;
 var camTarget=new THREE.Vector3(0,FLOOR_H*2,BUILDING_MID_Z*BUILDING_Z_STRETCH);
 
+/* 2026-10-20 종합검진 : 3D(WebGL)를 못 쓰는 폰 — 아이폰 「차단 모드」, 막혔거나 오래된 그래픽, 메모리가 모자랄 때 —
+   에서는 three.js 가 렌더러를 만들다 오류를 던져 bootApp 이 거기서 멈췄다. 장소 버튼 · 첫 화면 · 출입문 QR 이 하나도 안 돌았다.
+   → 그림만 안 그리는 대역 렌더러를 쓴다. 3D 칸은 비지만 찾기 · 층 고르기 · 사진 길안내 · 도착은 그대로 된다.
+     (앱 코드가 쓰는 렌더러 기능은 이것뿐이다 — setPixelRatio · getPixelRatio · setSize · render · domElement · shadowMap · info · getContext) */
+var NO_WEBGL = false;
+function makeNoGLRenderer(cv){
+  NO_WEBGL = true;
+  try{ document.documentElement.classList.add('noGL3d'); }catch(e){}   // 3D 가 있어야 하는 버튼(경로 미리보기 · 직접 걸어보기 · 크게 보기)은 숨긴다 (app.css)
+  /* 빈 검은 칸 대신 한 줄 알림 (3D 칸 자리에) */
+  try{
+    var m = document.createElement('div'); m.className = 'noGL';
+    m.innerHTML = '이 휴대폰에서는 3D 를 볼 수 없어요<br><b>「길안내 시작」을 누르면 사진으로 안내해요</b><small>3D is not available on this phone — photo guidance still works</small>';
+    cv.parentNode.insertBefore(m, cv.nextSibling); cv.style.display = 'none';
+  }catch(e){}
+  var pr = 1, nop = function(){};
+  return { isNoGL:true, domElement:cv, shadowMap:{enabled:false, type:0}, info:{render:{calls:0, triangles:0}, programs:[], memory:{}},
+           setPixelRatio:function(v){ pr = v || 1; }, getPixelRatio:function(){ return pr; }, setSize:nop, render:nop,
+           getContext:function(){ return null; }, setClearColor:nop, setAnimationLoop:nop, compile:nop, dispose:nop };
+}
+
 function init3D(){
   var cv=document.getElementById('c3d');
   var isMobilePerf = ('ontouchstart' in window) || navigator.maxTouchPoints>0 || /Mobi|Android|iPhone|iPad/.test(navigator.userAgent);
@@ -108,7 +128,8 @@ function init3D(){
      의자 다리(굵기 3.5cm)·문틀처럼 얇은 것이 화면에서 한 점보다 가늘어지면 통째로 사라져 보였다
      ("크리에이티브 존 의자 다리가 없다" 제보). 폰에서도 켠다 —
      요즘 폰 GPU 에서 MSAA 는 싸고, 이 장면은 픽셀보다 '그리는 개수'가 병목이라 부담이 크지 않다. */
-  renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:false,powerPreference:'high-performance'});
+  try{ renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:false,powerPreference:'high-performance'}); }
+  catch(err){ renderer = makeNoGLRenderer(cv); }      // 3D 를 못 쓰는 폰 — 아래 makeNoGLRenderer 참고
   /* 모바일 성능 최적화 : PCFSoftShadowMap은 그림자 지는 라이트마다 픽셀당 여러 번
      텍셀 샘플링을 해서 모바일 GPU에 부담이 크다 — 모바일에서는 그림자 자체를 꺼서
      프레임을 확보하고(그림자 없이도 앰비언트/디렉셔널 조명으로 입체감은 유지됨),

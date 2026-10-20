@@ -73,6 +73,7 @@ var SUGAI = (function(){
 
   var TFJS = ['lib/tf.min.js',       'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js'];
   var MNET = ['lib/mobilenet.min.js','https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js'];
+  var MODEL_URL = 'https://www.kaggle.com/models/google/mobilenet-v2/TfJs/050-224-classification/2/model.json?tfjs-format=file&tfhub-redirect=true';
 
   var REF = null, CODES = null, NAMES = null, DIM = 0;
   var net = null, loading = null, failed = false;
@@ -224,7 +225,11 @@ var SUGAI = (function(){
         /* 모델은 늘 tfhub 의 원래 모델(mobilenet_v2_050_224)을 쓴다. 기준 자료가 이 모델로 만들어졌다.
            예전에는 같은 서버의 model/ 을 먼저 찾았는데, 로컬 모델은 값이 달라 판별이 전부 틀어졌고
            (2026-09-18) 두지 않기로 해서 매번 404 만 남겼다. 앱으로 포장할 때는 tfhub 모델 파일을 그대로 받아 넣는다. */
-        return mobilenet.load({version:2, alpha:0.5});
+        /* 2026-10-20 종합검진 : tfhub.dev 가 Kaggle 로 옮겨 가면서 라이브러리의 옛 주소
+           (tfhub.dev/…/mobilenet_v2_050_224/classification/2/model.json?tfjs-format=file)가 404 가 되어 AI 가 조용히 꺼져 있었다.
+           같은 모델(같은 이름 · 같은 값)을 Kaggle 이 그대로 내준다 — 기준 자료와 값이 같은지 앱 사진으로 확인함. 안 되면 옛 주소도 한 번. */
+        return mobilenet.load({version:2, alpha:0.5, modelUrl:MODEL_URL, inputRange:[0, 1]})
+          ['catch'](function(){ return mobilenet.load({version:2, alpha:0.5}); });
       })
       .then(function(m){
         net = m;

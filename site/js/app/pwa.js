@@ -532,6 +532,12 @@ var PWA = (function(){
       if(reg.active) reg.active.postMessage({type:'status'});
     });
   }
+  /* 나머지(사진·3D) 받기를 이어 가라고 — sw.js 는 활성화를 붙잡지 않고 따로 받는다(2026-10-20 종합검진). 다 받았으면 금방 끝난다. */
+  function askRest(){
+    navigator.serviceWorker.ready.then(function(reg){
+      if(reg.active) reg.active.postMessage({type:'rest'});
+    });
+  }
   if(window.top === window.self){
     if(!('serviceWorker' in navigator)) off.state = 'nosupport';
     else if(swWanted()){
@@ -594,6 +600,7 @@ var PWA = (function(){
         location.reload();
       }
       navigator.serviceWorker.addEventListener('controllerchange', function(){
+        askRest();                               // 새 일꾼이 나머지를 다 받도록 (처음 설치 때도)
         if(!hadSW || reloaded) return;
         waiting = true;
         applyUpdate();
@@ -609,7 +616,7 @@ var PWA = (function(){
         /* updateViaCache:'none' — sw.js 자체는 브라우저 캐시를 거치지 않고 늘 새로 확인한다 */
         navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(function(reg){
           swReg = reg;
-          askStatus();
+          askStatus(); askRest();
           reg.addEventListener('updatefound', function(){ off.state = 'saving'; syncOff(); });
           checkUpdate();                            // 앱을 열 때마다 새 판이 있는지 물어본다
           keepStore();                              // 받아 둔 것을 지워도 되는지 — 지우지 말아 달라고 한 번

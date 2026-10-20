@@ -447,7 +447,7 @@
   .recentEmpty{color:#5A6472;font-size:0.7812rem;padding:0.875rem 0.25rem;text-align:center;}
   .recentItem{position:relative;border-radius:0.75rem;flex:0 0 auto;}
   .recentItem .rrow{display:flex;align-items:center;gap:0.625rem;background:#0D0F18;border:1px solid #1A1D2B;
-    border-radius:0.75rem;padding:0.75rem 0.875rem;cursor:pointer;touch-action:pan-y;user-select:none;}
+    border-radius:0.75rem;padding:0.75rem 0.875rem;cursor:pointer;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
   .recentItem .rrow:active{border-color:#00E5FF;}
   .recentItem .ric{color:#5A6472;font-size:0.8125rem;flex:0 0 auto;}
   .recentItem .rtxt{flex:1;min-width:0;color:#93A1B0;font-size:0.8125rem;font-weight:600;
@@ -575,7 +575,8 @@
   .trip.on{background:linear-gradient(90deg,#00E5FF,#7B5CFF);border-color:#00E5FF;color:#05060A;}
 
   /* s5 */
-  #cfd{width:100%;flex:1;min-height:0;border-radius:0.875rem;background:#05060A;border:1px solid #1A1D2B;display:block;cursor:grab;}
+  /* touch-action:none — #c3d 와 같은 까닭(2026-10-20 종합검진 : 아이폰 사파리는 user-scalable=no 를 무시해서 층 지도를 두 손가락으로 벌리면 페이지 전체가 커졌다) */
+  #cfd{width:100%;flex:1;min-height:0;border-radius:0.875rem;background:#05060A;border:1px solid #1A1D2B;display:block;cursor:grab;touch-action:none;}
   .legend2{display:flex;gap:0.875rem;justify-content:center;margin:0.625rem 0;font-size:0.7188rem;color:#7C8AA0;flex-wrap:wrap;}
   .legend2 i{width:0.625rem;height:0.625rem;border-radius:2px;display:inline-block;margin-right:0.3125rem;}
   .legend2 em{font-style:normal;}
@@ -583,7 +584,7 @@
      그대로 보이고, 별도 줄을 차지하지 않아 이미 빽빽한 s4 레이아웃에 영향을 주지 않는다. */
   .legend3d{position:absolute;top:0.75rem;left:0.75rem;z-index:5;display:flex;flex-direction:column;gap:0.25rem;
     background:rgba(6,10,18,.62);border:1px solid rgba(0,229,255,.25);border-radius:0.5rem;
-    padding:0.4375rem 0.625rem;font-size:0.6562rem;color:#CFE3F2;pointer-events:none;backdrop-filter:blur(2px);}
+    padding:0.4375rem 0.625rem;font-size:0.6562rem;color:#CFE3F2;pointer-events:none;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
   .legend3d span{display:flex;align-items:center;gap:0.375rem;white-space:nowrap;}
   .legend3d i{width:0.5rem;height:0.5rem;border-radius:2px;flex:0 0 auto;}
   .legend3d em{font-style:normal;}
@@ -1394,8 +1395,8 @@
      앱 밝기는 쉬운 사용모드를 끈 때와 똑같고, 누를 곳은 노란 테두리·손가락·말풍선으로만 알려 준다. */
   .ezSpot{position:absolute;border-radius:0.875rem;box-shadow:none;transition:all .25s ease;}
   .ezRing{position:absolute;border-radius:0.875rem;border:3px solid #FFD43B;transition:all .25s ease;animation:ezRing 1.4s ease-out infinite;
-    outline:2px solid rgba(26,21,0,.55);outline-offset:0;}   /* 밝은 버튼 위에서도 노란 테두리가 보이게 바깥에 얇은 짙은 선 */
-  @keyframes ezRing{0%{box-shadow:0 0 0 0 rgba(255,212,59,.75)}100%{box-shadow:0 0 0 1.125rem rgba(255,212,59,0)}}
+    }   /* 밝은 버튼 위에서도 노란 테두리가 보이게 바깥에 얇은 짙은 선 — outline 은 아이폰 16.3 이하에서 둥근 모서리를 안 따라가 네모로 보여서(2026-10-20 종합검진) 그림자 첫 겹으로 그린다 */
+  @keyframes ezRing{0%{box-shadow:0 0 0 2px rgba(26,21,0,.55),0 0 0 2px rgba(255,212,59,.75)}100%{box-shadow:0 0 0 2px rgba(26,21,0,.55),0 0 0 1.125rem rgba(255,212,59,0)}}
   .ezFinger{position:absolute;font-size:2.25rem;line-height:1;transition:left .25s ease,top .25s ease;
     filter:drop-shadow(0 3px 6px rgba(0,0,0,.75));animation:ezTap 1.4s ease-in-out infinite;}
   @keyframes ezTap{0%,100%{transform:translate(0,0) scale(1)}45%{transform:translate(-0.25rem,-0.375rem) scale(1.05)}60%{transform:translate(0,0) scale(.94)}}   /* 덜 튀게 — 옆 글자를 건드리지 않게 */
@@ -1462,3 +1463,22 @@
   html.lt .hwShot img{border-color:#C5D0DC;box-shadow:0 0.375rem 1.25rem rgba(15,27,45,.18);}
   html.lt .hwShot figcaption,html.lt #sguide h4 small{color:#53647A;}
   html.lt .hwTip{background:#FFF6D6;border-color:#D9A800;color:#5C4400;}
+
+  /* ══ 폰을 가로로 눕히면 (2026-10-20 종합검진) ══
+     화면들은 세로로 긴 폰에 맞춰 만들었고(manifest 도 portrait), 가로로 눕힌 폰은 폭이 넓어 컴퓨터용 액자(390×790)가 떠서
+     위(← · ☰)와 아래가 잘린 채 움직일 수도 없었다(아이폰은 manifest 의 방향 고정을 따르지 않는다).
+     → 손가락으로 쓰는 기기를 가로로 낮게 눕혔을 때만 「세로로 돌려 주세요」 한 장을 덮는다. 세우면 그대로 이어진다. */
+  @media (pointer: coarse) and (orientation: landscape) and (max-height: 500px){
+    body::after{content:'📱  휴대폰을 세로로 돌려 주세요\A\APlease turn your phone upright';white-space:pre;text-align:center;
+      position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;
+      background:#0B0E13;color:#E7F6FF;font:800 20px/1.6 'Pretendard','맑은 고딕','Malgun Gothic',sans-serif;}
+  }
+
+  /* 3D(WebGL)를 못 쓰는 폰 — 3D 칸 자리의 알림 (view3d.js makeNoGLRenderer · 2026-10-20 종합검진) */
+  .noGL{flex:1;min-height:8rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.375rem;text-align:center;
+    padding:1rem;border-radius:0.875rem;border:1px dashed #2A3646;color:#9FB3C8;font-size:0.9375rem;line-height:1.6;word-break:keep-all;}
+  .noGL b{color:#E7F6FF;}
+  .noGL small{font-size:0.75rem;color:#6B7A90;}
+  html.lt .noGL{border-color:#AEBCCD;color:#44546A;}
+  html.lt .noGL b{color:#0F1B2D;}
+  html.noGL3d #s4 > .triprow, html.noGL3d #fsBtn{display:none !important;}

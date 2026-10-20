@@ -12,9 +12,9 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '33f7baffe3c1';   // 파일 249개 · 16.5MB
+var VERSION = '2de2dee18e8a';   // 파일 249개 · 16.5MB
 var FILES = [
-  ['3d/realistic.html','fad48337e13a',78531],
+  ['3d/realistic.html','9524531d6645',79368],
   ['3d/tex/01.png','c66e23f057fc',50906],
   ['3d/tex/02.jpg','7c73c547aee9',56154],
   ['3d/tex/03.jpg','adaf838029b9',11139],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','26be76fb790b',113785],
+  ['css/app.css','824b2fbaa4e5',115875],
   ['css/boot.css','b77d5cd2fa9b',1658],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
@@ -232,13 +232,13 @@ var FILES = [
   ['js/app/boot.js','eafa2629e77b',10019],
   ['js/app/building.js','95b01af4110d',23489],
   ['js/app/easy.js','f3a3cdb638ba',23703],
-  ['js/app/floor-detail.js','59f52121571a',19195],
+  ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','bcc83dabb095',44185],
   ['js/app/howto.js','0ad9905c1578',18518],
   ['js/app/icons.js','4cb6e33c5920',21136],
   ['js/app/overview3d.js','35ad3a4e8f9a',108858],
   ['js/app/photos.js','e5b7012b347d',52593],
-  ['js/app/pwa.js','35c2bdbade17',45503],
+  ['js/app/pwa.js','c5c6c66ef719',45957],
   ['js/app/qrnav.js','1ab04e81bfc1',20800],
   ['js/app/resume.js','b2a9974631f1',8244],
   ['js/app/roadview-1f.js','14696e0f4c2a',46207],
@@ -248,16 +248,16 @@ var FILES = [
   ['js/app/roadview-play.js','80b285a273bb',23711],
   ['js/app/roadview-roof.js','21f2a5e8678f',119576],
   ['js/app/roadview-stairs.js','7f992b896804',70498],
-  ['js/app/roadview.js','7c27eb33cc6b',133277],
+  ['js/app/roadview.js','e4ccae279c4a',133370],
   ['js/app/roomfix.js','1b886c300886',22082],
-  ['js/app/shell.js','eb9e53fbe79c',19974],
+  ['js/app/shell.js','943a6865e96e',20230],
   ['js/app/start.js','4065777331b0',1505],
-  ['js/app/sugai.js','678cd0fc5120',131221],
+  ['js/app/sugai.js','f96f8cd6ed74',131937],
   ['js/app/sugdb.js','b801511229ee',23438],
   ['js/app/suggest.js','27c314357e60',51946],
-  ['js/app/topmenu.js','aec172f6b342',3654],
-  ['js/app/ui.js','282878056bf6',28494],
-  ['js/app/view3d.js','58d5a74e0443',49725],
+  ['js/app/topmenu.js','0351042966f1',4319],
+  ['js/app/ui.js','ed1b84452a9b',28617],
+  ['js/app/view3d.js','27c66181cc45',51621],
   ['js/app/zoom.js','0bc33c826b8c',8395],
   ['js/vendor/jsqr.min.js','a07c909282f1',130501],
   ['js/vendor/jszip.min.js','57fff0459a39',97676],
@@ -366,17 +366,31 @@ self.addEventListener('install', function(e){
   e.waitUntil(precache(FILES.filter(isShell), false));
 });
 
-self.addEventListener('activate', function(e){
-  /* 순서가 중요하다 : 옛 판을 먼저 지우면 '안 바뀐 파일을 옛 판에서 옮겨 담기'를 못 해
-     14MB 를 전부 다시 받게 된다. 그래서 다 옮겨 담은 뒤에 지운다. */
-  e.waitUntil(self.clients.claim()
-    .then(function(){ return precache(FILES.filter(function(f){ return !isShell(f); }), true); })
+/* 나머지(사진·3D, 약 15MB) 받기 — 한 번에 하나만 돈다. 이미 받은 것은 건너뛰므로 몇 번을 불러도 이어서 받는다.
+   순서가 중요하다 : 옛 판을 먼저 지우면 '안 바뀐 파일을 옛 판에서 옮겨 담기'를 못 해
+   14MB 를 전부 다시 받게 된다. 그래서 다 옮겨 담은 뒤에 지운다. */
+var restRun = null;
+function precacheRest(){
+  if(restRun) return restRun;
+  preDone = FILES.filter(isShell).length;           // 핵심은 설치 때 받았다 — 진행 수를 거기서부터
+  restRun = precache(FILES.filter(function(f){ return !isShell(f); }), true)
     .then(function(){
       return caches.keys().then(function(names){
         return Promise.all(names.filter(function(n){ return n.indexOf('b3nav-') === 0 && n !== CACHE && n !== FONT_CACHE; })
                                 .map(function(n){ return caches.delete(n); }));
       });
-    }));
+    })
+    .then(function(){ restRun = null; }, function(err){ restRun = null; throw err; });
+  return restRun;
+}
+
+/* 2026-10-20 종합검진 : 예전에는 나머지를 activate 의 waitUntil 안에서 받았다. 그런데 워커가 '활성화 중'인 동안에는
+   이 워커가 맡은 화면의 요청(사진 · 3D · 글꼴)이 활성화가 끝날 때까지 줄 서서 기다린다(명세 — 크롬 · 사파리 모두).
+   그래서 처음 연 폰은 15MB 를 다 받을 때까지 길안내 사진이 안 떴다(느린 데이터면 수십 초).
+   → activate 는 넘겨받기만 하고 바로 끝낸다. 나머지는 곧바로 시작하되, 그 일의 수명은 화면이 보내는 'rest' 가 늘려 준다(pwa.js). */
+self.addEventListener('activate', function(e){
+  e.waitUntil(self.clients.claim());
+  precacheRest()['catch'](function(){});
 });
 
 /* 앱 파일 : 저장한 것 먼저 (주소 뒤 ?gate= 같은 것은 무시), 없으면 인터넷 */
@@ -419,6 +433,9 @@ self.addEventListener('message', function(e){
     e.waitUntil(caches.open(CACHE).then(function(c){ return c.keys(); }).then(function(keys){
       if(src) src.postMessage({type:'status', version:VERSION, cached:keys.length, total:FILES.length, bytes:totalBytes()});
     }));
+  } else if(d.type === 'rest'){
+    /* 화면이 켜질 때마다 보낸다 — 나머지를 다 받을 때까지 워커가 꺼지지 않게(못 받은 것만 이어서) */
+    e.waitUntil(precacheRest()['catch'](function(){}));
   } else if(d.type === 'simOffline'){
     SIM_OFFLINE = !!d.on;
     if(src) src.postMessage({type:'simOffline', on:SIM_OFFLINE});

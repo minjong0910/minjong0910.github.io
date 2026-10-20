@@ -1272,7 +1272,7 @@ function fpMkBox(w,h,d,col,op,emi){
    구워서(PMREM) 전역에서 재사용한다. */
 var FP_ENV_MAP=null;
 function fpEnsureEnvMap(){
-  if(FP_ENV_MAP || !renderer) return FP_ENV_MAP;
+  if(FP_ENV_MAP || !renderer || renderer.isNoGL) return FP_ENV_MAP;   // 3D 를 못 쓰는 폰(대역 렌더러)에서는 만들지 않는다
   var envScene=new THREE.Scene();
   var mats=[0xF2F0EA,0xF2F0EA,0xFFFFFF,0x8A8578,0xE8E6DE,0xE8E6DE].map(function(c){
     return new THREE.MeshBasicMaterial({color:c, side:THREE.BackSide});

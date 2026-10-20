@@ -314,9 +314,11 @@ function clearSearch(){
 /* ========== 즐겨찾기 ========== */
 function favId(t){ return t.kind+'_'+t.floor+'_'+(t.code||''); }
 function loadFavs(){
-  try{ return JSON.parse(localStorage.getItem('favRooms')||'[]'); }catch(e){ return []; }
+  try{ return JSON.parse(localStorage.getItem('favRooms')||'[]'); }catch(e){ return favMem || []; }
 }
-function saveFavs(list){ localStorage.setItem('favRooms', JSON.stringify(list)); }
+/* 2026-10-20 종합검진 : 사파리 「모든 쿠키 차단」이나 저장 공간이 가득 차면 setItem 이 오류를 던져 ☆ 가 안 눌렸다 — 이 화면 동안은 메모리에 */
+var favMem = null;
+function saveFavs(list){ favMem = list; try{ localStorage.setItem('favRooms', JSON.stringify(list)); }catch(e){} }
 function isFav(t){ return loadFavs().some(function(f){ return f.id===favId(t); }); }
 function toggleFav(){
   if(!target) return;

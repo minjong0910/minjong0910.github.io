@@ -22,7 +22,7 @@
 #     설치·오프라인(tests/pwa.html) QR 주소로 열기·기기별 설치 안내 13가지·12MB 저장·끊김 흉내·AI 는 인터넷 될 때만·QR 4장 다시 읽기
 #     안전망(tests/golden)        길안내 754가지·사진·화면·CSS·3D 그림 15장이 기록과 같은가
 #   pwsh -File 검사.ps1 -Ci      GitHub 자동 검사용 — 다른 컴퓨터라 글꼴·그래픽이 달라, 안전망에서 글자 폭·3D 그림 비교를 뺀다
-param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v149', [int]$Port = 8080)
+param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v150', [int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ROOT = $PSScriptRoot
@@ -47,6 +47,11 @@ Step '1 파일 검사'
 $ga = Join-Path $ROOT '.gitattributes'
 if((Test-Path $ga) -and ((Get-Content $ga -Raw) -match '(?m)^\*\s+-text')){ Ok '.gitattributes 줄바꿈 보호' } else { Bad '.gitattributes 의 "* -text" 가 없습니다 (git 이 줄바꿈을 바꾼다)' }
 if((Test-Path (Join-Path $ROOT 'model')) -or (Test-Path (Join-Path $SITE 'model'))){ Bad 'model\ 폴더가 있습니다 — 앱이 이 로컬 모델을 먼저 써서 판별이 틀어진다 (tfhub 모델과 값이 다름)' } else { Ok 'model\ 폴더 없음' }
+# 2026-10-20 종합검진 : AI 모델 주소가 살아 있는지 — tfhub.dev 가 Kaggle 로 옮기며 옛 주소가 404 가 되어 사진 AI 가 조용히 꺼져 있었다(아무도 몰랐다).
+#   인터넷이 없거나 잠깐 막혀도 배포까지 막지는 않게 [주의]로만 알린다.
+$mu = [regex]::Match([IO.File]::ReadAllText((Join-Path $SITE 'js\app\sugai.js'), $UTF), "var MODEL_URL = '([^']+)'").Groups[1].Value
+if(-not $mu){ Bad 'sugai.js 에서 AI 모델 주소(MODEL_URL)를 찾지 못했습니다' }
+else { try { $mr = Invoke-WebRequest $mu -TimeoutSec 15 -UseBasicParsing -MaximumRedirection 5; if($mr.Content -match 'weightsManifest'){ Ok 'AI 모델 주소(Kaggle)가 모델 파일을 내줍니다' } else { Warn ('AI 모델 주소가 모델 파일이 아닌 것을 내줍니다 — 사진 AI 가 꺼집니다 : ' + $mu) } } catch { Warn ('AI 모델 주소가 응답하지 않습니다 — 사진 AI 가 꺼집니다 : ' + $mu + ' (' + $_.Exception.Message + ')') } }
 
 # 화면 틀이 부르는 파일
 $html = [IO.File]::ReadAllText((Join-Path $SITE 'index.html'), $UTF)

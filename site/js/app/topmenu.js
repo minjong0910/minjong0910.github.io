@@ -37,11 +37,19 @@ var TOPMENU = (function(){
   function pick(fn){ setOpen(false); if(typeof fn === 'function') fn(); }
   /* 밝은 화면 스위치 — 메뉴는 열어 둔 채로 바뀌는 걸 바로 보여 준다 */
   function light(e){ if(e) e.stopPropagation(); setLight(!isLight()); }
-  /* 메뉴 밖을 누르면 닫기만 한다(그 아래 버튼은 눌리지 않게) */
-  document.addEventListener('click', function(e){
+  /* 메뉴 밖을 누르면 닫기만 한다(그 아래 버튼은 눌리지 않게)
+     2026-10-20 종합검진 : 아이폰 사파리는 빈 곳 · 글자처럼 누를 수 없는 곳을 탭하면 click 을 아예 안 보내서 메뉴가 안 닫혔다
+     → 손가락이 닿는 순간(pointerdown)에 닫고, 곧이어 오는 click 은 삼킨다(그 아래 버튼이 눌리지 않게). */
+  var swallowUntil = 0;
+  document.addEventListener('pointerdown', function(e){
     if(!isOpen()) return;
     var w = $('tmMenu'); if(w && w.contains(e.target)) return;
-    setOpen(false); e.stopPropagation(); e.preventDefault();
+    setOpen(false); swallowUntil = Date.now() + 600;
+  }, true);
+  document.addEventListener('click', function(e){
+    var w = $('tmMenu'), inside = !!(w && w.contains(e.target));
+    if(isOpen()){ if(inside) return; setOpen(false); e.stopPropagation(); e.preventDefault(); return; }
+    if(!inside && Date.now() < swallowUntil){ swallowUntil = 0; e.stopPropagation(); e.preventDefault(); }
   }, true);
   /* 관리자 화면 · QR 카메라 화면 · 사진 위치 고르기는 밝은 화면에서도 어두운 채로 (.dk — app.css 「밝은 화면」) */
   ['sqr', 'spick', 'sph', 'sadmin', 'sphmgr', 'spwgate', 'phsort', 'saidat'].forEach(function(id){

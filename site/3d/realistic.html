@@ -19,7 +19,7 @@
     background:linear-gradient(0deg,rgba(6,10,16,.78),rgba(6,10,16,0))}
   .b{pointer-events:auto;border:1px solid rgba(255,255,255,.2);background:rgba(20,26,34,.5);
     color:#eef1f4;font-size:12px;padding:7px 12px;border-radius:7px;cursor:pointer;
-    font-family:inherit;backdrop-filter:blur(10px);transition:.15s;white-space:nowrap}
+    font-family:inherit;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:.15s;white-space:nowrap}
   .b:hover{background:rgba(255,255,255,.18)}
   .b.on{background:#c96a3c;border-color:#c96a3c}
   #tip{position:absolute;bottom:56px;left:0;right:0;text-align:center;font-size:10.5px;
@@ -71,7 +71,17 @@ var SILL=1.52, WH=1.46, REV=0.34;   // 창대높이·창높이·창폭·기둥�
 
 /* ── 렌더러 ───────────────────────────────────────────────── */
 var cv=document.getElementById('cv');
-var renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true});
+/* 2026-10-20 종합검진 : 3D(WebGL)를 못 쓰는 폰에서는 여기서 오류가 나고 빈 칸만 남았다 — 그림만 안 그리는 대역을 쓰고 한 줄 알린다 */
+var renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true}); }
+catch(err){
+  var nop=function(){};
+  renderer={isNoGL:true, shadowMap:{}, setPixelRatio:nop, setSize:nop, render:nop, domElement:cv};
+  var nm=document.createElement('div');
+  nm.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#9FB3C8;font:600 14px/1.6 sans-serif;padding:16px';
+  nm.textContent='이 휴대폰에서는 3D 건물을 볼 수 없어요. 길안내는 그대로 쓸 수 있어요.';
+  document.body.appendChild(nm);
+}
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.outputEncoding=THREE.sRGBEncoding;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -103,8 +113,8 @@ var skyMesh=new THREE.Mesh(new THREE.SphereGeometry(900,32,20), skyMat);
 scene.add(skyMesh);
 
 /* 하늘로부터 환경맵(IBL) 생성 — 유리·금속 반사의 근거가 된다 */
-var pmrem=new THREE.PMREMGenerator(renderer);
-(function(){
+var pmrem=renderer.isNoGL ? null : new THREE.PMREMGenerator(renderer);   // 3D 를 못 쓰면 반사 환경도 만들지 않는다
+(function(){ if(!pmrem) return;
   var c=document.createElement('canvas'); c.width=1024; c.height=512;
   var x=c.getContext('2d');
   var g=x.createLinearGradient(0,0,0,512);

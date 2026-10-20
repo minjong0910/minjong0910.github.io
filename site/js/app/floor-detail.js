@@ -12,7 +12,8 @@ function initB(){
      여부를 전혀 확인하지 않고 항상 antialias:true, 픽셀비 2까지 써서
      휴대폰에서 불필요하게 무거웠다 — 메인 렌더러와 같은 기준으로 맞춘다. */
   var __isMobB = ('ontouchstart' in window) || navigator.maxTouchPoints>0 || /Mobi|Android|iPhone|iPad/.test(navigator.userAgent);
-  rB=new THREE.WebGLRenderer({canvas:cv,antialias:!__isMobB,powerPreference:'high-performance'});
+  try{ rB=new THREE.WebGLRenderer({canvas:cv,antialias:!__isMobB,powerPreference:'high-performance'}); }
+  catch(err){ rB = makeNoGLRenderer(cv); }      // 3D 를 못 쓰는 폰 (view3d.js makeNoGLRenderer)
   rB.setPixelRatio(Math.min(devicePixelRatio, __isMobB?1.75:2));
   sB=new THREE.Scene();
   sB.background=new THREE.Color(document.documentElement.classList.contains('lt') ? 0xDCE4EE : 0x0E1217);   // 밝은 화면이면 밝은 바탕 (topmenu.js)
@@ -202,7 +203,7 @@ function perfRender(){
     PERF.n = 0; PERF.ms = 0; PERF.t0 = now;
   }
 }
-function showFloorDetail(lv){
+function showFloorDetail(lv, stay){   // stay : 화면은 바꾸지 않고 다시 그리기만 (언어를 바꿀 때 — ui.js applyLang)
   document.getElementById('t5').textContent = (LANG==='ko')
     ? (lv==='B1' ? '지하 1층 · 크리에이티브 존'
                  : (lv==='R' ? '옥상 상세' : lv+'층 상세'))
@@ -304,8 +305,8 @@ function showFloorDetail(lv){
   thetaB=-Math.PI/2; phiB=0.12;   // 기존 0.24는 비스듬히 내려다봐서 평면도가 평행사변형처럼 살짝
                                     // 틀어져 보였다 — 더 수직에 가깝게(0.12) 낮춰서 도면이 반듯하게 보이도록.
   sB.add(groupB);
-  go('s5');
-  resizeB();
+  if(!stay) go('s5');
+  if(!stay || document.getElementById('s5').classList.contains('on')) resizeB();
 }
 function pos(o,x,y,z){ o.position.set(x,y,z); return o; }
 function bigLabel(t,c,k){ var l=labelSprite(t,c); l.scale.multiplyScalar(k||1.7); return l; }

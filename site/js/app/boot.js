@@ -58,7 +58,8 @@ function scanReveal(boot, cb){
   }catch(err){}
 
   var boot = pre || makeOverlay('fx-boot');
-  if(pre){ pre.removeAttribute('id'); pre.classList.remove('fx-pre'); }
+  var preFirst = '';                        // 바탕에 미리 찍혀 있던 첫 줄 (커서 ▊ 뺌)
+  if(pre){ var pp = pre.querySelector('pre'); preFirst = pp ? pp.textContent.replace(/▊$/, '') : ''; pre.removeAttribute('id'); pre.classList.remove('fx-pre'); }
   var ko = (typeof LANG === 'undefined' || LANG === 'ko');
   boot.innerHTML =
     '<div class="fx-scan-noise"></div>' +
@@ -112,7 +113,9 @@ function scanReveal(boot, cb){
   if(typeof ROOM_PHOTOS === 'object' && ROOM_PHOTOS) Object.keys(ROOM_PHOTOS).forEach(function(k){
     var c = (ROOM_PHOTOS[k] || []).length; if(c){ pk++; pc += c; }
   });
-  say(ko ? '> 공대 3호관 길안내' : '> Engineering Bldg 3 Navigator');
+  /* 첫 줄은 index.html 의 바탕(#fxPre)에 이미 찍혀 있으면 그대로 두고 이어서 찍는다 — 처음 여는 폰이 큰 파일을 받는 동안에도 초록 글이 보이게 (2026-10-20) */
+  var FIRST = ko ? '> 공대 3호관 길안내' : '> Engineering Bldg 3 Navigator';
+  if(preFirst === FIRST){ lines.push(FIRST); paint(); } else say(FIRST);
   say(ko ? ('> 건물 자료 ··· 지상 ' + FLOORS + '개 층 · 지하 1층 · 호실 ' + rooms + '곳')
          : ('> Building ··· ' + FLOORS + ' floors · B1 · ' + rooms + ' rooms'));
   /* 3D 는 글꼴을 받은 뒤(최대 1.5초) bootApp 이 만든다. 첫 화면에는 3D 가 없으므로 오래 기다리지 않는다 —

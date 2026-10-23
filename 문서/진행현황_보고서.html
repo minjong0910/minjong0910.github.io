@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>졸업작품 진행현황 보고 — 공대 3호관 길안내</title>
+<!--
+  졸업작품 진행현황 보고서 (지도교수님께 드리는 A4 PDF)
+  만들기 : pwsh -File 도구\진행현황보고서_만들기.ps1 [-Desktop]
+  숫자 출처 : README(정확도 · 기준선) · sw.js 오프라인 목록(249개 · 16.5MB) · 검사.ps1(23가지) · 재료 구매 신청서(10/21) · git 기록
+  그림 : img/ 아래 이름은 만들기 도구가 도구\발표그림\ppt\ 에서 복사해 넣는다
+-->
+<style>
+@page { size: A4; margin: 14mm 15mm 15mm 15mm;
+  @bottom-center { content: counter(page) " / " counter(pages); font: 8.5pt "Malgun Gothic"; color: #8A939D; } }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font-family: "Malgun Gothic", sans-serif; color: #2B3138; font-size: 9.2pt; line-height: 1.5; word-break: keep-all; }
+b, strong { color: #15181C; }
+.am { color: #B4530F; font-weight: 700; }
+.dim { color: #6B7684; }
+.sm { font-size: 8.4pt; }
+
+/* 머리 */
+.head { background: #1E2227; color: #fff; border-radius: 6px; padding: 12px 18px 11px; }
+.head .k { font-size: 8.5pt; letter-spacing: .25em; color: #C3C5C8; font-weight: 700; }
+.head h1 { margin: 3px 0 2px; font-size: 19pt; letter-spacing: -.01em; line-height: 1.25; }
+.head h1 em { font-style: normal; color: #E8A664; }
+.head .sub { color: #D5D7DA; font-size: 9.6pt; }
+
+table.info { width: 100%; border-collapse: collapse; margin: 9px 0 0; font-size: 8.9pt; }
+table.info th { width: 84px; text-align: left; background: #E9EBEE; color: #2B3138; font-weight: 700; padding: 4px 9px; border: 1px solid #D6DCE2; }
+table.info td { padding: 4px 9px; border: 1px solid #D6DCE2; }
+
+.one { margin: 9px 0 0; border-left: 5px solid #B4530F; background: #FDF5EE; padding: 7px 13px; font-size: 9.5pt; line-height: 1.55; }
+
+h2 { font-size: 12.4pt; margin: 13px 0 7px; padding-bottom: 4px; border-bottom: 2px solid #1E2227; display: flex; align-items: baseline; gap: 8px; break-after: avoid; }
+h2 .no { color: #B4530F; font-size: 12pt; }
+h2 .note { margin-left: auto; font-size: 8.4pt; font-weight: 400; color: #6B7684; }
+h3 { font-size: 10.4pt; margin: 12px 0 6px; break-after: avoid; }
+
+/* 영역별 상태 */
+.tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+.tile { border: 1px solid #D6DCE2; border-radius: 6px; padding: 7px 8px 6px; background: #fff; }
+.tile .t { font-size: 8.6pt; color: #6B7684; font-weight: 700; }
+.tile .big { font-size: 10.4pt; font-weight: 700; color: #15181C; margin: 3px 0 2px; line-height: 1.3; }
+.tile .d { font-size: 8.2pt; color: #4A5560; line-height: 1.45; }
+
+.chip { display: inline-block; font-size: 7.9pt; font-weight: 700; border-radius: 10px; padding: 1px 8px; white-space: nowrap; line-height: 1.6; }
+.c-done { background: #1E2227; color: #fff; }
+.c-ing  { background: #FBEADB; color: #B4530F; }
+.c-wait { background: #fff; color: #6B7684; border: 1px solid #AEB6BF; }
+
+/* 표 */
+table.t { width: 100%; border-collapse: collapse; font-size: 8.5pt; line-height: 1.45; }
+table.t th { background: #E9EBEE; text-align: left; padding: 4px 7px; border: 1px solid #D6DCE2; font-weight: 700; color: #2B3138; }
+table.t td { padding: 3.5px 7px; border: 1px solid #D6DCE2; vertical-align: top; }
+table.t tr { break-inside: avoid; }
+table.t td.c, table.t th.c { text-align: center; }
+table.t td.r { text-align: right; white-space: nowrap; }
+table.t tr.hi td { background: #FDF5EE; }
+table.t td.m { font-weight: 700; color: #15181C; white-space: nowrap; }
+
+/* 화면 줄 */
+.shots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 10px 0 0; break-inside: avoid; }
+.shots figure { margin: 0; text-align: center; }
+.shots img { height: 205px; width: auto; max-width: 100%; border-radius: 6px; border: 1px solid #D6DCE2; display: block; margin: 0 auto; }
+.shots figcaption { font-size: 8.2pt; margin-top: 4px; line-height: 1.35; }
+.shots figcaption b { display: block; font-size: 8.7pt; }
+
+/* 막대 */
+.bars { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 0; break-inside: avoid; }
+.bbox { border: 1px solid #D6DCE2; border-radius: 6px; padding: 9px 12px; }
+.bbox .h { font-weight: 700; font-size: 9.2pt; margin-bottom: 5px; }
+.bar { display: grid; grid-template-columns: 146px 1fr 44px; align-items: center; gap: 8px; margin: 4px 0; font-size: 8.4pt; }
+.bar .tr { height: 9px; background: #E9EBEE; border-radius: 5px; overflow: hidden; }
+.bar .fl { height: 100%; background: #AEB6BF; border-radius: 5px; }
+.bar .fl.a { background: #B4530F; }
+.bar .v { text-align: right; font-weight: 700; }
+
+/* 일정 */
+.cal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; break-inside: avoid; }
+.wk { border: 1px solid #D6DCE2; border-radius: 6px; padding: 9px 11px; background: #fff; }
+.wk.last { border-color: #E0B48C; background: #FDF5EE; }
+.wk .d { font-size: 8.4pt; color: #6B7684; font-weight: 700; }
+.wk .n { font-size: 10.6pt; font-weight: 700; margin: 2px 0 5px; }
+.wk ul { margin: 0; padding-left: 14px; font-size: 8.7pt; line-height: 1.55; }
+.wk li { margin: 2px 0; }
+.track { position: relative; height: 36px; margin: 2px 12px 8px; }
+.track .ln { position: absolute; left: 0; right: 0; top: 10px; height: 3px; background: #D6DCE2; border-radius: 2px; }
+.track .dt { position: absolute; top: 4px; width: 15px; height: 15px; border-radius: 50%; background: #fff; border: 3px solid #1E2227; transform: translateX(-50%); }
+.track .dt.now { background: #1E2227; }
+.track .dt.goal { border-color: #B4530F; background: #B4530F; }
+.track .lb { position: absolute; top: 21px !important; font-size: 8.2pt; font-weight: 700; transform: translateX(-50%); white-space: nowrap; }
+
+.box { border: 1px solid #D6DCE2; border-radius: 6px; padding: 9px 13px; background: #fff; break-inside: avoid; }
+.box .h { font-weight: 700; margin-bottom: 4px; }
+.box ul { margin: 0; padding-left: 15px; }
+.box li { margin: 2px 0; }
+.two { display: grid; grid-template-columns: 1.15fr 1fr; gap: 10px; }
+.pb { break-before: page; }
+.foot { margin-top: 16px; padding-top: 7px; border-top: 1px solid #D6DCE2; font-size: 8.2pt; color: #6B7684; }
+</style>
+</head>
+<body>
+
+<!-- ═════════════════════════ 1쪽 : 개요 · 한눈에 ═════════════════════════ -->
+<div class="head">
+  <div class="k">졸 업 작 품 &nbsp; 진 행 현 황 &nbsp; 보 고</div>
+  <h1>공대 3호관 <em>길안내</em></h1>
+  <div class="sub">영상 유사도 격차로 응답 수준을 가변하는 오프라인 실내 길안내 앱</div>
+</div>
+
+<table class="info">
+  <tr><th>팀</th><td>공3길 — 김민종 · 문성일 · 손의윤</td><th>지도교수</th><td>강규창 교수님</td></tr>
+  <tr><th>보고일</th><td>2026년 10월 24일 (토)</td><th>완성 목표</th><td><b>2026년 11월 11일 (수)</b> — <span class="am">18일 남음</span></td></tr>
+  <tr><th>공개 주소</th><td colspan="3">https://minjong0910.github.io &nbsp;<span class="dim sm">(설치형 웹앱 · 출입문 QR 로 바로 열림 · 지금 운영 중)</span></td></tr>
+</table>
+
+<div class="one">
+  <b>한 줄 요약</b> — 길안내 · 사진 AI 판정 · 제보와 승인 · 인터넷 없이 열기까지 <b>핵심 기능은 모두 완성되어 공개 주소에서 운영 중</b>이고,
+  10월 계획서 이후 <b>쉬운 사용모드 · 길안내 이어 하기 · 밝은 화면</b> 등 처음 온 사람을 위한 기능을 더했습니다.
+  남은 18일은 <b>실제 기기 점검 · 처음 온 사람 사용성 시험 · NFC 대비책 설치 · 최종 보고서와 발표 준비</b>에 씁니다.
+</div>
+
+<h2><span class="no">0</span> 영역별 진행 상태</h2>
+<div class="tiles">
+  <div class="tile"><div class="t">앱 개발</div><div class="big">핵심 기능 완성</div><span class="chip c-done">완료</span><div class="d" style="margin-top:5px">길안내 754가지 · 152곳 · 한국어/영어 · 공개 주소 운영 중</div></div>
+  <div class="tile"><div class="t">성능 개선</div><div class="big">확실할 때<br>10장 중 9장</div><span class="chip c-done">완료</span><div class="d" style="margin-top:5px">확신 상위 10% 자리 92.9% · 층 97.8%</div></div>
+  <div class="tile"><div class="t">안정화</div><div class="big">폰 흉내 점검<br>오류 0</div><span class="chip c-ing">마무리 중</span><div class="d" style="margin-top:5px">아이폰 · 삼성 실제 기기 점검이 남음</div></div>
+  <div class="tile"><div class="t">부품 구매</div><div class="big">NFC 태그<br>10개</div><span class="chip c-wait">승인 대기</span><div class="d" style="margin-top:5px">13,500원 · 10/21 신청 · 현장실습지원센터</div></div>
+  <div class="tile"><div class="t">발표 · 문서</div><div class="big">발표 자료<br>12쪽 완성</div><span class="chip c-ing">마무리 중</span><div class="d" style="margin-top:5px">최종 보고서 · 시연 연습이 남음</div></div>
+</div>
+
+<!-- ═════════════════════════ 1 지금까지 한 일 ═════════════════════════ -->
+<h2><span class="no">1</span> 지금까지 한 일 <span class="note">월별 경과 · 10월 하순은 계획서(10/15) 제출 이후</span></h2>
+<table class="t">
+  <tr><th style="width:74px">시기</th><th>한 일</th><th style="width:205px">결과</th></tr>
+  <tr><td class="m">4월</td><td>주제 선정 — 비콘 · 와이파이 장비 없이 되는 실내 길안내. 3호관 지하 1층~5층과 출입문 네 곳(정 · 후 · 동 · 서) 실측</td><td>층별 구조 확보</td></tr>
+  <tr><td class="m">5월</td><td>3호관 전층 3D 실내 모델 제작 (three.js, 좌표를 코드로 생성)</td><td>조감도 · 1인칭 「직접 걸어보기」</td></tr>
+  <tr><td class="m">6월</td><td>네 출입문 × 다섯 층의 경유점과 안내 문구 표</td><td>호실 · 화장실 · 비상계단 안내의 뼈대</td></tr>
+  <tr><td class="m">7월</td><td>사진 장소 판정 — MobileNet v2 로 사진을 숫자 1,280개로 바꿔 유사도 비교</td><td>첫 동작 확인</td></tr>
+  <tr><td class="m">8월</td><td>출입문 QR 4개 · 호실 번호판 글자 읽기(OCR) · 제보 서버와 보안 규칙</td><td>출발점 지정 · 호실 확인 · 제보</td></tr>
+  <tr><td class="m">9월</td><td>정확도 측정과 개선 · 4·5층 재촬영 322장 · 한 파일 앱(2만 줄)을 기능별 파일로 나눔 · 관리자 비밀번호를 코드에서 제거 ·
+      인터넷 없이 열리는 설치형 웹앱 · 네 문 × 다섯 층 길안내 완성 · 삼성 폰 3D 오류(노란 화면 · 문 사라짐) 해결 · <b>9/21 중간 발표</b> · 발명 명칭 확정</td>
+      <td>자리 정답 41.1% → 55.6% · 길안내 754가지</td></tr>
+  <tr><td class="m">10월 상순</td><td>「확실할 때만 답하기」로 전환 · 기준선 · 제거 실험 · 발명신고서와 특허 도면 9쪽 · 구조도 · 코드 안내 · <b>계획서 제출(10/15)</b></td><td>확신 상위 10% 자리 92.9%</td></tr>
+  <tr class="hi"><td class="m">10월 하순</td><td>
+      <b>쉬운 사용모드</b> + 사진 이용안내 10쪽(10/20) · <b>길안내 이어 하기</b>(10/19) · <b>밝은 화면 · ☰ 메뉴</b> · 버튼 테두리(10/19) ·
+      <b>초성 검색 · 건의함 하루 3번 · 관리자 방 이름 바꾸기</b> · 아이콘 교체(10/18) · 3D 배경 개선(10/18) ·
+      출입문 QR 최종본(10/20) · <b>종합 점검</b>(10/20) · 사진 AI 모델을 우리 서버로(10/21) · <b>NFC 태그 구매 신청</b>(10/21) ·
+      졸업작품 발표 자료(교수님 Type 2 양식, 12쪽, 10/24)</td>
+      <td>처음 온 사람도 누를 곳만 따라가면 됨 · 삼성 폰에서도 AI 동작</td></tr>
+</table>
+
+<!-- ═════════════════════════ 2 개발 현황 ═════════════════════════ -->
+<h2 class="pb"><span class="no">2</span> 개발 현황 <span class="note">2026-10-24 공개 주소 기준</span></h2>
+<table class="t">
+  <tr><th style="width:24px" class="c">#</th><th style="width:150px">기능</th><th>내용</th><th style="width:64px" class="c">상태</th></tr>
+  <tr><td class="c">1</td><td class="m">3D 건물</td><td>전층 조감도 · 층 상세 지도 · 1인칭 「직접 걸어보기」, 가야 할 길을 건물 위에 표시</td><td class="c"><span class="chip c-done">완료</span></td></tr>
+  <tr><td class="c">2</td><td class="m">길안내</td><td>네 출입문 × 지하 1층~5층, 호실 · 화장실 · 비상계단 <b>754가지</b>(한국어 · 영어). 단계마다 그 자리의 실제 사진과 한 문장</td><td class="c"><span class="chip c-done">완료</span></td></tr>
+  <tr><td class="c">3</td><td class="m">출입문 QR</td><td>정문 · 후문 · 동문 · 서문 4장 — 폰 기본 카메라로 찍으면 앱이 그 문에서 「여기가 맞나요?」로 열림. 안 읽히면 네 문 중 직접 고르기</td><td class="c"><span class="chip c-done">완료</span></td></tr>
+  <tr><td class="c">4</td><td class="m">인터넷 없이 열기</td><td>설치형 웹앱 — 처음 한 번 <b>249개 파일 · 16.5MB</b>(안내 사진 169장 포함)를 받아 두면 비행기 모드에서도 길안내</td><td class="c"><span class="chip c-done">완료</span></td></tr>
+  <tr><td class="c">5</td><td class="m">사진 AI 판정</td><td>MobileNet v2 + 번호판 글자 읽기, 1·2등 격차로 「자리 / 층 / 모름」 세 가지로만 답함. 10/21 모델을 우리 서버로 옮겨 삼성 폰에서도 동작</td><td class="c"><span class="chip c-done">완료</span></td></tr>
+  <tr><td class="c">6</td><td class="m">건의함 · 관리자</td><td>이용자가 낡은 사진을 찍어 올림(하루 3번) → 관리자 승인 전에는 아무 화면에도 반영 안 됨. 관리자가 방 이름을 바로 바꿀 수 있음</td><td class="c"><span class="chip c-done">완료</span></td></tr>
+  <tr class="hi"><td class="c">7</td><td class="m">쉬운 사용모드</td><td>QR → 초록 로고 → 「처음이세요?」 → 여기가 맞나요? 순서로, 켜면 진짜 화면 위에서 누를 곳을 손가락으로 짚어 줌 + 사진 이용안내 10쪽</td><td class="c"><span class="chip c-done">완료</span></td></tr>
+  <tr class="hi"><td class="c">8</td><td class="m">길안내 이어 하기</td><td>길안내 중 앱이 꺼져도 30분 안에 다시 켜면 「아까 보던 길안내가 있어요」 → 그 단계부터</td><td class="c"><span class="chip c-done">완료</span></td></tr>
+  <tr class="hi"><td class="c">9</td><td class="m">편의 기능</td><td>밝은 화면 · ☰ 메뉴 · 초성 검색 · 교수님 성함으로 찾기 · 즐겨찾기 · 인터넷 상태 표시</td><td class="c"><span class="chip c-done">완료</span></td></tr>
+  <tr><td class="c">10</td><td class="m">NFC 태그로 열기</td><td>QR 이 훼손되거나 안 읽힐 때의 대비책. 앱은 QR 과 같은 주소라 <b>수정 없이 준비됨</b> — 태그 승인 · 수령 후 기록 · 부착</td><td class="c"><span class="chip c-wait">태그 대기</span></td></tr>
+</table>
+
+<div class="shots">
+  <figure><img src="img/s04.jpg" alt=""><figcaption><b>쉬운 사용모드</b>누를 곳을 손가락으로</figcaption></figure>
+  <figure><img src="img/s20.jpg" alt=""><figcaption><b>길안내 이어 하기</b>꺼져도 그 단계부터</figcaption></figure>
+  <figure><img src="img/s15.jpg" alt=""><figcaption><b>밝은 화면</b>햇빛 아래에서도</figcaption></figure>
+  <figure><img src="img/s14.jpg" alt=""><figcaption><b>☰ 메뉴</b>버튼 정리</figcaption></figure>
+  <figure><img src="img/s17.jpg" alt=""><figcaption><b>건의함</b>하루 3번 · 사진 제보</figcaption></figure>
+</div>
+
+<h3>개발 규모와 품질 관리</h3>
+<table class="t">
+  <tr><th style="width:150px">항목</th><th>지금</th></tr>
+  <tr><td class="m">직접 쓴 코드</td><td>JavaScript <b>31개 파일 · 약 2만 4천 줄</b> (묶음 도구 없음)</td></tr>
+  <tr><td class="m">서버</td><td>Firebase Firestore 컬렉션 6개 — 서버에서 도는 우리 코드는 <b>보안 규칙 130줄</b>이 전부, 서버 · 배포 비용 <b>0원</b>(무료 한도 안)</td></tr>
+  <tr><td class="m">자동 검사</td><td>올릴 때마다 <b>검사 23가지</b> + GitHub 자동 검사 — <b>하나라도 틀리면 배포가 막힘</b>. 안전망이 길안내 754가지(한/영) · 사진 · 화면 기록과 대조</td></tr>
+  <tr><td class="m">종합 점검 (10/20)</td><td>공개 주소를 아이폰 · 삼성 · 작은 폰 · 가로 화면 · 3D 없는 폰 크기로 흉내 내 QR 부터 도착 · 건의함까지 <b>38단계 — 앱 오류 0</b> (찾은 7가지는 그날 고침)</td></tr>
+</table>
+
+<!-- ═════════════════════════ 3 성능 개선 ═════════════════════════ -->
+<h2 class="pb"><span class="no">3</span> 성능 개선 <span class="note">사진 판정은 「다른 사람이 찍은 사진」으로만 잼 — 실제 이용 조건</span></h2>
+<table class="t">
+  <tr><th style="width:150px">항목</th><th class="c" style="width:78px">전</th><th class="c" style="width:78px">후</th><th>무엇을 바꿨나</th></tr>
+  <tr><td class="m">사진 → 정확한 자리</td><td class="c">41.1%</td><td class="c"><b>55.6%</b></td><td>사진 줄이는 방식을 기준과 같게 통일(9/20) · 4·5층 재촬영 322장(9/23) — 1,844장, 95% 구간 51.7~58.3%</td></tr>
+  <tr class="hi"><td class="m">확실할 때만 답하기</td><td class="c">64.7%</td><td class="c"><b class="am">92.9%</b></td><td>확신 상위 10% 의 자리 정답. 「1등 점수」 대신 <b>「1·2등 격차」</b>로 확신을 잼 — 같은 AI · 같은 사진, 기준 하나만 바꿈 (층 97.8%)</td></tr>
+  <tr><td class="m">엘리베이터 안 층</td><td class="c">구분 불가</td><td class="c"><b>97%</b></td><td>층마다 똑같이 생겨 모양으로는 못 가름 → 층 표시 <b>글자를 먼저 읽기</b> (틀린 층을 말한 적 0건)</td></tr>
+  <tr><td class="m">5층 왼쪽 복도</td><td class="c">5%</td><td class="c"><b>48%</b></td><td>가장 약했던 곳을 다른 사람 · 다른 날 재촬영 (층 39% → 63%)</td></tr>
+  <tr><td class="m">기준선과 비교</td><td class="c">20.4%</td><td class="c"><b>55.6%</b></td><td>작은 흑백 사진 비교 대비 CNN 이 <b>+35.2%p</b> (95% 구간 +30.6 ~ +38.9) — 우연(0.7%)과도 비교</td></tr>
+  <tr><td class="m">1인칭 걷기 속도</td><td class="c">1배</td><td class="c"><b>1.6배</b></td><td>반투명 끄기 · 멀리 있는 것 안 그리기 (9/28)</td></tr>
+  <tr><td class="m">삼성 폰 안정성</td><td class="c">오류</td><td class="c"><b>해결</b></td><td>3D 노란 화면 · 문 사라짐(셰이더 컴파일 실패, 9/24~28) · AI 꺼짐(모델 주소가 기기별로 막힘 → 우리 서버로, 10/21)</td></tr>
+  <tr><td class="m">QR 로 열 때 화면</td><td class="c">두 번</td><td class="c"><b>한 번</b></td><td>새 판으로 바뀔 때 초록 켜는 화면이 두 번 뜨던 것 (10/21) — 처음 쓰는 사람은 한 번만 봄</td></tr>
+</table>
+<p class="sm dim" style="margin:5px 0 0">※ 측정 : 다른 조원이 찍은 사진으로만 맞히기(같은 사람이 한 번에 찍은 38개 묶음은 기준에서 뺌). 9월 초의 첫 측정(240장, 7.7% → 18.6%)은 조건이 달라 위 표와 직접 비교하지 않음.</p>
+
+<div class="bars">
+  <div class="bbox">
+    <div class="h">AI가 맞힌 사진 — 10장 중 몇 장?</div>
+    <div class="bar"><span>아무 때나 다 답하면</span><div class="tr"><div class="fl" style="width:55.6%"></div></div><span class="v">55.6%</span></div>
+    <div class="bar"><span>1등 점수로 골라 답하면</span><div class="tr"><div class="fl" style="width:64.7%"></div></div><span class="v">64.7%</span></div>
+    <div class="bar"><span class="am">1·2등 격차로 골라 답하면</span><div class="tr"><div class="fl a" style="width:92.9%"></div></div><span class="v am">92.9%</span></div>
+  </div>
+  <div class="bbox">
+    <div class="h">이용자에게 보이는 답 — 확실한 만큼만</div>
+    <div style="font-size:8.6pt;line-height:1.75">
+      <b>「아마 여기예요 : 13101호」</b> <span class="dim">— 확실할 때</span><br>
+      <b>「층은 3층 같아요」</b> <span class="dim">— 층만 확실할 때</span><br>
+      <b>「어디인지 알 수 없어요」</b> <span class="dim">— 모를 때</span><br>
+      <span class="dim sm">어느 답이든 관리자가 승인해야 반영됩니다.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════ 4 부품 구매 현황 ═════════════════════════ -->
+<h2><span class="no">4</span> 부품 구매 현황</h2>
+<table class="t">
+  <tr><th style="width:120px">품목</th><th>규격</th><th class="c" style="width:44px">수량</th><th class="c" style="width:86px">금액</th><th class="c" style="width:74px">신청 · 준비</th><th class="c" style="width:78px">상태</th></tr>
+  <tr class="hi"><td class="m">NFC 메탈 태그</td><td>NTAG213 스티커 · 금속 부착 전용<br><span class="dim sm">QR 이 훼손되거나 인식에 실패할 때의 대비책</span></td><td class="c">10개</td><td class="r">13,500원<br><span class="dim sm">상품 11,000 + 배송 2,500</span></td><td class="c">10/21 신청<br><span class="dim sm">현장실습지원센터</span></td><td class="c"><span class="chip c-wait">승인 대기</span></td></tr>
+  <tr><td class="m">출입문 QR</td><td>정문 · 후문 · 동문 · 서문 4장 (A4 인쇄본)</td><td class="c">4장</td><td class="r">자체 인쇄</td><td class="c">10/20 최종본</td><td class="c"><span class="chip c-done">준비 완료</span></td></tr>
+  <tr><td class="m">서버 · 배포</td><td>GitHub Pages · Firebase 무료 한도</td><td class="c">—</td><td class="r">0원</td><td class="c">—</td><td class="c"><span class="chip c-done">운영 중</span></td></tr>
+  <tr><td class="m" colspan="3" style="text-align:right">합계</td><td class="r"><b>13,500원</b></td><td colspan="2"></td></tr>
+</table>
+
+<div class="box" style="margin-top:9px">
+  <div class="h">NFC 태그 활용 계획 — 승인이 나면</div>
+  <ul>
+    <li>태그 4장에 문마다 주소를 하나씩 기록 — <span style="white-space:nowrap">정문 <b>?gate=MAIN</b></span> · <span style="white-space:nowrap">후문 <b>?gate=BACK</b></span> · <span style="white-space:nowrap">동문 <b>?gate=EAST</b></span> · <span style="white-space:nowrap">서문 <b>?gate=WEST</b></span></li>
+    <li>폰을 태그에 대면 QR 을 찍은 것과 똑같이 그 문의 「여기가 맞나요?」로 열림 — <b>앱은 고칠 것이 없음</b> (QR 과 같은 주소)</li>
+    <li>아이폰 · 삼성 두 기종으로 읽히는지 시험 → 덮어쓰지 못하게 <b>잠금</b> → QR 옆에 부착. 나머지 6장은 예비</li>
+  </ul>
+</div>
+
+<!-- ═════════════════════════ 5 남은 일정 ═════════════════════════ -->
+<h2 class="pb"><span class="no">5</span> 남은 일정 <span class="note">10/24 보고 → 11/11 완성 · 18일</span></h2>
+<div class="track">
+  <div class="ln"></div>
+  <div class="dt now" style="left:1%"></div><div class="lb" style="left:0;transform:none">10/24 보고</div>
+  <div class="dt" style="left:36%"></div><div class="lb" style="left:36%">10/31</div>
+  <div class="dt" style="left:75%"></div><div class="lb" style="left:75%">11/7</div>
+  <div class="dt goal" style="left:99%"></div><div class="lb am" style="left:auto;right:0;transform:none">11/11 완성</div>
+</div>
+<div class="cal">
+  <div class="wk">
+    <div class="d">1주 · 10/26(월) ~ 10/31(토)</div>
+    <div class="n">실제 기기 점검</div>
+    <ul>
+      <li><b>아이폰 · 삼성 실제 폰</b>으로 네 문 QR → 도착까지 끝까지 눌러 보기</li>
+      <li>쉬운 사용모드 · 이어 하기 · 밝은 화면 · 건의함 확인</li>
+      <li>찾은 문제 바로 고치기 (고칠 때마다 자동 검사)</li>
+      <li>사용성 시험 준비 — 처음 온 사람 · 질문지</li>
+      <li>NFC 구매 승인 확인</li>
+    </ul>
+  </div>
+  <div class="wk">
+    <div class="d">2주 · 11/2(월) ~ 11/7(토)</div>
+    <div class="n">사용성 시험 · NFC</div>
+    <ul>
+      <li><b>처음 온 사람 사용성 시험</b> — 3호관을 모르는 사람이 앱만 보고 문 앞까지 가는지</li>
+      <li>시험에서 나온 문제 고치기</li>
+      <li>NFC 수령 → 기록 · 두 기종 시험 · 잠금</li>
+      <li>출입문에 QR · NFC 부착, 네 문에서 열리는지 확인</li>
+      <li>최종 보고서 초안</li>
+    </ul>
+  </div>
+  <div class="wk last">
+    <div class="d">3주 · 11/9(월) ~ 11/11(수)</div>
+    <div class="n">마무리 → <span class="am">11/11 완성</span></div>
+    <ul>
+      <li>마지막 종합 점검 (흉내 점검 38단계 + 실제 폰)</li>
+      <li>최종 보고서 완성</li>
+      <li>발표 자료 다듬기 · <b>시연 연습</b> · 발표 분담 정하기</li>
+      <li>시연 당일 대비 — 비행기 모드에서도 열리는지 다시 확인</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═════════════════════════ 6 위험 요소와 대응 ═════════════════════════ -->
+<h2><span class="no">6</span> 위험 요소와 대응</h2>
+<table class="t">
+  <tr><th style="width:190px">위험</th><th>대응</th></tr>
+  <tr><td class="m">NFC 승인 · 배송이 늦어짐</td><td>NFC 는 <b>추가 대비책</b>이라 일정에 영향 없음 — QR 그대로 쓰고, QR 이 안 읽히면 화면에서 네 문을 직접 고르는 기능이 이미 있음</td></tr>
+  <tr><td class="m">실제 폰에서만 나는 문제</td><td>지금까지는 폰 흉내 점검 — 1주차에 아이폰 · 삼성 실제 기기로 확인. 앱 안 「문제 기록」으로 폰의 상태를 한 줄로 받아 원인을 찾음</td></tr>
+  <tr><td class="m">사진 판정은 인터넷이 필요</td><td>길안내는 인터넷 없이 되고, 사진 판정은 건의함에서만 씀. 판정 결과도 관리자 승인 뒤 반영이라 <b>길안내에는 영향 없음</b></td></tr>
+  <tr><td class="m">안내 사진이 실제와 달라짐</td><td>이용자 제보(건의함) → AI 판정 → 관리자 승인으로 그 자리 사진이 바뀜. 만든 사람이 졸업해도 계속 맞게 돌아가게 하는 것이 이 작품의 목표</td></tr>
+</table>
+
+<div class="foot">
+  공대 3호관 길안내 · 팀 공3길 (김민종 · 문성일 · 손의윤) · 지도교수 강규창 교수님 · 2026. 10. 24. 보고<br>
+  숫자 출처 — 정확도 : 사진 2,075장 측정(2026-09-23, 저장소 README) · 파일 수 · 크기 : 앱의 오프라인 목록(sw.js) · 검사 : 검사.ps1 · 구매 : 캡스톤디자인 재료 구매 신청서(10/21)
+</div>
+
+</body>
+</html>

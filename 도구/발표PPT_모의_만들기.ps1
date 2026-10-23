@@ -2,8 +2,9 @@
 #
 #   2026-10-24 사용자 : 「방금까지 만든 건 나만의 발표자료 — 조원 2명의 발표 자료가 필요. 지금까지 만든 방식 말고 내용 · 자료 사진 · 설명이
 #                       각각 다른 유형으로. 두 자료끼리 겹치면 안 되고, 모든 내용이 실제 우리 앱 기반」 · 완전히 새로 · PowerPoint · 15쪽 이내
-#   ① 사용 설명서편 — 기능 12가지를 실제 앱 화면으로 (흰 바탕 + 보라). 화면은 10/24 본 서버를 아이폰 크기로 찍은 것(발표그림\모의\A*.jpg)
-#   ② 현장 답사편   — 앱 화면 없이 3호관에서 직접 찍은 장소 사진만 (종이색 + 먹회색 + 산호색). 안내 문장은 앱의 실제 길안내 기록(tests\golden\v150.json)
+#   10/24 다시 : 「주제를 똑같이 — 평가할 때 주제가 달라 어렵다. 주제는 같고 안의 내용만 전혀 다르게」 → 두 벌 모두 같은 주제 · Type 2 양식 같은 순서 12쪽
+#   ① 이용자 편 — 실제 앱 화면으로(흰 바탕 + 보라). 화면은 10/24 본 서버를 아이폰 크기로 찍은 것(발표그림\모의\A*.jpg · E*.jpg)
+#   ② 현장 편   — 앱 화면 없이 3호관에서 직접 찍은 장소 사진만 (종이색 + 먹회색 + 산호색). 안내 문장은 앱의 실제 길안내 기록(tests\golden\v150.json)
 #   두 자료 모두 : 구조도 · 블록도 · 흐름도 없음 · 정확도 수치 없음 · 발표자 나눔 표시 없음(한 사람이 한 벌) · 김민종 발표(Type 2 12쪽)와 그림 · 내용이 겹치지 않게
 #     (QR 도 나눔 : 김민종 발표 = 동문, ① = 후문, ② = 서문)
 #
@@ -65,6 +66,7 @@ function T($sl, [double]$x, [double]$y, [double]$w, [double]$h, [string]$text, [
   Rich $tf.TextRange $text $size $color $bold.IsPresent $accent $boldColor
   $pf = $tf.TextRange.ParagraphFormat; $pf.Alignment = $align; $pf.LineRuleWithin = -1; $pf.SpaceWithin = $lines; $pf.SpaceAfter = $after
   if($spacing -ne 0){ $s.TextFrame2.TextRange.Font.Spacing = $spacing }
+  $s.Height = $h
   return $s
 }
 # 네모 (둥근 모서리는 $radius pt)
@@ -256,314 +258,308 @@ function SavePres([string]$name, [int]$want){
 }
 
 # ═════════════════════════════════════════════════════════════════════════
-#  A — 사용 설명서형 : 흰 바탕 + 보라(앱 QR 카드 색) + 하늘색. 왼쪽은 실제 앱 화면, 오른쪽은 「이렇게 써요」
+#  두 벌 모두 같은 주제 · 같은 순서(교수님 Type 2 양식 10단계 + 기능 1 · 2 = 12쪽) — 쪽 제목도 양식 문장. 안의 예시 · 사진 · 설명만 전혀 다르게
+#   2026-10-24 사용자 : 「주제를 똑같이 맞춰줘. 평가할 때 주제가 달라서 어떻게 평가해야 할지 모르겠어.
+#                       주제는 똑같지만 안의 내용을 전혀 다른 2개로」 → 순서도 Type 2 로 같게(사용자 고름)
+#   ① 앱 화면으로 보는 이용자 이야기 (흰 바탕 + 보라) · ② 3호관 현장 사진으로 보는 공간 이야기 (종이색 + 산호색)
 # ═════════════════════════════════════════════════════════════════════════
+$STEPS8 = @('들어가며', '문제점', '해결 아이디어', '설계 및 구현', '기능 시연', '변화', '발전 방향', '마무리')
+function CrumbM([string]$cur){ return (($STEPS8 | ForEach-Object { if($_ -eq $cur){ '[[' + $_ + ']]' } else { $_ } }) -join '  ›  ') }
+
+# ── ① 쪽 틀
 function PaletteA(){
   $script:BG = 'FFFFFF'; $script:INK = '1B1F3B'; $script:INK2 = '474C68'; $script:DIM = '7A7F96'
   $script:LINE = 'D9D4F6'; $script:LINE2 = 'ECE9FB'; $script:CARD = 'FFFFFF'
   $script:AC = '5B3FE0'; $script:AC2 = 'F0EDFF'; $script:ACT = '3B2A9E'; $script:AM = '5B3FE0'; $script:RD = 'D93A5B'; $script:MINT = '0AB3D4'
 }
-function PgA([string]$tag, [string]$title, [string]$lead, [string]$notes){
+function PgA([string]$kick, [string]$title, [string]$lead, [string]$crumb, [string]$notes){
   $script:pg++
   $sl = $pres.Slides.Add($pres.Slides.Count + 1, 12); Bg $sl 'FFFFFF'
   Rect $sl 0 0 8 $H $AC | Out-Null
-  Chip $sl $M 28 86 22 $tag $AC 'FFFFFF' 10 -bold -radius 11 | Out-Null
-  T $sl $M 56 $CW 32 $title 21 $INK -bold -accent $AC -lines 1.1 | Out-Null
-  if($lead){ T $sl $M 92 $CW 20 $lead 12 $INK2 | Out-Null }
+  Chip $sl $M 26 (22 + 9.6 * $kick.Length) 22 $kick $AC 'FFFFFF' 10 -bold -radius 11 | Out-Null
+  T $sl $M 54 $CW 32 $title 21 $INK -bold -accent $AC -lines 1.1 | Out-Null
+  if($lead){ T $sl $M 90 $CW 20 $lead 12 $INK2 | Out-Null }
   Line $sl $M $FOOTY ($M + $CW) $FOOTY $LINE2 0.75 | Out-Null
-  T $sl $M ($FOOTY + 6) 500 14 '공대 3호관 길안내 · 사용 설명서' 8.5 $DIM -spacing 0.6 | Out-Null
+  T $sl $M ($FOOTY + 6) 700 14 (CrumbM $crumb) 8.5 $DIM -spacing 0.6 | Out-Null
   T $sl ($M + $CW - 100) ($FOOTY + 6) 100 14 ([string]$script:pg) 8.5 $DIM -align 3 | Out-Null
   Notes $sl $notes
   return $sl
 }
-# 폰 화면 여러 장을 왼쪽부터 — 아래에 짧은 이름
-function PhonesA($sl, [object[]]$items, [double]$x, [double]$y, [double]$h, [double]$gap = 14){
+function PhonesA($sl, [object[]]$items, [double]$x, [double]$y, [double]$ph, [double]$gap = 14){
   foreach($it in $items){
-    $w = PhoneW $it[0] $h
-    Pic $sl $it[0] $x $y $w $h 'CFC6F7' -round | Out-Null
-    if($it[1]){ T $sl ($x - 10) ($y + $h + 6) ($w + 20) 16 $it[1] 10 $INK2 -bold -align 2 | Out-Null }
-    $x += $w + $gap
+    $pw = PhoneW $it[0] $ph
+    Pic $sl $it[0] $x $y $pw $ph 'CFC6F7' -round | Out-Null
+    if($it[1]){ T $sl ($x - 12) ($y + $ph + 6) ($pw + 24) 16 $it[1] 10 $INK2 -bold -align 2 | Out-Null }
+    $x += $pw + $gap
   }
   return $x
 }
-# 「이렇게 써요」 번호 목록 — @( @('굵은 말', '설명'), … ) · 끝난 y 를 돌려준다
-function StepsA($sl, [object[]]$items, [double]$x, [double]$y, [double]$w, [double]$gap = 12){
-  T $sl $x $y $w 16 '이렇게 써요' 10 $AC -bold -spacing 1.5 | Out-Null
+function StepsA($sl, [object[]]$items, [double]$x, [double]$y, [double]$bw, [double]$gap = 12){
+  T $sl $x $y $bw 16 '이렇게 씁니다' 10 $AC -bold -spacing 1.5 | Out-Null
   $y += 24
   for($i = 0; $i -lt $items.Count; $i++){
     Oval $sl $x $y 22 $AC ([string]($i + 1)) 10.5 | Out-Null
-    $t = T $sl ($x + 32) ($y + 1) ($w - 32) 200 ('**' + $items[$i][0] + '**' + $(if($items[$i][1]){ '\n' + $items[$i][1] } else { '' })) 11.5 $INK2 -lines 1.32 -boldColor $INK
-    $h = Fit $t
-    $y += [Math]::Max(24, $h) + $gap
+    $t = T $sl ($x + 32) ($y + 1) ($bw - 32) 200 ('**' + $items[$i][0] + '**' + $(if($items[$i][1]){ '\n' + $items[$i][1] } else { '' })) 11.5 $INK2 -lines 1.32 -boldColor $INK
+    $th = Fit $t
+    $y += [Math]::Max(24, $th) + $gap
   }
   return $y
 }
-function TipA($sl, [double]$x, [double]$y, [double]$w, [string]$text){
-  $b = Rect $sl $x $y $w 50 $AC2 '' 0 6
-  T $sl ($x + 14) ($y + 9) 120 14 '이럴 때 좋아요' 9.5 $AC -bold -spacing 1 | Out-Null
-  $t = T $sl ($x + 14) ($y + 26) ($w - 28) 100 $text 11 $INK -lines 1.3
-  $h = Fit $t; $b.Height = 26 + $h + 12
+function BoxA($sl, [double]$x, [double]$y, [double]$bw, [string]$label, [string]$text){
+  $b = Rect $sl $x $y $bw 50 $AC2 '' 0 6
+  T $sl ($x + 14) ($y + 9) ($bw - 28) 14 $label 9.5 $AC -bold -spacing 1 | Out-Null
+  $t = T $sl ($x + 14) ($y + 26) ($bw - 28) 100 $text 11 $INK -lines 1.3
+  $th = Fit $t; $b.Height = 26 + $th + 12
   return ($y + $b.Height)
 }
-# 화면 위 번호 표시 — 그림 안의 비율 자리(fx, fy)에
-function MarkA($sl, [double]$px, [double]$py, [double]$pw, [double]$ph, [double]$fx, [double]$fy, [int]$n){
-  $ox = $(if($fx -gt 0.75){ $px + $pw + 6 } else { $px - 28 })
-  Oval $sl $ox ($py + $ph * $fy - 11) 22 $RD ([string]$n) 10.5 | Out-Null
-}
-function CalloutsA($sl, [object[]]$items, [double]$x, [double]$y, [double]$w, [double]$gap = 9){
-  for($i = 0; $i -lt $items.Count; $i++){
-    Oval $sl $x $y 22 $RD ([string]($i + 1)) 10.5 | Out-Null
-    $t = T $sl ($x + 32) ($y + 1) ($w - 32) 200 ('**' + $items[$i][0] + '**' + $(if($items[$i][1]){ ' — ' + $items[$i][1] } else { '' })) 11.5 $INK2 -lines 1.32 -boldColor $INK
-    $h = Fit $t
-    $y += [Math]::Max(24, $h) + $gap
-  }
-  return $y
+function StripA($sl, [double]$y, [string]$text, [double]$sh = 44){
+  Rect $sl $M $y $CW $sh $AC2 '' 0 6 | Out-Null
+  Rect $sl $M $y 6 $sh $AC | Out-Null
+  $t = T $sl ($M + 22) $y ($CW - 40) $sh $text 12.5 $INK -anchor 3 -lines 1.3
+  $t.Height = $sh
 }
 
+# ── ② 쪽 틀
+function PaletteB(){
+  $script:BG = 'F5F1EA'; $script:INK = '23292F'; $script:INK2 = '4E565E'; $script:DIM = '857C70'
+  $script:LINE = 'DDD3C4'; $script:LINE2 = 'E9E1D4'; $script:CARD = 'FFFDF9'
+  $script:AC = '23292F'; $script:AC2 = 'ECE4D6'; $script:ACT = '23292F'; $script:AM = 'D9482B'; $script:RD = 'B3261E'; $script:MINT = 'D9482B'
+}
+function PgB([string]$kick, [string]$title, [string]$lead, [string]$crumb, [string]$notes){
+  $script:pg++
+  $sl = $pres.Slides.Add($pres.Slides.Count + 1, 12); Bg $sl $BG
+  Oval $sl $M 29 12 $AM '' | Out-Null
+  T $sl ($M + 20) 26 600 16 $kick 10 $AM -bold -spacing 2 | Out-Null
+  T $sl $M 48 $CW 32 $title 21 $INK -bold -accent $AM -lines 1.1 | Out-Null
+  if($lead){ T $sl $M 84 $CW 20 $lead 12 $INK2 | Out-Null }
+  Line $sl $M $FOOTY ($M + $CW) $FOOTY $LINE 0.75 | Out-Null
+  T $sl $M ($FOOTY + 6) 700 14 (CrumbM $crumb) 8.5 $DIM -spacing 0.6 | Out-Null
+  T $sl ($M + $CW - 100) ($FOOTY + 6) 100 14 ([string]$script:pg) 8.5 $DIM -align 3 | Out-Null
+  Notes $sl $notes
+  return $sl
+}
+function PhotoB($sl, [string]$file, [double]$x, [double]$y, [double]$bw, [double]$bh){
+  $p = PicCover $sl $file $x $y $bw $bh ''
+  try{ $p.AutoShapeType = 1 }catch{}
+  $p.Line.Visible = 0
+  return $p
+}
+function TagB($sl, [double]$x, [double]$y, [string]$text, [string]$fill = 'D9482B'){
+  $tw = [Math]::Min(260, 16 + 8.2 * $text.Length)
+  Chip $sl $x $y $tw 20 $text $fill 'FFFFFF' 9 -bold -radius 0 | Out-Null
+}
+function StripB($sl, [double]$y, [string]$text, [double]$sh = 44){
+  Rect $sl $M $y $CW $sh $CARD $LINE 0.75 | Out-Null
+  Rect $sl $M $y 5 $sh $AM | Out-Null
+  $t = T $sl ($M + 20) $y ($CW - 36) $sh $text 12 $INK2 -anchor 3 -lines 1.3
+  $t.Height = $sh
+}
+
+# 표지 · Q&A 의 공통 글 — 두 벌 모두 같은 주제
+$TOPIC = '공대 3호관 길안내'
+$TOPIC_SUB = '건물 안에서 길을 잃는 문제 해결을 위한\n[[새로운 제안]]'
+
+# ═════════════════════════════════════════════════════════════════════════
+#  ① 앱 화면으로 보는 이용자 이야기
+# ═════════════════════════════════════════════════════════════════════════
 function BuildA(){
   PaletteA; NewPres
   # ── 1 표지
   $script:pg++
   $sl = $pres.Slides.Add(1, 12); Bg $sl $AC
   $o = $sl.Shapes.AddShape(9, 560, -120, 520, 520); $o.Line.Visible = 0; $o.Fill.ForeColor.RGB = (C '7B62F0'); $o.Fill.Transparency = 0.35; $o.Shadow.Visible = 0
-  T $sl $M 118 520 16 '졸업작품 모의 발표 · 기능 편' 11 'D9D2FF' -bold -spacing 3 | Out-Null
-  T $sl $M 144 520 110 '공대 3호관 길안내\n[[사용 설명서]]' 40 'FFFFFF' -bold -accent '8FEBFA' -lines 1.1 | Out-Null
-  T $sl $M 264 500 44 '처음 켜는 순간부터 설정까지 —\n기능 12가지를 실제 화면으로 따라가 봅니다' 14 'E6E2FF' -lines 1.45 | Out-Null
-  Rect $sl $M 330 90 4 '8FEBFA' | Out-Null
-  T $sl $M 350 500 40 '**팀 공3길**    김민종 · 손의윤 · 문성일\n**지도교수**    강규창 교수님' 11.5 'D9D2FF' -lines 1.7 -boldColor 'FFFFFF' | Out-Null
-  $w1 = PhoneW 'A02_쉬운모드_첫화면.jpg' 390
-  Pic $sl 'A02_쉬운모드_첫화면.jpg' 548 75 $w1 390 '8C78F2' -round | Out-Null
-  Pic $sl '화면11_단계2.jpg' (548 + $w1 + 14) 75 $w1 390 '8C78F2' -round | Out-Null
-  Notes $sl '안녕하십니까. 오늘은 공대 3호관 길안내를 사용 설명서처럼, 실제 화면을 한 장씩 넘기며 소개하겠습니다.\n앱을 처음 켜는 순간부터 설정까지, 기능 열두 가지를 쓰는 순서대로 보여 드리겠습니다.'
+  T $sl $M 120 480 16 '졸업작품 모의 발표 ① · 이용자의 손끝에서' 11 'D9D2FF' -bold -spacing 2 | Out-Null
+  T $sl $M 146 480 56 $TOPIC 40 'FFFFFF' -bold | Out-Null
+  T $sl $M 212 480 60 $TOPIC_SUB 19 'E6E2FF' -lines 1.4 -accent '8FEBFA' | Out-Null
+  Rect $sl $M 292 90 4 '8FEBFA' | Out-Null
+  T $sl $M 314 480 40 '**팀 공3길**    김민종 · 손의윤 · 문성일\n**지도교수**    강규창 교수님' 11.5 'D9D2FF' -lines 1.7 -boldColor 'FFFFFF' | Out-Null
+  $pw1 = PhoneW 'A02_쉬운모드_첫화면.jpg' 390
+  Pic $sl 'A02_쉬운모드_첫화면.jpg' 548 75 $pw1 390 '8C78F2' -round | Out-Null
+  Pic $sl 'E06_단계1.jpg' (548 + $pw1 + 14) 75 $pw1 390 '8C78F2' -round | Out-Null
+  Notes $sl '안녕하십니까. 팀 공3길의 졸업작품 「공대 3호관 길안내」를 발표하겠습니다. 건물 안에서 길을 잃는 문제를 해결하기 위한 새로운 제안입니다.\n오늘은 이 앱을 쓰는 사람의 손끝에서, 실제 화면을 따라 말씀드리겠습니다.'
 
-  # ── 2 차례
-  $sl = PgA '차 례' '기능 [[12가지]], 쓰는 순서대로 보여 드립니다' '쪽마다 왼쪽은 실제 앱 화면, 오른쪽은 「이렇게 써요」입니다.' '오늘 소개할 기능 열두 가지입니다. 앱을 켜고, 찾고, 보고, 따라가고, 편하게 쓰고, 함께 고치는 순서입니다.\n쪽마다 왼쪽에는 지금 운영 중인 앱의 실제 화면을, 오른쪽에는 쓰는 방법을 정리했습니다.'
-  $items = @(
-    @('01', '처음 켜기', '「처음이세요?」에 한 번 답하기', 3), @('02', '쉬운 사용모드', '누를 곳을 손가락으로', 4),
-    @('03', '출입문 QR', '카메라가 막혀도 시작', 5), @('04', '찾기', '번호 · 성함 · 초성', 6),
-    @('05', '3D 건물', '손가락으로 돌려 보기', 7), @('06', '층 상세 · 1인칭', '위에서 보고, 미리 걷기', 8),
-    @('07', '단계 안내', '한 화면을 읽는 순서', 9), @('08', '즐겨찾기 · 이어 하기', '다시 찾지 않게', 10),
-    @('09', '☰ 메뉴 · 밝은 화면', '햇빛 아래에서도', 11), @('10', '인터넷이 끊겨도', '오른쪽 위를 보세요', 12),
-    @('11', '앱 다운로드', '홈 화면에 한 번', 13), @('12', 'English · 건의함', '함께 쓰고 함께 고치기', 14))
-  $cardW = ($CW - 3 * 12) / 4
-  for($i = 0; $i -lt 12; $i++){
-    $x = $M + ($i % 4) * ($cardW + 12); $y = 126 + [Math]::Floor($i / 4) * 116; $it = $items[$i]
-    Card $sl $x $y $cardW 104 $(if(($i % 2) -eq 0){ 'FFFFFF' } else { 'FAF9FF' }) $LINE | Out-Null
-    T $sl ($x + 14) ($y + 12) 60 26 $it[0] 20 $AC -bold | Out-Null
-    T $sl ($x + $cardW - 64) ($y + 16) 50 14 ([string]$it[3] + '쪽') 9.5 $DIM -align 3 | Out-Null
-    T $sl ($x + 14) ($y + 46) ($cardW - 28) 20 $it[1] 13.5 $INK -bold | Out-Null
-    T $sl ($x + 14) ($y + 70) ($cardW - 28) 18 $it[2] 10.5 $DIM | Out-Null
+  # ── 2 들어가며
+  $sl = PgA '02 · 들어가며' '혹시 이런 불편함, [[겪어 보셨나요?]]' '처음 3호관에 오는 사람은 — 저마다 다른 것을 손에 쥐고 옵니다.' '들어가며' '처음 3호관에 오는 사람을 떠올려 보십시오. 저마다 손에 쥔 정보가 다릅니다.\n신입생은 시간표의 13524 라는 번호만 들고 옵니다. 몇 층인지는 모릅니다. 학부모나 손님은 교수님 성함만 압니다. 호실 번호는 모릅니다. 그리고 폰이 낯선 분은 앱을 깔고 가입하라는 말에서 멈춥니다.\n길을 찾는 사람마다 손에 쥔 정보가 다른데, 안내는 한 가지 방식뿐입니다.'
+  $cards = @(
+    @('13524', '「시간표엔 13524 —\n몇 층으로 가야 하죠?」', '번호만 아는 신입생'),
+    @('이재호 교수님', '「교수님 성함만 알아요 —\n호실은 모르고요」', '성함만 아는 학부모 · 손님'),
+    @('앱 설치 · 가입?', '「앱을 깔고\n가입까지 해야 하나요?」', '폰이 낯선 방문객'))
+  $cw3 = ($CW - 2 * 18) / 3
+  for($i = 0; $i -lt 3; $i++){
+    $xx = $M + $i * ($cw3 + 18)
+    Card $sl $xx 124 $cw3 270 $(if($i -eq 2){ 'FAF9FF' } else { 'FFFFFF' }) $LINE | Out-Null
+    Rect $sl $xx 124 $cw3 5 $AC | Out-Null
+    T $sl ($xx + 20) 146 ($cw3 - 40) 40 $cards[$i][0] 24 $AC -bold | Out-Null
+    T $sl ($xx + 20) 206 ($cw3 - 40) 90 $cards[$i][1] 16 $INK -bold -lines 1.4 | Out-Null
+    Line $sl ($xx + 20) 330 ($xx + $cw3 - 20) 330 $LINE2 0.75 | Out-Null
+    T $sl ($xx + 20) 344 ($cw3 - 40) 20 $cards[$i][2] 11.5 $DIM | Out-Null
   }
+  StripA $sl 412 '길을 찾는 사람마다 **손에 쥔 정보가 다릅니다** — 그런데 안내는 한 가지 방식뿐입니다.' 46
 
-  # ── 3 기능 01 처음 켜기
-  $sl = PgA '기능 01' '앱을 켜면 [[딱 한 번]] 묻습니다' '「처음이세요?」 — 누를 곳을 하나씩 알려 드릴지 고르는 창입니다.' '첫 번째 기능은 처음 켜기입니다. 앱을 켜면 초록 로고 글이 지나간 뒤 「처음이세요?」 창이 뜹니다.\n「네, 알려 주세요」를 누르면 쉬운 사용모드가 켜져서, 오른쪽 화면처럼 첫 화면부터 노란 테두리와 손가락이 누를 곳을 짚어 줍니다. 「아니요」를 누르면 바로 첫 화면입니다.\n마음이 바뀌면 첫 화면 노란 칸이나 설정에서 언제든 바꿀 수 있고, 출입문 QR 로 들어오면 매번 물어봅니다.'
-  $x = PhonesA $sl @(@('A01_쉬운모드창.jpg', '「처음이세요?」'), @('A02_쉬운모드_첫화면.jpg', '「네」를 누르면')) $M 124 352
-  $rx = $x + 18; $rw = $M + $CW - $rx
-  $y = StepsA $sl @(
-    @('초록 로고 글이 지나가면', '「처음이세요?」 창이 뜹니다'),
-    @('「네, 알려 주세요」', '쉬운 사용모드가 켜지고, 첫 화면부터 손가락이 짚어 줍니다'),
-    @('「아니요, 혼자 할게요」', '바로 첫 화면으로 갑니다'),
-    @('나중에 바꾸려면', '첫 화면 노란 칸의 「켜짐 · 꺼짐」이나 설정에서 언제든')) $rx 124 $rw
-  TipA $sl $rx ($y + 4) $rw '출입문 QR로 들어오면 **매번 물어봅니다** — 처음 온 사람을 놓치지 않으려고요.' | Out-Null
+  # ── 3 문제점
+  $sl = PgA '03 · 우리가 발견한 문제점' '기존 방식의 한계와 명확한 [[Pain Point]]' '이용자 쪽에서 보면 — 지금 있는 안내는 세 군데에서 막힙니다.' '문제점' '이용자 쪽에서 보면 지금 있는 안내는 세 군데에서 막힙니다.\n첫째, 내가 아는 것으로 못 찾습니다. 벽의 안내도에서는 교수님 성함이나 학과 사무실 이름을 찾기 어렵고, 지도 앱은 건물 이름까지만 압니다.\n둘째, 앱이 문턱입니다. 설치하고 가입하고 메뉴를 익혀야 하는데, 폰이 낯선 분은 여기서 시작도 못 합니다.\n셋째, 한국어뿐입니다. 유학생이나 외국인 방문객은 안내판과 호실 이름을 읽기 어렵습니다.\n가장 아픈 곳은 둘째입니다. 앱이 어려우면 안내가 아무리 좋아도 쓰이지 않습니다.'
+  $pp = @(
+    @('PAIN POINT 1', '「아는 것」으로 못 찾는다', '벽의 안내도에서는 **교수님 성함 · 학과 사무실 이름**을 찾기 어렵고, 지도 앱은 **건물 이름까지만** 압니다.', '기존 — 벽 안내도 · 지도 앱', $false),
+    @('PAIN POINT 2', '「앱」이 문턱이다', '설치하고, 가입하고, 메뉴를 익혀야 — **폰이 낯선 분은 시작도 못 합니다.**', '기존 — 앱스토어에서 받는 앱', $true),
+    @('PAIN POINT 3', '「한국어」뿐이다', '안내판도 호실 이름도 한국어 — **유학생 · 외국인 방문객**은 읽기 어렵습니다.', '기존 — 한국어 안내판', $false))
+  for($i = 0; $i -lt 3; $i++){
+    $xx = $M + $i * ($cw3 + 18); $hot = $pp[$i][4]
+    Card $sl $xx 124 $cw3 268 $(if($hot){ 'F4F1FF' } else { 'FFFFFF' }) $(if($hot){ 'B9AEF2' } else { $LINE }) | Out-Null
+    T $sl ($xx + 20) 142 ($cw3 - 40) 14 $pp[$i][0] 9.5 $(if($hot){ $AC } else { $DIM }) -bold -spacing 1.5 | Out-Null
+    T $sl ($xx + 20) 164 ($cw3 - 40) 26 $pp[$i][1] 17 $(if($hot){ $AC } else { $INK }) -bold | Out-Null
+    T $sl ($xx + 20) 204 ($cw3 - 40) 110 $pp[$i][2] 12.5 $INK2 -lines 1.55 | Out-Null
+    Line $sl ($xx + 20) 340 ($xx + $cw3 - 20) 340 $LINE 0.75 -dash | Out-Null
+    T $sl ($xx + 20) 352 ($cw3 - 40) 20 $pp[$i][3] 10 $DIM | Out-Null
+  }
+  StripA $sl 410 '가장 아픈 곳은 **PAIN POINT 2** — 앱이 어려우면, 안내가 아무리 좋아도 **시작조차 못 합니다.**' 46
 
-  # ── 4 기능 02 쉬운 사용모드
-  $sl = PgA '기능 02' '쉬운 사용모드는 [[손가락]]이 길을 짚어 줍니다' '설명서를 따로 넘기지 않아도 — 지금 보고 있는 진짜 화면 위에서 알려 줍니다.' '두 번째, 쉬운 사용모드가 하는 일입니다.\n지금 눌러야 할 버튼에 노란 테두리와 손가락이 붙고, 말풍선이 「공대 3호관이 맞으면 눌러요」처럼 할 일을 한 문장으로 알려 줍니다. 말풍선은 사진이나 3D 를 가리지 않는 빈자리에 앉습니다.\n말풍선의 ✕ 를 누르면 쉬운 사용모드가 꺼지고, 설정의 이용안내에서는 실제 화면 그림에 번호를 붙인 안내 11쪽을 볼 수 있습니다.'
-  $x = PhonesA $sl @(@('A03_쉬운모드_다음.jpg', '말풍선 + 손가락'), @('A13_이용안내3.jpg', '이용안내 11쪽')) $M 124 352
-  $rx = $x + 18; $rw = $M + $CW - $rx
-  $y = StepsA $sl @(
-    @('노란 테두리 + 👆', '지금 누를 버튼을 표시합니다'),
-    @('말풍선 한 문장', '「공대 3호관이 맞으면 눌러요」처럼 할 일만'),
-    @('사진 · 3D를 가리지 않게', '말풍선이 화면의 빈자리에 앉습니다'),
-    @('말풍선의 ✕', '누르면 쉬운 사용모드가 꺼집니다'),
-    @('이용안내 11쪽', '설정 → 이용안내 — 실제 화면 그림에 번호를 붙여서')) $rx 124 $rw 10
-  TipA $sl $rx ($y + 2) $rw '폰이 익숙하지 않은 분께 건넬 때 — **「켜짐」 한 번**이면 됩니다.' | Out-Null
+  # ── 4 해결 아이디어
+  $sl = PgA '04 · 우리의 해결 아이디어' '그래서 우리는 [[아는 만큼만 찾는 길안내]]를 생각했습니다' '세 가지 막힘에 하나씩 — 이용자가 따로 배울 것이 없게 했습니다.' '해결 아이디어' '그래서 저희는 아는 만큼만 입력하면 찾아 주는 길안내를 생각했습니다.\n아는 것이 제각각인 문제에는 검색창 하나로 호실 번호, 교수님 성함, 초성까지 받습니다. 앱이 문턱인 문제에는 설치도 가입도 없이 QR 한 번이면 열리고, 쉬운 사용모드가 누를 곳을 손가락으로 짚어 줍니다. 한국어뿐인 문제에는 English 한 번으로 안내 전체를 영어로 바꿉니다.\n한 문장으로, 아는 것만 들고 와도 누를 곳을 따라가면 문 앞까지 갑니다.'
+  $ideas = @(
+    @('A04_초성검색.jpg', 'PAIN 1 → 아는 대로 찾는다', '검색창 하나에 **호실 번호 · 교수님 성함 · 초성**'),
+    @('E03_무엇을찾으세요.jpg', 'PAIN 2 → 설치 없이, 손가락이 안내', '**QR 한 번**이면 바로 열리고, **쉬운 사용모드**가 누를 곳을'),
+    @('화면18_영어.jpg', 'PAIN 3 → English 한 번', '안내 문장 · 버튼 · 층 이름까지 **모두 영어로**'))
+  for($i = 0; $i -lt 3; $i++){
+    $xx = $M + $i * ($cw3 + 18)
+    Card $sl $xx 120 $cw3 280 'FAF9FF' $LINE | Out-Null
+    $pw = PhoneW $ideas[$i][0] 190
+    Pic $sl $ideas[$i][0] ($xx + ($cw3 - $pw) / 2) 132 $pw 190 'CFC6F7' -round | Out-Null
+    T $sl ($xx + 16) 332 ($cw3 - 32) 18 $ideas[$i][1] 12.5 $AC -bold | Out-Null
+    T $sl ($xx + 16) 354 ($cw3 - 32) 40 $ideas[$i][2] 11 $INK2 -lines 1.35 | Out-Null
+  }
+  StripA $sl 414 '**한 문장으로** — 아는 것만 들고 와도, **누를 곳을 따라가면** 문 앞까지.' 44
 
-  # ── 5 기능 03 출입문 QR
-  $sl = PgA '기능 03' '출입문 QR — [[카메라가 막혀도]] 시작할 수 있습니다' '폰 기본 카메라로 찍으면 그 문에서 바로 열리고, 앱 안에서도 찍을 수 있습니다.' '세 번째, 출입문 QR 입니다. 정문 · 후문 · 동문 · 서문에 QR 이 하나씩 붙습니다.\n폰 기본 카메라로 찍으면 앱스토어 없이 그 문의 「여기가 맞나요?」로 바로 열리고, 앱 첫 화면의 「출입문 QR 스캔하고 시작」으로도 찍을 수 있습니다.\n카메라 권한이 막혀 있으면 오른쪽 화면처럼 안내가 나오고, 「사진으로 QR 찍기」로 권한 없이 찍거나, 아래 네 문 버튼으로 직접 고를 수 있습니다.'
-  $qh = 300; $qw = PhoneW 'QR_후문.png' $qh
-  Pic $sl 'QR_후문.png' $M 140 $qw $qh '' | Out-Null
-  T $sl $M (140 + $qh + 8) $qw 16 '후문 QR (인쇄본)' 10 $INK2 -bold -align 2 | Out-Null
-  $x = PhonesA $sl @(,@('A11_QR스캔.jpg', '카메라가 막혔을 때')) ($M + $qw + 18) 124 352
-  $rx = $x + 18; $rw = $M + $CW - $rx
-  $y = StepsA $sl @(
-    @('폰 기본 카메라로 문 QR', '앱스토어 없이 그 문의 「여기가 맞나요?」로'),
-    @('앱 안 「출입문 QR 스캔하고 시작」', '첫 화면에서 바로 카메라'),
-    @('권한이 막혔다면', '「사진으로 QR 찍기」 — 권한 없이'),
-    @('그래도 안 되면', '정문 · 후문 · 동문 · 서문 버튼으로 직접')) $rx 124 $rw 10
-  TipA $sl $rx ($y + 2) $rw '어느 문으로 들어와도 — **그 문에서 출발**합니다.' | Out-Null
+  # ── 5 설계 및 구현
+  $sl = PgA '05 · 솔루션 설계 및 구현' '공대 3호관 길안내의 [[전체 구조와 개발 기술]]' '이용자가 만나는 화면 다섯 개 — 화면마다 쓰인 기술입니다.' '설계 및 구현' '이용자가 만나는 화면은 크게 다섯 개입니다. 화면마다 무엇으로 만들었는지 보시겠습니다.\n첫 화면을 포함한 앱 전체는 앱스토어 없이 브라우저에서 열리는 설치형 웹앱입니다. 찾기 화면의 초성 검색은 글자의 첫소리를 직접 비교하도록 만들었습니다. 3D 화면은 three.js 로 좌표에서 건물을 그립니다. 단계 화면은 서비스 워커가 휴대폰에 저장해 둔 실제 사진과 한 문장을 보여 주고, 즐겨찾기와 이어 하기는 휴대폰 안에 저장합니다.\n화면 설계에는 원칙이 있습니다. 오른쪽 위는 인터넷과 메뉴 두 개만, 버튼 테두리는 또렷하게, 말풍선은 사진을 가리지 않게 했습니다.'
+  $scr = @(
+    @('A02_쉬운모드_첫화면.jpg', '첫 화면', '설치형 웹앱(PWA)', '앱스토어 없이 브라우저에서'),
+    @('E04_성함검색.jpg', '찾기', '초성 검색', '첫소리를 직접 비교'),
+    @('E05_3D.jpg', '3D 건물', 'three.js', '좌표에서 건물을 그림'),
+    @('E07_단계2.jpg', '단계 안내', '서비스 워커', '사진을 폰에 저장 — 오프라인'),
+    @('E10_도착.jpg', '도착 · 다음', 'localStorage', '즐겨찾기 · 이어 하기 저장'))
+  $slot5 = $CW / 5
+  for($i = 0; $i -lt 5; $i++){
+    $pw = PhoneW $scr[$i][0] 236; $xx = $M + $i * $slot5
+    Pic $sl $scr[$i][0] ($xx + ($slot5 - $pw) / 2) 118 $pw 236 'CFC6F7' -round | Out-Null
+    T $sl $xx 360 $slot5 16 $scr[$i][1] 11 $INK -bold -align 2 | Out-Null
+    Chip $sl ($xx + 10) 380 ($slot5 - 20) 22 $scr[$i][2] $AC 'FFFFFF' 9.5 -bold -radius 11 | Out-Null
+    T $sl $xx 406 $slot5 14 $scr[$i][3] 9.5 $DIM -align 2 | Out-Null
+  }
+  StripA $sl 432 '**화면 설계 원칙** — 오른쪽 위는 인터넷 · ☰ 두 개만 · 버튼 테두리 3px · 말풍선은 사진을 가리지 않게 · 글자 크기는 그대로' 42
 
-  # ── 6 기능 04 찾기
-  $sl = PgA '기능 04' '번호 · 성함 · [[초성]] — 아는 만큼만 쳐도 찾습니다' '「무엇을 찾으세요?」에서 강의실을 누르면 검색창이 열립니다.' '네 번째, 찾기입니다. 검색창 하나로 세 가지 방법을 씁니다.\n시간표의 호실 번호를 그대로 쳐도 되고, 교수님 성함 「이재호」를 치면 전자공학과 이재호 교수님 연구실, 3층 13310 이 나옵니다.\n이름이 가물가물하면 첫소리만 쳐도 됩니다. 「ㅎㄱㅅㅁㅅ」라고 치면 학과사무실, 1층 13115 를 찾습니다. 한 번 찾은 곳은 검색창 아래 최근 기록에 남습니다.'
-  $x = PhonesA $sl @(@('A04_초성검색.jpg', '「ㅎㄱㅅㅁㅅ」'), @('A05_성함검색.jpg', '「이재호」')) $M 124 352
-  $rx = $x + 18; $rw = $M + $CW - $rx
-  $y = StepsA $sl @(
-    @('호실 번호', '시간표에 적힌 번호 그대로 — 예) 13524'),
-    @('교수님 성함', '「이재호」 → 전자공학과 이재호 교수님 연구실 · 3층 13310'),
-    @('초성만', '「ㅎㄱㅅㅁㅅ」 → 학과사무실 · 1층 13115'),
-    @('최근 기록', '한 번 찾은 곳은 검색창 아래에 남습니다')) $rx 124 $rw
-  TipA $sl $rx ($y + 4) $rw '이름이 가물가물해도 — **첫소리만** 기억나면 됩니다.' | Out-Null
+  # ── 6 핵심 기능 시연
+  $sl = PgA '06 · 핵심 기능 시연' '공대 3호관 길안내는 [[이렇게 동작합니다]]' '정문에서 「이재호 교수님」만 알고 출발 — 쉬운 사용모드를 켠 채로 따라가 봅니다.' '기능 시연' '이제 실제로 따라가 보겠습니다. 정문에서, 교수님 성함만 알고 출발하는 경우입니다. 쉬운 사용모드는 켜 두었습니다.\n정문 QR 을 찍으면 「여기가 맞나요?」에 정문 사진이 나옵니다. 「무엇을 찾으세요?」에서 강의실을 누르고, 「이재호」를 치면 전자공학과 이재호 교수님 연구실, 3층 13310 이 나옵니다.\n3D 에서 빨간 곳이 가는 곳이고, 길안내를 시작하면 다섯 단계 — 정문으로 들어오세요, 엘리베이터를 타고 3층으로, 내려서 우회전, 복도를 따라 직진, 그리고 도착입니다.\n노란 말풍선이 매 화면 할 일 한 가지만 알려 줍니다.'
+  $flow = @(
+    @('E02_여기가맞나요.jpg', '① 정문 QR', '「여기가 맞나요?」'), @('E03_무엇을찾으세요.jpg', '② 무엇을 찾나', '강의실'),
+    @('E04_성함검색.jpg', '③ 「이재호」', '3층 13310'), @('E05_3D.jpg', '④ 3D', '빨간 곳이 가는 곳'),
+    @('E06_단계1.jpg', '⑤ 1 / 5', '정문으로 들어오세요'), @('E07_단계2.jpg', '⑥ 2 / 5', '엘리베이터 3층'),
+    @('E08_단계3.jpg', '⑦ 3 / 5', '내려서 우회전'), @('E10_도착.jpg', '⑧ 도착', '13310호 연구실'))
+  $fx0 = 22; $slot8 = ($W - 2 * $fx0) / 8; $phh = 250
+  for($i = 0; $i -lt 8; $i++){
+    $pw = PhoneW $flow[$i][0] $phh; $xx = $fx0 + $slot8 * $i
+    Pic $sl $flow[$i][0] ($xx + ($slot8 - $pw) / 2) 120 $pw $phh 'CFC6F7' -round | Out-Null
+    T $sl $xx 378 $slot8 16 $flow[$i][1] 10.5 $(if($i -ge 4 -and $i -le 6){ $AC } else { $INK }) -bold -align 2 | Out-Null
+    T $sl $xx 396 $slot8 14 $flow[$i][2] 9 $DIM -align 2 | Out-Null
+  }
+  StripA $sl 432 '노란 말풍선이 매 화면 **할 일 한 가지만** — 「사진과 같은 곳까지 걸어가서 눌러요」.' 42
 
-  # ── 7 기능 05 3D 건물
-  $sl = PgA '기능 05' '건물을 통째로 — [[손가락으로 돌려 보는]] 3D' '목적지를 고르면 3D 건물 위에 가야 할 층과 방이 색으로 표시됩니다.' '다섯 번째, 3D 건물입니다. 목적지를 고르면 이 화면이 나옵니다.\n왼쪽 위 범례는 목적지, 가야 할 층, 현재 층, 엘리베이터, 계단을 색으로 구분합니다. 손가락 하나로 돌리고, 두 개로 확대하고 옮기고, 층을 누르면 그 층을 자세히 보여 줍니다.\n아래에는 경로 미리보기와 직접 걸어보기, 층 상세 버튼, 지금 몇 층에 있는지 고르는 줄, 그리고 길안내 시작 버튼이 있습니다. 오른쪽 위 별은 즐겨찾기입니다.'
-  $ph = 384; $pw = PhoneW 'A08_13310_3D.jpg' $ph; $px = $M + 70; $py = 112
-  Pic $sl 'A08_13310_3D.jpg' $px $py $pw $ph 'CFC6F7' -round | Out-Null
-  $marks = @(@(0.1, 0.15), @(0.9, 0.11), @(0.1, 0.59), @(0.1, 0.665), @(0.1, 0.735), @(0.1, 0.855), @(0.1, 0.945))
-  for($i = 0; $i -lt 7; $i++){ MarkA $sl $px $py $pw $ph $marks[$i][0] $marks[$i][1] ($i + 1) }
-  $rx = $px + $pw + 60; $rw = $M + $CW - $rx
-  $y = CalloutsA $sl @(
-    @('범례', '목적지 · 가야 할 층 · 현재 층 · 엘리베이터 · 계단을 색으로'),
-    @('☆ 즐겨찾기', '누르면 ★ — 다음엔 메뉴에서 바로'),
-    @('손가락 조작', '1개로 돌리고, 2개로 확대 · 이동, 층을 누르면 자세히'),
-    @('경로 미리보기 · 직접 걸어보기', '가는 길을 움직여 보여 주기 / 1인칭으로 걷기'),
-    @('층 상세', 'B1~5F · 옥상 — 그 층을 위에서'),
-    @('현재 위치', '지금 몇 층에 있는지 고르기'),
-    @('길안내 시작', '사진 단계 안내로')) $rx 118 $rw 8
-  TipA $sl $rx ($y + 4) $rw '어느 층으로 가야 하는지 — **노란 층**만 보면 됩니다.' | Out-Null
+  # ── 7 기능 1
+  $sl = PgA '06 · 핵심 기능 시연 · 기능 1' '「앱이 낯설다」를 해결하는 [[쉬운 사용모드]]' '설명서를 따로 넘기지 않아도 — 지금 보고 있는 진짜 화면 위에서 알려 줍니다.' '기능 시연' '기능 1 입니다. 앱이 낯설다는 문제를 해결하는 쉬운 사용모드입니다.\n앱을 켜면 「처음이세요?」라고 묻고, 「네」를 누르면 켜집니다. 그다음부터는 지금 눌러야 할 버튼에 노란 테두리와 손가락이 붙고, 말풍선이 할 일을 한 문장으로 알려 줍니다. 길안내 중에는 「1/5」처럼 몇 번째 단계인지도 말풍선에 나옵니다.\n말풍선의 ✕ 를 누르면 꺼지고, 첫 화면 노란 칸이나 설정에서 언제든 다시 켭니다. 설정의 이용안내에는 실제 화면 그림에 번호를 붙인 안내가 11쪽 있습니다.'
+  $xr = PhonesA $sl @(@('A01_쉬운모드창.jpg', '「처음이세요?」'), @('E07_단계2.jpg', '단계마다 말풍선'), @('A13_이용안내3.jpg', '이용안내 11쪽')) $M 120 318 12
+  $rx = $xr + 14; $rw = $M + $CW - $rx
+  $yy = StepsA $sl @(
+    @('「처음이세요?」 → 「네」', '앱을 켜면 한 번, QR로 들어오면 매번 묻습니다'),
+    @('노란 테두리 + 👆', '지금 누를 버튼에'),
+    @('말풍선 한 문장', '단계 번호(1/5)와 할 일 한 가지'),
+    @('✕ 를 누르면 꺼짐', '첫 화면 노란 칸 · 설정에서 다시 켜기')) $rx 120 $rw 9
+  BoxA $sl $rx ($yy + 2) $rw '이럴 때 좋아요' '폰이 익숙하지 않은 분께 건넬 때 — **「네」 한 번**이면 됩니다.' | Out-Null
 
-  # ── 8 기능 06 층 상세 · 1인칭
-  $sl = PgA '기능 06' '위에서 내려다보고, [[미리 걸어 봅니다]]' '3D에서 층 버튼을 누르면 층 상세, 「직접 걸어보기」를 누르면 1인칭 화면입니다.' '여섯 번째, 층 상세와 1인칭입니다.\n층 상세는 그 층을 위에서 내려다본 지도로, 방 번호가 모두 적혀 있고 빨간 안내선이 들어온 문에서 목적지까지 이어집니다.\n「직접 걸어보기」를 누르면 걷는 눈높이의 1인칭 화면이 나와, 출발 전에 복도를 미리 걸어 볼 수 있습니다. 바닥에는 「엘리베이터 앞으로」 같은 이름표가 보입니다.'
-  $x = PhonesA $sl @(@('화면08_층상세.jpg', '층 상세'), @('화면09_1인칭.jpg', '1인칭 직접 걸어보기')) $M 124 352
-  $rx = $x + 18; $rw = $M + $CW - $rx
-  $y = StepsA $sl @(
-    @('층 상세', '그 층을 위에서 내려다본 지도 — 방 번호가 모두'),
-    @('빨간 안내선', '들어온 문에서 시작해 목적지까지'),
-    @('직접 걸어보기', '걷는 눈높이로 복도를 미리 걸어 봅니다'),
-    @('바닥의 이름표', '「엘리베이터 앞으로」처럼 다음에 갈 곳을')) $rx 124 $rw
-  TipA $sl $rx ($y + 4) $rw '처음 가는 길이 긴장될 때 — **출발 전에 한 번** 걸어 보세요.' | Out-Null
+  # ── 8 기능 2
+  $sl = PgA '06 · 핵심 기능 시연 · 기능 2' '「아는 것이 제각각」을 개선하는 [[하나의 검색창]]' '번호 · 성함 · 초성 — 그리고 English. 아는 만큼만 쳐도 찾습니다.' '기능 시연' '기능 2 입니다. 사람마다 아는 것이 제각각이라는 문제를 하나의 검색창으로 개선했습니다.\n시간표의 호실 번호를 그대로 쳐도 되고, 교수님 성함을 쳐도 됩니다. 이름이 가물가물하면 첫소리만 쳐도 됩니다. 「ㅎㄱㅅㅁㅅ」라고 치면 학과사무실, 1층 13115 가 나옵니다. 한 번 찾은 곳은 최근 기록에 남습니다.\n그리고 설정에서 English 를 누르면 안내 문장, 버튼, 층 이름까지 모두 영어로 바뀝니다.'
+  $xr = PhonesA $sl @(@('A04_초성검색.jpg', '「ㅎㄱㅅㅁㅅ」'), @('E04_성함검색.jpg', '「이재호」'), @('화면18_영어.jpg', 'English')) $M 120 318 12
+  $rx = $xr + 14; $rw = $M + $CW - $rx
+  $yy = StepsA $sl @(
+    @('호실 번호', '시간표의 번호 그대로 — 13524'),
+    @('교수님 성함', '「이재호」 → 3층 13310 연구실'),
+    @('초성만', '「ㅎㄱㅅㅁㅅ」 → 1층 13115 학과사무실'),
+    @('English', '설정에서 한 번 — 안내 전체가 영어로')) $rx 120 $rw 9
+  BoxA $sl $rx ($yy + 2) $rw '이럴 때 좋아요' '이름이 가물가물해도 — **첫소리만** 기억나면 됩니다.' | Out-Null
 
-  # ── 9 기능 07 단계 안내 읽는 법
-  $sl = PgA '기능 07' '한 단계, 한 화면 — [[읽는 순서]]가 있습니다' '길안내를 시작하면 단계마다 이 화면이 한 장씩 넘어갑니다.' '일곱 번째, 단계 안내 화면을 읽는 순서입니다.\n맨 위 진행 막대와 「2 / 5 단계」로 지금 어디까지 왔는지 보고, 큰 화살표로 방향을, 한 문장으로 할 일을 봅니다.\n그다음 그 자리의 실제 사진을 눈앞 풍경과 맞춰 봅니다. 사진이 두 장이면 오른쪽 위에 「1 / 2 · 눌러서 다음」이 보이고, 눌러서 넘깁니다. 맨 아래 이전 · 다음으로 단계를 오갑니다.'
-  $ph = 384; $pw = PhoneW '화면11_단계2.jpg' $ph; $px = $M + 70; $py = 112
-  Pic $sl '화면11_단계2.jpg' $px $py $pw $ph 'CFC6F7' -round | Out-Null
-  $marks = @(@(0.1, 0.115), @(0.1, 0.21), @(0.1, 0.285), @(0.1, 0.62), @(0.9, 0.375), @(0.1, 0.925))
-  for($i = 0; $i -lt 6; $i++){ MarkA $sl $px $py $pw $ph $marks[$i][0] $marks[$i][1] ($i + 1) }
-  $rx = $px + $pw + 60; $rw = $M + $CW - $rx
-  $y = CalloutsA $sl @(
-    @('진행 막대 · 「2 / 5 단계」', '지금 어디까지 왔는지'),
-    @('큰 화살표', '돌아야 할 방향'),
-    @('한 문장', '「엘리베이터를 타고 5층으로 올라가세요」'),
-    @('그 자리의 실제 사진', '눈앞 풍경과 같은지 맞춰 보기'),
-    @('「1 / 2 · 눌러서 다음」', '사진이 두 장이면 눌러서 넘기기'),
-    @('이전 · 다음', '단계를 앞뒤로')) $rx 118 $rw 10
-  TipA $sl $rx ($y + 4) $rw '읽는 순서 — **화살표 → 문장 → 사진**. 풍경이 사진과 다르면 한 단계 돌아가 보세요.' | Out-Null
+  # ── 9 변화
+  $sl = PgA '07 · 우리가 만든 변화' '공대 3호관 길안내 도입으로 [[기대되는 효과]]' '처음 한 번이 아니라 — 두 번째, 세 번째가 편해지는 것들입니다.' '변화' '이 앱을 쓰면 무엇이 달라지는지, 쓰는 사람의 하루로 보겠습니다.\n자주 가는 연구실은 별 하나로 즐겨찾기에 담아 다음엔 메뉴에서 바로 엽니다. 길안내 중에 전화가 와서 앱이 꺼져도, 30분 안이면 보던 단계부터 이어 갑니다.\n한낮 야외에서 화면이 안 보이면 메뉴에서 밝은 화면으로 바꾸고, 신호가 끊겨도 오른쪽 위에 「오프라인」이 뜰 뿐 안내는 그대로입니다.\n처음 길을 찾는 것보다, 두 번째와 세 번째가 편해지는 앱입니다.'
+  $fx = @(
+    @('A09_즐겨찾기_별.jpg', '즐겨찾기', '자주 가는 곳도 매번 다시 검색', '☆ 한 번 — 메뉴에서 바로'),
+    @('화면20_이어하기.jpg', '이어 하기', '앱이 꺼지면 처음부터 다시', '30분 안이면 보던 단계부터'),
+    @('화면15_밝은화면.jpg', '밝은 화면', '한낮 야외에선 화면이 안 보임', '☰ 에서 밝은 화면 한 번'),
+    @('A15_오프라인.jpg', '오프라인 표시', '신호가 끊기면 멈추는 지도 앱', '「오프라인」이어도 안내는 그대로'))
+  $c4 = ($CW - 3 * 14) / 4
+  for($i = 0; $i -lt 4; $i++){
+    $xx = $M + $i * ($c4 + 14)
+    Card $sl $xx 116 $c4 290 'FFFFFF' $LINE | Out-Null
+    $pw = PhoneW $fx[$i][0] 160
+    Pic $sl $fx[$i][0] ($xx + ($c4 - $pw) / 2) 128 $pw 160 'CFC6F7' -round | Out-Null
+    T $sl ($xx + 14) 296 ($c4 - 28) 18 $fx[$i][1] 13 $INK -bold | Out-Null
+    T $sl ($xx + 14) 320 ($c4 - 28) 14 '지금까지' 8.5 $DIM -bold -spacing 1 | Out-Null
+    T $sl ($xx + 14) 336 ($c4 - 28) 30 $fx[$i][2] 10.5 $DIM -lines 1.3 | Out-Null
+    T $sl ($xx + 14) 366 ($c4 - 28) 14 '이제는' 8.5 $AC -bold -spacing 1 | Out-Null
+    T $sl ($xx + 14) 382 ($c4 - 28) 24 $fx[$i][3] 11 $INK -bold -lines 1.3 | Out-Null
+  }
+  StripA $sl 420 '처음 한 번 길을 찾는 것보다 — **두 번째, 세 번째가 편해지는 앱**입니다.' 44
 
-  # ── 10 기능 08 즐겨찾기 · 이어 하기
-  $sl = PgA '기능 08' '즐겨찾기 · 이어 하기 — [[다시 찾지 않게]]' '자주 가는 곳은 담아 두고, 앱이 꺼져도 보던 단계부터 이어 갑니다.' '여덟 번째, 즐겨찾기와 이어 하기입니다.\n3D 화면 오른쪽 위 별을 누르면 채워진 별이 되면서 즐겨찾기에 담기고, ☰ 메뉴의 즐겨찾기에서 「열기」로 바로 갑니다.\n길안내 중에 전화를 받거나 앱이 꺼져도, 30분 안에 다시 켜면 「아까 보던 길안내가 있어요」 카드가 뜹니다. 「이어서 보기」를 누르면 보던 단계부터 다시 안내합니다.'
-  $x = PhonesA $sl @(@('A09_즐겨찾기_별.jpg', '☆ → ★'), @('A10_즐겨찾기목록.jpg', '즐겨찾기'), @('화면20_이어하기.jpg', '이어 하기')) $M 124 318 12
-  $rx = $x + 16; $rw = $M + $CW - $rx
-  $y = StepsA $sl @(
-    @('3D 화면의 ☆', '누르면 ★ — 즐겨찾기에 담깁니다'),
-    @('☰ → 즐겨찾기', '「열기 ›」로 바로, ✕로 지우기'),
-    @('앱이 꺼져도', '30분 안에 다시 켜면 「아까 보던 길안내가 있어요」'),
-    @('「이어서 보기」', '보던 단계부터 다시')) $rx 124 $rw 8
-  TipA $sl $rx ($y + 2) $rw '길안내 중 전화가 와도 — **처음부터 다시 찾지 않습니다.**' | Out-Null
+  # ── 10 발전 방향
+  $sl = PgA '08 · 향후 발전 방향' '더 나은 서비스를 위한 [[다음 단계]]' '이용자 쪽에서 준비 중인 것 하나, 그리고 다음에 넣을 후보 둘입니다.' '발전 방향' '다음 단계입니다. 이용자 쪽에서 준비 중인 것 하나와 다음 후보 둘입니다.\n먼저 NFC 태그입니다. QR 이 훼손되거나 잘 안 읽힐 때 폰을 문에 대기만 하면 그 문에서 시작합니다. 앱은 QR 과 같은 주소를 쓰기 때문에 고칠 것이 없고, 지금 태그 구매 승인을 기다리고 있습니다.\n다음 후보는 카카오톡 미리보기입니다. 친구에게 앱 주소를 보내면 앱 이름과 그림이 미리 보이게 하려 합니다.\n그리고 방 번호 읽는 법입니다. 13524 의 가운데 숫자 5 가 층이라는 것을 알려 주면, 번호만 봐도 몇 층으로 갈지 압니다.'
+  $nx = @(
+    @('준비 중 · 태그 승인 대기', 'NFC 태그로 열기', 'QR이 훼손되거나 안 읽힐 때 — **폰을 문에 대기만** 하면 그 문에서 시작', '앱은 QR과 같은 주소 — 고칠 것 없이 준비됨'),
+    @('다음 후보', '카카오톡 미리보기', '친구에게 주소를 보내면 — **앱 이름과 그림이 미리** 보이게', '「여기로 와」 한마디에 길안내까지'),
+    @('다음 후보', '방 번호 읽는 법', '「13524」의 **가운데 숫자 5가 층** — 번호만 봐도 몇 층인지', '시간표만 보고도 엘리베이터 버튼을'))
+  for($i = 0; $i -lt 3; $i++){
+    $xx = $M + $i * ($cw3 + 18); $ready = ($i -eq 0)
+    Card $sl $xx 120 $cw3 278 $(if($ready){ 'F4F1FF' } else { 'FFFFFF' }) $(if($ready){ 'B9AEF2' } else { $LINE }) | Out-Null
+    Chip $sl ($xx + 18) 138 (22 + 9 * $nx[$i][0].Length) 22 $nx[$i][0] $(if($ready){ $AC } else { 'FFFFFF' }) $(if($ready){ 'FFFFFF' } else { $AC }) 9.5 -bold -line $(if($ready){ '' } else { $AC }) -radius 11 | Out-Null
+    T $sl ($xx + 18) 176 ($cw3 - 36) 26 $nx[$i][1] 17 $INK -bold | Out-Null
+    T $sl ($xx + 18) 214 ($cw3 - 36) 100 $nx[$i][2] 12.5 $INK2 -lines 1.55 | Out-Null
+    Line $sl ($xx + 18) 340 ($xx + $cw3 - 18) 340 $LINE 0.75 -dash | Out-Null
+    T $sl ($xx + 18) 352 ($cw3 - 36) 36 $nx[$i][3] 10.5 $DIM -lines 1.3 | Out-Null
+  }
+  StripA $sl 414 '**목표는 하나** — 폰이 낯선 사람도 **누구에게도 묻지 않고** 시작하게.' 44
 
-  # ── 11 기능 09 ☰ 메뉴 · 밝은 화면
-  $sl = PgA '기능 09' '오른쪽 위 [[두 개]]면 충분합니다 — ☰ 메뉴와 밝은 화면' '버튼을 줄여 화면을 넓게 쓰고, 햇빛 아래에서는 밝은 화면으로 바꿉니다.' '아홉 번째, ☰ 메뉴와 밝은 화면입니다.\n화면 오른쪽 위에는 인터넷 상태와 ☰ 두 개만 둡니다. ☰ 를 누르면 밝은 화면, 처음으로, 즐겨찾기, 설정이 펼쳐집니다.\n밝은 화면 스위치를 켜면 글자 크기는 그대로 두고 바탕만 밝게 바뀝니다. 한낮 야외에서 폰 화면이 잘 안 보일 때 씁니다. 버튼 테두리는 3픽셀 하늘색으로 또렷하게 했습니다.'
-  $x = PhonesA $sl @(@('화면14_메뉴.jpg', '☰ 를 누르면'), @('화면15_밝은화면.jpg', '밝은 화면')) $M 124 352
-  $rx = $x + 18; $rw = $M + $CW - $rx
-  $y = StepsA $sl @(
-    @('오른쪽 위는 두 개뿐', '인터넷 상태 · ☰'),
-    @('☰ 를 누르면', '밝은 화면 · 처음으로 · 즐겨찾기 · 설정'),
-    @('밝은 화면 스위치', '글자 크기는 그대로, 바탕만 밝게'),
-    @('버튼 테두리', '3픽셀 하늘색 — 어디를 누를지 또렷하게')) $rx 124 $rw
-  TipA $sl $rx ($y + 4) $rw '한낮 야외 · 햇빛 아래 — **밝은 화면**으로 바꾸면 잘 보입니다.' | Out-Null
+  # ── 11 마무리
+  $sl = PgA '09 · 마무리하며' '프로젝트 [[요약 및 결론]]' '' '마무리' '마무리하겠습니다. 저희는 이용자가 막히는 세 곳에 하나씩 답했습니다.\n아는 것이 제각각인 문제에는 번호, 성함, 초성을 모두 받는 하나의 검색창으로, 앱이 문턱인 문제에는 설치 없는 QR 한 번과 쉬운 사용모드로, 한국어뿐인 문제에는 English 한 번으로 답했습니다.\n(잠깐 멈추고) 아는 것만 들고 오십시오. 누를 곳만 따라오면, 문 앞입니다.'
+  $sum = @(
+    @('아는 것이 제각각', '하나의 검색창', '번호 · 성함 · 초성 — 아는 만큼만'),
+    @('앱이 문턱', 'QR 한 번 + 쉬운 사용모드', '설치 · 가입 없이, 손가락만 따라'),
+    @('한국어뿐', 'English 한 번', '안내 문장 · 버튼 · 층 이름까지'))
+  for($i = 0; $i -lt 3; $i++){
+    $xx = $M + $i * ($cw3 + 18)
+    Card $sl $xx 100 $cw3 178 'FFFFFF' $LINE | Out-Null
+    T $sl ($xx + 18) 116 ($cw3 - 36) 16 ('막힘 — ' + $sum[$i][0]) 10.5 $DIM -bold | Out-Null
+    T $sl ($xx + 18) 142 ($cw3 - 36) 56 $sum[$i][1] 18 $AC -bold -lines 1.2 | Out-Null
+    T $sl ($xx + 18) 226 ($cw3 - 36) 40 $sum[$i][2] 11.5 $INK2 -lines 1.35 | Out-Null
+  }
+  Rect $sl $M 296 $CW 176 $AC '' 0 8 | Out-Null
+  T $sl ($M + 30) 318 ($CW - 60) 70 '아는 것만 들고 오십시오.\n누를 곳만 따라오면 — [[문 앞입니다.]]' 26 'FFFFFF' -bold -accent '8FEBFA' -lines 1.25 | Out-Null
+  T $sl ($M + 30) 410 ($CW - 60) 50 '번호든 성함이든 첫소리든 — 설치도 가입도 없이, 노란 손가락이 짚어 주는 곳만 누르면 됩니다.' 12.5 'E6E2FF' -lines 1.5 | Out-Null
 
-  # ── 12 기능 10 인터넷이 끊겨도
-  $sl = PgA '기능 10' '인터넷이 끊기면 — [[오른쪽 위]]가 알려 줍니다' '한 번 받아 둔 앱은 인터넷 없이도 열리고, 지금 상태를 오른쪽 위에서 바로 봅니다.' '열 번째, 인터넷이 끊겼을 때입니다.\n인터넷이 끊기면 오른쪽 위 동그라미가 주황색 「오프라인」으로 바뀝니다. 눌러 보면 지금 무엇이 되고 무엇이 쉬는지 알려 줍니다.\n길안내, 3D, 사진은 그대로 되고, 사진으로 위치를 찾는 AI 만 쉽니다. 「인터넷 없이 열기 : 준비됨」이면 처음 한 번 받아 둔 것으로 열립니다.'
-  $x = PhonesA $sl @(@('A15_오프라인.jpg', '주황 「오프라인」'), @('A16_저장상태.jpg', '누르면 지금 상태')) $M 124 352
-  $rx = $x + 18; $rw = $M + $CW - $rx
-  $y = StepsA $sl @(
-    @('끊기면 주황색 「오프라인」', '설정을 열지 않아도 한눈에'),
-    @('눌러 보면', '무엇이 되고 무엇이 쉬는지 한 줄씩'),
-    @('그대로 되는 것', '길안내 · 3D · 사진 — 쉬는 것은 사진으로 위치 찾기(AI)뿐'),
-    @('「인터넷 없이 열기 : 준비됨」', '처음 한 번 받아 둔 것으로 열립니다')) $rx 124 $rw
-  TipA $sl $rx ($y + 4) $rw '신호가 약한 계단 · 엘리베이터 안에서도 — **안내는 멈추지 않습니다.**' | Out-Null
-
-  # ── 13 기능 11 앱 다운로드
-  $sl = PgA '기능 11' '앱 다운로드 — [[홈 화면에 한 번]] 담아 두기' '앱스토어 없이, 설정의 「앱 다운로드」에서 폰에 맞는 버튼을 누릅니다.' '열한 번째, 앱 다운로드입니다. 이 앱은 앱스토어에 없습니다. 첫 화면 아래 「앱을 다운로드 하시려면 설정에 들어가주세요」를 누르면 설정이 열립니다.\n삼성 폰은 「삼성 →」 버튼 한 번으로 설치되고, 아이폰은 애플이 그 버튼을 막아 두어서 「아이폰 →」을 누르면 공유, 홈 화면에 추가, 추가 세 단계를 그림으로 보여 줍니다.\n설치하지 않아도 브라우저에서 그대로 쓸 수 있고, 홈 화면에 아이콘이 생기면 다음부터는 QR 없이 바로 엽니다.'
-  $x = PhonesA $sl @(@('A02_쉬운모드_첫화면.jpg', '첫 화면 맨 아래'), @('A14_아이폰설치.jpg', '아이폰 세 단계')) $M 124 352
-  $rx = $x + 18; $rw = $M + $CW - $rx
-  $y = StepsA $sl @(
-    @('첫 화면 맨 아래 노란 줄', '「앱을 다운로드 하시려면 설정에」'),
-    @('「삼성 →」', '버튼 한 번으로 설치'),
-    @('「아이폰 →」', '공유 → 홈 화면에 추가 → 추가, 세 단계 그림 안내'),
-    @('설치하지 않아도', '브라우저에서 그대로 쓸 수 있습니다')) $rx 124 $rw
-  TipA $sl $rx ($y + 4) $rw '홈 화면에 아이콘이 생기면 — 다음부터는 **QR 없이 바로** 엽니다.' | Out-Null
-
-  # ── 14 기능 12 English · 건의함
-  $sl = PgA '기능 12' 'English · 건의함 — [[함께 쓰고, 함께 고칩니다]]' '말이 달라도 같은 길을, 건물이 바뀌어도 맞는 사진을.' '열두 번째, 영어와 건의함입니다.\n설정에서 English 를 누르면 안내 문장, 버튼, 층 이름까지 모두 영어로 바뀝니다. 「Enter through the main gate」처럼 단계 안내도 그대로 영어입니다.\n건의함에서는 실제 모습과 달라진 곳을 찍어 올립니다. 한 사람이 하루 세 번까지 올릴 수 있고, 관리자가 확인한 뒤에 모든 사람의 화면에 반영됩니다.'
-  $x = PhonesA $sl @(@('화면18_영어.jpg', 'English'), @('화면17_건의함.jpg', '건의함')) $M 124 352
-  $rx = $x + 18; $rw = $M + $CW - $rx
-  $y = StepsA $sl @(
-    @('설정 → English', '안내 문장 · 버튼 · 층 이름까지 영어로'),
-    @('건의함', '실제와 달라진 곳을 찍어 올립니다'),
-    @('하루 3번까지', '오늘 올릴 수 있는 횟수가 화면에 — 관리자는 제한 없이'),
-    @('관리자가 확인한 뒤', '모든 사람의 화면에 반영')) $rx 124 $rw
-  TipA $sl $rx ($y + 4) $rw '공사로 바뀐 복도를 봤다면 — **사진 한 장**이 다음 사람을 돕습니다.' | Out-Null
-
-  # ── 15 마무리
+  # ── 12 Q&A
   $script:pg++
   $sl = $pres.Slides.Add($pres.Slides.Count + 1, 12); Bg $sl $AC
   $o = $sl.Shapes.AddShape(9, -160, 300, 460, 460); $o.Line.Visible = 0; $o.Fill.ForeColor.RGB = (C '7B62F0'); $o.Fill.Transparency = 0.4; $o.Shadow.Visible = 0
-  T $sl $M 70 600 16 '마 무 리' 11 'D9D2FF' -bold -spacing 3 | Out-Null
-  T $sl $M 96 620 90 '설명서는 여기까지 —\n[[직접 눌러 보십시오.]]' 32 'FFFFFF' -bold -accent '8FEBFA' -lines 1.15 | Out-Null
-  $tasks = @(@('1', '후문 QR 찍기', '「여기가 맞나요?」에 후문 사진이 뜹니다'), @('2', '「ㅎㄱㅅㅁㅅ」 검색', '초성만으로 학과사무실'), @('3', '☰ → 밝은 화면', '바탕이 밝게 바뀝니다'))
-  for($i = 0; $i -lt 3; $i++){
-    $yy = 214 + $i * 74
-    Rect $sl $M $yy 560 62 'FFFFFF' '' 0 8 | Out-Null
-    Oval $sl ($M + 16) ($yy + 16) 30 $AC $tasks[$i][0] 13 | Out-Null
-    T $sl ($M + 60) ($yy + 11) 480 20 $tasks[$i][1] 14 $INK -bold | Out-Null
-    T $sl ($M + 60) ($yy + 34) 480 16 $tasks[$i][2] 11 $INK2 | Out-Null
-  }
-  T $sl $M 448 600 20 '질의응답 — 들어 주셔서 감사합니다' 13 'E6E2FF' | Out-Null
+  T $sl $M 120 520 16 '1 0 · Q & A' 10 'D9D2FF' -bold -spacing 3 | Out-Null
+  T $sl $M 146 520 80 'Q [[&]] A' 60 'FFFFFF' -bold -accent '8FEBFA' -boldColor 'FFFFFF' | Out-Null
+  T $sl $M 232 520 24 '질의응답 — 들어 주셔서 감사합니다' 16 'E6E2FF' | Out-Null
+  Rect $sl $M 276 90 4 '8FEBFA' | Out-Null
+  T $sl $M 298 520 40 ('**' + $TOPIC + '** · 팀 공3길\n김민종 · 손의윤 · 문성일   |   지도교수 강규창 교수님') 12 'D9D2FF' -lines 1.6 -boldColor 'FFFFFF' | Out-Null
+  T $sl $M 368 520 40 '후문 QR을 찍고 — **쉬운 사용모드를 켠 채로** 직접 따라가 보십시오.' 12.5 'E6E2FF' -boldColor 'FFFFFF' | Out-Null
   $qh = 330; $qw = PhoneW 'QR_후문.png' $qh
-  Pic $sl 'QR_후문.png' (903 - $qw) 92 $qw $qh '' | Out-Null
-  T $sl (903 - $qw) (92 + $qh + 8) $qw 16 '지금 찍어 보십시오' 11 'FFFFFF' -bold -align 2 | Out-Null
-  Notes $sl '설명서는 여기까지입니다. 이제 직접 눌러 보시면 좋겠습니다.\n오른쪽 후문 QR 을 찍으면 「여기가 맞나요?」에 후문 사진이 뜹니다. 검색창에 「ㅎㄱㅅㅁㅅ」만 쳐 보시고, ☰ 메뉴에서 밝은 화면도 켜 보십시오.\n들어 주셔서 감사합니다. 질문 받겠습니다.'
+  Pic $sl 'QR_후문.png' (903 - $qw) 96 $qw $qh '' | Out-Null
+  Notes $sl '들어 주셔서 감사합니다. 오른쪽 후문 QR 을 찍고, 쉬운 사용모드를 켠 채로 직접 따라가 보십시오.\n질문 받겠습니다.'
 
-  SavePres '졸업작품 모의 발표 ① 사용 설명서편' 15
+  SavePres '졸업작품 모의 발표 ① 이용자 편' 12
 }
 
 # ═════════════════════════════════════════════════════════════════════════
-#  B — 현장 답사형 : 종이색 바탕 + 먹회색 + 산호색 핀. 앱 화면 없이 3호관에서 직접 찍은 사진만
+#  ② 3호관 현장 사진으로 보는 공간 이야기 — 앱 화면 없이 장소 사진만, 안내 문장은 앱의 실제 기록(tests\golden\v150.json)
 # ═════════════════════════════════════════════════════════════════════════
-function PaletteB(){
-  $script:BG = 'F5F1EA'; $script:INK = '23292F'; $script:INK2 = '4E565E'; $script:DIM = '857C70'
-  $script:LINE = 'DDD3C4'; $script:LINE2 = 'E9E1D4'; $script:CARD = 'FFFDF9'
-  $script:AC = '23292F'; $script:AC2 = 'ECE4D6'; $script:ACT = '23292F'; $script:AM = 'D9482B'; $script:RD = 'B3261E'; $script:MINT = 'D9482B'
-}
-function PgB([string]$stop, [string]$title, [string]$notes){
-  $script:pg++
-  $sl = $pres.Slides.Add($pres.Slides.Count + 1, 12); Bg $sl $BG
-  Oval $sl $M 30 12 $AM '' | Out-Null
-  T $sl ($M + 20) 27 300 16 $stop 10 $AM -bold -spacing 2 | Out-Null
-  T $sl $M 50 $CW 34 $title 22 $INK -bold -accent $AM -lines 1.1 | Out-Null
-  Line $sl $M $FOOTY ($M + $CW) $FOOTY $LINE 0.75 | Out-Null
-  T $sl $M ($FOOTY + 6) 500 14 '현장 답사 · 공대 3호관 길안내' 8.5 $DIM -spacing 0.6 | Out-Null
-  T $sl ($M + $CW - 100) ($FOOTY + 6) 100 14 ([string]$script:pg) 8.5 $DIM -align 3 | Out-Null
-  Notes $sl $notes
-  return $sl
-}
-# 사진을 칸에 꽉 채워 자르고, 모서리는 각지게
-function PhotoB($sl, [string]$file, [double]$x, [double]$y, [double]$w, [double]$h){
-  $p = PicCover $sl $file $x $y $w $h ''
-  try{ $p.AutoShapeType = 1 }catch{}
-  $p.Line.Visible = 0
-  return $p
-}
-# 사진 왼쪽 아래 이름표
-function TagB($sl, [double]$x, [double]$y, [string]$text, [string]$fill = 'D9482B'){
-  $w = [Math]::Min(260, 16 + 8.2 * $text.Length)
-  Chip $sl $x $y $w 20 $text $fill 'FFFFFF' 9 -bold -radius 0 | Out-Null
-}
-function StripB($sl, [double]$y, [string]$text, [double]$h = 44){
-  Rect $sl $M $y $CW $h $CARD $LINE 0.75 | Out-Null
-  Rect $sl $M $y 5 $h $AM | Out-Null
-  $t = T $sl ($M + 20) $y ($CW - 36) $h $text 12 $INK2 -anchor 3 -lines 1.3
-  $t.Height = $h
-}
-
 function BuildB(){
   PaletteB; NewPres
   # ── 1 표지
@@ -571,247 +567,200 @@ function BuildB(){
   $sl = $pres.Slides.Add(1, 12); Bg $sl $AC
   PhotoB $sl '현장_정문.jpg' 0 0 $W $H | Out-Null
   $ov = Rect $sl 0 0 $W $H '1A1F24'; $ov.Fill.Transparency = 0.32
-  $ov2 = Rect $sl 0 250 $W 290 '1A1F24'; $ov2.Fill.Transparency = 0.2
-  Oval $sl $M 288 12 'FF7A5C' '' | Out-Null
-  T $sl ($M + 20) 285 600 16 'FIELD REPORT · 졸업작품 모의 발표' 10.5 'F3D7CC' -bold -spacing 2.5 | Out-Null
-  T $sl $M 310 820 60 '공대 3호관을 [[걸어서]] 읽다' 40 'FFFFFF' -bold -accent 'FF7A5C' | Out-Null
-  T $sl $M 374 820 24 '네 개의 문 · 여섯 개의 층 — 길안내가 따라가는 실제 공간' 15 'EDE6DC' | Out-Null
-  T $sl $M 430 820 20 '**팀 공3길**   김민종 · 손의윤 · 문성일    |    **지도교수**   강규창 교수님' 11.5 'D8D0C4' -boldColor 'FFFFFF' | Out-Null
+  $ov2 = Rect $sl 0 236 $W 304 '1A1F24'; $ov2.Fill.Transparency = 0.18
+  Oval $sl $M 262 12 'FF7A5C' '' | Out-Null
+  T $sl ($M + 20) 259 600 16 '졸업작품 모의 발표 ② · 3호관 현장에서' 10.5 'F3D7CC' -bold -spacing 2 | Out-Null
+  T $sl $M 284 820 56 $TOPIC 40 'FFFFFF' -bold | Out-Null
+  T $sl $M 346 820 60 $TOPIC_SUB 19 'EDE6DC' -lines 1.4 -accent 'FF7A5C' | Out-Null
+  T $sl $M 434 820 20 '**팀 공3길**   김민종 · 손의윤 · 문성일    |    **지도교수**   강규창 교수님' 11.5 'D8D0C4' -boldColor 'FFFFFF' | Out-Null
   T $sl ($W - 260) 500 220 14 '사진 : 공대 3호관 정문' 9 'D8D0C4' -align 3 | Out-Null
-  Notes $sl '안녕하십니까. 오늘은 앱 화면 대신, 공대 3호관을 직접 걸으며 찍은 사진으로 발표하겠습니다.\n길안내 앱은 결국 실제 건물을 따라갑니다. 네 개의 문과 여섯 개의 층을 답사하듯 함께 걸어 보겠습니다.'
+  Notes $sl '안녕하십니까. 팀 공3길의 졸업작품 「공대 3호관 길안내」를 발표하겠습니다. 건물 안에서 길을 잃는 문제를 해결하기 위한 새로운 제안입니다.\n오늘은 앱 화면 대신, 3호관을 직접 걸으며 찍은 사진으로 말씀드리겠습니다.'
 
-  # ── 2 답사 범위
-  $sl = PgB 'STOP 00 · 답사 범위' '지하 1층부터 5층까지 — [[여섯 개 층]]을 걸었습니다' '먼저 답사 범위입니다. 공대 3호관은 지상 다섯 개 층과 지하 1층, 모두 여섯 개 층이고, 출입문은 정문 · 후문 · 동문 · 서문 네 곳입니다.\n앱이 안내하는 호실은 100곳입니다. 1층에는 네 출입문과 로비, 학과사무실이 있고, 2층에는 카페 테이블이 있는 라운지, 3층부터 5층에는 사물함이 늘어선 넓은 홀과 연구실, 강의실이 있습니다. 지하 1층은 크리에이티브 존입니다.\n이제 문부터 차례로 걸어 보겠습니다.'
-  $floors = @(
-    @('5F', '연구실 · 강의실 · PC실(13524) · 사물함 홀'), @('4F', '연구실 · 프로그래밍 동아리실(KTC) · 사물함 홀'),
-    @('3F', '연구실 · 강의실 · 사물함 홀'), @('2F', '강의실 · 카페 테이블이 있는 라운지'),
-    @('1F', '네 출입문 · 로비(안내실) · 학과사무실 · 강의실'), @('B1', '크리에이티브 존 — 자유 열람 공간'))
-  for($i = 0; $i -lt 6; $i++){
-    $yy = 104 + $i * 50; $hot = ($i -eq 4)
-    Rect $sl $M $yy 470 42 $(if($hot){ 'FBE9E4' } else { $CARD }) $(if($hot){ 'EDB9AC' } else { $LINE }) 0.75 | Out-Null
-    Rect $sl $M $yy 52 42 $(if($hot){ $AM } else { $AC }) | Out-Null
-    T $sl $M $yy 52 42 $floors[$i][0] 15 'FFFFFF' -bold -align 2 -anchor 3 | Out-Null
-    T $sl ($M + 66) $yy 396 42 $floors[$i][1] 12 $INK2 -anchor 3 | Out-Null
-  }
-  $stats = @(@('4', '출입문'), @('6', '층 (지하 1층 포함)'), @('100', '안내하는 호실'))
+  # ── 2 들어가며
+  $sl = PgB '02 · 들어가며' '혹시 이런 불편함, [[겪어 보셨나요?]]' '3호관 안에서 직접 찍은 사진입니다 — 길을 잃는 순간은 건물 곳곳에 있습니다.' '들어가며' '3호관 안에서 직접 찍은 사진 세 장입니다.\n1층 로비에 들어섰는데 어느 쪽으로 가야 할지 모릅니다. 위층에 올라가면 복도가 다 똑같아서 여기가 몇 층인지 헷갈립니다. 그리고 문은 많은데, 이 방이 맞는지 가까이 가 봐야 압니다.\n3호관은 문이 넷, 층이 여섯입니다. 길을 잃는 순간은 건물 곳곳에 있습니다.'
+  $ph3 = @(@('현장_1층로비.jpg', '「로비에 들어섰는데…\n어느 쪽이지?」', '1층 로비'), @('현장_3층복도L.jpg', '「복도가 다 똑같은데…\n여기 몇 층이지?」', '3층 복도'), @('현장_13410.jpg', '「문은 많은데…\n이 방이 맞나?」', '4층 연구실 문 앞'))
+  $c3 = ($CW - 2 * 18) / 3
   for($i = 0; $i -lt 3; $i++){
-    $xx = $M + 500 + $i * 118
-    T $sl $xx 104 110 50 $stats[$i][0] 38 $AM -bold | Out-Null
-    T $sl $xx 156 110 30 $stats[$i][1] 10.5 $INK2 -lines 1.25 | Out-Null
+    $xx = $M + $i * ($c3 + 18)
+    PhotoB $sl $ph3[$i][0] $xx 114 $c3 220 | Out-Null
+    TagB $sl $xx 314 $ph3[$i][2] $AC
+    T $sl $xx 344 $c3 50 $ph3[$i][1] 14 $INK -bold -lines 1.3 | Out-Null
   }
-  PhotoB $sl '현장_3층라운지.jpg' ($M + 500) 200 346 200 | Out-Null
-  TagB $sl ($M + 500) 380 '3층 · 엘리베이터 앞 홀'
-  StripB $sl 412 '앱이 안내하는 곳은 모두 이 여섯 개 층 안에 있습니다 — 오늘은 **문에서 출발해 위로**, 그리고 **지하로** 걸어 봅니다.' 46
+  StripB $sl 412 '3호관은 **문이 넷, 층이 여섯** — 길을 잃는 순간은 건물 안 곳곳에 있습니다.' 46
 
-  # ── 3 네 개의 문
-  $sl = PgB 'STOP 01 · 출입문' '문이 넷이면, [[첫걸음도 넷]]입니다' '3호관의 네 출입문입니다. 생김새도, 들어서면 처음 보이는 풍경도 다릅니다.\n정문은 「전자정보관」 현판 아래 계단을 올라 큰 유리문으로 들어가고, 들어서면 바로 엘리베이터 쪽입니다. 후문으로 들어서면 1층 라운지가 나오고, 왼쪽에 지하로 내려가는 계단이 있습니다.\n동문은 벽돌 벽 사이 계단, 서문은 초록 차양 아래 유리문이고, 둘 다 긴 복도를 따라 엘리베이터까지 갑니다. 그래서 안내의 첫걸음도 문마다 따로 정했습니다.'
-  $gates = @(
-    @('현장_정문.jpg', '정문', '「전자정보관」 현판 아래 계단 · 들어서면 바로 엘리베이터 쪽'),
-    @('현장_후문.jpg', '후문', '들어서면 1층 라운지 · 왼쪽에 지하로 내려가는 계단'),
-    @('현장_동문.jpg', '동문', '벽돌 벽 사이 계단 · 긴 복도를 따라 엘리베이터로'),
-    @('현장_서문.jpg', '서문', '초록 차양 아래 유리문 · 동문처럼 긴 복도'))
-  $gw = ($CW - 3 * 12) / 4
+  # ── 3 문제점
+  $sl = PgB '03 · 우리가 발견한 문제점' '기존 방식의 한계와 명확한 [[Pain Point]]' '공간 쪽에서 보면 — 3호관에는 헷갈리는 이유가 세 가지 있습니다.' '문제점' '공간 쪽에서 보면 3호관에는 헷갈리는 이유가 세 가지 있습니다.\n첫째, 문이 넷입니다. 정문, 후문, 동문, 서문 — 들어온 문마다 엘리베이터까지 가는 길이 다릅니다. 지도 앱은 건물 앞까지만 데려다줍니다.\n둘째, 복도가 닮았습니다. 층마다 같은 모습이라 눈으로는 층을 가리기 어렵고, 층마다 붙은 안내도는 그 앞에 서야 보입니다.\n셋째, 번호판은 가까이 가야 보입니다. 문 앞까지 가서 하나씩 확인해야 합니다.\n가장 아픈 곳은 둘째입니다. 몇 층인지 헷갈리면 그다음 안내는 모두 틀어집니다.'
+  $pp = @(
+    @('현장_후문.jpg', 'PAIN POINT 1', '문이 넷이다', '들어온 문마다 **엘리베이터까지 가는 길**이 다릅니다.', '기존 — 지도 앱은 건물 앞까지', $false),
+    @('현장_4층복도R.jpg', 'PAIN POINT 2', '복도가 닮았다', '층마다 같은 모습 — **눈으로는 층을 가리기 어렵습니다.**', '기존 — 층 안내도는 그 앞에서만', $true),
+    @('현장_13524.jpg', 'PAIN POINT 3', '번호판은 가까이에서만', '문 앞까지 가서 **하나씩 확인**해야 합니다.', '기존 — 직접 걸으며 번호 확인', $false))
+  for($i = 0; $i -lt 3; $i++){
+    $xx = $M + $i * ($c3 + 18); $hot = $pp[$i][5]
+    PhotoB $sl $pp[$i][0] $xx 110 $c3 150 | Out-Null
+    Rect $sl $xx 260 $c3 136 $(if($hot){ 'FBE9E4' } else { $CARD }) $(if($hot){ 'EDB9AC' } else { $LINE }) 0.75 | Out-Null
+    T $sl ($xx + 16) 270 ($c3 - 32) 14 $pp[$i][1] 9.5 $(if($hot){ $AM } else { $DIM }) -bold -spacing 1.5 | Out-Null
+    T $sl ($xx + 16) 290 ($c3 - 32) 24 $pp[$i][2] 16 $(if($hot){ $AM } else { $INK }) -bold | Out-Null
+    T $sl ($xx + 16) 320 ($c3 - 32) 44 $pp[$i][3] 11.5 $INK2 -lines 1.4 | Out-Null
+    T $sl ($xx + 16) 370 ($c3 - 32) 16 $pp[$i][4] 9.5 $DIM | Out-Null
+  }
+  StripB $sl 410 '가장 아픈 곳은 **PAIN POINT 2** — 몇 층인지 헷갈리면, **그다음 안내는 모두 틀어집니다.**' 46
+
+  # ── 4 해결 아이디어
+  $sl = PgB '04 · 우리의 해결 아이디어' '그래서 우리는 [[사진으로 걷는 길안내]]를 생각했습니다' '헷갈리는 세 곳마다 — 그 자리의 실제 사진과 짧은 한 문장을 놓았습니다.' '해결 아이디어' '그래서 저희는 사진으로 걷는 길안내를 생각했습니다. 헷갈리는 세 곳마다 그 자리의 실제 사진과 짧은 한 문장을 놓았습니다.\n문이 넷인 문제에는 문마다 첫걸음을 따로 정했습니다. 복도가 닮은 문제에는 엘리베이터를 기준점으로 삼아, 내린 방향으로 좌우를 말합니다. 번호판이 멀리서 안 보이는 문제에는 「오른쪽에서 여섯 번째 방」처럼 문을 세게 했습니다.\n눈앞 풍경과 사진을 맞춰 보며 걸으면 됩니다.'
+  $id = @(
+    @('현장_서문복도.jpg', 'PAIN 1 → 문마다 첫걸음', '서문은 「복도를 따라 직진하세요」 — **문마다 따로**'),
+    @('현장_1층엘리베이터.jpg', 'PAIN 2 → 엘리베이터가 기준점', '「엘리베이터에서 내려서 **우회전** 하세요」'),
+    @('현장_KTC.jpg', 'PAIN 3 → 도착은 문을 세서', '「왼쪽에서 **첫 번째 방**에 KTC 프로그래밍 동아리실」'))
+  for($i = 0; $i -lt 3; $i++){
+    $xx = $M + $i * ($c3 + 18)
+    PhotoB $sl $id[$i][0] $xx 110 $c3 210 | Out-Null
+    T $sl $xx 330 $c3 18 $id[$i][1] 12.5 $AM -bold | Out-Null
+    T $sl $xx 352 $c3 44 $id[$i][2] 11.5 $INK2 -lines 1.35 | Out-Null
+  }
+  StripB $sl 410 '**한 문장으로** — 그 자리의 **실제 사진**과 **짧은 한 문장**이면, 눈앞 풍경과 맞춰 보며 걸을 수 있습니다.' 46
+
+  # ── 5 설계 및 구현
+  $sl = PgB '05 · 솔루션 설계 및 구현' '공대 3호관 길안내의 [[전체 구조와 개발 기술]]' '길안내를 이루는 재료 네 가지 — 그리고 같은 목적지를 네 문에서 설계한 예입니다.' '설계 및 구현' '길안내를 이루는 재료는 네 가지입니다. 직접 찍은 장소 사진 169장, 한국어와 영어로 쓴 안내 문장 754가지, 네 문과 여섯 층의 안내 절차, 그리고 3D 건물을 그리는 좌표입니다.\n오른쪽은 설계의 예입니다. 4층 13410호를 네 문에서 가면, 엘리베이터를 탄 뒤로는 모두 같고 두 번째 걸음만 다릅니다. 정문은 들어서면 바로 엘리베이터라 다섯 단계, 나머지는 여섯 단계입니다.\n문별 절차는 작은 표 네 개로 정해 두었기 때문에, 층을 하나 늘리려면 숫자 하나만 넣으면 됩니다.'
+  $mat = @(@('169장', '직접 찍은 장소 사진'), @('754가지', '안내 문장 · 한국어 / 영어'), @('네 문 × 여섯 층', '문별 · 층별 안내 절차'), @('three.js', '좌표에서 3D 건물을 그림'))
   for($i = 0; $i -lt 4; $i++){
-    $xx = $M + $i * ($gw + 12)
-    PhotoB $sl $gates[$i][0] $xx 100 $gw 236 | Out-Null
-    TagB $sl $xx 316 $gates[$i][1]
-    T $sl $xx 346 $gw 50 $gates[$i][2] 11 $INK2 -lines 1.35 | Out-Null
+    $yy = 106 + $i * 74
+    Rect $sl $M $yy 250 64 $CARD $LINE 0.75 | Out-Null
+    Rect $sl $M $yy 5 64 $AM | Out-Null
+    T $sl ($M + 18) ($yy + 8) 220 28 $mat[$i][0] 20 $INK -bold | Out-Null
+    T $sl ($M + 18) ($yy + 38) 220 18 $mat[$i][1] 10.5 $INK2 | Out-Null
   }
-  StripB $sl 412 '문마다 안에서 처음 마주치는 풍경이 다릅니다 — 그래서 **문에서 엘리베이터까지 가는 한 걸음**을 문마다 따로 정했습니다.' 46
-
-  # ── 4 같은 연구실, 네 갈래
-  $sl = PgB 'STOP 02 · 같은 목적지' '4층 13410호까지 — 문마다 [[두 번째 걸음]]이 다릅니다' '같은 목적지, 4층 13410호 IT융합통신공학과 지석근 교수님 연구실을 네 문에서 가 보겠습니다.\n정문은 들어서면 바로 엘리베이터라 다섯 단계입니다. 후문은 「1층 라운지에서 우회전」, 동문과 서문은 「복도를 따라 직진」이라는 한 걸음이 더 붙어 여섯 단계가 됩니다.\n엘리베이터를 탄 뒤로는 네 문 모두 똑같습니다. 다른 것은 문에서 엘리베이터까지, 딱 한 걸음입니다.'
-  $rows = @(
-    @('정문', @('정문으로\n들어오세요', '', '엘리베이터 4층으로', '내려서 우회전', '복도를 따라 직진', '오른쪽 여섯 번째 방'), '5단계'),
-    @('후문', @('후문으로\n들어오세요', '1층 라운지에서\n우회전', '엘리베이터 4층으로', '내려서 우회전', '복도를 따라 직진', '오른쪽 여섯 번째 방'), '6단계'),
-    @('동문', @('동문으로\n들어오세요', '복도를 따라 직진', '엘리베이터 4층으로', '내려서 우회전', '복도를 따라 직진', '오른쪽 여섯 번째 방'), '6단계'),
-    @('서문', @('서문으로\n들어오세요', '복도를 따라 직진', '엘리베이터 4층으로', '내려서 우회전', '복도를 따라 직진', '오른쪽 여섯 번째 방'), '6단계'))
-  $cx = $M + 62; $cg = 9; $cwid = ($CW - 62 - 5 * $cg) / 6
-  for($i = 0; $i -lt 6; $i++){ T $sl ($cx + $i * ($cwid + $cg)) 98 $cwid 14 ('STEP ' + ($i + 1)) 8.5 $DIM -bold -align 2 -spacing 1 | Out-Null }
+  $tx = $M + 270; $twid = $M + $CW - $tx
+  T $sl $tx 106 $twid 16 '설계 예 — 4층 13410호 (IT융합통신공학과 지석근 교수님 연구실)' 10.5 $AM -bold | Out-Null
+  $rows = @(@('정문', '— 바로 엘리베이터', '5단계'), @('후문', '1층 라운지에서 우회전', '6단계'), @('동문', '복도를 따라 직진', '6단계'), @('서문', '복도를 따라 직진', '6단계'))
   for($r = 0; $r -lt 4; $r++){
-    $yy = 118 + $r * 66; $row = $rows[$r]
-    Rect $sl $M $yy 52 54 $AC | Out-Null
-    T $sl $M ($yy + 6) 52 24 $row[0] 14 'FFFFFF' -bold -align 2 | Out-Null
-    T $sl $M ($yy + 30) 52 16 $row[2] 9 'D8D0C4' -align 2 | Out-Null
-    for($i = 0; $i -lt 6; $i++){
-      $xx = $cx + $i * ($cwid + $cg); $txt = $row[1][$i]
-      if($i -eq 1){
-        if($txt){ Chip $sl $xx $yy $cwid 54 $txt 'FBE9E4' $AM 10.5 -bold -line 'EDB9AC' -radius 3 | Out-Null }
-        else { Chip $sl $xx $yy $cwid 54 '— 바로 엘리베이터' $BG $DIM 10 -line $LINE -radius 3 | Out-Null }
-      } else { Chip $sl $xx $yy $cwid 54 $txt $CARD $INK2 10.5 -line $LINE -radius 3 | Out-Null }
-    }
+    $yy = 130 + $r * 50
+    Rect $sl $tx $yy 58 42 $AC | Out-Null
+    T $sl $tx $yy 58 42 $rows[$r][0] 13 'FFFFFF' -bold -align 2 -anchor 3 | Out-Null
+    Chip $sl ($tx + 64) $yy 104 42 ('들어오세요') $CARD $INK2 10 -line $LINE -radius 3 | Out-Null
+    Chip $sl ($tx + 174) $yy 150 42 $rows[$r][1] $(if($r -eq 0){ $BG } else { 'FBE9E4' }) $(if($r -eq 0){ $DIM } else { $AM }) 10.5 -bold:($r -ne 0) -line $(if($r -eq 0){ $LINE } else { 'EDB9AC' }) -radius 3 | Out-Null
+    Chip $sl ($tx + 330) $yy ($twid - 330 - 58) 42 '엘리베이터 4층 → 우회전 → 직진 → 여섯 번째 방' $CARD $INK2 9.5 -line $LINE -radius 3 | Out-Null
+    T $sl ($tx + $twid - 52) $yy 52 42 $rows[$r][2] 11 $INK -bold -align 3 -anchor 3 | Out-Null
   }
-  StripB $sl 392 '엘리베이터를 탄 뒤로는 **네 문 모두 같은 길** — 다른 건 문에서 엘리베이터까지 **한 걸음뿐**입니다.' 46
-  T $sl $M 446 $CW 16 '목적지 : 13410호 · IT융합통신공학과 지석근 교수님 연구실 (앱의 실제 안내 문장, 줄여 적음)' 9.5 $DIM | Out-Null
+  T $sl $tx 334 $twid 30 '엘리베이터를 탄 뒤로는 **네 문 모두 같은 길** — 다른 건 문에서 엘리베이터까지 **한 걸음**뿐입니다.' 11 $INK2 -lines 1.35 | Out-Null
+  StripB $sl 418 '구현 — 문별 절차는 **작은 표 네 개**로 정해 두어, 층을 하나 늘리려면 **숫자 하나**만 넣으면 됩니다.' 44
 
-  # ── 5 후문에서 지하로
-  $sl = PgB 'STOP 03 · 후문 → 지하 1층' '후문에서 지하로는 — [[엘리베이터보다 계단]]' '후문에서 지하 1층 크리에이티브 존으로 가는 길입니다.\n후문으로 들어서면 왼쪽에 바로 계단이 보입니다. 그 계단으로 내려가면 왼쪽에 크리에이티브 존 입구가 있습니다. 네 단계면 끝납니다.\n같은 곳을 정문에서 가면 엘리베이터 앞으로 가서 지하 1층으로 내려가고, 내려서 왼쪽, 정면, 도착까지 여섯 단계입니다. 후문에서는 엘리베이터를 찾을 필요가 없습니다.'
-  $steps = @(@('현장_후문.jpg', '1  후문으로 들어오세요'), @('현장_후문계단.jpg', '2  좌측에 보이는 계단을 통해 내려가세요'), @('현장_지하복도.jpg', '3  좌측에 크리에이티브 존이 있습니다'), @('현장_크리에이티브존.jpg', '4  크리에이티브 존에 도착했습니다'))
-  $sw = ($CW - 3 * 12) / 4
-  for($i = 0; $i -lt 4; $i++){
-    $xx = $M + $i * ($sw + 12)
-    PhotoB $sl $steps[$i][0] $xx 100 $sw 236 | Out-Null
-    T $sl $xx 344 $sw 40 $steps[$i][1] 11.5 $INK -bold -lines 1.3 | Out-Null
-    if($i -lt 3){ Line $sl ($xx + $sw + 1) 218 ($xx + $sw + 11) 218 $AM 2 -arrow | Out-Null }
-  }
-  StripB $sl 400 '같은 곳을 **정문**에서 가면 — 엘리베이터 앞 → 지하 1층으로 → 내려서 왼쪽 → 정면 → 도착, **여섯 단계**. 후문은 **네 단계**입니다.' 50
-
-  # ── 6 엘리베이터
-  $sl = PgB 'STOP 04 · 엘리베이터' '위층으로 가는 길은 모두 [[엘리베이터]]에서 갈라집니다' '2층부터 5층까지 어디를 가든, 길은 엘리베이터를 지납니다.\n그래서 안내의 기준도 엘리베이터입니다. 「엘리베이터에서 내려서 우회전 하세요」처럼, 내린 방향을 기준으로 좌우를 말합니다.\n엘리베이터 안 사진도 안내에 들어갑니다. 문 위 표시기와 안쪽 버튼으로 몇 층인지 확인하고 내리면 됩니다.'
-  $pics = @(@('현장_1층엘리베이터.jpg', '1층 · 엘리베이터 앞'), @('현장_4층엘리베이터안.jpg', '4층에 내리기 직전'), @('현장_4층복도R.jpg', '내려서 우회전 → 4층 복도'))
-  $pw3 = ($CW - 2 * 12) / 3
-  for($i = 0; $i -lt 3; $i++){
-    $xx = $M + $i * ($pw3 + 12)
-    PhotoB $sl $pics[$i][0] $xx 100 $pw3 220 | Out-Null
-    TagB $sl $xx 300 $pics[$i][1] $(if($i -eq 1){ $AM } else { $AC })
-  }
-  $pts = @(@('2~5층 어디든', '엘리베이터를 타고 그 층으로'), @('좌우의 기준', '「엘리베이터에서 내려서」 — 내린 방향으로 좌회전 · 우회전'), @('엘리베이터 안 사진', '문 위 표시기로 몇 층인지 확인하고 내리기'))
-  for($i = 0; $i -lt 3; $i++){
-    $xx = $M + $i * ($pw3 + 12)
-    Rect $sl $xx 332 $pw3 72 $CARD $LINE 0.75 | Out-Null
-    T $sl ($xx + 14) 342 ($pw3 - 28) 18 $pts[$i][0] 12.5 $INK -bold | Out-Null
-    T $sl ($xx + 14) 364 ($pw3 - 28) 36 $pts[$i][1] 10.5 $INK2 -lines 1.3 | Out-Null
-  }
-  StripB $sl 418 '그래서 안내 문장은 늘 **엘리베이터를 기준점**으로 시작합니다 — 「엘리베이터에서 내려서 좌회전 하세요」.' 44
-
-  # ── 7 몇 층일까요
-  $sl = PgB 'STOP 05 · 복도' '이 복도는 [[몇 층]]일까요?' '잠깐 퀴즈입니다. 네 장의 복도 사진, 몇 층일까요?\n(잠시 기다렸다가) 왼쪽부터 3층, 4층, 5층, 2층입니다. 층마다 복도가 닮아서 사진만 보고는 맞히기 어렵습니다.\n그래서 안내 문장마다 층과 방향을 꼭 넣고, 단계 사진에는 「5층 복도」처럼 어느 층인지 이름을 붙였습니다.'
-  $q = @(@('현장_3층복도L.jpg', '3층'), @('현장_4층복도R.jpg', '4층'), @('현장_5층복도L.jpg', '5층'), @('현장_2층복도R.jpg', '2층'))
-  $qw = ($CW - 3 * 12) / 4
-  for($i = 0; $i -lt 4; $i++){
-    $xx = $M + $i * ($qw + 12)
-    PhotoB $sl $q[$i][0] $xx 96 $qw 250 | Out-Null
-    Oval $sl ($xx + $qw / 2 - 22) 198 44 $AM '?' 22 | Out-Null
-    Chip $sl $xx 354 $qw 30 ('정답 : ' + $q[$i][1]) $AC2 $INK 11 -bold -radius 3 | Out-Null
-  }
-  StripB $sl 400 '층마다 복도가 닮아 **사진만으로는 층을 알기 어렵습니다** — 그래서 안내 문장마다 **층과 방향**을, 단계 사진마다 「5층 복도」처럼 **층 이름**을 붙였습니다.' 50
-
-  # ── 8 1층 화장실
-  $sl = PgB 'STOP 06 · 1층 화장실' '같은 화장실, [[네 가지 길]]' '1층 화장실 하나를 네 문에서 가는 길입니다.\n정문은 1층 라운지에서 우측, 후문은 라운지에서 좌측으로 꺾습니다. 동문은 1층 중앙계단을 지나 우측, 서문은 왼쪽 네 번째 강의실 13119호를 지나 좌측으로 꺾습니다.\n눈에 띄는 것, 계단이나 호실 번호를 지나서 꺾으라고 말하는 것이 포인트입니다. 2층부터 5층은 더 간단해서, 엘리베이터에서 내려 좌회전하면 바로 화장실입니다.'
-  $wc = @(@('현장_화장실_정문길.jpg', '정문', '1층 라운지에서\n우측으로'), @('현장_화장실_후문길.jpg', '후문', '1층 라운지에서\n좌측으로'), @('현장_1층복도L.jpg', '동문', '1층 중앙계단을\n지나 우측으로'), @('현장_화장실_서문길.jpg', '서문', '13119호실을\n지나 좌측으로'))
-  $ww = 128; $wh = 150
-  for($i = 0; $i -lt 4; $i++){
-    $xx = $M + ($i % 2) * ($ww * 2 + 14); $yy = 98 + [Math]::Floor($i / 2) * ($wh + 8)
-    PhotoB $sl $wc[$i][0] $xx $yy $ww $wh | Out-Null
-    TagB $sl $xx $yy $wc[$i][1] $AC
-    T $sl ($xx + $ww + 8) ($yy + 50) ($ww - 12) 50 $wc[$i][2] 11 $INK -bold -lines 1.3 | Out-Null
-  }
-  $bx = $M + 2 * ($ww * 2 + 14) + 6
-  Line $sl ($bx - 14) 250 ($bx - 4) 250 $AM 2 -arrow | Out-Null
-  PhotoB $sl '현장_1층화장실.jpg' $bx 98 170 308 | Out-Null
-  TagB $sl $bx 386 '1층 화장실 도착'
-  $tx = $bx + 186; $tw = $M + $CW - $tx
-  T $sl $tx 104 $tw 16 '2~5층은' 10 $AM -bold -spacing 1 | Out-Null
-  T $sl $tx 124 $tw 60 '엘리베이터에서\n내려서 **좌회전**하면\n바로 화장실' 12.5 $INK2 -lines 1.35 -boldColor $INK | Out-Null
-  PhotoB $sl '현장_3층화장실.jpg' $tx 196 $tw 210 | Out-Null
-  TagB $sl $tx 386 '3층 화장실'
-  StripB $sl 418 '꺾는 곳은 **눈에 띄는 것**으로 — 「중앙계단을 지나」, 「13119호실을 지나」처럼 지나칠 표지를 함께 말합니다.' 44
-
-  # ── 9 비상계단
-  $sl = PgB 'STOP 07 · 비상계단' '비상계단은 [[복도 끝]] — 정문에서 3층까지 일곱 걸음' '비상계단입니다. 3층 비상계단을 정문에서 가 보면 일곱 단계입니다.\n정문으로 들어와 엘리베이터 앞으로, 3층으로 올라가 엘리베이터 정면에서 좌측으로 꺾고, 복도를 따라 직진하면 오른쪽 복도 끝에 비상계단이 있습니다.\n비상계단은 층마다 복도 끝에 있어서, 앱에서는 화장실처럼 검색 없이 고르면 가장 가까운 곳으로 안내합니다. 지하 1층은 비상계단 목록에서 뺐습니다.'
-  PhotoB $sl '현장_3층비상계단.jpg' $M 96 280 372 | Out-Null
-  TagB $sl $M 448 '3층 · 복도 끝 비상계단'
-  $route = @('정문으로 들어오세요', '엘리베이터 앞으로 가세요', '엘리베이터를 타고 3층으로 올라가세요', '엘리베이터 정면에서 좌측으로 꺾으세요', '복도를 따라 직진하세요', '오른쪽 복도 끝에 비상계단이 위치해 있습니다', '비상계단에 도착했습니다')
-  $rx = $M + 306; $rw = $M + $CW - $rx
-  Line $sl ($rx + 13) 112 ($rx + 13) 418 $LINE 2 | Out-Null
-  for($i = 0; $i -lt 7; $i++){
-    $yy = 100 + $i * 48; $last = ($i -eq 6)
-    Oval $sl $rx $yy 26 $(if($last){ $AM } else { $AC }) ([string]($i + 1)) 11 | Out-Null
-    T $sl ($rx + 40) ($yy + 3) ($rw - 40) 22 $route[$i] 13 $(if($last){ $AM } else { $INK }) -bold:$last | Out-Null
-  }
-  T $sl $rx 444 $rw 20 '지하 1층은 비상계단 목록에서 뺐습니다.' 10.5 $DIM | Out-Null
-
-  # ── 10 라운지
-  $sl = PgB 'STOP 08 · 엘리베이터 앞 홀' '엘리베이터 앞 홀 — [[층마다 다른 얼굴]]' '엘리베이터 앞 넓은 공간은 층마다 생김새가 다릅니다.\n1층은 안내실이 있는 로비, 2층은 카페 테이블과 책상이 있는 라운지, 3층과 4층은 사물함이 늘어선 넓은 홀입니다.\n복도는 층마다 닮았지만 이 홀은 달라서, 엘리베이터에서 내리자마자 「지금 몇 층인가」를 눈으로 확인하는 표지가 됩니다.'
-  $lg = @(@('현장_1층로비.jpg', '1층 로비', '안내실과 정문 쪽 유리문'), @('현장_2층라운지.jpg', '2층 라운지', '카페 테이블 · 책상 · 사물함'), @('현장_3층라운지.jpg', '3층 홀', '사물함이 늘어선 넓은 홀'), @('현장_4층라운지.jpg', '4층 홀', '창가로 트인 사물함 홀'))
-  $lw4 = ($CW - 3 * 12) / 4
-  for($i = 0; $i -lt 4; $i++){
-    $xx = $M + $i * ($lw4 + 12)
-    PhotoB $sl $lg[$i][0] $xx 96 $lw4 250 | Out-Null
-    TagB $sl $xx 326 $lg[$i][1] $(if($i -eq 1){ $AM } else { $AC })
-    T $sl $xx 354 $lw4 20 $lg[$i][2] 11 $INK2 | Out-Null
-  }
-  StripB $sl 396 '복도는 닮았지만 엘리베이터 앞 홀은 층마다 다릅니다 — 내리자마자 **「지금 몇 층인가」를 눈으로 확인하는 표지**입니다.' 46
-
-  # ── 11 도착 문장
-  $sl = PgB 'STOP 09 · 도착' '마지막 한마디는 — [[몇 번째 방]]인가' '도착입니다. 마지막 안내 문장은 늘 문을 셉니다.\n「오른쪽에서 여섯 번째 방에 13410호」, 「오른쪽에서 세 번째 방에 13524호 PC실」, 「왼쪽에서 첫 번째 방에 KTC 프로그래밍 동아리실」처럼요.\n번호판이 보이기 전부터 몇 번째 문인지 세며 다가갈 수 있습니다. 그리고 앱에는 그 문 앞 사진이 있어서, 마지막에 사진과 문을 맞춰 보면 됩니다.'
-  $ar = @(@('현장_13410.jpg', '13410호', '「오른쪽에서 여섯 번째 방에\n13410호 · IT융합통신공학과\n지석근 교수님 연구실이 있습니다」'), @('현장_13524.jpg', '13524호', '「오른쪽에서 세 번째 방에\n13524호 · PC실이 있습니다」'), @('현장_KTC.jpg', 'KTC', '「왼쪽에서 첫 번째 방에\nKTC 프로그래밍 동아리실이\n있습니다」'))
-  $aw = ($CW - 2 * 14) / 3
-  for($i = 0; $i -lt 3; $i++){
-    $xx = $M + $i * ($aw + 14)
-    PhotoB $sl $ar[$i][0] $xx 96 $aw 230 | Out-Null
-    TagB $sl $xx 306 $ar[$i][1]
-    T $sl $xx 336 $aw 60 $ar[$i][2] 11.5 $INK -lines 1.35 | Out-Null
-  }
-  StripB $sl 412 '번호판이 보이기 전부터 — **「오른쪽에서 몇 번째 방」**으로 문을 세며 다가갈 수 있습니다.' 44
-
-  # ── 12 여섯 장면
-  $sl = PgB 'STOP 10 · 처음부터 끝까지' '서문에서 4층 연구실까지 — [[여섯 장면]]' '이제 처음부터 끝까지 한 번에 따라가 보겠습니다. 서문에서 4층 13410호까지입니다.\n서문으로 들어와 복도를 따라 직진, 엘리베이터를 타고 4층, 내려서 우회전, 복도를 따라 직진, 그리고 오른쪽에서 여섯 번째 방.\n앱이 단계마다 보여 주는 사진이 바로 이 장면들입니다. 눈앞 풍경이 사진과 같으면 맞게 가고 있는 것입니다.'
-  $sc = @(@('현장_서문.jpg', '서문으로 들어오세요'), @('현장_서문복도.jpg', '복도를 따라 직진하세요'), @('현장_1층엘리베이터.jpg', '엘리베이터를 타고 4층으로'), @('현장_4층엘리베이터안.jpg', '내려서 우회전 하세요'), @('현장_4층복도R.jpg', '복도를 따라 직진하세요'), @('현장_13410.jpg', '오른쪽 여섯 번째 방\n— 도착'))
+  # ── 6 핵심 기능 시연
+  $sl = PgB '06 · 핵심 기능 시연' '공대 3호관 길안내는 [[이렇게 동작합니다]]' '서문에서 4층 13410호까지 — 앱이 단계마다 보여 주는 사진 그대로 걸어 봅니다.' '기능 시연' '이제 실제로 걸어 보겠습니다. 서문에서 4층 13410호 연구실까지입니다.\n서문으로 들어와 복도를 따라 직진하고, 엘리베이터를 타고 4층으로 올라가, 내려서 우회전, 복도를 따라 직진하면 오른쪽에서 여섯 번째 방입니다.\n앱이 단계마다 보여 주는 사진이 바로 이 장면들입니다. 눈앞 풍경이 사진과 같으면 맞게 가고 있는 것입니다.'
+  $sc = @(@('현장_서문.jpg', '서문으로 들어오세요'), @('현장_서문복도.jpg', '복도를 따라 직진하세요'), @('현장_1층엘리베이터.jpg', '엘리베이터를 타고\n4층으로'), @('현장_4층엘리베이터안.jpg', '내려서 우회전 하세요'), @('현장_4층복도R.jpg', '복도를 따라 직진하세요'), @('현장_13410.jpg', '오른쪽 여섯 번째 방\n— 도착'))
   $s6 = ($CW - 5 * 10) / 6
   for($i = 0; $i -lt 6; $i++){
     $xx = $M + $i * ($s6 + 10)
-    PhotoB $sl $sc[$i][0] $xx 100 $s6 250 | Out-Null
-    Oval $sl ($xx + 8) 108 24 $(if($i -eq 5){ $AM } else { $AC }) ([string]($i + 1)) 11 | Out-Null
+    PhotoB $sl $sc[$i][0] $xx 110 $s6 240 | Out-Null
+    Oval $sl ($xx + 8) 118 24 $(if($i -eq 5){ $AM } else { $AC }) ([string]($i + 1)) 11 | Out-Null
+    if($i -lt 5){ Line $sl ($xx + $s6 + 1) 230 ($xx + $s6 + 9) 230 $AM 2 -arrow | Out-Null }
     T $sl $xx 358 $s6 36 $sc[$i][1] 10.5 $INK -bold -lines 1.3 | Out-Null
   }
-  StripB $sl 404 '앱이 단계마다 보여 주는 사진이 **바로 이 장면들**입니다 — 눈앞 풍경이 사진과 같으면 맞게 가고 있는 것입니다.' 46
+  StripB $sl 410 '앱이 단계마다 보여 주는 사진이 **바로 이 장면들**입니다 — 눈앞 풍경이 사진과 같으면 맞게 가고 있는 것입니다.' 46
 
-  # ── 13 안내 말의 규칙
-  $sl = PgB 'STOP 11 · 안내 문장' '현장에서 정한 [[안내 말의 규칙]]' '현장을 걸으며 안내 문장의 규칙을 정했습니다.\n「쭉 이동하세요」 대신 「직진하세요」처럼 짧고 분명하게, 좌우는 엘리베이터에서 내린 방향을 기준으로 말합니다.\n정문에서 위층으로 갈 때는 들어서면 바로 엘리베이터라 「엘리베이터 앞으로 가세요」를 뺐습니다. 도착은 몇 번째 방인지 세고, 꺾는 곳은 계단이나 호실 번호처럼 눈에 띄는 것을 지나서 꺾으라고 말합니다.'
-  $rules = @(
-    @('짧고 분명하게', '「복도를 따라 직진하세요」', '「쭉 이동하세요」 대신'),
-    @('엘리베이터 기준', '「엘리베이터에서 내려서 우회전」', '좌우는 내린 방향으로'),
-    @('필요 없는 걸음은 빼기', '정문 → 위층은 다섯 단계', '들어서면 바로 엘리베이터라 「엘리베이터 앞으로」를 뺌'),
-    @('도착은 문 세기', '「오른쪽에서 여섯 번째 방」', '번호판보다 먼저 보이는 것'),
-    @('지나칠 표지', '「1층 중앙계단을 지나 우측으로」', '눈에 띄는 것을 지나서 꺾기'),
-    @('호실 번호도 이정표', '「13119호실을 지나 좌측으로」', '번호를 확인하며 꺾기'))
-  $rw3 = ($CW - 2 * 12) / 3
-  for($i = 0; $i -lt 6; $i++){
-    $xx = $M + ($i % 3) * ($rw3 + 12); $yy = 98 + [Math]::Floor($i / 3) * 148
-    Rect $sl $xx $yy $rw3 136 $CARD $LINE 0.75 | Out-Null
-    T $sl ($xx + 16) ($yy + 14) 40 30 ('0' + ($i + 1)) 20 $AM -bold | Out-Null
-    T $sl ($xx + 16) ($yy + 48) ($rw3 - 32) 18 $rules[$i][0] 13 $INK -bold | Out-Null
-    T $sl ($xx + 16) ($yy + 72) ($rw3 - 32) 22 $rules[$i][1] 11.5 $AM -bold | Out-Null
-    T $sl ($xx + 16) ($yy + 98) ($rw3 - 32) 32 $rules[$i][2] 10.5 $INK2 -lines 1.3 | Out-Null
+  # ── 7 기능 1
+  $sl = PgB '06 · 핵심 기능 시연 · 기능 1' '「문이 넷이라 헷갈린다」를 해결하는 [[문마다 다른 첫걸음]]' '어느 문으로 들어왔는지에 따라 — 처음 마주치는 풍경과 첫 문장이 달라집니다.' '기능 시연' '기능 1 입니다. 문이 넷이라 헷갈리는 문제를, 문마다 다른 첫걸음으로 해결했습니다.\n정문은 들어서면 바로 엘리베이터 쪽이라 위층으로 갈 때 「엘리베이터 앞으로 가세요」를 빼고 다섯 단계입니다. 후문은 「1층 라운지에서 우회전」, 동문과 서문은 「복도를 따라 직진」으로 시작합니다.\n지하 크리에이티브 존은 더 다릅니다. 후문에서는 왼쪽 계단으로 내려가 네 단계면 되지만, 정문에서는 엘리베이터로 내려가 여섯 단계입니다.'
+  $gt = @(@('현장_정문.jpg', '정문', '들어서면 바로 엘리베이터 —\n위층은 다섯 단계'), @('현장_후문.jpg', '후문', '「1층 라운지에서 우회전」\n지하는 왼쪽 계단으로'), @('현장_동문.jpg', '동문', '「복도를 따라 직진하세요」'), @('현장_서문.jpg', '서문', '「복도를 따라 직진하세요」'))
+  $g4 = ($CW - 3 * 12) / 4
+  for($i = 0; $i -lt 4; $i++){
+    $xx = $M + $i * ($g4 + 12)
+    PhotoB $sl $gt[$i][0] $xx 110 $g4 196 | Out-Null
+    TagB $sl $xx 286 $gt[$i][1] $AC
+    T $sl $xx 314 $g4 40 $gt[$i][2] 11 $INK -bold -lines 1.35 | Out-Null
   }
-  T $sl $M 400 $CW 16 '모두 앱의 실제 안내 문장입니다.' 9.5 $DIM | Out-Null
-
-  # ── 14 바로잡은 것
-  $sl = PgB 'STOP 12 · 바로잡은 것' '걸어 보고 [[바로잡은 것]]' '마지막으로, 직접 걸어 보고 바로잡은 것들입니다.\n9월 24일에는 1층 길안내의 좌우가 반대인 것을 찾아, 엘리베이터를 마주 보는 기준으로 고쳤습니다. 1층 복도 사진이 반대로 나오던 것도 함께 고쳤습니다.\n「KTC호」라고 적혀 있던 곳은 현장 이름대로 「프로그래밍 동아리실」로 바꿨고, 1층 비상계단은 엘리베이터 정면에서 시작하도록 했습니다.\n10월 19일에는 정문 길 미리보기가 두 문 사이 기둥으로 걸어 들어가던 것을, 오른쪽 문으로 들어가게 바로잡았습니다. 오른쪽 사진이 그 정문의 두 문입니다.'
-  $fx = @(
-    @('9/24', '1층 길안내의 좌우가 반대', '→ 「엘리베이터를 마주 보고」 기준으로'),
-    @('9/24', '1층 복도 사진이 반대 방향', '→ 걷는 방향의 사진으로'),
-    @('9/27', '「KTC호」라는 이름', '→ 현장 이름대로 「프로그래밍 동아리실」'),
-    @('9/28', '1층 비상계단 안내', '→ 엘리베이터 정면에서 시작'),
-    @('9/28', '2~5층 화장실 안내', '→ 「엘리베이터에서 내려서」 — 호실 안내와 같은 말'),
-    @('10/19', '정문 미리보기가 두 문 사이 기둥으로', '→ 오른쪽 문으로 들어가게'))
-  for($i = 0; $i -lt 6; $i++){
-    $yy = 98 + $i * 52
-    Chip $sl $M $yy 58 40 $fx[$i][0] $AC 'FFFFFF' 11 -bold -radius 3 | Out-Null
-    T $sl ($M + 72) ($yy + 2) 440 18 $fx[$i][1] 12.5 $INK -bold | Out-Null
-    T $sl ($M + 72) ($yy + 22) 440 18 $fx[$i][2] 11 $AM | Out-Null
+  $bx = $M; $by = 364
+  foreach($p in @(@('현장_후문계단.jpg', '좌측 계단으로'), @('현장_크리에이티브존.jpg', '크리에이티브 존'))){
+    PhotoB $sl $p[0] $bx $by 150 100 | Out-Null
+    TagB $sl $bx ($by + 80) $p[1] $AM
+    $bx += 158
   }
-  PhotoB $sl '현장_정문안.jpg' ($M + 540) 98 306 230 | Out-Null
-  TagB $sl ($M + 540) 308 '정문 안쪽 — 두 개의 문'
-  T $sl ($M + 540) 340 306 60 '두 문 사이에는 기둥이 있습니다 — 미리보기가 그 기둥으로 걸어 들어가던 것을 **오른쪽 문**으로 바로잡았습니다.' 11 $INK2 -lines 1.35 | Out-Null
-  StripB $sl 418 '도면만 보고는 몰랐던 것들입니다 — **직접 걸어 봐야** 안내가 실제와 맞습니다.' 44
+  Rect $sl $bx $by ($M + $CW - $bx) 100 $CARD $LINE 0.75 | Out-Null
+  Rect $sl $bx $by 5 100 $AM | Out-Null
+  T $sl ($bx + 18) $by ($M + $CW - $bx - 30) 100 '지하 크리에이티브 존 — **후문**에서는 「좌측에 보이는 계단을 통해 내려가세요」 **네 단계**, 정문에서는 엘리베이터로 **여섯 단계**.' 12 $INK2 -anchor 3 -lines 1.35 | Out-Null
 
-  # ── 15 마무리
+  # ── 8 기능 2
+  $sl = PgB '06 · 핵심 기능 시연 · 기능 2' '「복도가 닮았다」를 개선하는 [[엘리베이터 기준 · 홀 표지]]' '복도는 닮았어도 — 엘리베이터 앞 홀은 층마다 얼굴이 다릅니다.' '기능 시연' '기능 2 입니다. 복도가 닮아 층이 헷갈리는 문제를 두 가지로 개선했습니다.\n첫째, 엘리베이터를 기준점으로 삼았습니다. 위층 길은 모두 엘리베이터에서 갈라지고, 「엘리베이터에서 내려서 우회전」처럼 내린 방향으로 좌우를 말합니다. 단계 사진마다 「5층 복도」처럼 층 이름도 붙였습니다.\n둘째, 엘리베이터 앞 홀입니다. 1층은 안내실이 있는 로비, 2층은 카페 테이블이 있는 라운지, 3층과 4층은 사물함이 늘어선 홀입니다. 내리자마자 몇 층인지 눈으로 확인하는 표지가 됩니다.'
+  $lg = @(@('현장_1층로비.jpg', '1층 · 로비', '안내실 · 정문 쪽 유리문'), @('현장_2층라운지.jpg', '2층 · 라운지', '카페 테이블 · 책상'), @('현장_3층라운지.jpg', '3층 · 홀', '사물함이 늘어선 홀'), @('현장_4층라운지.jpg', '4층 · 홀', '창가로 트인 사물함 홀'))
+  for($i = 0; $i -lt 4; $i++){
+    $xx = $M + $i * ($g4 + 12)
+    PhotoB $sl $lg[$i][0] $xx 106 $g4 186 | Out-Null
+    TagB $sl $xx 272 $lg[$i][1] $(if($i -eq 1){ $AM } else { $AC })
+    T $sl $xx 298 $g4 18 $lg[$i][2] 10.5 $INK2 | Out-Null
+  }
+  $pts = @(@('엘리베이터가 기준점', '위층 길은 모두 엘리베이터에서 — 「내려서 우회전 하세요」'), @('사진마다 층 이름', '「5층 복도」처럼 — 단계 사진 아래에'), @('홀이 곧 표지', '내리자마자 몇 층인지 눈으로 확인'))
+  $p3 = ($CW - 2 * 12) / 3
+  for($i = 0; $i -lt 3; $i++){
+    $xx = $M + $i * ($p3 + 12)
+    Rect $sl $xx 330 $p3 70 $CARD $LINE 0.75 | Out-Null
+    T $sl ($xx + 14) 340 ($p3 - 28) 18 $pts[$i][0] 12.5 $AM -bold | Out-Null
+    T $sl ($xx + 14) 362 ($p3 - 28) 34 $pts[$i][1] 10.5 $INK2 -lines 1.3 | Out-Null
+  }
+  StripB $sl 414 '복도는 닮았어도 **엘리베이터에서 시작**하고 **홀 모습으로 확인**하면 — 층을 헷갈리지 않습니다.' 44
+
+  # ── 9 변화
+  $sl = PgB '07 · 우리가 만든 변화' '공대 3호관 길안내 도입으로 [[기대되는 효과]]' '강의실만이 아니라 — 몰라서 묻던 곳까지 사진으로 찾아갑니다.' '변화' '이 앱을 쓰면 무엇이 달라지는지, 3호관 안의 세 곳으로 보겠습니다.\n화장실은 이제 「어디예요?」라고 묻지 않아도 됩니다. 네 문 어디로 들어와도 그 문에서 가는 길로 안내하고, 2층부터 5층은 엘리베이터에서 내려 좌회전하면 바로입니다.\n비상계단은 복도 끝에 있어 평소에는 지나치기 쉽습니다. 이제는 「오른쪽 복도 끝에 비상계단」까지 일곱 걸음으로 안내합니다.\n지하 크리에이티브 존은 있는지도 모르는 분이 많습니다. 후문에서 계단으로 네 단계면 됩니다.'
+  $ch = @(
+    @('현장_1층화장실.jpg', '화장실', '「화장실 어디예요?」 — 물어서 찾기', '네 문 어디서든 그 문에서 가는 길로 · 2~5층은 내려서 좌회전'),
+    @('현장_3층비상계단.jpg', '비상계단', '복도 끝에 있어 평소엔 지나치기 쉬움', '「오른쪽 복도 끝에 비상계단」 — 정문에서 일곱 걸음'),
+    @('현장_크리에이티브존.jpg', '지하 크리에이티브 존', '지하에 있는지도 모르는 곳', '후문에서 계단으로 — 네 단계'))
+  for($i = 0; $i -lt 3; $i++){
+    $xx = $M + $i * ($c3 + 18)
+    PhotoB $sl $ch[$i][0] $xx 106 $c3 170 | Out-Null
+    TagB $sl $xx 256 $ch[$i][1]
+    Rect $sl $xx 276 $c3 122 $CARD $LINE 0.75 | Out-Null
+    T $sl ($xx + 14) 286 ($c3 - 28) 14 '지금까지' 8.5 $DIM -bold -spacing 1 | Out-Null
+    T $sl ($xx + 14) 302 ($c3 - 28) 30 $ch[$i][2] 11 $DIM -lines 1.3 | Out-Null
+    T $sl ($xx + 14) 336 ($c3 - 28) 14 '이제는' 8.5 $AM -bold -spacing 1 | Out-Null
+    T $sl ($xx + 14) 352 ($c3 - 28) 40 $ch[$i][3] 11.5 $INK -bold -lines 1.3 | Out-Null
+  }
+  StripB $sl 412 '처음 온 사람이 **묻지 않고 찾는 곳**이 늘어납니다 — 강의실만이 아니라 화장실 · 비상계단 · 지하까지.' 44
+
+  # ── 10 발전 방향
+  $sl = PgB '08 · 향후 발전 방향' '더 나은 서비스를 위한 [[다음 단계]]' '지금은 3호관 문 앞에서 시작해 방 앞에서 끝납니다 — 그 앞뒤를 잇는 다음 후보입니다.' '발전 방향' '다음 단계입니다. 지금 길안내는 3호관 문 앞에서 시작해 방 앞에서 끝납니다. 그 앞과 뒤를 잇는 것이 다음 후보입니다.\n첫째, 3호관까지 오는 길입니다. 캠퍼스에 처음 온 사람이 3호관의 네 문 가운데 가장 가까운 문까지 오게 하려 합니다.\n둘째, 나가는 길입니다. 도착한 곳에서 가장 가까운 출입문으로 다시 안내합니다.\n셋째, 강의실에서 강의실로입니다. 다음 수업 장소로 바로 이어서 안내합니다.\n목표는 바깥에서 안까지, 그리고 안에서 다시 바깥까지 이어지는 길안내입니다.'
+  $nx = @(
+    @('현장_서문.jpg', '3호관까지 오는 길', '캠퍼스에서 — **가장 가까운 문**까지'),
+    @('현장_정문안.jpg', '나가는 길', '도착한 곳에서 — **가장 가까운 출입문**으로'),
+    @('현장_13524.jpg', '강의실 → 강의실', '다음 수업 장소로 — **바로 이어서**'))
+  for($i = 0; $i -lt 3; $i++){
+    $xx = $M + $i * ($c3 + 18)
+    PhotoB $sl $nx[$i][0] $xx 110 $c3 200 | Out-Null
+    Chip $sl ($xx + 10) 120 72 20 '다음 후보' $AM 'FFFFFF' 9 -bold -radius 0 | Out-Null
+    T $sl $xx 322 $c3 22 $nx[$i][1] 15 $INK -bold | Out-Null
+    T $sl $xx 350 $c3 40 $nx[$i][2] 12 $INK2 -lines 1.35 | Out-Null
+  }
+  StripB $sl 410 '**목표는 하나** — 3호관 **바깥에서 안까지, 안에서 다시 바깥까지** 이어지는 길안내.' 46
+
+  # ── 11 마무리
+  $sl = PgB '09 · 마무리하며' '프로젝트 [[요약 및 결론]]' '' '마무리' '마무리하겠습니다. 3호관에서 헷갈리는 세 곳에 하나씩 답했습니다.\n문이 넷인 문제에는 문마다 다른 첫걸음으로, 복도가 닮은 문제에는 엘리베이터 기준과 층마다 다른 홀로, 번호판이 멀리서 안 보이는 문제에는 몇 번째 방인지 세는 도착 문장으로 답했습니다.\n(잠깐 멈추고) 건물은 그대로입니다. 그 건물을 사진으로 휴대폰에 담았고, 사진 속 3호관이 길을 알려 줍니다.'
+  $sm = @(@('문이 넷', '문마다 다른 첫걸음'), @('복도가 닮았다', '엘리베이터 기준 · 홀 표지'), @('번호판이 안 보인다', '「오른쪽에서 몇 번째 방」'))
+  for($i = 0; $i -lt 3; $i++){
+    $yy = 100 + $i * 62
+    Rect $sl $M $yy 470 52 $CARD $LINE 0.75 | Out-Null
+    Rect $sl $M $yy 5 52 $AM | Out-Null
+    T $sl ($M + 18) $yy 150 52 $sm[$i][0] 13 $DIM -bold -anchor 3 | Out-Null
+    T $sl ($M + 170) $yy 290 52 ('→  ' + $sm[$i][1]) 14 $INK -bold -anchor 3 | Out-Null
+  }
+  PhotoB $sl '현장_3층라운지.jpg' ($M + 488) 100 358 176 | Out-Null
+  TagB $sl ($M + 488) 256 '3층 · 엘리베이터 앞 홀' $AC
+  Rect $sl $M 296 $CW 176 $AC '' 0 0 | Out-Null
+  T $sl ($M + 30) 318 ($CW - 60) 70 '건물은 그대로입니다.\n[[사진 속 3호관]]이 길을 알려 줍니다.' 26 'FFFFFF' -bold -accent 'FF7A5C' -lines 1.25 | Out-Null
+  T $sl ($M + 30) 410 ($CW - 60) 50 '문마다 첫걸음 · 엘리베이터 기준 · 몇 번째 방 — 눈앞 풍경과 사진을 맞춰 보며 걸으면 됩니다.' 12.5 'D8D0C4' -lines 1.5 | Out-Null
+
+  # ── 12 Q&A
   $script:pg++
   $sl = $pres.Slides.Add($pres.Slides.Count + 1, 12); Bg $sl $AC
   PhotoB $sl '현장_서문.jpg' 0 0 $W $H | Out-Null
   $ov = Rect $sl 0 0 $W $H '1A1F24'; $ov.Fill.Transparency = 0.22
-  Oval $sl $M 120 12 'FF7A5C' '' | Out-Null
-  T $sl ($M + 20) 117 400 16 '답사를 마치며' 10.5 'F3D7CC' -bold -spacing 2.5 | Out-Null
-  T $sl $M 144 560 100 '다음 답사는 —\n[[여러분 차례]]입니다.' 34 'FFFFFF' -bold -accent 'FF7A5C' -lines 1.15 | Out-Null
-  T $sl $M 256 540 50 '서문 QR을 찍고, 오늘 본 **여섯 장면**을 직접 걸어 보십시오.\n앱의 사진과 눈앞 풍경이 같은지 — 그게 이 앱의 전부입니다.' 13 'EDE6DC' -lines 1.6 -boldColor 'FFFFFF' | Out-Null
-  T $sl $M 340 540 20 '질의응답 — 들어 주셔서 감사합니다' 13 'D8D0C4' | Out-Null
+  T $sl $M 120 520 16 '1 0 · Q & A' 10 'F3D7CC' -bold -spacing 3 | Out-Null
+  T $sl $M 146 520 80 'Q [[&]] A' 60 'FFFFFF' -bold -accent 'FF7A5C' -boldColor 'FFFFFF' | Out-Null
+  T $sl $M 232 520 24 '질의응답 — 들어 주셔서 감사합니다' 16 'EDE6DC' | Out-Null
+  Rect $sl $M 276 90 4 'FF7A5C' | Out-Null
+  T $sl $M 298 520 40 ('**' + $TOPIC + '** · 팀 공3길\n김민종 · 손의윤 · 문성일   |   지도교수 강규창 교수님') 12 'D8D0C4' -lines 1.6 -boldColor 'FFFFFF' | Out-Null
+  T $sl $M 368 520 40 '서문 QR을 찍고 — 오늘 본 **여섯 장면**을 직접 걸어 보십시오.' 12.5 'EDE6DC' -boldColor 'FFFFFF' | Out-Null
   $qh = 320; $qw = PhoneW 'QR_서문.png' $qh
   Pic $sl 'QR_서문.png' (903 - $qw) 96 $qw $qh '' | Out-Null
-  Notes $sl '답사는 여기까지입니다. 다음 답사는 여러분 차례입니다.\n오른쪽 서문 QR 을 찍고, 오늘 본 여섯 장면을 직접 걸어 보십시오. 앱의 사진과 눈앞 풍경이 같은지 확인하는 것, 그게 이 앱의 전부입니다.\n들어 주셔서 감사합니다. 질문 받겠습니다.'
+  Notes $sl '들어 주셔서 감사합니다. 오른쪽 서문 QR 을 찍고, 오늘 본 여섯 장면을 직접 걸어 보십시오.\n질문 받겠습니다.'
 
-  SavePres '졸업작품 모의 발표 ② 현장 답사편' 15
+  SavePres '졸업작품 모의 발표 ② 현장 편' 12
 }
 
 # ══ 만들기 ══════════════════════════════════════════════════════

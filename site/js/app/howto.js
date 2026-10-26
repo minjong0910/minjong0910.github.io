@@ -99,8 +99,8 @@ var HOWTO = [
       ['진행 표시', '지금 몇 번째 단계인지 보여 줘요. (예 : 1 / 3 단계)', 'Progress', 'Shows which step you are on. (e.g. 1 / 3)'],
       ['화살표', '어느 쪽으로 가야 하는지 보여 줘요.', 'Arrow', 'Shows which way to go.'],
       ['할 일', '지금 해야 할 일을 한 문장으로 알려 줘요.', 'What to do', 'Tells you what to do now.'],
-      ['실제 사진', '그 자리에서 찍은 사진이에요. 눈앞 모습과 같은지 비교하며 걸어요. 사진 위에 「1/2 · 눌러서 다음」이 보이면 사진을 눌러 다음 사진을 볼 수 있어요.',
-       'Real photo', 'A photo taken at that spot. Compare it with what you see. If it shows "1/2 · tap for next", tap the photo for the next one.'],
+      ['실제 사진', '그 자리에서 찍은 사진이에요. 눈앞 모습과 같은지 비교하며 걸어요. 사진을 누르면 크게 볼 수 있고, 두 손가락으로 더 키울 수 있어요. 위에 「1/2 · 다음 사진 ›」이 보이면 그걸 눌러 다음 사진을 봐요.',
+       'Real photo', 'A photo taken at that spot. Compare it with what you see. Tap the photo to zoom in, and pinch to zoom further. If it shows "1/2 · Next ›", tap that for the next photo.'],
       ['다음', '사진 속 자리에 오면 눌러요. 마지막 단계에서는 「도착했어요」로 바뀌어요. 왼쪽 버튼은 앞 단계로 돌아가요.',
        'Next', 'Tap when you reach the spot in the photo. On the last step it says "Arrived". The left button goes back.']
     ] },
@@ -108,7 +108,7 @@ var HOWTO = [
     lead:['다 왔어요!', 'You made it!'],
     items:[
       ['도착한 곳', '도착한 방 이름이에요.', 'Destination', 'The name of the room you reached.'],
-      ['도착 사진', '문 앞 모습이에요. 눈앞과 같은지 확인해 보세요.', 'Arrival photo', 'The door of the room. Check that it matches.'],
+      ['도착 사진', '문 앞 모습이에요. 눈앞과 같은지 확인해 보세요. 누르면 크게 보여서 문 옆 명패 글씨까지 볼 수 있어요.', 'Arrival photo', 'The door of the room. Check that it matches. Tap to zoom in and read the name plate.'],
       ['다른 장소 찾기', '다른 곳으로 또 가고 싶으면 눌러요. 「무엇을 찾으세요?」로 바로 가요.', 'Find another place', 'Go somewhere else. Opens "What are you looking for?".'],
       ['처음으로 돌아가기', '처음 화면으로 돌아가요.', 'Back to start', 'Returns to the first screen.']
     ] },

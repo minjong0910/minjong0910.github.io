@@ -362,12 +362,12 @@
   <div class="gbox">
     <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 8개</div>
     <div class="grid">
-      <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">376줄 · 화면 전환 go()</span></button>
+      <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">378줄 · 화면 전환 go()</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
-      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">732줄 · 화면 21개</span></button>
+      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">736줄 · 화면 21개</span></button>
       <button class="b p" data-id="f_easy"><span class="n">easy.js</span><span class="d">322줄 · 쉬운 사용모드</span></button>
       <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">189줄 · 사진 이용안내</span></button>
-      <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">185줄 · 사진 확대</span></button>
+      <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">219줄 · 사진 확대</span></button>
       <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">64줄 · ☰ 메뉴 · 밝은 화면</span></button>
       <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">135줄 · 길안내 이어 하기</span></button>
     </div>
@@ -387,7 +387,7 @@
     <div class="gt">④ 길안내와 사진</div><div class="gs">실제로 길을 알려 주는 부분 · 4개</div>
     <div class="grid">
       <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">638줄 · 안내 단계 만들기</span></button>
-      <button class="b p" data-id="f_photos"><span class="n">photos.js</span><span class="d">1,065줄 · 사진 목록 · 사진 상자</span></button>
+      <button class="b p" data-id="f_photos"><span class="n">photos.js</span><span class="d">1,077줄 · 사진 목록 · 사진 상자</span></button>
       <button class="b p" data-id="qr"><span class="n">qrnav.js</span><span class="d">434줄 · 출입문 QR</span></button>
       <button class="b p" data-id="f_roomfix"><span class="n">roomfix.js</span><span class="d">398줄 · 구성 및 변경 · 메모</span></button>
     </div>
@@ -705,9 +705,9 @@ f_index:{t:'index.html — 화면 21개가 한 파일에',z:'p',zl:'폰 안에�
 f_zoom:{t:'zoom.js — 사진 확대',z:'p',zl:'폰 안에서 돈다',
  kid:'사진을 <b>손가락으로 키워서</b> 볼 수 있게 해요.',
  why:'안내 사진에서 <b>호실 번호판이 작아</b> 안 보일 때가 있습니다. 확대해 보면 되는데, 브라우저 기본 확대를 쓰면 <b>화면 전체가 커져서</b> 길안내 UI 가 깨집니다.<br>그래서 사진에만 적용되는 확대를 직접 만들었습니다.',
- where:['길안내 화면의 <b>사진을 두 손가락으로</b> 벌릴 때','사진을 <b>끌어서</b> 옮길 때'],
- how:'Pointer Events 로 두 손가락 거리를 재고 CSS transform 으로 사진 요소만 변환합니다.',
- tech:['Pointer Events','CSS transform'],
+ where:['길안내 · 도착 사진을 <b>한 번 누르면</b> 화면 가득 (2026-10-26)','크게 본 채로 <b>두 손가락</b>으로 더 키우고 <b>끌어서</b> 옮길 때','사진이 여러 장이면 <b>‹ ›</b> 로 넘길 때 · 관리자 건의함 사진'],
+ how:'터치 이벤트로 두 손가락 거리를 재고 CSS transform 으로 사진 요소만 변환합니다.',
+ tech:['Touch Events','CSS transform'],
  src:[['site/js/app/zoom.js','사진 확대 전부']]},
 
 f_topmenu:{t:'topmenu.js — 세 줄(☰) 메뉴 · 밝은 화면',z:'p',zl:'폰 안에서 돈다',

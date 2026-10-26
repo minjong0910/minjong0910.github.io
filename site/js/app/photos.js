@@ -982,8 +982,10 @@ function phCapLine(el, list, idx, code){
   return capFor(list[idx].cap) || phCap(code);
 }
 function phCntTxt(k, total){
-  return (LANG==='ko') ? ((k+1) + ' / ' + total + ' · 눌러서 다음') : ((k+1) + ' / ' + total + ' · Tap for next');
+  return (LANG==='ko') ? ((k+1) + ' / ' + total + ' · 다음 사진 ›') : ((k+1) + ' / ' + total + ' · Next ›');
 }
+/* 2026-10-26 : 사진을 한 번 누르면 크게 보기(zoom.js) — 사용자가 견본을 보고 「두 번이 아니라 한 번」으로 정함 */
+function phZoomTxt(){ return (LANG==='ko') ? '🔍 눌러서 크게 보기' : '🔍 Tap to zoom'; }
 /* 언어 전환 시, 이미 화면에 떠 있는 사진의 설명(cap)·장수 카운터(cnt)만 지금 언어로
    다시 그린다 — 사진 자체나 지금 보고 있는 인덱스(el._phIndex)는 그대로 유지한다. */
 function refreshAllPhotoLang(){
@@ -991,9 +993,10 @@ function refreshAllPhotoLang(){
     var list = el._phList, code = el._phCode;
     if(!list || !list.length) return;
     var idx = el._phIndex || 0;
-    var capEl = el.querySelector('.cap'), cntEl = el.querySelector('.cnt');
+    var capEl = el.querySelector('.cap'), cntEl = el.querySelector('.cnt'), zEl = el.querySelector('.zm');
     if(capEl) capEl.textContent = phCapLine(el, list, idx, code);
     if(cntEl) cntEl.textContent = phCntTxt(idx, list.length);
+    if(zEl) zEl.textContent = phZoomTxt();
   });
 }
 function phFill(el, code, placeholder, capOverride){
@@ -1026,15 +1029,24 @@ function phFill(el, code, placeholder, capOverride){
   img.style.height = '100%';
   img.src = list[0].u; el.appendChild(img);
   var cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = phCapLine(el, list, 0, code); el.appendChild(cap);
-  if(list.length > 1){
-    var cnt = document.createElement('div'); cnt.className = 'cnt';
-    // 사진이 여러 장일 때 '눌러서 넘긴다'는 걸 알 수 있게 카운터에 같이 적어준다
-    cnt.textContent = phCntTxt(0, list.length); el.appendChild(cnt);
-    el.onclick = function(){
-      i = (i+1) % list.length; el._phIndex = i;
-      img.src = list[i].u; cap.textContent = phCapLine(el, list, i, code); cnt.textContent = phCntTxt(i, list.length);
-    };
+  var cnt = null;
+  function show(k){
+    i = k; el._phIndex = i;
+    img.src = list[i].u; cap.textContent = phCapLine(el, list, i, code);
+    if(cnt) cnt.textContent = phCntTxt(i, list.length);
   }
+  if(list.length > 1){
+    cnt = document.createElement('div'); cnt.className = 'cnt';
+    // 사진이 여러 장이면 위쪽 「1 / 2 · 다음 사진 ›」을 눌러 넘긴다 — 사진 자체를 누르면 크게 보기
+    cnt.textContent = phCntTxt(0, list.length); el.appendChild(cnt);
+    cnt.onclick = function(e){ e.stopPropagation(); show((i+1) % list.length); };
+  }
+  var zm = document.createElement('div'); zm.className = 'zm'; zm.textContent = phZoomTxt(); el.appendChild(zm);
+  /* 한 번 누르면 크게 보기 — 크게 본 창에서 사진을 넘기면 이 상자도 같은 사진으로 맞춘다 */
+  el.onclick = function(){
+    if(typeof openZoomList !== 'function') return;
+    openZoomList(list.map(function(p, k){ return { u:p.u, cap:phCapLine(el, list, k, code) }; }), i, show);
+  };
 }
 
 /* 입력 연결 */

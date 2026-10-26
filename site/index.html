@@ -711,10 +711,14 @@
 <div class="imgZoom" id="imgZoom">
   <div class="izBar">
     <span class="izCap" id="izCap"></span>
+    <span class="izNum" id="izNum" style="display:none"></span>
     <button class="izBtn" onclick="closeZoom()" aria-label="닫기">✕</button>
   </div>
   <div class="izStage" id="izStage">
-    <img id="izImg" alt="제보 사진 크게 보기">
+    <img id="izImg" alt="사진 크게 보기">
+    <!-- 2026-10-26 : 길안내 사진이 여러 장이면 크게 본 채로 넘긴다 (zoom.js izNav) -->
+    <button class="izNav izPrev" id="izPrev" style="display:none" onclick="event.stopPropagation();izNav(-1)" aria-label="이전 사진">‹</button>
+    <button class="izNav izNext" id="izNext" style="display:none" onclick="event.stopPropagation();izNav(1)" aria-label="다음 사진">›</button>
   </div>
   <div class="izFoot">
     <button class="izBtn" onclick="izStep(-1)" aria-label="축소">－</button>

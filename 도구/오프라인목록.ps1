@@ -7,6 +7,7 @@
 #   넣지 않는 것  : data\aivec.js · data\ailib.js (AI 사진 판별 자료)와 lib\ (AI 라이브러리)
 #                  eval_all.html · batches.json (측정 도구 — 이용자 폰에 둘 이유가 없다)
 #                  ai-model\ (AI 모델 7.9MB — 2026-10-21 부터 우리 서버에 둔다)
+#                  demo\ (졸업작품 전시용 자동 시연 1.6MB — 발표장 다른 기기에서 주소로 여는 쪽, 이용자 폰에 둘 이유가 없다)
 #                  — AI 는 인터넷이 될 때만 쓰기로 했다. 그리고 sw.js 자신.
 #
 #   파일마다 지문(SHA-256 앞 12자리)과 크기를 적는다. 폰은 받은 파일의 지문을 확인하고,
@@ -23,7 +24,7 @@ $SW   = Join-Path $SITE 'sw.js'
 $UTF8 = New-Object System.Text.UTF8Encoding($false)
 
 # pick/ 은 사진 고르기 작업용 화면이다 — 앱이 아니므로 사용자가 내려받을 이유가 없다 (약 29MB)
-$SKIP = '^(sw\.js|data/aivec\.js|data/ailib\.js|lib/.*|ai-model/.*|pick/.*|eval_all\.html|batches\.json)$'
+$SKIP = '^(sw\.js|data/aivec\.js|data/ailib\.js|lib/.*|ai-model/.*|demo/.*|pick/.*|eval_all\.html|batches\.json)$'
 $files = @(Get-ChildItem $SITE -Recurse -File | ForEach-Object {
   [pscustomobject]@{ rel = ($_.FullName.Substring($SITE.Length + 1) -replace '\\', '/'); full = $_.FullName; size = $_.Length }
 } | Where-Object { $_.rel -notmatch $SKIP })

@@ -224,6 +224,8 @@ function findAnother(){ clearSearch(); go('scat'); }
      앱 안에서 한 단계만 뒤로 간 뒤 그 칸을 다시 채운다.
      첫 화면(s1)에서는 다시 채우지 않고 그대로 흘려보내 앱이 종료되게 한다. */
 function appBackStep(){
+  // ⓪ 사진 크게 보기 창이 떠 있으면 그것부터 닫는다 (2026-10-26 — 길안내 사진도 한 번 누르면 이 창이 뜬다)
+  if(typeof izIsOpen==='function' && izIsOpen()){ closeZoom(); return true; }
   // ⓪ 오른쪽 위 ☰ 메뉴가 펼쳐져 있으면 그것부터 닫는다 (2026-10-19)
   if(typeof TOPMENU!=='undefined' && TOPMENU.isOpen()){ TOPMENU.close(); return true; }
   if(typeof RESUME!=='undefined' && RESUME.isAsking()){ RESUME.dismiss(); return true; }   // 「아까 보던 길안내」 카드

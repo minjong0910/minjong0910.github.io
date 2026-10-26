@@ -40,13 +40,41 @@ function izPoint(cx, cy){
 function izStep(dir){ izZoomAt(0, 0, dir > 0 ? IZ.sc*1.5 : IZ.sc/1.5); }
 function izReset(){ IZ.sc = 1; IZ.x = 0; IZ.y = 0; izApply(); }
 
+/* 2026-10-26 : 길안내 사진 상자(photos.js phFill)에서 한 번 누르면 여기로 — 사진이 여러 장이면 ‹ › 로 넘기고,
+   넘긴 사진은 onShow 로 상자에도 알려 준다(닫으면 상자도 같은 사진). 관리자 건의함은 openZoom 그대로 한 장. */
+var IZL = { list:null, i:0, onShow:null };
+function openZoomList(list, i, onShow){
+  if(!list || !list.length) return;
+  IZL.list = list; IZL.i = i || 0; IZL.onShow = onShow || null;
+  izShow(list[IZL.i].u, list[IZL.i].cap);
+  izNavSync();
+}
+function izNav(d){
+  if(!IZL.list || IZL.list.length < 2) return;
+  var n = IZL.list.length;
+  IZL.i = (IZL.i + d + n) % n;
+  izShow(IZL.list[IZL.i].u, IZL.list[IZL.i].cap);
+  izNavSync();
+  if(IZL.onShow) IZL.onShow(IZL.i);
+}
+function izNavSync(){
+  var many = !!(IZL.list && IZL.list.length > 1), num = izEl('izNum');
+  ['izPrev', 'izNext'].forEach(function(id){ var b = izEl(id); if(b) b.style.display = many ? '' : 'none'; });
+  if(num){ num.style.display = many ? '' : 'none'; if(many) num.textContent = (IZL.i + 1) + ' / ' + IZL.list.length; }
+}
 function openZoom(url, cap){
+  IZL.list = null; IZL.onShow = null;
+  izShow(url, cap);
+  izNavSync();
+}
+function izShow(url, cap){
   var box = izEl('imgZoom'), im = izEl('izImg'), cp = izEl('izCap'), hint = izEl('izHint');
   if(!box || !im || !url) return;
   if(cp) cp.textContent = cap || '';
+  var en = (typeof LANG !== 'undefined' && LANG === 'en');   // 길안내 사진도 이 창을 쓰게 되어(2026-10-26) 영어 안내도 둔다
   if(hint) hint.textContent = ('ontouchstart' in window)
-    ? '두 손가락으로 확대 · 두 번 탭하면 확대/원래대로 · 끌어서 이동'
-    : '마우스 휠로 확대 · 끌어서 이동 · 두 번 클릭하면 확대/원래대로';
+    ? (en ? 'Pinch to zoom · double-tap to zoom in/out · drag to move' : '두 손가락으로 확대 · 두 번 탭하면 확대/원래대로 · 끌어서 이동')
+    : (en ? 'Scroll to zoom · drag to move · double-click to zoom in/out' : '마우스 휠로 확대 · 끌어서 이동 · 두 번 클릭하면 확대/원래대로');
   IZ.sc = 1; IZ.x = 0; IZ.y = 0; IZ.p0 = null; IZ.drag = null;
   im.style.transform = '';
   box.classList.add('on');
@@ -63,9 +91,15 @@ function closeZoom(){
   var box = izEl('imgZoom'), im = izEl('izImg');
   if(box) box.classList.remove('on');
   if(im){ im.removeAttribute('src'); im.style.transform = ''; }   // 큰 사진을 메모리에서 놓아준다
+  IZL.list = null; IZL.onShow = null;
   document.removeEventListener('keydown', izKey);
 }
-function izKey(e){ if(e.key === 'Escape' || e.keyCode === 27) closeZoom(); }
+function izKey(e){
+  if(e.key === 'Escape' || e.keyCode === 27) closeZoom();
+  else if(e.key === 'ArrowLeft') izNav(-1);
+  else if(e.key === 'ArrowRight') izNav(1);
+}
+function izIsOpen(){ var b = izEl('imgZoom'); return !!(b && b.classList.contains('on')); }
 
 /* 관리자 건의함 카드에서 부르는 입구 — 사진과 함께 메모·AI 추정을 제목줄에 보여준다 */
 function zoomFromSug(id){

@@ -6,9 +6,10 @@
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0B0E13">
 <title>공대 3호관 길안내</title>
-<!-- 발표장 QR 이 여는 곳 (2026-10-27) — 숫자를 1 올리고 곧바로 앱(동문에서 시작)으로 넘긴다.
+<!-- 발표장 QR 이 여는 곳 (2026-10-27 · 10-28 「지금 켜 둔 사람」) — 숫자를 1 올리고 곧바로 앱(동문에서 시작)으로 넘긴다.
+     · 이 창에 발표 이름 · 폰 번호(무작위 16자)를 적어 두면(sessionStorage b3live), 앱의 js/app/live.js 가 켜 둔 동안 「보고 있어요」를 보낸다
      · 누가 열었는지는 남기지 않는다 : Firestore live/<발표이름> 의 숫자 n 을 1 올릴 뿐(서버/firestore.rules 의 live 칸)
-     · 한 폰은 3시간에 한 번만 센다(이 폰의 localStorage 에 마지막 시각만 적음)
+     · 「연 사람」 n 은 한 폰을 3시간에 한 번만 센다(이 폰의 localStorage 에 마지막 시각만 적음) — 「지금 켜 둔 사람」은 늘 새로
      · 인터넷이 안 되거나 서버가 늦어도 2.5초 안에 앱으로 넘어간다 — 길안내가 먼저다
      ?e=이름 : 발표마다 따로 셀 때(기본 grad) · ?nocount=1 : 세지 않고 넘기기(시험용) -->
 <style>
@@ -32,18 +33,27 @@
   function go(){ if(done) return; done = true; location.replace(APP); }
   var mark = 'b3live:' + EV, now = Date.now(), last = 0;
   try{ last = +localStorage.getItem(mark) || 0; }catch(e){}
-  if(/[?&]nocount=1/.test(location.search) || now - last < 3 * 3600 * 1000 || !window.fetch){ go(); return; }
+  if(/[?&]nocount=1/.test(location.search) || !window.fetch){ go(); return; }
+  var pid = '', A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  try{ var old = JSON.parse(sessionStorage.getItem('b3live') || 'null'); if(old && old.e === EV && /^[A-Za-z0-9]{16}$/.test(old.p)) pid = old.p; }catch(e){}
+  if(!pid){ var rnd = new Uint8Array(16); (window.crypto || window.msCrypto).getRandomValues(rnd); for(var i = 0; i < 16; i++) pid += A.charAt(rnd[i] % A.length); }
+  try{ sessionStorage.setItem('b3live', JSON.stringify({e: EV, p: pid, s: now})); }catch(e){}
+  var count = !(now - last < 3 * 3600 * 1000);
   setTimeout(go, 2500);
   var doc = 'projects/' + PROJ + '/databases/(default)/documents/live/' + EV;
-  var body = {writes: [{update: {name: doc, fields: {}}, updateMask: {fieldPaths: []},
-    updateTransforms: [{fieldPath: 'n', increment: {integerValue: '1'}}, {fieldPath: 't', setToServerValue: 'REQUEST_TIME'}]}]};
-  fetch('https://firestore.googleapis.com/v1/projects/' + PROJ + '/databases/(default)/documents:commit?key=' + KEY,
-        {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)})
-    .then(function(r){
-      window.__liveStatus = r.status;
-      if(r.ok){ try{ localStorage.setItem(mark, String(now)); }catch(e){} }
-      go();
-    }, function(){ window.__liveStatus = 'net'; go(); });
+  var here = {update: {name: doc + '/here/' + pid, fields: {}}, updateMask: {fieldPaths: []},
+    updateTransforms: [{fieldPath: 't', setToServerValue: 'REQUEST_TIME'}]};
+  /* 둘을 따로 보낸다 — 한쪽 규칙이 아직 없어도 다른 쪽은 셀 수 있게. 둘 다 끝나면(늦어도 2.5초) 앱으로 */
+  var API = 'https://firestore.googleapis.com/v1/projects/' + PROJ + '/databases/(default)/documents:commit?key=' + KEY;
+  function send(w){
+    return fetch(API, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({writes: [w]})})
+      .then(function(r){ return r.ok; }, function(){ return false; });
+  }
+  var jobs = [send(here)];
+  if(count) jobs.push(send({update: {name: doc, fields: {}}, updateMask: {fieldPaths: []},
+    updateTransforms: [{fieldPath: 'n', increment: {integerValue: '1'}}, {fieldPath: 't', setToServerValue: 'REQUEST_TIME'}]})
+    .then(function(ok){ if(ok){ try{ localStorage.setItem(mark, String(now)); }catch(e){} } return ok; }));
+  Promise.all(jobs).then(function(r){ window.__liveStatus = r; go(); });
 })();
 </script>
 </body>

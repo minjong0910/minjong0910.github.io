@@ -355,21 +355,22 @@
       <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">652줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
       <button class="b p" data-id="f_boot"><span class="n">boot.js</span><span class="d">170줄 · 첫 화면 연출</span></button>
       <button class="b p" data-id="f_start"><span class="n">start.js</span><span class="d">32줄 · 글꼴 기다렸다 시작</span></button>
-      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">444줄 · 오프라인 저장소</span></button>
+      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">445줄 · 오프라인 저장소</span></button>
     </div>
   </div>
 
   <div class="gbox">
-    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 8개</div>
+    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 9개</div>
     <div class="grid">
       <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">378줄 · 화면 전환 go()</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
-      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">736줄 · 화면 21개</span></button>
+      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">738줄 · 화면 21개</span></button>
       <button class="b p" data-id="f_easy"><span class="n">easy.js</span><span class="d">322줄 · 쉬운 사용모드</span></button>
       <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">189줄 · 사진 이용안내</span></button>
       <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">219줄 · 사진 확대</span></button>
       <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">64줄 · ☰ 메뉴 · 밝은 화면</span></button>
       <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">135줄 · 길안내 이어 하기</span></button>
+      <button class="b p" data-id="f_live"><span class="n">live.js</span><span class="d">34줄 · 발표장 「지금 켜 둔 사람」</span></button>
     </div>
   </div>
 
@@ -725,6 +726,13 @@ f_resume:{t:'resume.js — 길안내 이어 하기',z:'p',zl:'폰 안에서 돈�
  how:'순서는 초록 켜는 화면 → 쉬운 사용모드 「처음이세요?」(처음인 사람만) → 이 카드. 30분이 지났거나, 다 왔거나, 출입문 QR 로 새로 들어왔으면 묻지 않습니다. 첫 화면·찾기·검색·도착 화면으로 가면 기억을 지웁니다.',
  tech:['localStorage','길안내 다시 만들기(startGuide)'],
  src:[['site/js/app/resume.js','기억 · 묻기 · 이어 보기'],['site/js/app/guide.js','단계마다 적어 두기(render6)']]},
+f_live:{t:'live.js — 발표장 「지금 켜 둔 사람」',z:'p',zl:'폰 안에서 돈다 · 발표장 QR 로 들어온 폰만',
+ kid:'발표장 QR 로 앱을 연 사람이 앱을 켜 두는 동안, 발표 화면에 「지금 N명이 켜 두고 있어요」가 보이게 해요. 앱을 끄면 숫자가 줄어요.',
+ why:'졸업작품 발표회(20쪽 Q&A)에서 「휴대폰 하나로 끝내시죠」를 말로만이 아니라 그 자리에서 보여 주려고 만들었습니다(2026-10-27 · 28 사용자).',
+ where:['발표장 QR(site/live/go.html)로 들어온 창만 — 출입문 QR · 그냥 연 사람에게는 <b>아무것도 안 함</b>(서버에 아무것도 안 보냄)','발표 화면 <b>minjong0910.github.io/live</b> — 큰 숫자가 지금 켜 둔 사람, 작은 숫자가 지금까지 연 사람'],
+ how:'go.html 이 이 창(sessionStorage)에 발표 이름과 무작위 번호 16자를 적어 두면, 화면이 보이는 동안 15초마다 서버 live/grad/here/번호 에 「지금 시각」만 쓰고, 화면이 가려지거나 닫히면 지웁니다. 발표 화면은 시각이 40초 안인 칸만 셉니다(서버의 count 질의). 이름 · 기기 정보는 남기지 않고, 2시간이 지나면 그만둡니다.',
+ tech:['Firestore REST(commit · DELETE)','sessionStorage','visibilitychange · pagehide'],
+ src:[['site/js/app/live.js','켜 둔 동안 신호 · 끄면 지우기'],['site/live/go.html','발표장 QR — 숫자 +1 · 표시 남기고 앱으로'],['site/live/index.html','발표 화면 — 3초마다 셈'],['서버/firestore.rules','live · here 칸 — 시각만 쓰기']]},
 
 f_easy:{t:'easy.js — 쉬운 사용모드',z:'p',zl:'폰 안에서 돈다',
  kid:'켜 두면 화면마다 <b>여기를 누르세요</b> 하고 노란 테두리와 손가락으로 알려 줘요.',

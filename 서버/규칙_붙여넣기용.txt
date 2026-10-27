@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// 공대 3호관 길안내 — Firestore 보안 규칙 (2026-09-22 v84 · 2026-10-18 방 정보·하루 3번 · 2026-10-27 발표장 접속 수 추가)
+// 공대 3호관 길안내 — Firestore 보안 규칙 (2026-09-22 v84 · 2026-10-18 방 정보·하루 3번 · 2026-10-27 발표장 접속 수 · 10-28 지금 켜 둔 사람 추가)
 //
 // 원칙
 //   · 관리자는 "로그인한 사람"이 아니라 "admins 명단에 UID 가 있는 사람"이다.
@@ -132,7 +132,17 @@ service cloud.firestore {
       allow update: if request.resource.data.keys().hasOnly(['n', 't'])
         && request.resource.data.n == resource.data.n + 1 && request.resource.data.t == request.time;
       allow delete: if false;
+
+      // 지금 켜 둔 사람 (2026-10-28) : 발표장 QR 로 들어온 폰이 앱을 켜 둔 동안 15초마다 자기 칸(무작위 번호)의 시각 t 만 새로 쓴다.
+      //   발표 화면은 t 가 40초 안인 칸만 센다. 끄면 그 칸을 지운다. 시각 말고는 아무것도 적을 수 없다.
+      match /here/{pid} {
+        allow read: if true;
+        allow create, update: if pid.matches('^[A-Za-z0-9]{16}$')
+          && request.resource.data.keys().hasOnly(['t']) && request.resource.data.t == request.time;
+        allow delete: if pid.matches('^[A-Za-z0-9]{16}$');
+      }
     }
+
     // 그 밖의 모든 곳은 막는다
     match /{document=**} {
       allow read, write: if false;

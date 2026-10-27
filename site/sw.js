@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '7dbb0f013e37';   // 파일 250개 · 16.6MB
+var VERSION = '125283befd0e';   // 파일 251개 · 16.6MB
 var FILES = [
   ['3d/realistic.html','9524531d6645',79368],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','2d85cd5841b5',116895],
+  ['css/app.css','d609bc0029e9',124619],
   ['css/boot.css','b77d5cd2fa9b',1658],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
@@ -217,8 +217,8 @@ var FILES = [
   ['guide/g05_search.jpg','aa54cc2d0655',30962],
   ['guide/g06_3d.jpg','6b51ff0988da',94498],
   ['guide/g07_floor.jpg','71e7e512e012',68313],
-  ['guide/g08_step.jpg','c277bee8d5be',97698],
-  ['guide/g09_arrive.jpg','789445787f18',67723],
+  ['guide/g08_step.jpg','b3bee4aaea07',123473],
+  ['guide/g09_arrive.jpg','01a120c4cb7c',78899],
   ['guide/g10_fav.jpg','24b3a50caa92',25747],
   ['guide/g11_settings.jpg','beb44546020a',60236],
   ['guide/g12_menu.jpg','9f444169217c',68100],
@@ -227,18 +227,18 @@ var FILES = [
   ['img/icon-192.png','a6893220bee4',5036],
   ['img/icon-512.png','de753e3f6802',14880],
   ['img/icon.svg','99ad3cbde680',2002],
-  ['index.html','c6378c6bfefc',56665],
+  ['index.html','11105e1dd19c',56884],
   ['js/app/aid.js','daa92696b9a7',32661],
   ['js/app/boot.js','57f3f42e5b9a',10615],
   ['js/app/building.js','95b01af4110d',23489],
   ['js/app/easy.js','bfc1efc5acd1',23947],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','bcc83dabb095',44185],
-  ['js/app/howto.js','e7e2098fcdef',18747],
+  ['js/app/howto.js','8fe1d8dba7f1',18938],
   ['js/app/icons.js','4cb6e33c5920',21136],
   ['js/app/live.js','641f671b6fff',2510],
   ['js/app/overview3d.js','35ad3a4e8f9a',108858],
-  ['js/app/photos.js','6243a1b56729',53450],
+  ['js/app/photos.js','9afe2486d7e1',54222],
   ['js/app/pwa.js','968cc93a717a',47453],
   ['js/app/qrnav.js','1ab04e81bfc1',20800],
   ['js/app/resume.js','b2a9974631f1',8244],
@@ -253,6 +253,7 @@ var FILES = [
   ['js/app/roomfix.js','1b886c300886',22082],
   ['js/app/shell.js','70fc85e85fa3',20455],
   ['js/app/start.js','4065777331b0',1505],
+  ['js/app/story.js','19c2668151da',11859],
   ['js/app/sugai.js','510d8159462a',132345],
   ['js/app/sugdb.js','b801511229ee',23438],
   ['js/app/suggest.js','27c314357e60',51946],

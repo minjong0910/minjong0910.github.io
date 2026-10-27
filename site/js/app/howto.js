@@ -94,25 +94,24 @@ var HOWTO = [
       ['길안내 시작', '여기서 바로 길안내를 시작할 수 있어요.', 'Start navigation', 'You can start navigation right here.']
     ] },
   { t:['길안내 따라가기', 'Following the steps'], img:'g08_step',
-    lead:['한 단계씩, 사진을 보면서 따라가요.', 'Follow one step at a time, looking at the photo.'],
+    lead:['그 자리의 실제 사진이 화면 가득 — 한 단계씩 따라가요.', 'The real photo fills the screen — follow one step at a time.'],
     items:[
-      ['진행 표시', '지금 몇 번째 단계인지 보여 줘요. (예 : 1 / 3 단계)', 'Progress', 'Shows which step you are on. (e.g. 1 / 3)'],
-      ['화살표', '어느 쪽으로 가야 하는지 보여 줘요.', 'Arrow', 'Shows which way to go.'],
-      ['할 일', '지금 해야 할 일을 한 문장으로 알려 줘요.', 'What to do', 'Tells you what to do now.'],
-      ['실제 사진', '그 자리에서 찍은 사진이에요. 눈앞 모습과 같은지 비교하며 걸어요. 사진을 누르면 크게 볼 수 있고, 두 손가락으로 더 키울 수 있어요. 위에 「1/2 · 다음 사진 ›」이 보이면 그걸 눌러 다음 사진을 봐요.',
-       'Real photo', 'A photo taken at that spot. Compare it with what you see. Tap the photo to zoom in, and pinch to zoom further. If it shows "1/2 · Next ›", tap that for the next photo.'],
-      ['다음', '사진 속 자리에 오면 눌러요. 마지막 단계에서는 「도착했어요」로 바뀌어요. 왼쪽 버튼은 앞 단계로 돌아가요.',
-       'Next', 'Tap when you reach the spot in the photo. On the last step it says "Arrived". The left button goes back.']
+      ['진행 표시', '어디서 어디로 가는지, 지금 몇 번째 단계인지 보여 줘요. 📷 옆은 지금 사진 속 자리예요.', 'Progress', 'Shows where you are going, which step you are on, and where the photo was taken.'],
+      ['누르면 크게', '사진을 누르면 누른 곳이 크게 보이고, 다시 누르면 원래대로 돌아와요. 「1/2 · 다음 사진 ›」이 보이면 그걸 눌러 다음 사진을 봐요.',
+       'Tap to zoom', 'Tap the photo to zoom in where you tapped; tap again to zoom out. If it shows "1/2 · Next ›", tap that for the next photo.'],
+      ['안내판', '공항 안내판처럼 노란 칸의 그림이 갈 방향(화살표 · 엘리베이터)을, 큰 글씨가 지금 할 일을 알려 줘요. 아래 작은 글씨는 영어예요.',
+       'Sign', 'Like an airport sign: the yellow box shows the way (arrow or elevator) and the big text tells you what to do.'],
+      ['다음', '사진 속 자리에 오면 눌러요. 마지막 단계에서는 「도착했어요」로 바뀌어요. 왼쪽 버튼은 앞 단계로 돌아가요. 사진을 좌우로 밀어도 넘어가요.',
+       'Next', 'Tap when you reach the spot in the photo. On the last step it says "Arrived". The left button goes back. You can also swipe the photo.']
     ] },
   { t:['도착', 'Arrived'], img:'g09_arrive',
     lead:['다 왔어요!', 'You made it!'],
     items:[
-      ['도착한 곳', '도착한 방 이름이에요.', 'Destination', 'The name of the room you reached.'],
-      ['도착 사진', '문 앞 모습이에요. 눈앞과 같은지 확인해 보세요. 누르면 크게 보여서 문 옆 명패 글씨까지 볼 수 있어요.', 'Arrival photo', 'The door of the room. Check that it matches. Tap to zoom in and read the name plate.'],
+      ['도착한 곳', '도착한 방 번호예요. 아래에 방 이름이 나와요.', 'Destination', 'The room you reached. Its name is shown below.'],
+      ['누르면 크게', '문 앞 사진이 화면 가득 보여요. 문 옆 명패를 누르면 크게 보여서 글씨까지 확인할 수 있어요.', 'Tap to zoom', 'The door fills the screen. Tap the name plate to zoom in and read it.'],
       ['다른 장소 찾기', '다른 곳으로 또 가고 싶으면 눌러요. 「무엇을 찾으세요?」로 바로 가요.', 'Find another place', 'Go somewhere else. Opens "What are you looking for?".'],
       ['처음으로 돌아가기', '처음 화면으로 돌아가요.', 'Back to start', 'Returns to the first screen.']
-    ] },
-  { t:['즐겨찾기 & 팁', 'Favorites & Tips'],
+    ] },  { t:['즐겨찾기 & 팁', 'Favorites & Tips'],
     secs:[
       { h:['⭐ 즐겨찾기 — 자주 가는 곳 저장하기', '⭐ Favorites — save places you visit often'], img:'g10_fav',
         pre:['3D 건물 화면 오른쪽 위 ☆을 누르면 ★로 바뀌며 저장돼요.', 'Tap ☆ at the top right of the 3D screen to save a place.'],

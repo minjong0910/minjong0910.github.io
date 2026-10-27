@@ -1493,3 +1493,81 @@
   html.lt .noGL{border-color:#AEBCCD;color:#44546A;}
   html.lt .noGL b{color:#0F1B2D;}
   html.noGL3d #s4 > .triprow, html.noGL3d #fsBtn{display:none !important;}
+
+  /* ══ 길안내 · 도착 화면 — 인스타 감성 + 공항 표지판 (2026-10-28 사용자 · js/app/story.js) ══
+     견본(생성물\견본_재출발_사진주인공_표지판_접속수\9_합친3_눌러보기.html)을 사용자가 고쳐 가며 정한 모양 그대로 :
+       · 실제 사진이 화면 맨 위부터 맨 아래까지(위 검은 칸 · 아래 흐린 바탕 없이) — 경로 · 단계 막대 · 위치는 사진 위에
+       · 아래는 공항 안내판 : 노란 칸 그림(직진 = 굵은 화살표 · 좌/우회전 = 앱의 원래 화살표 · 엘리베이터 그림 · 도착 ✓) + 큰 글 + 영어
+       · 사진을 누르면 누른 곳이 2배(「🔍 누르면 크게 / 작게」) · 좌우로 밀면 이전 · 다음
+     밝은 화면에서도 이 두 화면은 사진 + 표지판 그대로 둔다. */
+  #s6.story,#s7.story{padding:0 !important;overflow:hidden;background:#000;display:block;text-align:left;}
+  #s6.story > .bar,#s6.story > .walkTrack,#s6.story > .stepno,#s6.story > #ar,#s6.story > #ins{display:none !important;}
+  #s7.story > .chk,#s7.story > h1,#s7.story > p{display:none !important;}
+  #s6.story #ph,#s7.story #ph7{position:absolute;inset:0;margin:0;width:auto;height:auto;max-height:none;min-height:0;
+    border:0;border-radius:0;background:#000;color:#8A8A8A;z-index:0;cursor:pointer;touch-action:pan-y;}
+  #s6.story #ph img,#s7.story #ph7 img{transition:transform .38s ease;will-change:transform;-webkit-user-drag:none;user-select:none;}
+  #s6.story.zoomed #ph img,#s7.story.zoomed #ph7 img{transform:scale(2);}
+  #s6.story #ph .cap,#s6.story #ph .zm,#s7.story #ph7 .cap,#s7.story #ph7 .zm{display:none;}
+  #s6.story #ph .cnt,#s7.story #ph7 .cnt{top:auto;right:0.9rem;bottom:auto;z-index:4;background:rgba(15,15,16,.92);color:#FFC400;
+    border:1.5px solid #FFC400;border-radius:0.375rem;font-size:0.75rem;font-weight:900;padding:0.3rem 0.6rem;}
+  #s6.story #ph .cnt{top:calc(env(safe-area-inset-top) + 8.85rem);}
+  #s7.story #ph7 .cnt{top:calc(env(safe-area-inset-top) + 11.1rem);}
+  .stShade{position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(to top,rgba(10,10,11,.88) 0%,rgba(10,10,11,.45) 30%,rgba(10,10,11,0) 52%);}
+  .stTop{position:absolute;left:0;right:0;top:0;z-index:3;padding:calc(3.55rem + env(safe-area-inset-top)) 0.9rem 1.5rem;
+    background:linear-gradient(to bottom,rgba(0,0,0,.62) 0%,rgba(0,0,0,.3) 62%,rgba(0,0,0,0) 100%);color:#fff;}
+  .stTop .row{display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;font-weight:800;color:#EDEDED;text-shadow:0 1px 5px rgba(0,0,0,.85);}
+  .stTop .row .rt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .stTop .row b{color:#FFC400;font-size:1rem;}
+  .stTop .stBack{flex:none;width:2rem;height:2rem;border-radius:50%;border:1.5px solid #FFC400;background:rgba(15,15,16,.8);color:#FFC400;
+    display:flex;align-items:center;justify-content:center;padding:0;font:900 1rem inherit;font-family:inherit;cursor:pointer;}
+  .stTop .stBack .lc{width:1.05rem;height:1.05rem;margin:0;}
+  .stSegs{display:flex;gap:0.22rem;margin-top:0.55rem;}
+  .stSegs i{flex:1;height:0.32rem;background:rgba(255,255,255,.38);box-shadow:0 1px 4px rgba(0,0,0,.35);}
+  .stSegs i.on{background:#FFC400;}
+  .stWhere{display:inline-flex;align-items:center;gap:0.3rem;margin-top:0.55rem;max-width:100%;font-size:0.75rem;font-weight:800;color:#fff;
+    border-left:3px solid #FFC400;padding:0.25rem 0.5rem;background:#1E1F22;border-radius:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 8.5rem);}
+  .stWhere svg{flex:none;width:0.9rem;height:0.9rem;}
+  .stZm{position:absolute;right:0.9rem;z-index:4;display:flex;align-items:center;gap:0.3rem;background:rgba(15,15,16,.92);color:#FFC400;
+    font-size:0.78rem;font-weight:900;padding:0.3rem 0.6rem;border-radius:0.375rem;pointer-events:none;}
+  .stZm svg{width:0.95rem;height:0.95rem;flex:none;}
+  #s6 .stZm{top:calc(env(safe-area-inset-top) + 6.97rem);}
+  #s7 .stZm{top:calc(env(safe-area-inset-top) + 9.2rem);}
+  .stEdge{position:absolute;top:44%;z-index:2;font-size:1.6rem;color:rgba(255,255,255,.55);text-shadow:0 1px 8px rgba(0,0,0,.6);pointer-events:none;}
+  .stEdge.l{left:0.35rem;} .stEdge.r{right:0.35rem;}
+  .stBottom{position:absolute;left:0.8rem;right:0.8rem;bottom:calc(0.8rem + env(safe-area-inset-bottom));z-index:3;}
+  .stSign{display:flex;background:rgba(15,15,16,.96);border-radius:0.375rem;overflow:hidden;min-height:6.4rem;box-shadow:0 10px 30px rgba(0,0,0,.5);}
+  .stSign .ic{flex:none;width:5.8rem;background:#FFC400;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .stSign .ic svg{width:68%;height:68%;}
+  .stSign .tx{flex:1;min-width:0;padding:0.75rem 0.85rem;display:flex;flex-direction:column;justify-content:center;word-break:keep-all;}
+  .stSign .ko{font-size:1.28rem;line-height:1.24;font-weight:900;letter-spacing:-0.02em;color:#fff;}
+  .stSign .ko.long{font-size:1.05rem;}
+  .stSign .en{font-size:0.75rem;color:#B5B5B5;font-weight:700;margin-top:0.3rem;}
+  .stSign .ic.turnR svg{animation:stTurnR 1.2s ease-in-out infinite;}
+  .stSign .ic.turnL svg{animation:stTurnL 1.2s ease-in-out infinite;}
+  @keyframes stTurnR{0%,100%{transform:translateX(0) rotate(0deg);}50%{transform:translateX(9%) rotate(18deg);}}
+  @keyframes stTurnL{0%,100%{transform:translateX(0) rotate(0deg);}50%{transform:translateX(-9%) rotate(-18deg);}}
+  .stBottom .navrow{margin-top:0.55rem;gap:0.5rem;}
+  html #s6.story .navrow .big,html #s7.story .stBottom .big{min-height:0;padding:0.75rem 0.4rem;border-radius:0.375rem;font-size:1rem;font-weight:900;
+    box-shadow:none;background-image:none;margin:0;}
+  html #s6.story .navrow .big#pv,html #s7.story .stBottom .big.ghost{background:rgba(15,15,16,.9);border:1.5px solid #5A5B60;color:#E0E0E0;}
+  html #s6.story .navrow .big#nx,html #s7.story .stBottom .big:not(.ghost){background:#FFC400;border:0;color:#111;}
+  .stHint{text-align:center;font-size:0.6875rem;color:#9A9A9A;font-weight:700;margin-top:0.45rem;text-shadow:0 1px 4px rgba(0,0,0,.8);}
+  /* 도착 화면 */
+  .stBand{position:absolute;left:0.9rem;right:0.9rem;top:calc(3.55rem + env(safe-area-inset-top));z-index:3;background:#FFC400;color:#111;
+    border-radius:0.375rem;padding:0.875rem;display:flex;gap:0.8rem;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.45);}
+  .stBand .ck{flex:none;width:3.25rem;height:3.25rem;background:#111;border-radius:0.3rem;display:flex;align-items:center;justify-content:center;}
+  .stBand .ck svg{width:70%;height:70%;}
+  .stBand .ko{font-size:1.5rem;font-weight:900;letter-spacing:-0.02em;line-height:1.1;}
+  .stBand .en{font-size:0.78rem;font-weight:800;color:#3A2E00;margin-top:0.2rem;}
+  .stWho{background:rgba(15,15,16,.94);border-radius:0.375rem;padding:0.75rem 0.875rem;font-size:1rem;font-weight:800;color:#fff;border-left:5px solid #FFC400;word-break:keep-all;}
+  .stWho small{display:block;color:#B5B5B5;font-size:0.72rem;font-weight:700;margin-top:0.2rem;}
+  .stWho small svg{width:0.85rem;height:0.85rem;vertical-align:-0.12rem;}
+  .stWho:empty{display:none;}
+  .stBtns{display:flex;gap:0.5rem;margin-top:0.55rem;}
+  .stBtns .big{flex:1 1 0;min-width:0;}
+  #s7.story .rfMemo{position:absolute;left:0.9rem;right:9rem;top:calc(9.6rem + env(safe-area-inset-top));z-index:3;
+    background:rgba(15,15,16,.9);color:#E0E0E0;border-radius:0.3rem;padding:0.35rem 0.6rem;font-size:0.75rem;}
+  /* 이 두 화면에서는 오른쪽 위 [인터넷][☰] 테두리도 노랑 */
+  html.stOn .topIcons .iconBtn{border-color:#FFC400 !important;background:rgba(15,15,16,.9) !important;box-shadow:none !important;}
+  html.stOn #tmBtn,html.stOn #tmBtn .lc{color:#FFC400 !important;}

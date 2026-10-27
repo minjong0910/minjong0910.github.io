@@ -355,21 +355,22 @@
       <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">655줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
       <button class="b p" data-id="f_boot"><span class="n">boot.js</span><span class="d">170줄 · 첫 화면 연출</span></button>
       <button class="b p" data-id="f_start"><span class="n">start.js</span><span class="d">32줄 · 글꼴 기다렸다 시작</span></button>
-      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">445줄 · 오프라인 저장소</span></button>
+      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">446줄 · 오프라인 저장소</span></button>
     </div>
   </div>
 
   <div class="gbox">
-    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 9개</div>
+    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 10개</div>
     <div class="grid">
       <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">378줄 · 화면 전환 go()</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
-      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">738줄 · 화면 21개</span></button>
+      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">740줄 · 화면 21개</span></button>
       <button class="b p" data-id="f_easy"><span class="n">easy.js</span><span class="d">322줄 · 쉬운 사용모드</span></button>
-      <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">189줄 · 사진 이용안내</span></button>
+      <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">188줄 · 사진 이용안내</span></button>
       <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">219줄 · 사진 확대</span></button>
       <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">64줄 · ☰ 메뉴 · 밝은 화면</span></button>
       <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">135줄 · 길안내 이어 하기</span></button>
+      <button class="b p" data-id="f_story"><span class="n">story.js</span><span class="d">168줄 · 길안내 · 도착 화면 (인스타 + 공항)</span></button>
       <button class="b p" data-id="f_live"><span class="n">live.js</span><span class="d">34줄 · 발표장 「지금 켜 둔 사람」</span></button>
     </div>
   </div>
@@ -388,7 +389,7 @@
     <div class="gt">④ 길안내와 사진</div><div class="gs">실제로 길을 알려 주는 부분 · 4개</div>
     <div class="grid">
       <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">638줄 · 안내 단계 만들기</span></button>
-      <button class="b p" data-id="f_photos"><span class="n">photos.js</span><span class="d">1,077줄 · 사진 목록 · 사진 상자</span></button>
+      <button class="b p" data-id="f_photos"><span class="n">photos.js</span><span class="d">1,084줄 · 사진 목록 · 사진 상자</span></button>
       <button class="b p" data-id="qr"><span class="n">qrnav.js</span><span class="d">434줄 · 출입문 QR</span></button>
       <button class="b p" data-id="f_roomfix"><span class="n">roomfix.js</span><span class="d">398줄 · 구성 및 변경 · 메모</span></button>
     </div>
@@ -733,6 +734,13 @@ f_live:{t:'live.js — 발표장 「지금 켜 둔 사람」',z:'p',zl:'폰 안�
  how:'go.html 이 이 창(sessionStorage)에 발표 이름과 무작위 번호 16자를 적어 두면, 화면이 보이는 동안 15초마다 서버 live/grad/here/번호 에 「지금 시각」만 쓰고, 화면이 가려지거나 닫히면 지웁니다. 발표 화면은 시각이 40초 안인 칸만 셉니다(서버의 count 질의). 이름 · 기기 정보는 남기지 않고, 2시간이 지나면 그만둡니다.',
  tech:['Firestore REST(commit · DELETE)','sessionStorage','visibilitychange · pagehide'],
  src:[['site/js/app/live.js','켜 둔 동안 신호 · 끄면 지우기'],['site/live/go.html','발표장 QR — 숫자 +1 · 표시 남기고 앱으로'],['site/live/index.html','발표 화면 — 3초마다 셈'],['서버/firestore.rules','live · here 칸 — 시각만 쓰기']]},
+f_story:{t:'story.js — 길안내 · 도착 화면 (인스타 감성 + 공항 표지판)',z:'p',zl:'폰 안에서 돈다',
+ kid:'길을 안내하는 화면에서 그 자리의 실제 사진이 화면 가득 보이고, 아래에 공항 안내판처럼 노란 화살표와 큰 글씨로 「어디로 가세요」가 나와요.',
+ why:'2026-10-27 사용자 「앱이 식상하다」 → 견본 여러 판을 보고 고른 모양(인스타 감성 + 공항 느낌). 사진이 작은 칸에 갇혀 있으면 눈앞 풍경과 맞춰 보기 어렵고, 표지판처럼 생긴 안내는 처음 봐도 바로 읽힌다.',
+ where:['길안내 화면 — 위 : 「동문 → 13310호」 · 단계 막대 · 📷 지금 자리 / 아래 : 노란 칸 그림(직진 굵은 화살표 · 좌우회전은 앱의 원래 화살표 · 엘리베이터 · 도착 ✓) + 큰 글 + 영어 + 이전 · 다음','사진을 누르면 <b>누른 곳이 2배</b>(「🔍 누르면 크게 / 작게」) · 좌우로 밀면 이전 · 다음','도착 화면 — 문 사진 가득 + 노란 띠 「13310호 도착」 + 방 이름'],
+ how:'guide.js 의 render6 · startGuide 와 photos.js 의 phFill 을 감싸서 위에 얹기만 합니다 — 단계를 만드는 표 · 이어 하기 · 쉬운 사용모드는 그대로이고, 예전 글자 칸(#ar · #ins · #stepno)은 감춘 채 남겨 둡니다. 밝은 화면에서도 이 두 화면은 사진 + 표지판 그대로입니다.',
+ tech:['CSS transform(scale 2 · transform-origin)','pointer 이벤트(누르기 · 밀기)','MutationObserver'],
+ src:[['site/js/app/story.js','위 · 아래 칸 · 누르기 · 밀기'],['site/css/app.css','「인스타 감성 + 공항 표지판」 묶음'],['site/js/app/photos.js','문 · 엘리베이터 안 사진 이름표']]},
 
 f_easy:{t:'easy.js — 쉬운 사용모드',z:'p',zl:'폰 안에서 돈다',
  kid:'켜 두면 화면마다 <b>여기를 누르세요</b> 하고 노란 테두리와 손가락으로 알려 줘요.',

@@ -68,8 +68,13 @@ sphApplyDeleted();
 
 /* 호실 외 공용 사진 키
    BLD=건물 외부 · B1=지하1층 · EV1~EV5=각 층 엘리베이터 앞 · HALL1L~HALL5R=각 층 왼쪽/오른쪽 복도 */
-var PH_LABEL = {BLD:'공대 3호관', B1:'지하 1층'};
-var PH_LABEL_EN = {BLD:'Engineering Bldg.3', B1:'B1'};
+var PH_LABEL = {BLD:'공대 3호관', B1:'지하 1층',
+  /* 2026-10-28 : 문 사진 — 설명에 「GATE_E」처럼 코드가 그대로 보였다 */
+  GATE_MAIN_OUT:'정문', GATE_BACK_OUT:'후문', GATE_EAST_OUT:'동문', GATE_WEST_OUT:'서문',
+  GATE_E:'동문 안쪽 복도', GATE_W:'서문 안쪽 복도', GATE_MAIN_WAY:'정문 로비', GATE_BACK_STAIR:'후문 계단'};
+var PH_LABEL_EN = {BLD:'Engineering Bldg.3', B1:'B1',
+  GATE_MAIN_OUT:'Front gate', GATE_BACK_OUT:'Back gate', GATE_EAST_OUT:'East gate', GATE_WEST_OUT:'West gate',
+  GATE_E:'East gate hallway', GATE_W:'West gate hallway', GATE_MAIN_WAY:'Front lobby', GATE_BACK_STAIR:'Back gate stairs'};
 (function(){
   for(var i=1;i<=5;i++){
     PH_LABEL['EV'+i]      = i+'층 엘리베이터 앞';
@@ -78,12 +83,14 @@ var PH_LABEL_EN = {BLD:'Engineering Bldg.3', B1:'B1'};
     PH_LABEL['WC'+i]      = i+'층 화장실';
     PH_LABEL['ES'+i]      = i+'층 계단';                /* v79 : AI 쪽과 같게 — ES = 계단, EMS = 비상계단 */
     PH_LABEL['EMS'+i]     = i+'층 비상계단';
+    PH_LABEL['EVIN'+i]    = i+'층 엘리베이터 안';         /* 2026-10-28 : 사진 설명에 「EVIN3」처럼 코드가 그대로 보였다 */
     PH_LABEL_EN['EV'+i]      = 'Floor '+i+' elevator';
     PH_LABEL_EN['HALL'+i+'L']= 'Floor '+i+' left hallway';
     PH_LABEL_EN['HALL'+i+'R']= 'Floor '+i+' right hallway';
     PH_LABEL_EN['WC'+i]      = 'Floor '+i+' restroom';
     PH_LABEL_EN['ES'+i]      = 'Floor '+i+' stairs';
     PH_LABEL_EN['EMS'+i]     = 'Floor '+i+' emergency stairs';
+    PH_LABEL_EN['EVIN'+i]    = 'Inside the elevator (floor '+i+')';
   }
 })();
 function phCap(code){

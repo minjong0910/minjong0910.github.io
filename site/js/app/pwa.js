@@ -9,7 +9,7 @@ try{
   }
 }catch(e){}
 /* 새 판으로 조용히 바꿔 단 직후면 index.html 맨 앞의 켜는 화면 바탕(#fxPre)을 감춘다 — 켜는 화면을 건너뛰는 때다(boot.js · 2026-10-20).
-   (켜는 화면 도중에 갈아탔으면 b3nav_boot_cont — 바탕은 그대로 두고 boot.js 가 켜는 화면을 이어서 보여 준다. 아래 applyUpdate)
+   (2026-10-28 부터 켜는 화면 도중에는 갈아타지 않는다 — 아래 applyUpdate. b3nav_boot_cont 는 boot.js 가 받아만 준다)
    2026-10-21 : 예전에는 출입문 QR 로 막 들어와 갈아탔으면(문을 넘겨받음) 켜는 화면을 처음부터 다시 보여 줬는데,
    사용자 폰에서 「초록 화면이 두 번」 떴다 — 그 규칙은 뺐다. */
 try{
@@ -590,15 +590,18 @@ var PWA = (function(){
         var splash = !!(bootEl && bootEl.style.willChange !== 'clip-path');   // 걷히는 중이면 이미 끝난 것으로 본다
         var asking = !!document.querySelector('.ezAsk');
         var busy = (id === 's6' || id === 's7' || id === 'sqr' || id === 'sqrok' || asking);
-        var okNow = splash
-                 || (!busy && ((!on || id === 's1') || !userActed))
+        /* 2026-10-28 사용자 「발표장 QR 을 찍고 여는데 초록 로고 글이 두 번 뜬다」 — 켜는 화면 도중에 갈아타면 「이어서」 보여 줘도
+           새로 고치는 순간 화면이 한 번 끊겼다 다시 초록으로 떠서 눈에는 두 번으로 보였다(새 판을 올린 직후 · 전에 열어 본 폰).
+           → 켜는 화면이 떠 있는 동안에는 갈아타지 않는다. 다 켜진 뒤 사용자가 잃을 것이 없는 때(아래)에 조용히(b3nav_quiet — 초록 없이) 갈아탄다. */
+        if(splash) return;
+        var okNow = (!busy && ((!on || id === 's1') || !userActed))
                  || (document.visibilityState === 'hidden' && !(id === 's6' || id === 's7' || id === 'sqr'));
         if(!okNow) return;
         reloaded = true;
         if(timer) clearInterval(timer);
-        /* 다시 뜰 때 : 켜는 화면 도중이었으면 이어서(b3nav_boot_cont), 아니면 켜는 화면을 건너뛴다(b3nav_quiet) — boot.js 가 본다.
+        /* 다시 뜰 때 : 켜는 화면을 건너뛴다(b3nav_quiet) — boot.js 가 본다. (b3nav_boot_cont 「이어서」는 이제 쓰지 않지만 boot.js 는 받아 준다)
            안 그러면 사용자 눈에 앱이 두 번 켜지는 것처럼 보인다. */
-        try{ sessionStorage.setItem(splash ? 'b3nav_boot_cont' : 'b3nav_quiet', '1'); }catch(err){}
+        try{ sessionStorage.setItem('b3nav_quiet', '1'); }catch(err){}
         /* 출입문 QR 로 막 들어와 아직 「여기가 맞나요?」에 답하지 않았으면 그 문을 넘겨준다 (위 ① 참고) */
         var carry = gateFromUrl || (id === 'sqrok' ? gateTaken : null);
         if(carry){ try{ sessionStorage.setItem('b3nav_gate_carry', carry); }catch(err){} }

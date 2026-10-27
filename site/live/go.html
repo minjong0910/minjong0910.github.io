@@ -10,7 +10,9 @@
      · 이 창에 발표 이름 · 폰 번호(무작위 16자)를 적어 두면(sessionStorage b3live), 앱의 js/app/live.js 가 켜 둔 동안 「보고 있어요」를 보낸다
      · 누가 열었는지는 남기지 않는다 : Firestore live/<발표이름> 의 숫자 n 을 1 올릴 뿐(서버/firestore.rules 의 live 칸)
      · 「연 사람」 n 은 한 폰을 3시간에 한 번만 센다(이 폰의 localStorage 에 마지막 시각만 적음) — 「지금 켜 둔 사람」은 늘 새로
-     · 인터넷이 안 되거나 서버가 늦어도 2.5초 안에 앱으로 넘어간다 — 길안내가 먼저다
+     · 인터넷이 안 되거나 서버가 늦어도 5초 안에 앱으로 넘어간다 — 길안내가 먼저다
+     · 2026-10-28 「초록 로고 글이 두 번」 : 전에 열어 본 폰이면, 새 판이 있는지 여기서 먼저 확인해 다 받은 뒤 앱으로 넘긴다.
+       (안 그러면 옛 판으로 켜지다가 켜는 화면 도중에 새 판으로 갈아타며 초록 화면이 두 번 보였다)
      ?e=이름 : 발표마다 따로 셀 때(기본 grad) · ?nocount=1 : 세지 않고 넘기기(시험용) -->
 <style>
   html,body{margin:0;height:100%;background:#0B0E13;color:#E7F6FF;font-family:"Malgun Gothic",sans-serif;}
@@ -39,7 +41,7 @@
   if(!pid){ var rnd = new Uint8Array(16); (window.crypto || window.msCrypto).getRandomValues(rnd); for(var i = 0; i < 16; i++) pid += A.charAt(rnd[i] % A.length); }
   try{ sessionStorage.setItem('b3live', JSON.stringify({e: EV, p: pid, s: now})); }catch(e){}
   var count = !(now - last < 3 * 3600 * 1000);
-  setTimeout(go, 2500);
+  setTimeout(go, 5000);
   var doc = 'projects/' + PROJ + '/databases/(default)/documents/live/' + EV;
   var here = {update: {name: doc + '/here/' + pid, fields: {}}, updateMask: {fieldPaths: []},
     updateTransforms: [{fieldPath: 't', setToServerValue: 'REQUEST_TIME'}]};
@@ -53,6 +55,25 @@
   if(count) jobs.push(send({update: {name: doc, fields: {}}, updateMask: {fieldPaths: []},
     updateTransforms: [{fieldPath: 'n', increment: {integerValue: '1'}}, {fieldPath: 't', setToServerValue: 'REQUEST_TIME'}]})
     .then(function(ok){ if(ok){ try{ localStorage.setItem(mark, String(now)); }catch(e){} } return ok; }));
+  /* 전에 열어 본 폰이면 새 판을 다 받을 때까지(늦어도 위의 5초) — 처음 온 폰은 기다릴 것이 없다 */
+  function swReady(){
+    if(!('serviceWorker' in navigator) || !navigator.serviceWorker.getRegistration) return Promise.resolve('없음');
+    return navigator.serviceWorker.getRegistration().then(function(reg){
+      if(!reg) return '처음';
+      return new Promise(function(res){
+        function watch(w){
+          if(!w || w.state === 'activated' || w.state === 'redundant') return false;
+          document.getElementById('s').textContent = '새 판으로 바꾸는 중…';
+          w.addEventListener('statechange', function(){ if(w.state === 'activated' || w.state === 'redundant') res('새 판'); });
+          return true;
+        }
+        reg.addEventListener('updatefound', function(){ watch(reg.installing); });
+        if(watch(reg.installing) || watch(reg.waiting)) return;
+        reg.update().then(function(){ if(!watch(reg.installing) && !watch(reg.waiting)) res('그대로'); }, function(){ res('확인 못 함'); });
+      });
+    })['catch'](function(){ return '확인 못 함'; });
+  }
+  jobs.push(swReady());
   Promise.all(jobs).then(function(r){ window.__liveStatus = r; go(); });
 })();
 </script>

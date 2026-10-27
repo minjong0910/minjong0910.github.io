@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>공대 3호관 길안내 — 발표장 실시간</title>
+<!-- 발표장 실시간 접속 수 (2026-10-27) — 발표 자료 20쪽(Q&A)과 같은 모양.
+     20쪽의 「● LIVE」를 누르면 이 화면이 열린다 → F(또는 오른쪽 위 단추)로 전체 화면, 끝나면 Esc · Alt+Tab 으로 발표로 돌아간다.
+     숫자 : Firestore live/<발표이름> 을 1.5초마다 읽는다(누구나 읽기만 가능 — 서버/firestore.rules).
+            이 화면을 연 때의 숫자를 0 으로 삼아 「이 화면을 연 뒤에 연 사람」을 보여 준다(R 키 = 다시 0 부터).
+     ?e=이름 : 발표마다 따로(기본 grad, QR 도 같은 이름으로 그려진다) · ?all=1 : 처음부터 센 전체 수 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<style>
+  :root{ --bg:#0B0F14; --cy:#22D3EE; --pk:#FF4D8D; --tx:#F2F6FA; --tx2:#B4C0CC; --dm:#6E7C8B; --card:#131A23; --ln:#26354A; }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:var(--bg);font-family:'맑은 고딕','Malgun Gothic',sans-serif;color:var(--tx);overflow:hidden;word-break:keep-all;}
+  .slide{position:absolute;left:50%;top:50%;width:960px;height:540px;overflow:hidden;transform-origin:50% 50%;}
+  .blob{position:absolute;left:520px;top:-160px;width:560px;height:560px;border-radius:50%;background:var(--cy);opacity:.12;filter:blur(70px);}
+  .k{position:absolute;left:56px;top:132px;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--tx2);}
+  .qa{position:absolute;left:56px;top:150px;font-family:'Bahnschrift',sans-serif;font-size:60px;font-weight:700;}
+  .qa span{color:var(--cy);}
+  .t1{position:absolute;left:56px;top:244px;font-size:17px;color:var(--tx2);}
+  .bar{position:absolute;left:56px;top:288px;width:56px;height:4px;background:var(--cy);}
+  .t2{position:absolute;left:56px;top:306px;font-size:12px;line-height:1.75;color:var(--tx2);}
+  .t2 b{color:var(--tx);}
+  .t3{position:absolute;left:56px;top:370px;font-size:18px;font-weight:700;}
+  .t3 span{color:var(--cy);}
+  .t4{position:absolute;left:56px;top:402px;font-size:12px;color:var(--tx2);}
+  .qr{position:absolute;left:468px;top:132px;height:280px;border-radius:6px;box-shadow:0 0 50px rgba(255,70,140,.18);}
+  .live{position:absolute;left:684px;top:96px;width:220px;height:344px;background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:18px 18px 14px;}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:900;letter-spacing:1.5px;color:var(--pk);border:1.5px solid var(--pk);border-radius:99px;padding:3px 9px;}
+  .pill i{width:7px;height:7px;border-radius:50%;background:var(--pk);box-shadow:0 0 10px var(--pk);animation:bl 1.2s infinite;}
+  .off .pill{color:var(--dm);border-color:var(--dm);} .off .pill i{background:var(--dm);box-shadow:none;animation:none;}
+  @keyframes bl{50%{opacity:.25;}}
+  .lab{font-size:11.5px;color:var(--tx2);margin-top:12px;}
+  .num{display:flex;align-items:baseline;gap:4px;margin-top:2px;position:relative;}
+  .num .n{font-family:'Bahnschrift',sans-serif;font-weight:700;font-size:96px;line-height:1;color:var(--cy);text-shadow:0 0 30px rgba(34,211,238,.35);font-variant-numeric:tabular-nums;}
+  .num .u{font-size:22px;font-weight:900;}
+  .pop{position:absolute;right:6px;top:4px;font-family:'Bahnschrift',sans-serif;font-size:18px;font-weight:700;color:var(--pk);opacity:0;}
+  .pop.go{animation:pop 1.1s ease-out;}
+  @keyframes pop{0%{opacity:0;transform:translateY(8px);}25%{opacity:1;}100%{opacity:0;transform:translateY(-18px);}}
+  .s{font-size:13px;font-weight:800;line-height:1.4;}
+  .bars{display:flex;align-items:flex-end;gap:2.5px;height:56px;margin-top:16px;border-bottom:1px solid var(--ln);}
+  .bars i{flex:1;background:linear-gradient(to top,rgba(34,211,238,.3),var(--cy));border-radius:2px 2px 0 0;min-height:1px;transition:height .4s;}
+  .bl{display:flex;justify-content:space-between;font-size:8.5px;color:var(--dm);margin-top:4px;}
+  .note{font-size:8.5px;color:var(--dm);margin-top:8px;line-height:1.5;}
+  .st{position:absolute;left:56px;bottom:14px;font-size:8.5px;color:var(--dm);}
+  .st.bad{color:#FF8DBA;}
+  .pg{position:absolute;right:56px;bottom:17px;font-family:'Bahnschrift',sans-serif;font-size:8.5px;color:var(--dm);}
+  .ctl{position:fixed;right:12px;top:10px;display:flex;gap:6px;z-index:5;transition:opacity .4s;}
+  .ctl button{background:#131A24;color:#E7F6FF;border:1px solid #2A3644;border-radius:8px;padding:6px 12px;font:13px 'Malgun Gothic',sans-serif;cursor:pointer;}
+  .ctl button:hover{border-color:#22D3EE;}
+  body.idle .ctl{opacity:0;} body.idle{cursor:none;}
+</style>
+</head>
+<body>
+<div class="ctl"><button id="rs">0부터 다시 (R)</button><button id="fs">전체 화면 (F)</button></div>
+<div class="slide" id="sl">
+  <div class="blob"></div>
+  <div class="k">10&nbsp;&nbsp;&nbsp;&nbsp;Q &amp; A</div>
+  <div class="qa">Q <span>&amp;</span> A</div>
+  <div class="t1">질의응답 — 들어 주셔서 감사합니다</div>
+  <div class="bar"></div>
+  <div class="t2"><b>공대 3호관 길안내</b> · 팀 공3길<br>김민종 · 손의윤 · 문성일&nbsp;&nbsp;|&nbsp;&nbsp;지도교수 강규창 교수님</div>
+  <div class="t3">지금, <span>가운데 QR을 찍어 보십시오.</span></div>
+  <div class="t4">설치도 가입도 없이 — 찍는 순간 오른쪽 숫자가 올라갑니다.</div>
+  <img class="qr" id="qr" alt="발표장 QR">
+  <div class="live off" id="live">
+    <span class="pill"><i></i>LIVE</span>
+    <div class="lab">지금 이 발표장에서</div>
+    <div class="num"><span class="n" id="n">0</span><span class="u">명</span><span class="pop" id="pop">+1</span></div>
+    <div class="s">이 앱을 열었어요</div>
+    <div class="bars" id="bars"></div>
+    <div class="bl"><span>1분 전</span><span>지금</span></div>
+    <div class="note">누가 열었는지는 남기지 않고, 휴대폰마다 한 번만 셉니다.</div>
+  </div>
+  <div class="st" id="st">서버에 연결하는 중…</div>
+  <div class="pg">20 / 20</div>
+</div>
+<script src="qr.js"></script>
+<script src="card.js"></script>
+<script>
+(function(){
+  'use strict';
+  var PROJ = 'minjong-b974c', KEY = 'AIzaSyBclnF6tX3FbuKxjBPaxVjkHF1rfRZAjnw';
+  var m = /[?&]e=([a-z0-9-]{1,20})(&|$)/.exec(location.search), EV = m ? m[1] : 'grad';
+  var ALL = /[?&]all=1/.test(location.search);
+  var sl = document.getElementById('sl');
+  function fit(){ var k = Math.min(innerWidth / 960, innerHeight / 540); sl.style.transform = 'translate(-50%,-50%) scale(' + k + ')'; }
+  addEventListener('resize', fit); fit();
+
+  /* QR 카드 — 발표 자료 그림과 같은 그리기(card.js) */
+  function drawQR(icon){ document.getElementById('qr').src = LIVECARD.draw(EV, icon, 150).canvas.toDataURL('image/png'); }
+  var ic = new Image(); ic.onload = function(){ drawQR(ic); }; ic.onerror = function(){ drawQR(null); }; ic.src = '../img/icon-192.png';
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ drawQR(ic.complete && ic.naturalWidth ? ic : null); });
+
+  /* 숫자 — 1.5초마다 읽는다 */
+  var nEl = document.getElementById('n'), pop = document.getElementById('pop'), bars = document.getElementById('bars');
+  var live = document.getElementById('live'), st = document.getElementById('st');
+  for(var i = 0; i < 24; i++) bars.appendChild(document.createElement('i'));
+  var hist = new Array(24).fill(0), cur = 0, base = null, total = null, shown = 0;
+  function draw(){
+    var b = bars.children, mx = Math.max(3, Math.max.apply(null, hist));
+    for(var i = 0; i < 24; i++) b[i].style.height = (hist[i] / mx * 100) + '%';
+    nEl.textContent = shown;
+  }
+  setInterval(function(){ hist.push(cur); hist.shift(); cur = 0; draw(); }, 2500);
+  function setStatus(t, bad){ st.textContent = t; st.className = 'st' + (bad ? ' bad' : ''); live.classList.toggle('off', !!bad); }
+  var API = 'https://firestore.googleapis.com/v1/projects/' + PROJ + '/databases/(default)/documents/live/' + EV + '?key=' + KEY;
+  function poll(){
+    fetch(API, {cache: 'no-store'}).then(function(r){
+      if(r.status === 404) return {n: 0};
+      if(r.status === 403) throw new Error('rules');
+      if(!r.ok) throw new Error('http ' + r.status);
+      return r.json().then(function(j){ return {n: +((j.fields && j.fields.n && j.fields.n.integerValue) || 0)}; });
+    }).then(function(d){
+      total = d.n;
+      if(base === null) base = ALL ? 0 : total;
+      var v = Math.max(0, total - base);
+      if(v > shown){ cur += v - shown; pop.classList.remove('go'); void pop.offsetWidth; pop.classList.add('go'); }
+      shown = v; draw();
+      setStatus('● 서버 연결됨 · 1.5초마다 셉니다 · 「' + EV + '」 지금까지 모두 ' + total + '명' + (ALL ? '' : ' (이 화면을 연 뒤 ' + v + '명)'), false);
+    })['catch'](function(e){
+      setStatus(e.message === 'rules' ? '서버 규칙이 아직 없습니다 — 「서버」 폴더의 firestore.rules 를 Firebase 콘솔에 붙여 넣어 주세요'
+                                      : '인터넷 연결을 확인해 주세요 — 다시 시도하는 중', true);
+    });
+  }
+  poll(); setInterval(poll, 1500);
+
+  /* 단추 · 키 */
+  function reset(){ if(total !== null){ base = total; shown = 0; hist = new Array(24).fill(0); cur = 0; draw(); } }
+  function full(){ if(document.fullscreenElement) document.exitFullscreen(); else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }
+  document.getElementById('rs').onclick = reset; document.getElementById('fs').onclick = full;
+  addEventListener('keydown', function(e){ if(e.key === 'f' || e.key === 'F') full(); else if(e.key === 'r' || e.key === 'R') reset(); });
+  var idle; function wake(){ document.body.classList.remove('idle'); clearTimeout(idle); idle = setTimeout(function(){ document.body.classList.add('idle'); }, 3000); }
+  addEventListener('mousemove', wake); addEventListener('keydown', wake); wake();
+})();
+</script>
+</body>
+</html>

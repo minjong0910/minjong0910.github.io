@@ -349,7 +349,7 @@ T $sl $rx 323 $rw 15 '[[→ 제보한 사진]]    건의함에서 올린 사진 
 T $sl $rx 340 $rw 15 '[[← 안내 사진 · 앱 자료]]    승인된 사진 · 앱 파일 → 모든 휴대폰' 9 $TX2 | Out-Null
 T $sl $rx 362 $rw 18 '서버 — [[맡아 둘 뿐]]  ~~Firebase Firestore · GitHub Pages~~' 12 $TX -bold | Out-Null
 $svb = @(
-  @('문지기', '보안 규칙 130줄 — 누가 무엇을 읽고 쓰나 · 하루 3번'),
+  @('문지기', '보안 규칙 141줄 — 누가 무엇을 읽고 쓰나 · 하루 3번'),
   @('제보 대기함', '승인 전 제보 사진이 기다리는 곳'),
   @('관리자 명부', '승인 · 방 이름 바꾸기를 할 수 있는 사람'),
   @('승인 사진 창고', '승인된 사진 · 바꾼 방 이름'),
@@ -364,7 +364,7 @@ for($i = 0; $i -lt 5; $i++){
 # ───────────────────────────────────────── 9 설계 ② 개발 기술
 #   2026-10-27 사용자 : 「개발 기술을 더 상세하게 — 어디에서 쓰고, 어디에서 어떤 기능을 하고, 어디 들어가 있는지」
 #   → 기술마다 한 줄 : 무엇을 하나 · 앱 어디에서 어떤 일을 · 들어 있는 곳(실제 파일). 「쓰는 곳」이라는 말머리는 쓰지 않는다(10/24)
-$sl = Page 4 '솔루션 설계 및 구현 · 개발 기술' '공대 3호관 길안내의 [[개발 기술]]' 60 '쓴 기술을, 앱 어디에 들어 있는지까지 말씀드리겠습니다.\n앱의 뼈대는 묶음 도구 없이 직접 쓴 자바스크립트 31개 파일입니다. 3D 조감도와 층 상세, 1인칭은 three.js 로 건물 좌표에서 그리고, 서비스 워커가 앱 전체를 폰에 담아 두어 비행기 모드에서도 됩니다. 앱 안 QR 스캔은 jsQR 이 맡습니다.\n건의함 사진 판정은 MobileNet 이 사진을 숫자 1,280개로 바꾸고, Tesseract 가 번호판 글자를 먼저 읽습니다. 둘 다 휴대폰 안에서 돕니다.\n서버는 Firebase 하나이고 보안 규칙 130줄이 지킵니다. GitHub Actions 는 검사를 통과해야만 배포합니다.'
+$sl = Page 4 '솔루션 설계 및 구현 · 개발 기술' '공대 3호관 길안내의 [[개발 기술]]' 60 '쓴 기술을, 앱 어디에 들어 있는지까지 말씀드리겠습니다.\n앱의 뼈대는 묶음 도구 없이 직접 쓴 자바스크립트 31개 파일입니다. 3D 조감도와 층 상세, 1인칭은 three.js 로 건물 좌표에서 그리고, 서비스 워커가 앱 전체를 폰에 담아 두어 비행기 모드에서도 됩니다. 앱 안 QR 스캔은 jsQR 이 맡습니다.\n건의함 사진 판정은 MobileNet 이 사진을 숫자 1,280개로 바꾸고, Tesseract 가 번호판 글자를 먼저 읽습니다. 둘 다 휴대폰 안에서 돕니다.\n서버는 Firebase 하나이고 보안 규칙 141줄이 지킵니다. GitHub Actions 는 검사를 통과해야만 배포합니다.'
 $cx = @($L, ($L + 158), ($L + 378), ($L + 662)); $cwd = @(158, 220, 284, 186)
 $hd = @('기술', '무엇을 하나', '앱 어디에서 · 어떤 일을', '들어 있는 곳')
 for($c = 0; $c -lt 4; $c++){ T $sl ($cx[$c] + 12) 96 ($cwd[$c] - 12) 14 $hd[$c] 9 $DM -bold -spacing 0.5 | Out-Null }
@@ -375,7 +375,7 @@ $tech = @(
   @('jsQR', '휴대폰', '카메라 화면에서 QR 을 읽는 도구', '앱 안 「출입문 QR 스캔하고 시작」 — 읽은 문으로 출발점 확정', "js/vendor/jsqr.min.js\n← qrnav.js"),
   @('TensorFlow.js', '휴대폰 · 쓸 때만 받음', '폰에서 도는 AI · MobileNet v2\n사진 → 숫자 1,280개', '건의함 사진 판정 — 기준 5,752개와\n닮음 비교 → 「아마 여기예요」', "lib/tf · mobilenet · ai-model/\ndata/aivec.js ← sugai.js"),
   @('Tesseract.js', '휴대폰 · 쓸 때만 받음', '사진 속 글자 읽기(OCR)', '문 번호판 · 엘리베이터 층 표시를 먼저 읽음\n— 층 100장 중 97장', "lib/tess/ (영문 · 숫자)\n← sugai.js"),
-  @('Firebase', '서버', 'Firestore 저장소 + 익명 로그인\n+ 보안 규칙 130줄', '제보 사진 · 승인 사진 · 방 이름 저장\n하루 3번 제한 · 관리자 승인', "Firestore 6칸 ← sugdb.js\n서버/firestore.rules"),
+  @('Firebase', '서버', 'Firestore 저장소 + 익명 로그인\n+ 보안 규칙 141줄', '제보 사진 · 승인 사진 · 방 이름 저장\n하루 3번 제한 · 관리자 승인', "Firestore 6칸 ← sugdb.js\n서버/firestore.rules"),
   @('GitHub Actions', '개발 · 배포 (+ Pages)', '자동 검사 로봇 + 무료 웹 호스팅', 'main 에 올리면 검사 23가지 →\n통과해야 minjong0910.github.io 에 배포', ".github/workflows/\n검사.ps1 · tests/"))
 for($i = 0; $i -lt 8; $i++){
   $y = 114 + $i * 46
@@ -387,7 +387,7 @@ for($i = 0; $i -lt 8; $i++){
   T $sl ($cx[2] + 12) $y ($cwd[2] - 20) 42 $tech[$i][3] 9 $TX -anchor 3 -lines 1.15 | Out-Null
   T $sl ($cx[3] + 10) $y ($cwd[3] - 14) 42 $tech[$i][4] 8 '7FD8E8' -anchor 3 -lines 1.15 -font 'Consolas' | Out-Null
 }
-T $sl $L 486 $CWID 16 '직접 쓴 앱 코드 [[31개 파일 · 약 2만 4천 줄]]   ·   서버에서 도는 우리 코드 = 보안 규칙 [[130줄]]   ·   서버 · 배포 비용 [[0원]]' 10 $TX2 | Out-Null
+T $sl $L 486 $CWID 16 '직접 쓴 앱 코드 [[31개 파일 · 약 2만 4천 줄]]   ·   서버에서 도는 우리 코드 = 보안 규칙 [[141줄]]   ·   서버 · 배포 비용 [[0원]]' 10 $TX2 | Out-Null
 
 # ───────────────────────────────────────── 10 설계 ③ 길안내 엔진
 $sl = Page 4 '솔루션 설계 및 구현 · 길안내 엔진' '1,110가지 길을 [[손으로 쓰지 않았습니다]]' 55 '길안내 엔진입니다. 출발점은 네 문과 각 층의 엘리베이터 앞, 모두 열 가지입니다. 목적지는 호실 100곳, 화장실과 비상계단 다섯 곳씩, 그리고 크리에이티브 존까지 111곳입니다.\n열 곱하기 111, 1,110가지 길을 하나하나 쓰지 않았습니다. 문마다, 층마다 안내 절차를 작은 표 네 개로 정해 두면, 엔진이 건물 좌표를 보고 단계를 만들어 냅니다. 「오른쪽에서 몇 번째 방」도 좌표로 셉니다.\n오른쪽이 실제로 만들어진 예입니다. 층을 하나 더하려면 표에 숫자 하나만 넣으면 됩니다.'
@@ -642,13 +642,28 @@ T $sl $L 244 440 24 '질의응답 — 들어 주셔서 감사합니다' 17 $TX2 
 Box $sl $L 288 56 4 $CY | Out-Null
 T $sl $L 308 440 44 '**공대 3호관 길안내** · 팀 공3길\n김민종 · 손의윤 · 문성일   |   지도교수 강규창 교수님' 12 $TX2 -lines 1.6 | Out-Null
 T $sl $L 372 440 30 '지금, [[오른쪽 QR을 찍어 보십시오.]]' 18 $TX -bold | Out-Null
-T $sl $L 404 440 20 '설치도 가입도 없이 — 동문에서 시작하는 길안내가 바로 열립니다.' 12 $TX2 | Out-Null
-$ph20 = 400; $px20 = ($L + $CWID) - (PhoneW '화면00_표지.jpg' $ph20)
-$qh = 260; $qw = PhoneW 'QR_동문.png' $qh
-$sl.Shapes.AddPicture((Join-Path $IMG 'QR_동문.png'), 0, -1, ($px20 - 26 - $qw), 150, $qw, $qh) | Out-Null
-Phone $sl '화면00_표지.jpg' $px20 72 $ph20 -glow | Out-Null
-T $sl ($W - $L - 120) 509 120 14 ('{0:D2} / {1}' -f $script:pg, $TOTAL) 8.5 $DM -align 3 -font $NF | Out-Null
-SetNotes $sl 20 'Q&A' '들어 주셔서 감사합니다. 지금 오른쪽 동문 QR 을 휴대폰 카메라로 찍어 보십시오. 설치도 가입도 없이 바로 열립니다.\n질문 받겠습니다.'
+T $sl $L 404 440 20 '설치도 가입도 없이 — 찍는 순간 실시간 숫자가 올라갑니다.' 12 $TX2 | Out-Null
+#   2026-10-27 사용자 : 「실제로 우리 앱을 연 사람을 세서, 발표 자료에 붙여 그때 열어야 한다」
+#   → 가운데 = 발표장 QR(도구\QR_발표장_만들기.ps1 — 찍으면 site\live\go.html 이 숫자를 1 올리고 앱으로 넘김)
+#     오른쪽 = 「● LIVE」 카드 : 슬라이드 쇼에서 누르면 실시간 화면(https://minjong0910.github.io/live/)이 브라우저로 열린다
+$LIVEURL = 'https://minjong0910.github.io/live/'
+$qh = 280; $qw = PhoneW 'QR_발표장.png' $qh
+$sl.Shapes.AddPicture((Join-Path $IMG 'QR_발표장.png'), 0, -1, 468, 132, $qw, $qh) | Out-Null
+$lx = 684; $lw = $L + $CWID - $lx
+$lv = @()
+$lv += Box $sl $lx 96 $lw 344 $CARD $LN 1 14
+$lv += Pill $sl ($lx + 18) 116 64 20 '●  LIVE' $BG $PK 9 $PK -bold
+$lv += T $sl ($lx + 18) 150 ($lw - 36) 18 '지금 이 발표장에서' 11.5 $TX2
+$lv += T $sl ($lx + 18) 170 ($lw - 36) 80 '[[몇 명]]이\n열었을까요?' 26 $TX -bold -lines 1.15
+$lv += T $sl ($lx + 18) 262 ($lw - 36) 40 'QR을 찍는 순간\n숫자가 실시간으로 올라갑니다' 11 $TX2 -lines 1.4
+$btn = Box $sl ($lx + 18) 318 ($lw - 36) 44 $PK '' 1 8
+$tf = $btn.TextFrame; $tf.MarginLeft = 4; $tf.MarginRight = 4; $tf.VerticalAnchor = 3; $tf.WordWrap = -1
+Rich $tf.TextRange '▶  실시간 화면 열기' 13 'FFFFFF' $true $KF; $tf.TextRange.ParagraphFormat.Alignment = 2
+$lv += $btn
+$lv += T $sl ($lx + 18) 372 ($lw - 36) 30 '슬라이드 쇼에서 누르면 브라우저로 열려요\nF 전체 화면 · Esc 후 Alt+Tab 으로 돌아오기' 8 $DM -lines 1.35
+$lv += T $sl ($lx + 18) 410 ($lw - 36) 16 'minjong0910.github.io/live' 8.5 $CY -font 'Consolas'
+foreach($s in $lv){ $a = $s.ActionSettings.Item(1); $a.Action = 7; $a.Hyperlink.Address = $LIVEURL }T $sl ($W - $L - 120) 509 120 14 ('{0:D2} / {1}' -f $script:pg, $TOTAL) 8.5 $DM -align 3 -font $NF | Out-Null
+SetNotes $sl 20 'Q&A' '들어 주셔서 감사합니다. 지금 가운데 QR 을 휴대폰 카메라로 찍어 보십시오. (LIVE 를 눌러 실시간 화면 → F) 찍는 순간 숫자가 올라갑니다.\n질문 받겠습니다.'
 
 # ══ 저장 ══════════════════════════════════════════════════════
 if($pres.Slides.Count -ne $TOTAL){ throw ('쪽 수가 ' + $TOTAL + ' 이 아닙니다 : ' + $pres.Slides.Count) }

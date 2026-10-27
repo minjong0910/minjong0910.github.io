@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// 공대 3호관 길안내 — Firestore 보안 규칙 (2026-09-22 v84 · 2026-10-18 방 정보·하루 3번 추가)
+// 공대 3호관 길안내 — Firestore 보안 규칙 (2026-09-22 v84 · 2026-10-18 방 정보·하루 3번 · 2026-10-27 발표장 접속 수 추가)
 //
 // 원칙
 //   · 관리자는 "로그인한 사람"이 아니라 "admins 명단에 UID 가 있는 사람"이다.
@@ -122,6 +122,17 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // 발표장 실시간 접속 수 (2026-10-27) : 발표용 QR(site/live/go.html)로 앱을 연 폰이 1 씩만 올린다.
+    //   누가 열었는지는 남기지 않는다(숫자 n 과 마지막 시각 t 뿐). 누구나 읽고(발표 화면), 줄이거나 지울 수 없다.
+    match /live/{ev} {
+      allow read: if true;
+      allow create: if ev.matches('^[a-z0-9-]{1,20}$')
+        && request.resource.data.keys().hasOnly(['n', 't'])
+        && request.resource.data.n == 1 && request.resource.data.t == request.time;
+      allow update: if request.resource.data.keys().hasOnly(['n', 't'])
+        && request.resource.data.n == resource.data.n + 1 && request.resource.data.t == request.time;
+      allow delete: if false;
+    }
     // 그 밖의 모든 곳은 막는다
     match /{document=**} {
       allow read, write: if false;

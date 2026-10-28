@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>공대 3호관 길안내 — 발표장 실시간</title>
-<!-- 발표장 실시간 (2026-10-27 · 10-28 「지금 켜 둔 사람」으로) — 발표 자료 20쪽(Q&A)과 같은 모양.
-     20쪽의 「● LIVE」를 누르면 이 화면이 열린다 → F(또는 오른쪽 위 단추)로 전체 화면, 끝나면 Esc · Alt+Tab 으로 발표로 돌아간다.
+<!-- 발표장 실시간 (2026-10-27 · 10-28 「지금 켜 둔 사람」으로) — 발표 자료 1쪽(표지)과 같은 모양(10-28 사용자 : 「LIVE 를 첫 페이지로」).
+     1쪽의 「● LIVE」를 누르면 이 화면이 열린다 → F(또는 오른쪽 위 단추)로 전체 화면, 끝나면 Esc · Alt+Tab 으로 발표로 돌아간다.
      큰 숫자 = 지금 켜 둔 사람 : live/<발표>/here 에서 시각 t 가 40초 안인 칸의 수(서버가 세어 줌 — count 질의, 3초마다).
               발표장 QR 로 들어온 폰의 앱(js/app/live.js)이 켜 둔 동안 15초마다 t 를 새로 쓰고, 끄면 지운다.
      작은 숫자 = 지금까지 연 사람 : live/<발표> 의 n (한 폰 3시간에 한 번).
@@ -21,9 +21,11 @@
   .k{position:absolute;left:56px;top:132px;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--tx2);}
   .qa{position:absolute;left:56px;top:150px;font-family:'Bahnschrift',sans-serif;font-size:60px;font-weight:700;}
   .qa span{color:var(--cy);}
-  .t1{position:absolute;left:56px;top:244px;font-size:17px;color:var(--tx2);}
-  .bar{position:absolute;left:56px;top:288px;width:56px;height:4px;background:var(--cy);}
-  .t2{position:absolute;left:56px;top:306px;font-size:12px;line-height:1.75;color:var(--tx2);}
+  .ti{position:absolute;left:56px;top:150px;font-size:40px;font-weight:800;letter-spacing:-1px;}
+  .t1{position:absolute;left:56px;top:212px;font-size:15px;color:var(--tx2);}
+  .t1 span{color:var(--cy);font-weight:700;}
+  .bar{position:absolute;left:56px;top:262px;width:56px;height:4px;background:var(--cy);}
+  .t2{position:absolute;left:56px;top:282px;font-size:12px;line-height:1.75;color:var(--tx2);}
   .t2 b{color:var(--tx);}
   .t3{position:absolute;left:56px;top:370px;font-size:18px;font-weight:700;}
   .t3 span{color:var(--cy);}
@@ -62,11 +64,11 @@
 <div class="ctl"><button id="fs">전체 화면 (F)</button></div>
 <div class="slide" id="sl">
   <div class="blob"></div>
-  <div class="k">10&nbsp;&nbsp;&nbsp;&nbsp;Q &amp; A</div>
-  <div class="qa">Q <span>&amp;</span> A</div>
-  <div class="t1">질의응답 — 들어 주셔서 감사합니다</div>
+  <div class="k">군산대학교 공과대학 · 졸업작품 발표</div>
+  <div class="ti">공대 3호관 길안내</div>
+  <div class="t1">건물 안에서 길을 잃는 문제 해결을 위한 <span>새로운 제안</span></div>
   <div class="bar"></div>
-  <div class="t2"><b>공대 3호관 길안내</b> · 팀 공3길<br>김민종 · 손의윤 · 문성일&nbsp;&nbsp;|&nbsp;&nbsp;지도교수 강규창 교수님</div>
+  <div class="t2"><b>팀 공3길</b>&nbsp;&nbsp;&nbsp;김민종 · 손의윤 · 문성일<br><b>지도교수</b>&nbsp;&nbsp;&nbsp;강규창 교수님</div>
   <div class="t3">지금, <span>가운데 QR을 찍어 보십시오.</span></div>
   <div class="t4">설치도 가입도 없이 — 찍는 순간 오른쪽 숫자가 올라갑니다.</div>
   <img class="qr" id="qr" alt="발표장 QR">
@@ -80,7 +82,7 @@
     <div class="tot" id="tot">지금까지 연 사람 <b id="all">–</b>명</div><div class="note">앱을 끄면 숫자가 줄어요 · 누가 열었는지는 남기지 않습니다.</div>
   </div>
   <div class="st" id="st">서버에 연결하는 중…</div>
-  <div class="pg">20 / 20</div>
+
 </div>
 <script src="qr.js"></script>
 <script src="card.js"></script>

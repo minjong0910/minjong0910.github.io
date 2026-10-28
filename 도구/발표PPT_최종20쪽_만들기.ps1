@@ -205,9 +205,27 @@ T $sl $L 248 520 60 '건물 안에서 길을 잃는 문제 해결을 위한\n[[�
 Box $sl $L 322 56 4 $CY | Out-Null
 T $sl $L 344 520 44 '**팀 공3길**    김민종 · 손의윤 · 문성일\n**지도교수**    강규창 교수님' 12 $TX2 -lines 1.7 | Out-Null
 $pw = Phone $sl '화면00_표지.jpg' 690 58 424 -glow
-$qh = 190; $qw = PhoneW 'QR_동문.png' $qh
-$sl.Shapes.AddPicture((Join-Path $IMG 'QR_동문.png'), 0, -1, (690 - 22 - $qw), 292, $qw, $qh) | Out-Null
-SetNotes $sl 30 '표지' '안녕하십니까. 팀 공3길입니다. 저희 졸업작품은 「공대 3호관 길안내」, 건물 안에서 길을 잃는 문제를 해결하기 위한 새로운 제안입니다.\n오늘은 어떤 어려움을 어떤 과정으로 풀었는지, 실제 앱과 함께 말씀드리겠습니다.'
+#   2026-10-28 사용자 : 「실시간 화면 열기를 첫 페이지로 — 발표할 때 처음부터 청중이 얼마나 앱을 켜 두는지 보고 싶다」
+#   → QR 은 발표장 QR(찍으면 숫자 +1 · 앱은 동문에서 시작), 그 위(사용자가 흰 상자로 표시한 자리)에 20쪽에 있던 「● LIVE」 카드를 줄여서
+$LIVEURL = 'https://minjong0910.github.io/live/'
+$qh = 190; $qw = PhoneW 'QR_발표장.png' $qh; $qx = 690 - 22 - $qw
+$sl.Shapes.AddPicture((Join-Path $IMG 'QR_발표장.png'), 0, -1, $qx, 292, $qw, $qh) | Out-Null
+#   (변수 이름 주의 : PowerShell 은 대소문자를 안 가린다 — $cy 는 하늘색 $CY 를 덮는다)
+$kx = $qx - 8; $ky = 50; $kw = 668 - $kx; $kh = 236
+$lv = @()
+$lv += Box $sl $kx $ky $kw $kh $CARD $LN 1 10
+$lv += Pill $sl ($kx + 12) ($ky + 13) 60 17 '● LIVE' $BG $PK 7.5 $PK -bold
+$lv += T $sl ($kx + 12) ($ky + 37) ($kw - 24) 12 '지금 이 발표장에서' 8.5 $TX2
+$lv += T $sl ($kx + 12) ($ky + 53) ($kw - 24) 52 '[[몇 명]]이\n켜 뒀을까요?' 17 $TX -bold -lines 1.15
+$lv += T $sl ($kx + 12) ($ky + 116) ($kw - 24) 28 'QR을 찍으면 올라가고\n앱을 끄면 내려갑니다' 8 $TX2 -lines 1.4
+$btn = Box $sl ($kx + 12) ($ky + 152) ($kw - 24) 30 $PK '' 1 6
+$tf = $btn.TextFrame; $tf.MarginLeft = 2; $tf.MarginRight = 2; $tf.VerticalAnchor = 3; $tf.WordWrap = -1
+Rich $tf.TextRange '▶  실시간 화면 열기' 10 'FFFFFF' $true $KF; $tf.TextRange.ParagraphFormat.Alignment = 2
+$lv += $btn
+$lv += T $sl ($kx + 12) ($ky + 190) ($kw - 24) 22 '슬라이드 쇼에서 누르면 브라우저로 열려요\nF 전체 화면 · Esc 후 Alt+Tab 으로 돌아오기' 5.8 $DM -lines 1.35
+$lv += T $sl ($kx + 12) ($ky + 216) ($kw - 24) 12 'minjong0910.github.io/live' 6.5 $CY -font 'Consolas'
+foreach($s in $lv){ $a = $s.ActionSettings.Item(1); $a.Action = 7; $a.Hyperlink.Address = $LIVEURL }
+SetNotes $sl 30 '표지' '안녕하십니까. 팀 공3길입니다. 저희 졸업작품은 「공대 3호관 길안내」, 건물 안에서 길을 잃는 문제를 해결하기 위한 새로운 제안입니다.\n오늘은 어떤 어려움을 어떤 과정으로 풀었는지, 실제 앱과 함께 말씀드리겠습니다. (가운데 QR 을 찍어 보시라고 권하고, LIVE 로 숫자를 확인)'
 
 # ───────────────────────────────────────── 2 들어가며 : 혹시 이런 불편함, 겪어보셨나요?
 $sl = Page 1 '들어가며' '혹시 이런 불편함, [[겪어 보셨나요?]]' 55 '수업 5분 전, 처음 가 보는 강의실을 찾는다고 생각해 보십시오.\n엘리베이터 문이 열렸는데 왼쪽인지 오른쪽인지 모릅니다. 복도에 들어서도 그 끝에 강의실이 있는지 모릅니다. 벽에 안내도가 붙어 있어도, 내가 찾는 호실은 보이지 않습니다.\n세 장 모두 공대 3호관에서 저희가 직접 찍은 사진입니다. 지도 앱은 건물 앞에서 끝나고, 그다음은 지나가는 사람에게 묻는 수밖에 없습니다.'
@@ -642,28 +660,14 @@ T $sl $L 244 440 24 '질의응답 — 들어 주셔서 감사합니다' 17 $TX2 
 Box $sl $L 288 56 4 $CY | Out-Null
 T $sl $L 308 440 44 '**공대 3호관 길안내** · 팀 공3길\n김민종 · 손의윤 · 문성일   |   지도교수 강규창 교수님' 12 $TX2 -lines 1.6 | Out-Null
 T $sl $L 372 440 30 '지금, [[오른쪽 QR을 찍어 보십시오.]]' 18 $TX -bold | Out-Null
-T $sl $L 404 440 20 '설치도 가입도 없이 — 찍는 순간 실시간 숫자가 올라갑니다.' 12 $TX2 | Out-Null
-#   2026-10-27 사용자 : 「실제로 우리 앱을 연 사람을 세서, 발표 자료에 붙여 그때 열어야 한다」
-#   → 가운데 = 발표장 QR(도구\QR_발표장_만들기.ps1 — 찍으면 site\live\go.html 이 숫자를 1 올리고 앱으로 넘김)
-#     오른쪽 = 「● LIVE」 카드 : 슬라이드 쇼에서 누르면 실시간 화면(https://minjong0910.github.io/live/)이 브라우저로 열린다
-$LIVEURL = 'https://minjong0910.github.io/live/'
-$qh = 280; $qw = PhoneW 'QR_발표장.png' $qh
-$sl.Shapes.AddPicture((Join-Path $IMG 'QR_발표장.png'), 0, -1, 468, 132, $qw, $qh) | Out-Null
-$lx = 684; $lw = $L + $CWID - $lx
-$lv = @()
-$lv += Box $sl $lx 96 $lw 344 $CARD $LN 1 14
-$lv += Pill $sl ($lx + 18) 116 64 20 '●  LIVE' $BG $PK 9 $PK -bold
-$lv += T $sl ($lx + 18) 150 ($lw - 36) 18 '지금 이 발표장에서' 11.5 $TX2
-$lv += T $sl ($lx + 18) 170 ($lw - 36) 80 '[[몇 명]]이\n켜 뒀을까요?' 26 $TX -bold -lines 1.15
-$lv += T $sl ($lx + 18) 262 ($lw - 36) 40 'QR을 찍으면 올라가고\n앱을 끄면 내려갑니다' 11 $TX2 -lines 1.4
-$btn = Box $sl ($lx + 18) 318 ($lw - 36) 44 $PK '' 1 8
-$tf = $btn.TextFrame; $tf.MarginLeft = 4; $tf.MarginRight = 4; $tf.VerticalAnchor = 3; $tf.WordWrap = -1
-Rich $tf.TextRange '▶  실시간 화면 열기' 13 'FFFFFF' $true $KF; $tf.TextRange.ParagraphFormat.Alignment = 2
-$lv += $btn
-$lv += T $sl ($lx + 18) 372 ($lw - 36) 30 '슬라이드 쇼에서 누르면 브라우저로 열려요\nF 전체 화면 · Esc 후 Alt+Tab 으로 돌아오기' 8 $DM -lines 1.35
-$lv += T $sl ($lx + 18) 410 ($lw - 36) 16 'minjong0910.github.io/live' 8.5 $CY -font 'Consolas'
-foreach($s in $lv){ $a = $s.ActionSettings.Item(1); $a.Action = 7; $a.Hyperlink.Address = $LIVEURL }T $sl ($W - $L - 120) 509 120 14 ('{0:D2} / {1}' -f $script:pg, $TOTAL) 8.5 $DM -align 3 -font $NF | Out-Null
-SetNotes $sl 20 'Q&A' '들어 주셔서 감사합니다. 지금 가운데 QR 을 휴대폰 카메라로 찍어 보십시오. (LIVE 를 눌러 실시간 화면 → F) 찍는 순간 숫자가 올라갑니다.\n질문 받겠습니다.'
+T $sl $L 404 440 20 '설치도 가입도 없이 — 동문에서 시작하는 길안내가 바로 열립니다.' 12 $TX2 | Out-Null
+#   발표장 QR(1쪽과 같은 것 — 여기서 찍어도 실시간 숫자에 들어간다) + 앱 첫 화면. 「● LIVE」 카드는 2026-10-28 1쪽으로 옮김
+$ph20 = 400; $px20 = ($L + $CWID) - (PhoneW '화면00_표지.jpg' $ph20)
+$qh = 260; $qw = PhoneW 'QR_발표장.png' $qh
+$sl.Shapes.AddPicture((Join-Path $IMG 'QR_발표장.png'), 0, -1, ($px20 - 26 - $qw), 150, $qw, $qh) | Out-Null
+Phone $sl '화면00_표지.jpg' $px20 72 $ph20 -glow | Out-Null
+T $sl ($W - $L - 120) 509 120 14 ('{0:D2} / {1}' -f $script:pg, $TOTAL) 8.5 $DM -align 3 -font $NF | Out-Null
+SetNotes $sl 20 'Q&A' '들어 주셔서 감사합니다. 지금 오른쪽 QR 을 휴대폰 카메라로 찍어 보십시오. 설치도 가입도 없이 바로 열립니다.\n질문 받겠습니다.'
 
 # ══ 저장 ══════════════════════════════════════════════════════
 if($pres.Slides.Count -ne $TOTAL){ throw ('쪽 수가 ' + $TOTAL + ' 이 아닙니다 : ' + $pres.Slides.Count) }

@@ -79,7 +79,7 @@ try{
   [void][Runtime.InteropServices.Marshal]::ReleaseComObject($app)
 }
 if($Desktop){
-  $dk = Join-Path ([Environment]::GetFolderPath('Desktop')) '졸업작품'
+  $dk = [Environment]::GetFolderPath('Desktop')   # 2026-10-29 사용자 : 폴더 말고 바탕화면에 바로
   foreach($f in $pptx, $pdf, $txt){ Copy-Item $f $dk -Force }
-  '바탕화면\졸업작품 에도 놓음'
+  '바탕화면에도 놓음'
 }

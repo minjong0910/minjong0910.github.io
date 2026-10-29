@@ -701,8 +701,8 @@ $txt = Join-Path $OutDir ($NAME + ' 리허설 대본.txt')
 ('전체 {0}' -f (Mmss $script:tsum))
 foreach($p in $script:plan){ ('{0:D2} {1,3}초 (대본 {2,3}초) 누적 {3}  {4}' -f $p.n, $p.secs, $p.est, (Mmss $p.cum), $p.title) }
 if($Desktop){
-  $dk = Join-Path ([Environment]::GetFolderPath('Desktop')) '졸업작품'
+  $dk = [Environment]::GetFolderPath('Desktop')   # 2026-10-29 사용자 : 폴더 말고 바탕화면에 바로
   New-Item -ItemType Directory -Force $dk | Out-Null
   Copy-Item $pptx (Join-Path $dk ($NAME + '.pptx')) -Force; Copy-Item $txt (Join-Path $dk ($NAME + ' 리허설 대본.txt')) -Force
-  '바탕화면\졸업작품 에도 놓음'
+  '바탕화면에도 놓음'
 }

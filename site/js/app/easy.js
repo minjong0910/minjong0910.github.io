@@ -271,15 +271,18 @@ var EASY = (function(){
        그래서 켜는 화면과 함께 뜨지 않고(사용자 : 「동시에 켜지면 안 된다」), 앱도 그 사이에 비치지 않는다. 답하면 이 화면이 사라지고 앱이 보인다.
      · 켜는 화면이 아예 없으면(새 판으로 조용히 바꿔 단 직후 — b3nav_quiet) 앱이 뜨자마자 이 화면을 띄운다.
      (10-18 「켜는 화면보다 먼저」 · 10-20 오전 「켜는 화면 위에」는 둘 다 사용자가 아니라고 함) */
-  function ask(){
-    if(asked() || !phone || $('.ezAsk')) return;   // 이미 떠 있으면 또 띄우지 않는다
+  /* force : 켜는 화면(동영상)이 끝날 때는 이미 답한 사람에게도 묻는다(아래 askFirst) — 처음이 아니면 제목을 「쉬운 사용모드」로, 지금 상태와 함께 */
+  function ask(force){
+    if((!force && asked()) || !phone || $('.ezAsk')) return;   // 이미 떠 있으면 또 띄우지 않는다
+    var first = lsGet(KEY_ASK) !== '1';
     var a = document.createElement('div'); a.className = 'ezAsk';
     a.innerHTML = '<div class="card"><div class="ic">👆</div>'
-      + '<b>' + T('처음이세요?', 'First time here?') + '</b>'
+      + (first ? '<b>' + T('처음이세요?', 'First time here?') + '</b>'
+               : '<b>' + T('쉬운 사용모드', 'Easy mode') + ' <span class="now">' + (on ? T('지금 켜짐', 'now On') : T('지금 꺼짐', 'now Off')) + '</span></b>')
       + '<p>' + T('누를 곳을 하나씩 알려 드릴까요?', 'Shall we show you what to tap, one step at a time?') + '</p>'
       + '<div class="note">⚙️ ' + T('설정에서 언제든 켜고 끌 수 있어요', 'You can turn this on or off anytime in Settings') + '</div>'
-      + '<button class="big" type="button" data-a="1">' + T('네, 알려 주세요', 'Yes, show me') + '</button>'
-      + '<button class="big ghost" type="button" data-a="0">' + T('아니요, 혼자 할게요', "No thanks, I'll explore") + '</button></div>';
+      + '<button class="big" type="button" data-a="1">' + (first ? T('네, 알려 주세요', 'Yes, show me') : T('켜기 — 알려 주세요', 'On — show me')) + '</button>'
+      + '<button class="big ghost" type="button" data-a="0">' + (first ? T('아니요, 혼자 할게요', "No thanks, I'll explore") : T('끄기 — 혼자 할게요', "Off — I'll explore")) + '</button></div>';
     a.addEventListener('click', function(e){
       var b = e.target.closest('button[data-a]'); if(!b) return;
       /* 2026-11-03 사용자 「애니메이션이 끝난 뒤 쉬운 사용모드 켜기/끄기가 사라졌다」 — 켜는 화면을 넘기려고 연달아 누른 손가락이
@@ -289,12 +292,14 @@ var EASY = (function(){
     });
     phone.appendChild(a);
   }
-  /* boot.js 가 켜는 화면을 걷기 직전에 부른다 — 물을 게 있으면 이 화면을 깔아 두고 true, 없으면(이미 답함 · 켜 둠) false */
+  /* boot.js 가 켜는 화면을 걷기 직전에 부른다 — 이 화면을 깔아 두고 true, 안 물을 때 false.
+     2026-11-03 사용자 「애니메이션이 끝난 뒤 쉬운 사용모드 ON / OFF 가 안 뜬다」 : 예전(10/20~)에는 처음 한 번 · 출입문 QR 때만 물어서
+     홈 화면에서 다시 열면 안 떴다 → 이제 켜는 화면이 끝날 때마다 묻는다(켜 둔 사람도 — 끌 수 있게). 공유 링크로 연 창만 묻지 않는다(바로 길안내) */
   function askFirst(){
-    if(askFired || on || asked()) return false;
+    if(askFired || fromShare() || lsGet('b3nav_easy_noask') === '1') return false;   // b3nav_easy_noask : 시험 도구 전용(검사 화면을 가리지 않게)
     if(!phone) build();
     syncButtons();
-    ask();
+    ask(true);
     if(!$('.ezAsk')) return false;
     askFired = true;
     return true;

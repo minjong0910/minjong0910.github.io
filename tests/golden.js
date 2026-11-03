@@ -84,7 +84,7 @@ function waitApp(){
         setTimeout(poll, 300);
       })();
     }, {once:true});
-    try{ localStorage.setItem('b3nav_easy_asked2', '1'); }catch(e){}   /* 쉬운 사용모드 「처음이세요?」 창이 검사 화면을 가리지 않게 (2026-10-20 본 앱에 들어옴) */
+    try{ localStorage.setItem('b3nav_easy_asked2', '1'); localStorage.setItem('b3nav_easy_noask', '1'); }catch(e){}   /* 쉬운 사용모드 「처음이세요?」 창이 검사 화면을 가리지 않게(11/03 부터는 켜는 화면이 끝날 때마다 물어서 noask 도) (2026-10-20 본 앱에 들어옴) */
     F.src = APP + (APP.indexOf('?') >= 0 ? '&' : '?') + 'golden=1';
   });
 }

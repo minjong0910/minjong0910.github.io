@@ -1441,6 +1441,8 @@
   .ezAsk .note{display:inline-block;margin:0 0 1rem;padding:0.4375rem 0.875rem;border-radius:2rem;
     background:rgba(255,212,59,.16);border:1.5px solid #FFD43B;color:#FFD43B;font-size:0.9375rem;font-weight:800;line-height:1.4;}
   .ezAsk .big{margin-top:0.5rem;}
+  /* 처음이 아닌 사람 — 「쉬운 사용모드  지금 꺼짐」 (2026-11-03 : 켜는 화면이 끝날 때마다 묻는다) */
+  .ezAsk b .now{display:inline-block;vertical-align:middle;margin-left:.5rem;padding:.2rem .65rem;border-radius:2rem;font-size:.8rem;font-weight:800;color:#0B0E13;background:#FFD43B;}
   
   /* ── 이용안내 (howto.js) — 실제 화면 사진 + 번호 설명. 그림의 노란 번호 = 설명 번호 ── */
   #sguide h4 small{color:#7C8AA0;font-weight:600;font-size:0.75rem;}

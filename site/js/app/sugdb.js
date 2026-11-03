@@ -204,6 +204,7 @@ var SUGDB = (function(){
     dbState('load', '서버 연결 중…');
     ensure().then(function(){
       if(!curUser){ dbState('off', '로그인 필요'); return; }
+      cleanup();
       if(unsub) return;
       unsub = db.collection(COL_SUG).where('status', '==', 'pending')
         .onSnapshot(function(snap){
@@ -227,6 +228,29 @@ var SUGDB = (function(){
   function setStatus(fid, patch){
     return ensure().then(function(){ return db.collection(COL_SUG).doc(fid).update(patch); })
       ['catch'](function(e){ console.warn('setStatus 실패', e); });
+  }
+
+  /* ── 건의함 사진 지우기 (2026-11-03 개인정보 안내와 같게 — consent.js PV_TABLE) ──
+     쓰지 않기로 한 사진(거절) : 바로 지운다 · 확인하지 못한 사진 : 30일이 지나면 지운다.
+     관리자가 관리자 화면을 열 때 한 번 정리한다(앞으로 거절은 바로 지우므로, 예전에 「거절」로만 남겨 둔 것도 함께). */
+  function removeSug(fid){
+    return ensure().then(function(){ return db.collection(COL_SUG).doc(fid)['delete'](); })
+      ['catch'](function(e){ console.warn('removeSug 실패', e); });
+  }
+  var cleaned = false;
+  function cleanup(){
+    if(cleaned || !online()) return;
+    cleaned = true;
+    var cut = Date.now() - 30 * 24 * 3600 * 1000;
+    ensure().then(function(){
+      if(!curUser) { cleaned = false; return; }
+      db.collection(COL_SUG).where('status', '==', 'rejected').get().then(function(snap){
+        snap.forEach(function(d){ d.ref['delete']()['catch'](function(){}); });
+      })['catch'](function(e){ console.warn('거절 사진 정리 실패', e); });
+      db.collection(COL_SUG).where('status', '==', 'pending').get().then(function(snap){
+        snap.forEach(function(d){ var x = d.data(); if(typeof x.ts === 'number' && x.ts < cut) d.ref['delete']()['catch'](function(){}); });
+      })['catch'](function(e){ console.warn('30일 지난 제보 정리 실패', e); });
+    })['catch'](function(){ cleaned = false; });
   }
 
   /* ── 승인된 사진 배포 ── */
@@ -417,7 +441,7 @@ var SUGDB = (function(){
   }, 3000);
 
   return { ensure:ensure, online:online, pushOne:pushOne, retryUnsynced:retryUnsynced, prepSubmit:prepSubmit,
-           watchAdmin:watchAdmin, unwatchAdmin:unwatchAdmin, setStatus:setStatus,
+           watchAdmin:watchAdmin, unwatchAdmin:unwatchAdmin, setStatus:setStatus, removeSug:removeSug, cleanup:cleanup,
            publishPhoto:publishPhoto, loadPhotos:loadPhotos,
            get lastPubErr(){ return lastPubErr; },                   /* v71 */
            unpublishPhoto:unpublishPhoto, hidePhoto:hidePhoto, unhidePhoto:unhidePhoto,

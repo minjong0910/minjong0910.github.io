@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '125283befd0e';   // 파일 251개 · 16.6MB
+var VERSION = 'a40419becb58';   // 파일 254개 · 16.7MB
 var FILES = [
   ['3d/realistic.html','9524531d6645',79368],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','d609bc0029e9',124619],
+  ['css/app.css','01e26b2c47cf',149905],
   ['css/boot.css','b77d5cd2fa9b',1658],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
@@ -227,19 +227,20 @@ var FILES = [
   ['img/icon-192.png','a6893220bee4',5036],
   ['img/icon-512.png','de753e3f6802',14880],
   ['img/icon.svg','99ad3cbde680',2002],
-  ['index.html','11105e1dd19c',56884],
+  ['index.html','c580aac8a7bb',60661],
   ['js/app/aid.js','daa92696b9a7',32661],
   ['js/app/boot.js','57f3f42e5b9a',10615],
   ['js/app/building.js','95b01af4110d',23489],
-  ['js/app/easy.js','bfc1efc5acd1',23947],
+  ['js/app/consent.js','4fc692ab3585',42841],
+  ['js/app/easy.js','4fc1ffd1ea62',24293],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','bcc83dabb095',44185],
-  ['js/app/howto.js','8fe1d8dba7f1',18938],
+  ['js/app/howto.js','ca050ec6837d',19091],
   ['js/app/icons.js','4cb6e33c5920',21136],
   ['js/app/live.js','641f671b6fff',2510],
   ['js/app/overview3d.js','35ad3a4e8f9a',108858],
   ['js/app/photos.js','9afe2486d7e1',54222],
-  ['js/app/pwa.js','968cc93a717a',47453],
+  ['js/app/pwa.js','20560fccb6b0',49210],
   ['js/app/qrnav.js','1ab04e81bfc1',20800],
   ['js/app/resume.js','b2a9974631f1',8244],
   ['js/app/roadview-1f.js','14696e0f4c2a',46207],
@@ -251,12 +252,14 @@ var FILES = [
   ['js/app/roadview-stairs.js','7f992b896804',70498],
   ['js/app/roadview.js','e4ccae279c4a',133370],
   ['js/app/roomfix.js','1b886c300886',22082],
-  ['js/app/shell.js','70fc85e85fa3',20455],
+  ['js/app/share.js','3c5152b84955',17599],
+  ['js/app/shell.js','826833e00ee5',20555],
   ['js/app/start.js','4065777331b0',1505],
   ['js/app/story.js','19c2668151da',11859],
   ['js/app/sugai.js','510d8159462a',132345],
-  ['js/app/sugdb.js','b801511229ee',23438],
-  ['js/app/suggest.js','27c314357e60',51946],
+  ['js/app/sugdb.js','dd4a6d4201ea',24944],
+  ['js/app/suggest.js','6b14f3772fc9',52266],
+  ['js/app/timetable.js','98accc0c0187',36691],
   ['js/app/topmenu.js','0351042966f1',4319],
   ['js/app/ui.js','ed1b84452a9b',28617],
   ['js/app/view3d.js','27c66181cc45',51621],
@@ -442,4 +445,22 @@ self.addEventListener('message', function(e){
     SIM_OFFLINE = !!d.on;
     if(src) src.postMessage({type:'simOffline', on:SIM_OFFLINE});
   }
+});
+
+/* 수업 알림을 눌렀을 때 (2026-11-03, js/app/timetable.js) — 열려 있는 앱 창이 있으면 그 창을 앞으로 데려와 「그 강의실 길안내」를 알리고,
+   없으면 ?to=호실&tt=1 로 새로 연다(pwa.js 가 주소를 받아 둔다). */
+self.addEventListener('notificationclick', function(e){
+  var d = (e.notification && e.notification.data) || {};
+  e.notification.close();
+  if(!d.to) return;
+  e.waitUntil(self.clients.matchAll({type: 'window', includeUncontrolled: true}).then(function(list){
+    for(var i = 0; i < list.length; i++){
+      var c = list[i];
+      if(c.url && c.url.indexOf(self.registration.scope) === 0 && 'focus' in c){
+        c.postMessage({type: 'b3class', to: d.to, id: d.id});
+        return c.focus();
+      }
+    }
+    if(self.clients.openWindow) return self.clients.openWindow('./?to=' + encodeURIComponent(d.to) + '&tt=1' + (d.id ? '&cid=' + encodeURIComponent(d.id) : ''));
+  }));
 });

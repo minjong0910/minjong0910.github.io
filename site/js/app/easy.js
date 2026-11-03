@@ -30,7 +30,9 @@ var EASY = (function(){
   var forceAsk = false;
   try{ forceAsk = !!(typeof PWA !== 'undefined' && PWA.cameFromGate && PWA.cameFromGate()) && !/[?&]easy=[01](&|$)/.test(qs)
                   && sessionStorage.getItem('b3nav_easy_answered') !== '1'; }catch(e){}   // 같은 창에서 이미 답했으면(새 판으로 갈아탄 뒤 등) 또 묻지 않는다
-  function asked(){ return !forceAsk && lsGet(KEY_ASK) === '1'; }
+  /* 2026-11-03 : 길 공유 링크(?to=)로 연 분에게는 묻지 않는다 — 「누르기만 하면 바로 길안내」(share.js). 다음에 앱을 그냥 켜면 그때 묻는다 */
+  function fromShare(){ try{ return !!(typeof PWA !== 'undefined' && PWA.cameFromShare && PWA.cameFromShare()); }catch(e){ return false; } }
+  function asked(){ return (!forceAsk && lsGet(KEY_ASK) === '1') || fromShare(); }
 
   function ko(){ return typeof LANG === 'undefined' || LANG !== 'en'; }
   function T(k, e){ return ko() ? k : e; }

@@ -205,6 +205,24 @@ var PWA = (function(){
   var gateTaken = null;           // 가져간 문 — 「여기가 맞나요?」에서 아직 답하지 않았을 때 새로 고치면 넘겨준다
   function takeGate(){ var g = gateFromUrl; gateFromUrl = null; gateTaken = g; return g; }
 
+  /* ── ①-2 길 공유하기 링크 (2026-11-03, js/app/share.js) ── ?to=호실&from=문 · 수업 알림을 눌러 열린 것은 &tt=1&cid=수업
+     출입문 QR 과 같이 주소에서 떼어 두고, share.js 가 앱이 준비되면 한 번 가져간다(takeShare). 새 판으로 갈아탈 때는 넘겨준다(b3nav_share_carry). */
+  var shareFromUrl = null, shareTaken = null;
+  try{
+    var qs2 = location.search, tm = qs2.match(/[?&]to=(\d{5})(?:&|$)/);
+    if(tm){
+      var fm = qs2.match(/[?&]from=([A-Za-z]+)/), cm = qs2.match(/[?&]cid=(\d+)/);
+      shareFromUrl = {to: tm[1], from: fm ? fm[1].toUpperCase() : null, tt: /[?&]tt=1(&|$)/.test(qs2), cid: cm ? cm[1] : null};
+      var rest2 = qs2.replace(/([?&])(to|from|tt|cid)=[^&]*/g, '$1').replace(/[?&]+(?=[?&]|$)/g, '').replace(/^&/, '?');
+      history.replaceState(history.state, '', location.pathname + (rest2 === '?' ? '' : rest2) + location.hash);
+    }
+  }catch(e){}
+  try{
+    var shc = sessionStorage.getItem('b3nav_share_carry');
+    if(shc){ sessionStorage.removeItem('b3nav_share_carry'); if(!shareFromUrl){ var o = JSON.parse(shc); if(o && /^\d{5}$/.test(o.to)) shareFromUrl = o; } }
+  }catch(e){}
+  function takeShare(){ var s = shareFromUrl; shareFromUrl = null; if(s) shareTaken = s; return s; }
+
   /* ── 기기 알아보기 ── (검사가 여러 기기 흉내를 넣어 볼 수 있게 글자만 받는 함수로) */
   var UA = navigator.userAgent || '';
   function envOf(ua, platform, touch){
@@ -605,6 +623,9 @@ var PWA = (function(){
         /* 출입문 QR 로 막 들어와 아직 「여기가 맞나요?」에 답하지 않았으면 그 문을 넘겨준다 (위 ① 참고) */
         var carry = gateFromUrl || (id === 'sqrok' ? gateTaken : null);
         if(carry){ try{ sessionStorage.setItem('b3nav_gate_carry', carry); }catch(err){} }
+        /* 길 공유 링크로 막 들어와 아직 문을 고르는 중(#srcv)이면 그 링크도 넘겨준다 (위 ①-2) */
+        var shCarry = shareFromUrl || (id === 'srcv' ? shareTaken : null);
+        if(shCarry){ try{ sessionStorage.setItem('b3nav_share_carry', JSON.stringify(shCarry)); }catch(err){} }
         location.reload();
       }
       navigator.serviceWorker.addEventListener('controllerchange', function(){
@@ -642,6 +663,7 @@ var PWA = (function(){
 
   return {
     install:install, doPrompt:doPrompt, close:close, openChrome:openChrome, copyLink:copyLink, takeGate:takeGate, cameFromGate:function(){ return !!(gateFromUrl || gateTaken); }, peekGate:function(){ return gateFromUrl || gateTaken; }, sync:sync,
+    takeShare:takeShare, cameFromShare:function(){ return !!(shareFromUrl || shareTaken); }, peekShare:function(){ return shareFromUrl || shareTaken; },
     netInfo:netInfo, netSync:netSync, netOn:netOn,
     get offline(){ return {state:off.state, done:off.done, total:off.total, bytes:off.bytes, version:off.version, text:offText()}; },
     /* 저장해 둔 것이 지켜지는가 — 설정 화면과 검사(tests/pwa.html)가 본다 */

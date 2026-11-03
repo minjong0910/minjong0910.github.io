@@ -611,10 +611,12 @@ function sugReject(id){
   var s = sugFind(id);
   if(!s) return;
   s.status = 'rejected'; s.handledTs = Date.now();
+  /* 2026-11-03 : 쓰지 않기로 한 사진은 서버에서 바로 지운다 (이용안내 「동의 · 권한 안내」에 그렇게 적었다 — consent.js) */
   if(typeof SUGDB !== 'undefined' && s.fid){
-    SUGDB.setStatus(s.fid, {status:'rejected', handledTs:s.handledTs});
+    if(SUGDB.removeSug) SUGDB.removeSug(s.fid); else SUGDB.setStatus(s.fid, {status:'rejected', handledTs:s.handledTs});
     SUG_REMOTE = SUG_REMOTE.filter(function(x){ return x.id!==id; });
   }
+  if(s.u && s.u.indexOf('data:') === 0) s.u = '';   // 이 폰에 남은 기록에서도 사진은 뺀다
   sugSaveQueue();
   sugAdminRender();
 }

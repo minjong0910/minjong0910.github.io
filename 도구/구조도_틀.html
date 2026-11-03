@@ -352,26 +352,29 @@
   <div class="gbox">
     <div class="gt">① 켜기</div><div class="gs">앱이 시작될 때 · 4개</div>
     <div class="grid">
-      <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">655줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
+      <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">677줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
       <button class="b p" data-id="f_boot"><span class="n">boot.js</span><span class="d">170줄 · 첫 화면 연출</span></button>
       <button class="b p" data-id="f_start"><span class="n">start.js</span><span class="d">32줄 · 글꼴 기다렸다 시작</span></button>
-      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">446줄 · 오프라인 저장소</span></button>
+      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">467줄 · 오프라인 저장소</span></button>
     </div>
   </div>
 
   <div class="gbox">
-    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 10개</div>
+    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 13개</div>
     <div class="grid">
       <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">378줄 · 화면 전환 go()</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
-      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">740줄 · 화면 21개</span></button>
-      <button class="b p" data-id="f_easy"><span class="n">easy.js</span><span class="d">322줄 · 쉬운 사용모드</span></button>
-      <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">188줄 · 사진 이용안내</span></button>
+      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">777줄 · 화면 24개</span></button>
+      <button class="b p" data-id="f_easy"><span class="n">easy.js</span><span class="d">324줄 · 쉬운 사용모드</span></button>
+      <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">189줄 · 사진 이용안내</span></button>
       <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">219줄 · 사진 확대</span></button>
       <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">64줄 · ☰ 메뉴 · 밝은 화면</span></button>
       <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">135줄 · 길안내 이어 하기</span></button>
       <button class="b p" data-id="f_story"><span class="n">story.js</span><span class="d">168줄 · 길안내 · 도착 화면 (인스타 + 공항)</span></button>
       <button class="b p" data-id="f_live"><span class="n">live.js</span><span class="d">34줄 · 발표장 「지금 켜 둔 사람」</span></button>
+      <button class="b p" data-id="f_consent"><span class="n">consent.js</span><span class="d">400줄 · 처음 켤 때 동의 · 기능별 허용</span></button>
+      <button class="b p" data-id="f_share"><span class="n">share.js</span><span class="d">218줄 · 길 공유하기 (링크)</span></button>
+      <button class="b p" data-id="f_timetable"><span class="n">timetable.js</span><span class="d">407줄 · 내 시간표 · 수업 알림</span></button>
     </div>
   </div>
 
@@ -399,8 +402,8 @@
     <div class="gt" style="color:var(--hot)">⑤ AI 와 제보 — 특허로 내려는 부분</div><div class="gs">4개</div>
     <div class="grid">
       <button class="b star" data-id="margin"><span class="n">sugai.js</span><span class="d">2,351줄 · AI 판정 · 격차</span></button>
-      <button class="b p" data-id="f_suggest"><span class="n">suggest.js</span><span class="d">1,022줄 · 건의함 · 관리자</span></button>
-      <button class="b s" data-id="f_sugdb"><span class="n">sugdb.js</span><span class="d">470줄 · 서버와 통신 (유일)</span></button>
+      <button class="b p" data-id="f_suggest"><span class="n">suggest.js</span><span class="d">1,024줄 · 건의함 · 관리자</span></button>
+      <button class="b s" data-id="f_sugdb"><span class="n">sugdb.js</span><span class="d">494줄 · 서버와 통신 (유일)</span></button>
       <button class="b p" data-id="f_aid"><span class="n">aid.js</span><span class="d">641줄 · AI 자료집 화면</span></button>
     </div>
   </div>
@@ -680,7 +683,7 @@ f_start:{t:'start.js — 글꼴을 기다렸다 시작',z:'p',zl:'폰 안에서 
 
 f_shell:{t:'shell.js — 화면 전환과 상태',z:'p',zl:'폰 안에서 돈다',
  kid:'지금 어느 화면을 보여 줄지 정하는 <b>리모컨</b>이에요.',
- why:'보통 웹앱은 화면을 바꿀 때 <b>서버에서 새 화면을 받아옵니다.</b> 그러면 인터넷이 없을 때 화면이 안 바뀝니다.<br>그래서 <b>화면 21개를 미리 다 넣어 두고</b> 보여 줄 것만 켜는 방식으로 했습니다. 화면을 바꿀 때 인터넷을 전혀 안 씁니다.',
+ why:'보통 웹앱은 화면을 바꿀 때 <b>서버에서 새 화면을 받아옵니다.</b> 그러면 인터넷이 없을 때 화면이 안 바뀝니다.<br>그래서 <b>화면 24개를 미리 다 넣어 두고</b> 보여 줄 것만 켜는 방식으로 했습니다. 화면을 바꿀 때 인터넷을 전혀 안 씁니다.',
  where:['앱의 <b>모든 화면 전환</b>','<b>뒤로가기</b> 버튼'],
  how:'라우터가 없습니다. <code>go(id)</code> 가 <code>.on</code> 클래스만 옮깁니다. 앱 전체의 상태는 사실상 <b>변수 다섯 개</b>뿐입니다(목적지 · 현재층 · 안내단계 · 단계번호 · 출발층).',
  tech:['바닐라 JS','전역 변수 상태','DOM 클래스 토글','history.pushState'],
@@ -696,11 +699,11 @@ f_ui:{t:'ui.js — 한/영 전환과 검색',z:'p',zl:'폰 안에서 돈다',
  tech:['data-* 속성 i18n','부분 문자열 검색','localStorage (최근 검색)'],
  src:[['site/js/app/ui.js','한/영 · 검색 전부']]},
 
-f_index:{t:'index.html — 화면 21개가 한 파일에',z:'p',zl:'폰 안에서 돈다',
+f_index:{t:'index.html — 화면 24개가 한 파일에',z:'p',zl:'폰 안에서 돈다',
  kid:'앱의 <b>모든 화면</b>이 이 한 장에 다 들어 있어요.',
  why:'화면마다 파일을 나누는 게 보통이지만, 그러면 <b>화면을 바꿀 때마다 파일을 받아야</b> 합니다. 인터넷이 없으면 못 바꿉니다.<br>그래서 한 파일에 전부 넣었습니다. 파일이 길어지는 건 단점이지만, <b>오프라인이 더 중요</b>했습니다.',
  where:['앱 전체 — <b>모든 화면이 여기 있습니다</b>'],
- how:'화면 21개가 <code>&lt;section class="screen"&gt;</code> 로 들어 있습니다. 화면 전환에 네트워크 요청이 <b>0건</b>입니다.',
+ how:'화면 24개가 <code>&lt;section class="screen"&gt;</code> 로 들어 있습니다. 화면 전환에 네트워크 요청이 <b>0건</b>입니다.',
  tech:['순수 HTML','화면 = section 21개','요청 없는 화면 전환'],
  src:[['site/index.html','앱의 모든 화면'],['site/css/app.css','앱 디자인 전부']]},
 
@@ -741,6 +744,27 @@ f_story:{t:'story.js — 길안내 · 도착 화면 (인스타 감성 + 공항 �
  how:'guide.js 의 render6 · startGuide 와 photos.js 의 phFill 을 감싸서 위에 얹기만 합니다 — 단계를 만드는 표 · 이어 하기 · 쉬운 사용모드는 그대로이고, 예전 글자 칸(#ar · #ins · #stepno)은 감춘 채 남겨 둡니다. 밝은 화면에서도 이 두 화면은 사진 + 표지판 그대로입니다.',
  tech:['CSS transform(scale 2 · transform-origin)','pointer 이벤트(누르기 · 밀기)','MutationObserver'],
  src:[['site/js/app/story.js','위 · 아래 칸 · 누르기 · 밀기'],['site/css/app.css','「인스타 감성 + 공항 표지판」 묶음'],['site/js/app/photos.js','문 · 엘리베이터 안 사진 이름표']]},
+f_consent:{t:'consent.js — 처음 켤 때 동의 · 기능별 허용 · 건의함 사진 개인정보',z:'p',zl:'폰 안에서 돈다',
+ kid:'앱을 처음 켜면 초록 글 다음에 「시작하기 전에 확인해 주세요」가 한 번 나와요. 한 번 동의하면 다시 묻지 않아요. 카메라 · 알림을 그때 허용하지 않았으면, 그 기능을 켤 때만 「허용할까요?」를 물어요.',
+ why:'2026-11-03 사용자가 눌러 보는 견본을 열 번 고쳐 정한 순서 — 「하나하나 켤 때마다 묻는 건 번거롭다, 처음에 한 번에」 · 「처음에 동의했으면 다시 묻지 말 것」 · 「QR 이면 QR 설명만, 건의함이면 건의함 설명만」 · 「설정에 동의 관리 줄은 두지 말고 이용안내 마지막 쪽에」.',
+ where:['초록 글 → <b>동의 화면</b>(필수 : 이용 안내 · 이 폰에 저장 / 선택 : 건의함 사진 개인정보 · 카메라 · 알림, 항목마다 「보기 ▾」) → 쉬운 사용모드 「처음이세요?」','처음에 허용 안 한 폰만 : 출입문 QR 스캔 · 건의함 📷 칸 · 수업 알림을 켜는 순간 앱이 묻는 창 [허용 안 함][허용]','건의함 : 사진 칸 아래 한 줄 · 맨 아래 「올린 사진 지워 달라고 하기」(글만) → 관리자 화면에 「사진 삭제 요청」 카드','☰ → 설정 → 이용안내 <b>12쪽 「동의 · 권한 안내」</b>'],
+ how:'easy.js 의 askFirst · busy 를 감싸 동의 화면을 「처음이세요?」 위(z 945)에 깝니다. 카메라는 getUserMedia 를 켜자마자 끄고, 알림은 Notification.requestPermission — 둘 다 누른 그 순간에 불러야 휴대폰 창이 뜹니다. 공유 링크(?to=)로 연 분에게는 묻지 않습니다(누르기만 하면 바로 길안내). 거절한 사진은 서버에서 바로 지우고, 확인하지 못한 사진은 관리자 화면을 열 때 30일 지난 것을 지웁니다(sugdb.js).',
+ tech:['localStorage','getUserMedia','Notification.requestPermission','MutationObserver'],
+ src:[['site/js/app/consent.js','동의 화면 · 허용 묻기 · 건의함 · 이용안내 12쪽'],['site/js/app/sugdb.js','거절 즉시 삭제 · 30일 정리'],['site/css/app.css','「처음 켤 때 동의 · 길 공유하기 · 내 시간표」 묶음']]},
+f_share:{t:'share.js — 길 공유하기',z:'p',zl:'폰 안에서 돈다',
+ kid:'설정 → 길 공유하기에서 호실 번호만 넣으면 카카오톡 · 문자로 「여기로 찾아오세요」 링크를 보내요. 받는 분은 누르기만 하면 바로 사진 길안내가 시작돼요.',
+ why:'2026-11-03 사용자 — 부모님 · 손님께 「몇 호로 와」라고만 하면 건물 안에서 헤맨다. 앱 설치나 번호 입력 없이 링크 하나로. 첫 화면은 단추가 많아 설정에 두었다(사용자).',
+ where:['보내는 분 : 호실(숫자판 · 앞자리로 후보) · 들어올 문 사진 넷 또는 「받는 분이 고르게」 · 보낼 글 미리 보기 · [카카오톡 · 문자로 보내기](휴대폰 공유 창) · [링크만 복사하기]','받는 분 : <code>minjong0910.github.io/?to=13324&amp;from=EAST</code> → 초록 글 → 길안내 1단계(「보내 주신 길」 카드 · 3호관 지도) · 문이 없으면 문 사진 고르기 · 도착하면 「보낸 분께 도착했어요 알리기」'],
+ how:'pwa.js 가 출입문 QR(?gate=)처럼 주소에서 ?to= 를 떼어 두고(새 판으로 갈아탈 때도 넘겨줌), 앱이 준비되면 출입문을 정한 뒤 openTarget · startGuide 로 길안내를 깔아 둡니다(resume.js 이어 보기와 같은 길). 카톡 미리 보기는 index.html 의 og 태그.',
+ tech:['navigator.share','클립보드','history.replaceState','Open Graph'],
+ src:[['site/js/app/share.js','보내기 · 받기 · 길안내 위 카드'],['site/js/app/pwa.js','주소 ?to= 받아 두기']]},
+f_timetable:{t:'timetable.js — 내 시간표 · 바로 길안내 · 수업 알림',z:'p',zl:'폰 안에서 돈다 · 이 폰에만 저장',
+ kid:'내 시간표를 넣어 두면, 수업 시간에 앱을 켜는 순간 그 강의실 길안내가 바로 떠요. 수업 시작 전에 고른 소리로 알림도 와요.',
+ why:'2026-11-03 사용자 — 에브리타임 같은 시간표를 앱 안에. 「−, + 말고 칸을 누르면 숫자판만」 · 「5분 단위 말고 직접」 · 「색은 무지개 전부」 · 「소리는 사용자가 직접 고르게」. 에브리타임 연동은 하지 않기로(사용자).',
+ where:['☰ → 내 시간표 · 설정 → 내 시간표 : 월~금 칸, 빈 곳을 누르면 넣기 · 수업을 누르면 고치기(과목 · 호실 확인 · 요일 · 시:분 숫자판 · 수업마다 알림 · 무지개 14색 + 막대 + 직접)','위 두 칸 : 바로 길안내(주로 들어오는 문 · 수업 [40]분 전부터 시작하고 [10]분 뒤까지) · 수업 알림(몇 분 전 · 소리 7가지 듣기 · 크기 · 진동 · 실제 알림 받아 보기)','앱을 켰을 때 : 그 시간이면 길안내 1단계 + 「09:00 과목 · 20분 남음 / 출발 바꾸기 · 다른 곳」, 앞 수업이 막 끝났으면 그 층 엘리베이터 앞에서 출발, 아니면 첫 화면 「오늘 다음 수업」 카드'],
+ how:'시간표는 localStorage 에만 둡니다. 알림은 앱이 열려 있는 동안 20초마다 시각을 보고 서비스 워커(sw.js)의 showNotification 으로 띄우며(안드로이드 크롬은 페이지에서 직접 못 띄움), 누르면 sw.js 의 notificationclick 이 앱에 알려 그 강의실 길안내로 갑니다. 앱을 닫아도 울리게 하려면 서버 알림(푸시)이 따로 있어야 해서 지금은 하지 않습니다.',
+ tech:['localStorage','inputmode="numeric"','Web Audio(소리 직접 만들기)','ServiceWorkerRegistration.showNotification','navigator.vibrate'],
+ src:[['site/js/app/timetable.js','시간표 · 바로 길안내 · 알림'],['site/sw.js','알림을 눌렀을 때'],['site/js/app/share.js','길안내 열기(route) · 위 카드']]},
 
 f_easy:{t:'easy.js — 쉬운 사용모드',z:'p',zl:'폰 안에서 돈다',
  kid:'켜 두면 화면마다 <b>여기를 누르세요</b> 하고 노란 테두리와 손가락으로 알려 줘요.',
@@ -753,10 +777,10 @@ f_easy:{t:'easy.js — 쉬운 사용모드',z:'p',zl:'폰 안에서 돈다',
 f_howto:{t:'howto.js — 사진으로 보는 이용안내',z:'p',zl:'폰 안에서 돈다',
  kid:'설정 → 이용안내가 <b>실제 앱 화면 사진</b>에 노란 번호표를 붙여 쉽게 알려 줘요.',
  why:'글로만 된 이용안내는 읽히지 않았습니다. 사용자 요청 : 실제 우리 앱 화면 사진과 함께 더 자세하고 쉽게.',
- where:['☰ → 설정 → 이용안내 <b>11쪽</b>','그림을 누르면 크게(zoom.js)'],
+ where:['☰ → 설정 → 이용안내 <b>12쪽</b>(마지막 「동의 · 권한 안내」는 consent.js 가 붙임)','그림을 누르면 크게(zoom.js)'],
  how:'ui.js 의 이용안내(GUIDE_PAGES · guideRender)를 갈아 끼웁니다. 그림 site/guide/g01~g12.jpg 는 실제 앱을 폰 크기(375×812)로 찍고 번호표를 붙인 것 — 화면이 바뀌면 다시 찍어야 합니다.',
  tech:['실제 화면 사진(헤드리스 Edge)','JPG 540px'],
- src:[['site/js/app/howto.js','11쪽 내용 · 그리기'],['site/js/app/ui.js','원래 이용안내']]},
+ src:[['site/js/app/howto.js','11쪽 내용 · 그리기 (12쪽은 consent.js)'],['site/js/app/ui.js','원래 이용안내']]},
 
 f_photos:{t:'photos.js — 장소 사진 — 파일 169개',z:'p',zl:'폰 안에서 돈다',
  kid:'각 방이 <b>실제로 어떻게 생겼는지</b> 사진으로 보여 줘요.',

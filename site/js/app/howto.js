@@ -162,6 +162,7 @@ guideRender = function(idx){
     }).join('') + '</ol>';
   }
   var h = '';
+  if(p.html) h += (typeof p.html === 'function') ? p.html() : p.html;   // 맨 끝 「동의 · 권한 안내」(consent.js) — 글을 통째로 준다
   if(p.lead) h += '<div class="hwLead">' + p.lead[L] + '</div>';
   if(p.img) h += shot(p.img, p.t[L]) + list(p.items);
   (p.secs || []).forEach(function(s){

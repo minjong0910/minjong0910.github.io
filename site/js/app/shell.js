@@ -83,7 +83,7 @@ function spawnParticles(containerId){
 }
 
 /* ========== 화면 전환 ========== */
-var SCREENS=['s1','s2','scat','s3','s4','s5','s6','s7','sph','sset','sguide','sfav','ssug','sadmin','sphmgr','spwgate','phsort','sqr','sqrok','saidat','spick'];
+var SCREENS=['s1','s2','scat','s3','s4','s5','s6','s7','sph','sset','sguide','sfav','ssug','sadmin','sphmgr','spwgate','phsort','sqr','sqrok','saidat','spick','stt','salm','srcv'];   /* stt 내 시간표 · salm 수업 알림 · srcv 받은 길 (2026-11-03) */
 /* ========== '여기가 맞나요?' 화면의 실사 3D ==========
    군산대 공대 3호관 실사 3D 페이지(three.js 포함)를 base64로 통째로 품고 있다가,
    iframe의 srcdoc으로 풀어서 띄운다. 외부 파일·인터넷 연결이 필요 없다.

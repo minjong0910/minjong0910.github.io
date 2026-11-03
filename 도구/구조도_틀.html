@@ -373,7 +373,7 @@
       <button class="b p" data-id="f_story"><span class="n">story.js</span><span class="d">168줄 · 길안내 · 도착 화면 (인스타 + 공항)</span></button>
       <button class="b p" data-id="f_live"><span class="n">live.js</span><span class="d">34줄 · 발표장 「지금 켜 둔 사람」</span></button>
       <button class="b p" data-id="f_consent"><span class="n">consent.js</span><span class="d">398줄 · 처음 켤 때 동의 · 기능별 허용</span></button>
-      <button class="b p" data-id="f_share"><span class="n">share.js</span><span class="d">218줄 · 길 공유하기 (링크)</span></button>
+      <button class="b p" data-id="f_share"><span class="n">share.js</span><span class="d">233줄 · 길 공유하기 (링크)</span></button>
       <button class="b p" data-id="f_timetable"><span class="n">timetable.js</span><span class="d">407줄 · 내 시간표 · 수업 알림</span></button>
     </div>
   </div>
@@ -753,8 +753,8 @@ f_consent:{t:'consent.js — 처음 켤 때 동의 · 기능별 허용 · 건의
  src:[['site/js/app/consent.js','동의 화면 · 허용 묻기 · 건의함 · 이용안내 마지막 쪽'],['site/js/app/sugdb.js','거절 즉시 삭제 · 30일 정리'],['site/css/app.css','「처음 켤 때 동의 · 길 공유하기 · 내 시간표」 묶음']]},
 f_share:{t:'share.js — 길 공유하기',z:'p',zl:'폰 안에서 돈다',
  kid:'설정 → 길 공유하기에서 호실 번호만 넣으면 카카오톡 · 문자로 「여기로 찾아오세요」 링크를 보내요. 받는 분은 누르기만 하면 바로 사진 길안내가 시작돼요.',
- why:'2026-11-03 사용자 — 부모님 · 손님께 「몇 호로 와」라고만 하면 건물 안에서 헤맨다. 앱 설치나 번호 입력 없이 링크 하나로. 첫 화면은 단추가 많아 설정에 두었다(사용자).',
- where:['보내는 분 : 호실(숫자판 · 앞자리로 후보) · 들어올 문 사진 넷 또는 「받는 분이 고르게」 · 보낼 글 미리 보기 · [카카오톡 · 문자로 보내기](휴대폰 공유 창) · [링크만 복사하기]','받는 분 : <code>minjong0910.github.io/?to=13324&amp;from=EAST</code> → 켜는 화면 → 길안내 1단계(「보내 주신 길」 카드 · 3호관 지도) · 문이 없으면 문 사진 고르기 · 도착하면 「보낸 분께 도착했어요 알리기」'],
+ why:'2026-11-03 사용자 — 부모님 · 손님께 「몇 호로 와」라고만 하면 건물 안에서 헤맨다. 앱 설치나 번호 입력 없이 링크 하나로. 첫 화면은 단추가 많아 설정에 두었다(사용자). 같은 날 사용자 「정해진 말은 좋지만 보내는 사람이 원하는 대로 지우거나 고칠 수 있게」 → 보낼 글을 고쳐 쓰는 칸으로(링크는 따로 붙여 깨지지 않게).',
+ where:['보내는 분 : 호실(숫자판 · 앞자리로 후보) · 들어올 문 사진 넷 또는 「받는 분이 고르게」 · 보낼 글(정해진 글이 들어 있고 눌러서 지우거나 고쳐 씀 · 「↺ 처음 글로」 · 링크는 저절로 붙음) · [카카오톡 · 문자로 보내기](휴대폰 공유 창) · [링크만 복사하기]','받는 분 : <code>minjong0910.github.io/?to=13324&amp;from=EAST</code> → 켜는 화면 → 길안내 1단계(「보내 주신 길」 카드 · 3호관 지도) · 문이 없으면 문 사진 고르기 · 도착하면 「보낸 분께 도착했어요 알리기」'],
  how:'pwa.js 가 출입문 QR(?gate=)처럼 주소에서 ?to= 를 떼어 두고(새 판으로 갈아탈 때도 넘겨줌), 앱이 준비되면 출입문을 정한 뒤 openTarget · startGuide 로 길안내를 깔아 둡니다(resume.js 이어 보기와 같은 길). 카톡 미리 보기는 index.html 의 og 태그.',
  tech:['navigator.share','클립보드','history.replaceState','Open Graph'],
  src:[['site/js/app/share.js','보내기 · 받기 · 길안내 위 카드'],['site/js/app/pwa.js','주소 ?to= 받아 두기']]},

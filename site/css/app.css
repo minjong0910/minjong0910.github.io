@@ -1578,7 +1578,6 @@
 .syI{width:1.1em;height:1.1em;vertical-align:-0.18em;flex:none;}
 .tmList .ln .syI{width:1.25rem;height:1.25rem;margin:0;color:#00E5FF;}
 .tmMenu.tmOpen .tmList .ln:nth-child(5){transition-delay:calc(var(--tmDur) * .75);}
-.syNew{margin-left:auto;font-style:normal;font-size:0.68rem;font-weight:900;background:#FF2E88;color:#fff;padding:0.1rem 0.4rem;border-radius:1rem;}
 .sySetSub{display:block;font-size:0.72rem;color:#7C8AA0;font-weight:600;margin-top:0.1rem;}
 .syDimBg{position:absolute;inset:0;background:rgba(2,4,8,.66);z-index:70;animation:syFade .2s;}
 @keyframes syFade{from{opacity:0}to{opacity:1}}
@@ -1649,6 +1648,19 @@ textarea.syInp{resize:none;line-height:1.5;}
 .syMsg{background:#0B1118;border:1.5px solid #26354A;border-radius:0.7rem;padding:0.65rem 0.75rem;font-size:0.82rem;line-height:1.55;color:#DCEBF7;white-space:pre-line;}
 .syMsg u{color:#7FCFEF;text-decoration:none;font-weight:700;word-break:break-all;}
 .syMsg.empty{color:#6F8296;}
+/* 보낼 글 — 고쳐 쓰는 글상자 + 고칠 수 없는 링크 줄 (2026-11-03 사용자). 글자 16px : 아이폰은 그보다 작으면 누를 때 화면이 확대된다 */
+.syMsgLab{display:flex;align-items:center;gap:0.3rem;}
+.syMsgLab small{color:#6F8296;font-weight:600;font-size:0.72rem;}
+.syReset{margin-left:auto;background:transparent;border:1px solid #33404F;color:#9FB2C8;border-radius:1rem;padding:0.15rem 0.6rem;font-family:inherit;font-size:0.75rem;font-weight:800;cursor:pointer;}
+.syMsgBox{padding:0;white-space:normal;overflow:hidden;}
+.syMsgBox:focus-within{border-color:#00E5FF;box-shadow:0 0 0 2px rgba(0,229,255,.25);}
+.syMsgTx{display:block;width:100%;min-height:6.4rem;background:transparent;border:0;outline:none;resize:none;padding:0.65rem 0.75rem 0.4rem;font-family:inherit;font-size:16px;line-height:1.5;color:#DCEBF7;}
+.syMsgTx::placeholder{color:#6F8296;}
+.syMsgLink{display:flex;align-items:center;gap:0.35rem;padding:0.45rem 0.75rem 0.6rem;border-top:1px dashed #26354A;font-size:0.78rem;}
+.syMsgLink svg{width:0.9rem;height:0.9rem;flex:none;color:#7FCFEF;}
+.syMsgLink u{flex:1;min-width:0;}
+.syMsgLink small{flex:none;color:#6F8296;font-size:0.7rem;}
+.syMsgBox.empty .syMsgLink{display:none;}
 
 /* 받은 길 : 문 고르기 (공항 표지판 모양) */
 #srcv{padding:calc(2.4rem + env(safe-area-inset-top)) 0.9rem calc(0.9rem + env(safe-area-inset-bottom)) !important;background:#0F0F10;color:#fff;text-align:left;word-break:keep-all;}
@@ -1816,6 +1828,7 @@ html.lt .sySheet .sub b,html.lt .sySheet li b{color:#0F1B2D;}
 html.lt .sySheet .lab,html.lt .sySheet ul{color:#24364D;}
 html.lt .sySheet.syPage{background:transparent;}
 html.lt .syInp,html.lt .syMsg,html.lt .syCk{background:#F3F7FB;border-color:#B9C6D6;color:#0F1B2D;}
+html.lt .syMsgTx{color:#0F1B2D;} html.lt .syMsgLink{border-top-color:#B9C6D6;} html.lt .syReset{border-color:#B9C6D6;color:#3A4A5C;}
 html.lt .syCk.on{background:#E6F6EC;border-color:#0E8A45;}
 html.lt .syCk.on .box{background:#0E8A45;border-color:#0E8A45;color:#fff;}
 html.lt .syOk{color:#0E8A45;}

@@ -51,7 +51,7 @@
       <div class="tmList" id="tmList" role="menu">
         <button class="ln" role="menuitemcheckbox" aria-checked="false" onclick="TOPMENU.light(event)">☀<span data-ko="밝은 화면" data-en="Light mode">밝은 화면</span><span class="tmSw" id="tmSw"></span></button>
         <button class="ln" role="menuitem" onclick="TOPMENU.pick(function(){ go(1); })">🏠<span data-ko="처음으로" data-en="Home">처음으로</span></button>
-        <button class="ln" role="menuitem" onclick="TOPMENU.pick(function(){ TIMETABLE.open('s1'); })"><span class="icCal"></span><span data-ko="내 시간표" data-en="My timetable">내 시간표</span><em class="syNew" data-ko="새로" data-en="New">새로</em></button>
+        <button class="ln" role="menuitem" onclick="TOPMENU.pick(function(){ TIMETABLE.open('s1'); })"><span class="icCal"></span><span data-ko="내 시간표" data-en="My timetable">내 시간표</span></button>
         <button class="ln" role="menuitem" onclick="TOPMENU.pick(function(){ openOverlay('sfav'); })">⭐<span data-ko="즐겨찾기" data-en="Favorites">즐겨찾기</span></button>
         <button class="ln" role="menuitem" onclick="TOPMENU.pick(function(){ openOverlay('sset'); })">⚙️<span data-ko="설정" data-en="Settings">설정</span></button>
       </div>
@@ -100,11 +100,11 @@
     </div>
     <!-- 길 공유하기 · 내 시간표 (2026-11-03 사용자 — 첫 화면은 단추가 많아 설정에, js/app/share.js · timetable.js) -->
     <div class="row">
-      <span><b data-ko="길 공유하기" data-en="Share a route">길 공유하기</b> <em class="syNew" style="margin-left:0.3rem;vertical-align:0.1rem;" data-ko="새로" data-en="New">새로</em><small class="sySetSub" data-ko="호실만 넣으면 카톡 · 문자로 길을 보내요" data-en="Send directions by chat with just a room number">호실만 넣으면 카톡 · 문자로 길을 보내요</small></span>
+      <span><b data-ko="길 공유하기" data-en="Share a route">길 공유하기</b><small class="sySetSub" data-ko="호실만 넣으면 카톡 · 문자로 길을 보내요" data-en="Send directions by chat with just a room number">호실만 넣으면 카톡 · 문자로 길을 보내요</small></span>
       <button class="ghost" style="padding:6px 14px;border-radius:8px;flex:none;" onclick="SHARE.open()" data-ko="보내기 →" data-en="Send →">보내기 →</button>
     </div>
     <div class="row">
-      <span><b data-ko="내 시간표" data-en="My timetable">내 시간표</b> <em class="syNew" style="margin-left:0.3rem;vertical-align:0.1rem;" data-ko="새로" data-en="New">새로</em><small class="sySetSub" data-ko="앱을 켜면 다음 수업 강의실로 바로" data-en="Opens the route to your next class">앱을 켜면 다음 수업 강의실로 바로</small></span>
+      <span><b data-ko="내 시간표" data-en="My timetable">내 시간표</b><small class="sySetSub" data-ko="앱을 켜면 다음 수업 강의실로 바로" data-en="Opens the route to your next class">앱을 켜면 다음 수업 강의실로 바로</small></span>
       <button class="ghost" style="padding:6px 14px;border-radius:8px;flex:none;" onclick="TIMETABLE.open('sset')" data-ko="열기 →" data-en="Open →">열기 →</button>
     </div>
     <!-- 앱 다운로드 (홈 화면에 설치) — 쓰는 분이 자기 폰을 직접 고른다 (2026-09-29).

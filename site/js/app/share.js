@@ -137,13 +137,28 @@
       '<div class="lab">' + T('① 어느 호실로 오시나요?', '① Which room?') + '</div><input class="syInp" id="shRoom" inputmode="numeric" pattern="[0-9]*" maxlength="5" autocomplete="off" placeholder="' + T('호실 번호 5자리 (예 : 13324)', '5-digit room (e.g. 13324)') + '"><div id="shOut"></div>' +
       '<div class="lab">' + T('② 받는 분이 어느 문으로 오시나요?', '② Which door will they use?') + '</div><div class="syGates">' + g + '</div>' +
       '<button class="syWho' + (SH.gate ? '' : ' pick') + '" type="button">' + T('잘 모르겠어요 — 받는 분이 문 앞에서 고르게 할게요', 'Not sure — let them choose at the door') + '</button>' +
-      '<div class="lab">' + T('보낼 글 (미리 보기)', 'Message preview') + '</div><div class="syMsg empty" id="shMsg"></div>' +
+      /* 보낼 글 — 2026-11-03 사용자 「정해진 말은 아주 좋다. 그래도 사용자가 원하는 대로 지우거나 고칠 수 있게」 :
+         처음엔 정해진 글이 들어 있고, 고쳐 쓸 수 있다(↺ 처음 글로). 링크는 길안내가 열려야 하니 고칠 수 없게 따로 붙인다 */
+      '<div class="lab syMsgLab">' + T('보낼 글', 'Message') + ' <small>' + T('— 눌러서 고쳐 쓸 수 있어요', '— tap to edit') + '</small>' +
+        '<button class="syReset" type="button" id="shReset" hidden>↺ ' + T('처음 글로', 'Reset') + '</button></div>' +
+      '<div class="syMsg syMsgBox empty" id="shMsg"><textarea class="syMsgTx" id="shMsgTx" rows="4" maxlength="400" disabled></textarea>' +
+        '<div class="syMsgLink">' + IC.link + '<u id="shLink"></u><small>' + T('링크는 저절로 붙어요', 'Link is added automatically') + '</small></div></div>' +
       '<button class="big" type="button" id="shSend" disabled>' + IC.msg + T('카카오톡 · 문자로 보내기', 'Send via KakaoTalk · SMS') + '</button>' +
       '<button class="big ghost" type="button" id="shCopy" disabled>' + IC.link + T('링크만 복사하기', 'Copy link only') + '</button>');
+    /* 고쳐 쓴 글은 호실 · 문을 바꿔도 그대로 둔다(애써 쓴 글이 사라지지 않게) — 「↺ 처음 글로」를 누르면 지금 호실 · 문으로 다시 만든다 */
+    var tx = $('#shMsgTx', s), edited = false;
+    function userText(){ var v = tx.value.replace(/\s+$/, ''); return v ? v + '\n' : ''; }
+    tx.addEventListener('input', function(){ edited = tx.value !== msgText(SH.code, SH.gate); $('#shReset', s).hidden = !edited; });
+    $('#shReset', s).onclick = function(){ edited = false; paint(); try{ tx.focus(); }catch(e){} };
     function paint(){
       var m = $('#shMsg', s);
-      if(!SH.code){ m.className = 'syMsg empty'; m.textContent = T('호실 번호를 넣으면 보낼 글이 만들어져요', 'Enter a room number to build the message'); }
-      else { m.className = 'syMsg'; m.innerHTML = esc(msgText(SH.code, SH.gate)) + '<u>' + esc(linkText(SH.code, SH.gate)) + '</u>'; }
+      if(!SH.code){ m.classList.add('empty'); tx.disabled = true; tx.value = ''; tx.placeholder = T('호실 번호를 넣으면 보낼 글이 만들어져요', 'Enter a room number to build the message'); $('#shLink', s).textContent = ''; }
+      else {
+        m.classList.remove('empty'); tx.disabled = false; tx.placeholder = T('보낼 글을 써 주세요 (비워 두면 링크만 가요)', 'Write a message (leave empty to send the link only)');
+        if(!edited) tx.value = msgText(SH.code, SH.gate);
+        $('#shLink', s).textContent = linkText(SH.code, SH.gate);
+      }
+      $('#shReset', s).hidden = !edited || !SH.code;
       $('#shSend', s).disabled = $('#shCopy', s).disabled = !SH.code;
       $$('.syGate', s).forEach(function(b){ b.classList.toggle('pick', b.getAttribute('data-g') === SH.gate); });
       $('.syWho', s).classList.toggle('pick', !SH.gate);
@@ -152,14 +167,14 @@
     $('.syWho', s).onclick = function(){ SH.gate = null; paint(); };
     roomField($('#shRoom', s), $('#shOut', s), function(c){ SH.code = c; paint(); });
     $('#shSend', s).onclick = function(){
-      var msg = msgText(SH.code, SH.gate), url = linkText(SH.code, SH.gate);
+      var msg = userText(), url = linkText(SH.code, SH.gate);
       if(navigator.share){
         navigator.share({title: '공대 3호관 길안내', text: msg, url: url}).then(function(){ U.closeSheet(); U.toast('✓ ' + T('보냈어요', 'Sent')); }, function(){});
         return;
       }
       copy(msg + url, function(){ U.toast(T('✓ 복사했어요 — 이 기기는 공유 창이 없어요. 카톡 · 문자에 붙여 넣어 주세요', '✓ Copied — paste it into a chat')); });
     };
-    $('#shCopy', s).onclick = function(){ copy(msgText(SH.code, SH.gate) + linkText(SH.code, SH.gate), function(){ U.toast(T('✓ 복사했어요 — 카톡 · 문자에 붙여 넣으면 돼요', '✓ Copied — paste it into a chat')); }); };
+    $('#shCopy', s).onclick = function(){ copy(userText() + linkText(SH.code, SH.gate), function(){ U.toast(T('✓ 복사했어요 — 카톡 · 문자에 붙여 넣으면 돼요', '✓ Copied — paste it into a chat')); }); };
     paint();
     setTimeout(function(){ try{ $('#shRoom', s).focus(); }catch(e){} }, 300);
   }

@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '787e80486661';   // 파일 260개 · 17.4MB
+var VERSION = 'b8814f26d77e';   // 파일 260개 · 17.4MB
 var FILES = [
   ['3d/realistic.html','9524531d6645',79368],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','9c703360724c',151613],
+  ['css/app.css','ff1f192748a4',152829],
   ['css/boot.css','0b23cf08e0b6',2841],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
@@ -220,9 +220,9 @@ var FILES = [
   ['guide/g08_step.jpg','b3bee4aaea07',123473],
   ['guide/g09_arrive.jpg','01a120c4cb7c',78899],
   ['guide/g10_fav.jpg','24b3a50caa92',25747],
-  ['guide/g11_settings.jpg','8acb3eff8a45',82505],
-  ['guide/g12_menu.jpg','9157aec4dcf8',76976],
-  ['guide/g13_share.jpg','5efd23200a98',123127],
+  ['guide/g11_settings.jpg','199aab72b946',80862],
+  ['guide/g12_menu.jpg','b79f8d521356',76290],
+  ['guide/g13_share.jpg','a4f01744c900',127047],
   ['guide/g14_tt.jpg','e1b7a9f36308',74555],
   ['guide/g15_alarm.jpg','19a2881348f4',102548],
   ['img/exit-sign.png','f1b9ed7cd89e',27291],
@@ -233,7 +233,7 @@ var FILES = [
   ['img/splash.mp4','d2f01cf420ad',277674],
   ['img/splash_end.jpg','040a235d9bd8',43535],
   ['img/splash_first.jpg','c68ac1b0d37e',29924],
-  ['index.html','48a1792f386d',60881],
+  ['index.html','eaced0d36e7d',60599],
   ['js/app/aid.js','daa92696b9a7',32661],
   ['js/app/boot.js','9a7f3034fbe7',9242],
   ['js/app/building.js','95b01af4110d',23489],
@@ -241,7 +241,7 @@ var FILES = [
   ['js/app/easy.js','894c4f66be72',26399],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','bcc83dabb095',44185],
-  ['js/app/howto.js','b17902556aa6',23981],
+  ['js/app/howto.js','46e50a64b7ca',24071],
   ['js/app/icons.js','4cb6e33c5920',21136],
   ['js/app/live.js','641f671b6fff',2510],
   ['js/app/overview3d.js','35ad3a4e8f9a',108858],
@@ -258,7 +258,7 @@ var FILES = [
   ['js/app/roadview-stairs.js','7f992b896804',70498],
   ['js/app/roadview.js','e4ccae279c4a',133370],
   ['js/app/roomfix.js','1b886c300886',22082],
-  ['js/app/share.js','47a7a02298b9',17608],
+  ['js/app/share.js','5e815c8597a3',19257],
   ['js/app/shell.js','2c94ab5ad1dd',33594],
   ['js/app/start.js','4065777331b0',1505],
   ['js/app/story.js','19c2668151da',11859],

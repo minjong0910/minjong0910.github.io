@@ -121,7 +121,7 @@ var HOWTO = [
     items:[
       ['호실 번호', '찾아올 곳의 5자리 번호를 넣어요. 초록 ✓ 가 뜨면 맞는 번호예요.', 'Room number', 'Enter the 5-digit room. A green ✓ means it is right.'],
       ['들어올 문', '받는 분이 들어올 문을 골라요. 모르면 아래 「잘 모르겠어요」 — 받는 분이 문 앞에서 골라요.', 'Door', 'Pick the door they will use. Not sure? They can pick it at the door.'],
-      ['보낼 글', '이렇게 보내져요. 링크가 함께 들어가요.', 'Message', 'This is what they get, with the link.'],
+      ['보낼 글', '정해진 글이 들어 있어요. 눌러서 지우거나 고쳐 쓸 수 있고, 링크는 저절로 붙어요.', 'Message', 'A ready-made message — tap to edit. The link is added automatically.'],
       ['카카오톡 · 문자로 보내기', '휴대폰 공유 창에서 카카오톡이나 문자를 골라 보내요.', 'Send', 'Choose KakaoTalk or SMS in the share window.'],
       ['링크만 복사하기', '글과 링크를 복사해요. 원하는 곳에 붙여 넣으면 돼요.', 'Copy link', 'Copies the message and link to paste anywhere.']
     ],

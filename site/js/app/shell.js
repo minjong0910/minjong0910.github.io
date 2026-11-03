@@ -335,23 +335,61 @@ function exitAsk(){
 }
 function exitClose(){ var w = document.querySelector('.syExit'); if(w) w.remove(); }
 
-/* ── 히스토리 칸 (휴대폰 뒤로가기를 앱 안에서 받는 받침) ── */
+/* ── 휴대폰 뒤로가기를 앱 안에서 받는 방법 두 가지 ──
+   2026-11-03 사용자 : 「종료를 누르면 바로 안 꺼지고 '한 번 더 뒤로가기' 가 뜬다 — 종료 버튼만 누르면 꺼지게」.
+   브라우저는 「지나온 칸이 하나뿐인 창」만 스크립트가 닫게 해 준다(window.close). 그런데 뒤로가기를 받으려고 깐 받침(history 칸)이
+   바로 그 지나온 칸이라, 받침을 쓰는 한 「종료」로 창을 닫을 수 없었다.
+   ① 닫기 감시(CloseWatcher) — 크롬 120 이상(안드로이드)은 뒤로가기 단추가 페이지의 「닫기 감시」를 먼저 부른다.
+      칸을 하나도 안 쓰므로 지나온 칸이 1개로 남고 → 「종료」 = window.close() 로 정말 닫힌다.
+      뒤로가기를 받을 때마다 감시를 새로 걸어 둔다(받은 뒤에는 새 감시가 따로 걸린다 — 몇 번을 눌러도 받는다).
+      크롬(안드로이드 120+)은 처음부터 이 방법. 다른 브라우저(삼성 인터넷 등)는 ②로 시작하면서 감시도 함께 걸어 두고,
+      뒤로가기가 감시로 오는 것을 한 번 보면 기억했다가(b3nav_cw_ok) 다음에 켤 때부터 이 방법.
+   ② 받침 칸(history) — 아이폰 · 닫기 감시가 없는 브라우저. 「종료」는 칸을 걷고 창을 닫아 보며, 그래도 안 닫히면 안내한다.
+   (컴퓨터에서 시험할 때는 주소에 ?cw=1 을 붙이면 ① — Esc 키가 휴대폰 뒤로가기와 같다) */
 var B3BACK = (function(){
   var ok = !!(window.history && history.pushState);
   var pos = 0, leaving = false, popping = false, CUSHION = 3;
+  var ua = navigator.userAgent || '';
+  var hasCW = (typeof CloseWatcher === 'function');
+  var cm = /Chrome\/(\d+)/.exec(ua), android = /Android/.test(ua);
+  var chromeAndroid = android && !!cm && +cm[1] >= 120 &&
+                      !/SamsungBrowser|; wv\)|Whale|KAKAOTALK|NAVER|EdgA|OPR|YaBrowser|Firefox|Line\//i.test(ua);
+  var learned = false;
+  try{ learned = localStorage.getItem('b3nav_cw_ok') === '1'; }catch(e){}
+  var useCW = hasCW && (chromeAndroid || (android && learned) || /[?&]cw=1(&|$)/.test(location.search));
+  var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  /* ① 닫기 감시 */
+  var cw = null;
+  function arm(){
+    if(!hasCW || cw || leaving) return;
+    try{ cw = new CloseWatcher(); }catch(e){ cw = null; return; }
+    cw.onclose = function(){
+      cw = null;
+      if(leaving) return;
+      if(android) try{ localStorage.setItem('b3nav_cw_ok', '1'); }catch(e){}   // 이 폰 브라우저는 뒤로가기가 감시로 온다 — 다음에는 ① 로 (컴퓨터의 Esc 는 세지 않는다)
+      popping = true;
+      try{ appBackStep(); }finally{ popping = false; }          // 뒤로가기 한 번 = 앱 안에서 한 걸음
+      arm();                                                     // 다음 뒤로가기도 받게 새로 건다
+      if(!cw) setTimeout(arm, 0);
+    };
+  }
+
+  /* ② 받침 칸 */
   function push(){ try{ history.pushState({b3i: pos + 1}, ''); pos++; return true; }catch(e){ return false; } }
   /* 화면을 진짜로 누를 때 칸 하나 — 누름 하나에 하나만, 뒤로가기를 받는 중에는 넣지 않는다 (위 ② 참고). 받침은 CUSHION 칸이면 충분하다 */
   function tap(e){
+    if(useCW){ if(!cw && !leaving) arm(); return; }            // ① 은 칸을 안 쓴다 (감시가 풀려 있으면 다시 건다)
     if(!ok || leaving || popping) return;
     if(e && e.isTrusted === false) return;                     // 코드가 대신 누른 것(element.click())은 사람이 누른 게 아니다
     if(navigator.userActivation && !navigator.userActivation.isActive) return;
     if(pos < CUSHION) push();
   }
-  if(ok){
+  if(useCW) arm();
+  else if(ok){
     try{ pos = (history.state && typeof history.state.b3i === 'number') ? history.state.b3i : 0; }catch(e){ pos = 0; }
     if(pos === 0) push();          // 켜자마자 뒤로가기를 눌러도 받도록 한 칸 (아이폰 · 다른 브라우저용 — 크롬은 화면을 한 번 누른 뒤부터 받는다)
-    window.addEventListener('click', tap);                     // 누른 일이 다 끝난 뒤(단계 · 화면이 바뀐 뒤)
-    window.addEventListener('keydown', tap);
+    if(hasCW) arm();               // 이 브라우저가 뒤로가기를 감시로 보내는지 알아 둔다 (보내면 이번에도 감시가 먼저 받는다)
     window.addEventListener('popstate', function(e){
       var to = (e.state && typeof e.state.b3i === 'number') ? e.state.b3i : 0;
       if(leaving){ pos = to; return; }
@@ -364,27 +402,38 @@ var B3BACK = (function(){
          뒤로가기를 몇 번 누르든 앱 안에서 받고, 앱을 닫는 건 첫 화면의 「종료」뿐이다. */
       try{ history.forward(); }catch(err){}
     });
-    window.addEventListener('pageshow', function(){ leaving = false; });
   }
-  /* 「종료」 — 이 앱이 쌓은 칸을 다 걷고 앱을 닫는다.
-     브라우저 탭으로 열었으면 앞 페이지로 나가고, 창을 닫을 수 있으면 닫는다.
-     홈 화면에 설치한 앱은 웹 페이지가 스스로 창을 못 닫는 폰이 있다 — 그때는 다음 뒤로가기 한 번에 닫히게 받침을 비우고 알린다. */
+  window.addEventListener('click', tap);                       // 누른 일이 다 끝난 뒤(단계 · 화면이 바뀐 뒤)
+  window.addEventListener('keydown', function(e){ if(e.key !== 'Escape') tap(e); });
+  window.addEventListener('pageshow', function(){ leaving = false; if(useCW) arm(); });
+
+  /* 「종료」 — 창을 닫는다. 못 닫는 경우(아이폰 · 지나온 칸이 남은 창)에만 안내한다. */
+  function notice(){
+    var ko = (typeof LANG === 'undefined' || LANG !== 'en');
+    var t = ios ? (ko ? '아이폰은 앱이 스스로 닫히지 않아요 — 화면 아래를 위로 밀어 나가 주세요' : 'On iPhone, swipe up from the bottom to leave the app')
+                : (ko ? '뒤로가기를 한 번 더 누르면 앱이 닫혀요' : 'Press back once more to close the app');
+    if(typeof B3UI !== 'undefined') B3UI.toast(t, true);
+  }
   function leave(){
-    if(!ok){ try{ window.close(); }catch(e){} return; }
     leaving = true;
+    if(cw){ try{ cw.destroy(); }catch(e){} cw = null; }
+    if(useCW || !ok){
+      try{ window.close(); }catch(e){}
+      setTimeout(function(){                                     // 아직 여기 있으면 — 앞에 다른 페이지가 있는 창(지나온 칸이 남음)
+        try{ if(history.length > 1) history.back(); }catch(e){}
+        setTimeout(function(){ leaving = false; if(useCW) arm(); notice(); }, 600);
+      }, 300);
+      return;
+    }
     var n = pos;
     if(n > 0) history.go(-n);
     setTimeout(function(){
       try{ window.close(); }catch(e){}
       try{ history.back(); }catch(e){}
-      setTimeout(function(){
-        leaving = false; pos = 0;
-        var ko = (typeof LANG === 'undefined' || LANG !== 'en');
-        if(typeof B3UI !== 'undefined') B3UI.toast(ko ? '뒤로가기를 한 번 더 누르면 앱이 닫혀요' : 'Press back once more to close the app', true);
-      }, 700);
+      setTimeout(function(){ leaving = false; pos = 0; notice(); }, 700);
     }, n > 0 ? 350 : 0);
   }
-  return {tap: tap, leave: leave, depth: function(){ return pos; }};
+  return {tap: tap, leave: leave, mode: function(){ return useCW ? 'CW' : 'history'; }, depth: function(){ return useCW ? (cw ? 'CW' : 'CW-off') : pos; }};
 })();
 
 /* 검색창·결과·안내문을 처음 상태로 */

@@ -282,6 +282,9 @@ var EASY = (function(){
       + '<button class="big ghost" type="button" data-a="0">' + T('아니요, 혼자 할게요', "No thanks, I'll explore") + '</button></div>';
     a.addEventListener('click', function(e){
       var b = e.target.closest('button[data-a]'); if(!b) return;
+      /* 2026-11-03 사용자 「애니메이션이 끝난 뒤 쉬운 사용모드 켜기/끄기가 사라졌다」 — 켜는 화면을 넘기려고 연달아 누른 손가락이
+         막 뜬 이 화면의 단추(아니요)를 눌러 바로 닫혔다. 켜는 화면을 마지막으로 누르고 0.8초 안의 누름은 무시한다(boot.js 가 b3BootTapAt 을 남긴다) */
+      if(Date.now() - (window.b3BootTapAt || 0) < 800) return;
       a.remove(); set(b.getAttribute('data-a') === '1');
     });
     phone.appendChild(a);

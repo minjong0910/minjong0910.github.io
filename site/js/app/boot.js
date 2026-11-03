@@ -56,13 +56,15 @@ function reveal(boot, cb){
   }
   Array.prototype.forEach.call(boot.querySelectorAll('.spPre'), function(e){ e.remove(); });
   boot.insertAdjacentHTML('beforeend', '<div class="spScrim"></div>' +
-    '<div class="spTtl"><div class="k"><i></i>' + (ko ? '공대 3호관 길안내' : 'Eng. Bldg 3 Navigator') + '</div>' +
-    '<h1>' + (ko ? '사진을 따라, 문 앞까지' : 'Follow the photos to the door') + '</h1>' +
+    /* 앱 이름이 가장 크게 (사용자 11/03 : 「공대 3호관 길안내가 너무 작다 — 이 문구가 가장 중요」) · 그 아래 꼬리표 · 한 줄 설명 */
+    '<div class="spTtl"><h1' + (ko ? '>공대 <b>3호관</b> 길안내' : ' class="en">Engineering <b>Bldg.3</b> Navigation') + '</h1>' +
+    '<div class="k"><i></i>' + (ko ? '사진을 따라, 문 앞까지' : 'Follow the photos to the door') + '</div>' +
     '<p>' + (ko ? '처음 온 곳도 사진만 따라오면 돼요' : 'New here? Just follow the photos.') + '</p></div>' +
     '<div class="spSkip">' + (ko ? '화면을 누르면 바로 시작해요' : 'Tap to start') + '</div>');
   var ttl = boot.querySelector('.spTtl'), skip = boot.querySelector('.spSkip'), scrim = boot.querySelector('.spScrim');
   var done = false, ready = false, animDone = false, d3Done = false, flat = false, MAX_MS = 12000;
-  var T_TITLE0 = 4.05, T_TITLE1 = 4.85, T_END = 5.1;   // 동영상 안 시각(초) — 견본과 같다
+  /* 앱 이름(공대 3호관 길안내)은 처음부터 끝까지 보이게 — 0.4~1.2초에 나타난다(사용자 11/03 : 「이 문구가 가장 중요」). 끝 장면(5.1초)에서 0.6초 더 머물고 넘어간다 */
+  var T_TITLE0 = .4, T_TITLE1 = 1.2, T_END = 5.1, HOLD = 600, endTimer = 0;   // 동영상 안 시각(초)
   /* 동영상을 못 트는 폰(아이폰 저전력 모드 · 동영상 막힘 · 처음 열 때 너무 느린 인터넷) — 끝 장면 그림에 제목만 얹고 잠깐 뒤에 닫는다 */
   function goFlat(){
     if(flat || done) return; flat = true;
@@ -70,7 +72,8 @@ function reveal(boot, cb){
     setTimeout(function(){ animDone = true; maybeFinish(); }, cont ? 300 : 1400);
   }
   vid.addEventListener('error', goFlat);
-  vid.addEventListener('ended', function(){ animDone = true; maybeFinish(); });
+  function reachEnd(){ if(endTimer || animDone) return; endTimer = setTimeout(function(){ animDone = true; maybeFinish(); }, HOLD); }
+  vid.addEventListener('ended', reachEnd);
   try{ vid.muted = true; if(cont && vid.readyState >= 1) vid.currentTime = 3.6; var pr = vid.play(); if(pr && pr['catch']) pr['catch'](goFlat); }catch(err){ goFlat(); }
   if(cont) vid.addEventListener('loadedmetadata', function(){ try{ if(vid.currentTime < 3.6) vid.currentTime = 3.6; }catch(err){} });
   setTimeout(function(){ if(!done && !flat && (vid.currentTime || 0) < .05) goFlat(); }, 2500);   // 2.5초가 지나도 안 움직이면
@@ -78,8 +81,9 @@ function reveal(boot, cb){
     if(done) return;
     var t = flat ? T_TITLE1 : (vid.currentTime || 0);
     var tp = Math.max(0, Math.min(1, (t - T_TITLE0) / (T_TITLE1 - T_TITLE0))); tp = 1 - Math.pow(1 - tp, 3);
-    ttl.style.opacity = tp; ttl.style.transform = 'translateY(' + (14 * (1 - tp)) + 'px)'; scrim.style.opacity = tp; skip.style.opacity = .8 * (1 - tp);
-    if(!flat && !animDone && t >= T_END){ animDone = true; maybeFinish(); }
+    ttl.style.opacity = tp; ttl.style.transform = 'translateY(' + (14 * (1 - tp)) + 'px)'; scrim.style.opacity = tp;
+    skip.style.opacity = flat ? 0 : .8 * Math.max(0, Math.min(1, (T_END - t) / .4));   // 「누르면 바로 시작」은 끝 장면 직전까지
+    if(!flat && t >= T_END) reachEnd();
     requestAnimationFrame(tick);
   })();
   function maybeFinish(){
@@ -95,7 +99,8 @@ function reveal(boot, cb){
     if(typeof EASY !== 'undefined' && EASY.askFirst) EASY.askFirst();
     reveal(boot, function(){ try{ vid.pause(); vid.removeAttribute('src'); vid.load(); }catch(err){} boot.remove(); });
   }
-  boot.addEventListener('click', finishBoot);   // 누르면 바로 시작
+  /* 누르면 바로 시작. 누른 시각을 남겨 둔다 — 넘기려고 연달아 누르던 손가락이 이어서 뜨는 「처음이세요?」의 단추를 바로 누르지 않게(easy.js 가 본다) */
+  boot.addEventListener('click', function(){ window.b3BootTapAt = Date.now(); finishBoot(); });
   setTimeout(finishBoot, MAX_MS);               // 안전장치 — 무슨 일이 있어도 이 시간 뒤에는 앱을 보여 준다
 
   /* 앱의 3D 는 글꼴을 받은 뒤(최대 1.5초) bootApp 이 만든다. 첫 화면에는 3D 가 없으므로 오래 기다리지 않는다 —

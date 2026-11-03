@@ -201,7 +201,6 @@ function go(id){
   if(id==='saidat' && typeof aidEnter==='function') aidEnter();     /* v55 : AI 사진 파악 자료집 */
   if(id==='sfav') renderFavorites();
   if(id==='s7') spawnParticles('arrivalFx');   // "안내를 마칩니다" 도착 파티클 효과
-  if(typeof B3BACK!=='undefined') B3BACK.topUp();   // 누른 그 순간이면 뒤로가기 칸을 넉넉히 채워 둔다
 }
 /* 즐겨찾기·설정은 어느 화면에서 열었든, 닫으면 그 이전 화면으로 되돌아간다 */
 var beforeOverlay='s1';
@@ -229,7 +228,11 @@ function findAnother(){ clearSearch(); go('scat'); }
      ① 지나온 화면을 순서대로 기억한다(navRecord) — 뒤로가기는 바로 전에 있던 화면으로.
         첫 화면으로 가면 비우고, 이미 지나온 화면으로 다시 가면 그 앞까지만 남긴다.
         한 번에 여러 화면을 건너뛰는 길(공유 링크 · 이어 보기 · QR 확인 → 찾기 → 목적지 → 길안내)은 거쳐 간 화면을 쌓지 않는다.
-     ② 히스토리 칸은 「화면을 누른 그 순간」에만 넉넉히 채운다(B3BACK.topUp) — 그 칸은 건너뛰지 않으므로 연달아 눌러도 앱 안에서 받는다.
+     ② 히스토리 칸(받침)은 「화면을 진짜로 누른 그 순간」에 하나씩만 넣는다(B3BACK.tap, 3칸까지).
+        2026-11-03 폰 시험(사용자) : 「마지막 페이지에서 뒤로가기 → 전 페이지, 거기서 한 번 더 → 앱이 꺼진다」.
+        한 번 누를 때 칸을 여러 개 넣거나, 뒤로가기를 받는 중에(바로 전에 화면을 눌렀어도) 칸을 넣으면
+        크롬은 그 칸들을 「누름 없이 넣은 칸」으로 보고 건너뛴다 → 누름 하나에 칸 하나, 뒤로가기 중에는 넣지 않는다.
+        뒤로가기로 칸 하나를 쓰면 새 칸을 넣지 않고 history.forward() 로 그 칸에 되돌아간다 — 같은 칸을 몇 번이든 다시 쓴다.
      ③ 떠 있는 것(사진 크게 보기 · ☰ · 아래 창 · 확인창)부터 닫고, 길안내 단계 · 이용안내 쪽은 한 칸씩.
      ④ 첫 화면에서 누르면 「앱을 종료하시겠어요?」 — [취소] · [종료]. 창이 떠 있을 때 한 번 더 누르면 [취소].
      ⑤ 화면 왼쪽 위 ← 도 같은 규칙(창 · 단계는 건너뛰고 화면만 한 칸).
@@ -311,6 +314,7 @@ document.addEventListener('click', function(e){
   var scr = b.closest('.screen');
   if(!scr || NAV_ADMIN[scr.id] || scr.id === 'sqr' || scr.id === 's4' && scr.classList.contains('fsMode')) return;   // QR 카메라 ← 는 카메라를 끄는 일을 한다(QRNAV.close)
   e.preventDefault(); e.stopPropagation();
+  B3BACK.tap(e);                                         // ← 도 화면을 누른 것 — 받침 칸 하나
   navBack();
 }, true);
 
@@ -334,35 +338,31 @@ function exitClose(){ var w = document.querySelector('.syExit'); if(w) w.remove(
 /* ── 히스토리 칸 (휴대폰 뒤로가기를 앱 안에서 받는 받침) ── */
 var B3BACK = (function(){
   var ok = !!(window.history && history.pushState);
-  var pos = 0, leaving = false;
-  /* 지금 화면에서 뒤로가기를 몇 번 눌러야 종료 확인까지 가는지 + 넉넉히 */
-  function want(){
-    var n = NAV.stack.length + 3;
-    var cur = document.querySelector('.screen.on'), id = cur ? cur.id : '';
-    if(id === 's6' && typeof si === 'number') n += si;
-    if(id === 'sguide' && typeof guideIdx === 'number') n += guideIdx;
-    return Math.min(n, 30);
-  }
+  var pos = 0, leaving = false, popping = false, CUSHION = 3;
   function push(){ try{ history.pushState({b3i: pos + 1}, ''); pos++; return true; }catch(e){ return false; } }
-  /* 누른 그 순간에만 — 누르지 않은 사이 넣은 칸은 크롬이 건너뛴다 */
-  function topUp(){
-    if(!ok || leaving) return;
+  /* 화면을 진짜로 누를 때 칸 하나 — 누름 하나에 하나만, 뒤로가기를 받는 중에는 넣지 않는다 (위 ② 참고). 받침은 CUSHION 칸이면 충분하다 */
+  function tap(e){
+    if(!ok || leaving || popping) return;
+    if(e && e.isTrusted === false) return;                     // 코드가 대신 누른 것(element.click())은 사람이 누른 게 아니다
     if(navigator.userActivation && !navigator.userActivation.isActive) return;
-    var w = want(), guard = 0;
-    while(pos < w && guard++ < 30){ if(!push()) break; }
+    if(pos < CUSHION) push();
   }
   if(ok){
     try{ pos = (history.state && typeof history.state.b3i === 'number') ? history.state.b3i : 0; }catch(e){ pos = 0; }
-    if(pos === 0) push();          // 켜자마자 뒤로가기를 눌러도 받도록 한 칸 (아직 안 눌러서 크롬은 건너뛸 수 있다 — 처음 누를 때 다시 채운다)
-    window.addEventListener('click', topUp);                    // 누른 일이 다 끝난 뒤(단계 · 화면이 바뀐 뒤) 채운다
-    window.addEventListener('keydown', topUp);
+    if(pos === 0) push();          // 켜자마자 뒤로가기를 눌러도 받도록 한 칸 (아이폰 · 다른 브라우저용 — 크롬은 화면을 한 번 누른 뒤부터 받는다)
+    window.addEventListener('click', tap);                     // 누른 일이 다 끝난 뒤(단계 · 화면이 바뀐 뒤)
+    window.addEventListener('keydown', tap);
     window.addEventListener('popstate', function(e){
       var to = (e.state && typeof e.state.b3i === 'number') ? e.state.b3i : 0;
       if(leaving){ pos = to; return; }
-      if(to >= pos){ pos = to; return; }                        // 앞으로 가기 — 할 일 없음
-      var n = pos - to; pos = to;
-      for(var i = 0; i < n; i++) appBackStep();                // 보통 한 번
-      if(pos === 0) push();                                      // 칸이 다 떨어졌으면 하나라도 다시 (다음에 누를 때 넉넉히 채운다)
+      if(to >= pos){ pos = to; return; }                        // 앞으로 가기(아래에서 되돌려 놓은 것) — 할 일 없음
+      pos = to;
+      popping = true;
+      try{ appBackStep(); }finally{ popping = false; }          // 뒤로가기 한 번 = 앱 안에서 한 걸음
+      /* 2026-11-03 폰 시험 뒤 : 쓴 칸을 새로 넣지 않고 「앞으로 가기」로 그 칸에 되돌아간다.
+         새 칸을 넣는 게 아니라서 크롬이 건너뛸 칸이 생기지 않고, 같은 칸을 몇 번이든 다시 쓴다 —
+         뒤로가기를 몇 번 누르든 앱 안에서 받고, 앱을 닫는 건 첫 화면의 「종료」뿐이다. */
+      try{ history.forward(); }catch(err){}
     });
     window.addEventListener('pageshow', function(){ leaving = false; });
   }
@@ -384,7 +384,7 @@ var B3BACK = (function(){
       }, 700);
     }, n > 0 ? 350 : 0);
   }
-  return {topUp: topUp, leave: leave, depth: function(){ return pos; }, want: want};
+  return {tap: tap, leave: leave, depth: function(){ return pos; }};
 })();
 
 /* 검색창·결과·안내문을 처음 상태로 */

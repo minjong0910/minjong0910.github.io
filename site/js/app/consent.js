@@ -170,9 +170,11 @@ var CONSENT = (function(){
      d: '<ul><li>' + T('이 폰에 남는 것 : 길안내 이어 하기(30분) · 즐겨찾기 · 최근 찾은 곳 · 내 시간표 · 수업 알림 설정 · 쉬운 사용모드 · 밝은 화면 · 이 동의 기록', 'Kept on this phone: resume (30 min) · favorites · recent searches · timetable · class alerts · easy mode · light mode · this consent') + '</li>' +
         '<li>' + T('인터넷이 없어도 열리게 앱을 이 폰에 저장해 둬요.', 'The app is saved on this phone so it opens offline.') + '</li>' +
         '<li>' + T('모두 이 폰에만 있고 서버로 보내지 않아요. 브라우저의 「사이트 데이터 삭제」로 한 번에 지울 수 있어요.', 'All of it stays on this phone. Clear the site data in your browser to delete it.') + '</li></ul>'},
-    /* 설명 없이 체크만 (사용자 11/03) — 처리방침 · 라이선스는 「확인」, 수집·이용은 길안내에 필요 없어 선택(필수로 묶으면 안 된다) */
-    {k: 'policy', req: true, plain: true, t: T('개인정보 처리방침', 'Privacy policy')},
-    {k: 'oss', req: true, plain: true, t: T('오픈소스 라이선스 고지', 'Open-source licenses')},
+    /* 설명 없이 체크만 (사용자 11/03) — 처리방침 · 라이선스는 「확인」, 수집·이용은 길안내에 필요 없어 선택(필수로 묶으면 안 된다).
+       처리방침 · 라이선스는 처음부터 체크된 채로(on) — 사용자 11/04 「하나하나 체크하기 번거롭다, 원하지 않으면 끄면 된다」.
+       동의가 아니라 알림이라 미리 체크해도 된다. 진짜 동의(수집·이용 · 건의함 사진 · 카메라 · 알림)는 미리 체크하지 않는다 */
+    {k: 'policy', req: true, plain: true, on: true, t: T('개인정보 처리방침', 'Privacy policy')},
+    {k: 'oss', req: true, plain: true, on: true, t: T('오픈소스 라이선스 고지', 'Open-source licenses')},
     {k: 'collect', req: false, plain: true, t: T('개인정보 수집·이용 동의', 'Collection & use of personal data')},
     {k: 'photo', req: false, t: T('건의함 사진 개인정보', 'Suggestion photos'), s: T('사진 · 메모를 받아 길안내 사진으로 써요 — 얼굴 X · GPS 지움', 'Photos and notes become guide photos — no faces · GPS removed'),
      d: '<ul><li>' + T('<b>사람 얼굴</b>이나 다른 사람의 화면 · 이름표가 나오지 않게 찍어 주세요.', 'Keep <b>faces</b> and name tags out of the photo.') + '</li><li>' + T('사진 속 위치 정보(GPS)는 올리기 전에 지워져요.', 'GPS data is removed before upload.') + '</li></ul>' + PV_TABLE() +
@@ -193,7 +195,7 @@ var CONSENT = (function(){
     if(document.querySelector('.syAgree')) return;
     shown = true;
     var list = AG(), st = {}, prev = ls(K.agree);
-    list.forEach(function(x){ st[x.k] = false; });
+    list.forEach(function(x){ st[x.k] = !!x.on; });
     /* 예전 판에 동의한 폰 — 그때 고른 것은 체크된 채로 보여 주고, 새 항목만 더 체크하면 되게 */
     if(prev){ st.use = st.local = true; st.photo = pvOK(); st.cam = camOK(); st.noti = ls(K.noti) === 'yes'; }
     var a = mk('div', 'syAgree',

@@ -354,10 +354,18 @@ var B3BACK = (function(){
   var cm = /Chrome\/(\d+)/.exec(ua), android = /Android/.test(ua);
   var chromeAndroid = android && !!cm && +cm[1] >= 120 &&
                       !/SamsungBrowser|; wv\)|Whale|KAKAOTALK|NAVER|EdgA|OPR|YaBrowser|Firefox|Line\//i.test(ua);
+  /* 2026-11-03 폰 시험 「종료를 눌러도 안 꺼진다」 : 삼성 인터넷도 28판부터 뒤로가기를 닫기 감시로 보낸다 — ① 로 */
+  var sm = /SamsungBrowser\/(\d+)/.exec(ua), samsungOK = android && !!sm && +sm[1] >= 28;
   var learned = false;
   try{ learned = localStorage.getItem('b3nav_cw_ok') === '1'; }catch(e){}
-  var useCW = hasCW && (chromeAndroid || (android && learned) || /[?&]cw=1(&|$)/.test(location.search));
+  var useCW = hasCW && (chromeAndroid || samsungOK || (android && learned) || /[?&]cw=1(&|$)/.test(location.search));
   var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  function standalone(){ try{ return !!(window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }catch(e){ return false; } }
+  function browserName(){
+    if(sm) return '삼성 인터넷 ' + sm[1];
+    if(/KAKAOTALK/i.test(ua)) return '카카오톡'; if(/NAVER\(inapp/i.test(ua)) return '네이버'; if(/Whale/i.test(ua)) return '웨일';
+    if(ios) return '아이폰'; if(cm) return (android ? '크롬 ' : 'PC ') + cm[1]; return '기타';
+  }
 
   /* ① 닫기 감시 */
   var cw = null;
@@ -414,6 +422,11 @@ var B3BACK = (function(){
                 : (ko ? '뒤로가기를 한 번 더 누르면 앱이 닫혀요' : 'Press back once more to close the app');
     if(typeof B3UI !== 'undefined') B3UI.toast(t, true);
   }
+  /* 못 닫았을 때 — 왜인지 「설정 → 문제 기록」에 남긴다(브라우저 · 방식 · 지나온 칸 수 · 설치한 앱인지). 폰에서만 생기는 일이라 원인을 보려면 이것뿐이다 */
+  function failLog(){
+    try{ localStorage.setItem('b3nav_exit_diag', [browserName(), useCW ? '감시' : '받침', '칸 ' + history.length, standalone() ? '설치한 앱' : '브라우저'].join(' · ')); }catch(e){}
+    try{ DIAG.paint(); }catch(e){}
+  }
   function leave(){
     leaving = true;
     if(cw){ try{ cw.destroy(); }catch(e){} cw = null; }
@@ -421,7 +434,10 @@ var B3BACK = (function(){
       try{ window.close(); }catch(e){}
       setTimeout(function(){                                     // 아직 여기 있으면 — 앞에 다른 페이지가 있는 창(지나온 칸이 남음)
         try{ if(history.length > 1) history.back(); }catch(e){}
-        setTimeout(function(){ leaving = false; if(useCW) arm(); notice(); }, 600);
+        /* 그래도 못 닫았으면 감시를 다시 걸지 않는다 — 다음 뒤로가기가 그대로 휴대폰에 가서 앱이 닫힌다.
+           (예전에는 여기서 감시를 다시 걸어, 「한 번 더 누르면 닫혀요」라고 해 놓고 누르면 종료 창이 또 떴다)
+           화면을 다시 누르면(앱을 계속 쓰면) tap() 이 감시를 다시 건다. */
+        setTimeout(function(){ leaving = false; failLog(); notice(); }, 600);
       }, 300);
       return;
     }
@@ -430,10 +446,11 @@ var B3BACK = (function(){
     setTimeout(function(){
       try{ window.close(); }catch(e){}
       try{ history.back(); }catch(e){}
-      setTimeout(function(){ leaving = false; pos = 0; notice(); }, 700);
+      setTimeout(function(){ leaving = false; pos = 0; failLog(); notice(); }, 700);
     }, n > 0 ? 350 : 0);
   }
-  return {tap: tap, leave: leave, mode: function(){ return useCW ? 'CW' : 'history'; }, depth: function(){ return useCW ? (cw ? 'CW' : 'CW-off') : pos; }};
+  return {tap: tap, leave: leave, mode: function(){ return useCW ? 'CW' : 'history'; }, depth: function(){ return useCW ? (cw ? 'CW' : 'CW-off') : pos; },
+          browser: browserName, standalone: standalone};
 })();
 
 /* 검색창·결과·안내문을 처음 상태로 */

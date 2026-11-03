@@ -8,11 +8,13 @@
 #
 #   사용법 : pwsh -File 도구\발표PPT_조원파트_합치기.ps1 [-Desktop]
 #            (내 자료는 먼저 도구\발표PPT_최종20쪽_만들기.ps1 로 만든다 — 조원 파일은 도구\발표_조원\ 에 둔다)
+#   2026-11-03 : 내 자료는 마무리 · Q&A 를 한 장으로 합친 19쪽 → 합친 자료가 정확히 20쪽(사용자 「20장 조건 — 너가 해줘 전부」)
+#                조원 파일은 도구\발표_조원\문성일파트_최신판_고치기.ps1 로 원본에서 다시 만든 것(숫자 · 이용안내 쪽 수 최신)
 param([string]$Base = '', [string]$Team = '', [int]$CutFrom = 12, [int]$CutTo = 16, [int]$TeamFrom = 12, [int]$TeamTo = 17, [switch]$Desktop)
 $ErrorActionPreference = 'Stop'
 $ROOT = Split-Path $PSScriptRoot -Parent
 $OUTD = Join-Path $ROOT '생성물\발표'
-if(-not $Base){ $Base = Join-Path $OUTD '졸업작품 발표 — 공대 3호관 길안내 (20쪽).pptx' }
+if(-not $Base){ $Base = Join-Path $OUTD '졸업작품 발표 — 공대 3호관 길안내 (합치기 전 19쪽).pptx' }
 if(-not $Team){ $Team = Join-Path $PSScriptRoot '발표_조원\문성일_12-17쪽.pptx' }
 $NAME = '졸업작품 발표 — 공대 3호관 길안내 (문성일 파트 합침)'
 $pptx = Join-Path $OUTD ($NAME + '.pptx'); $pdf = Join-Path $OUTD ($NAME + '.pdf'); $txt = Join-Path $OUTD ($NAME + ' 리허설 대본.txt')
@@ -79,7 +81,8 @@ try{
   [void][Runtime.InteropServices.Marshal]::ReleaseComObject($app)
 }
 if($Desktop){
-  $dk = [Environment]::GetFolderPath('Desktop')   # 2026-10-29 사용자 : 폴더 말고 바탕화면에 바로
-  foreach($f in $pptx, $pdf, $txt){ Copy-Item $f $dk -Force }
-  '바탕화면에도 놓음'
+  #   2026-10-29 사용자 : 폴더 말고 바탕화면에 바로. 바탕화면에서는 짧은 이름(「…길안내.pptx · .pdf」)으로 쓰고 있다 — 그 이름 그대로 덮어쓴다
+  $dk = [Environment]::GetFolderPath('Desktop'); $short = '졸업작품 발표 — 공대 3호관 길안내'
+  Copy-Item $pptx (Join-Path $dk ($short + '.pptx')) -Force; Copy-Item $pdf (Join-Path $dk ($short + '.pdf')) -Force
+  '바탕화면에도 놓음 : ' + $short + '.pptx · .pdf'
 }

@@ -125,7 +125,9 @@ var DIAG = (function(){
     }catch(err){}
     try{
       L.push('뒤로가기 : 칸 ' + (history.length || 0) +
-             ' · 받침 ' + ((typeof B3BACK !== 'undefined') ? B3BACK.mode() + ' ' + B3BACK.depth() : '없음'));
+             ' · 받침 ' + ((typeof B3BACK !== 'undefined') ? B3BACK.mode() + ' ' + B3BACK.depth() + ' · ' + B3BACK.browser() : '없음'));
+      var xd = localStorage.getItem('b3nav_exit_diag');     // 「종료」로 못 닫았던 때 (shell.js failLog)
+      if(xd) L.push('종료 못 함 : ' + xd);
     }catch(err){}
     /* ★ 2026-09-28 : 걷기 화면에 실제로 그려진 색. 앱이 스스로 재서 **저장해 두므로**,
        걷기에 들어갔다가 앱을 껐다 켠 뒤에 이 기록을 떠도 그대로 남아 있다.

@@ -3,8 +3,10 @@
 
    사용자 요청 : 설정 → 이용안내가 전부 글이다. 실제 우리 앱 화면 사진과 함께 더 자세하고 쉽게.
                  「즐겨찾기 & 팁」은 남기되 더 쉽고 자세하게.
-   · 그림 : guide/g01~g12.jpg — 실제 앱을 폰 크기(375×812)로 찍고, 설명할 곳에 노란 번호표를 붙였다.
+   · 그림 : guide/g01~g15.jpg — 실제 앱을 폰 크기(375×812)로 찍고, 설명할 곳에 노란 번호표를 붙였다.
             (2026-10-20 오른쪽 위 [인터넷][☰] · 하늘색 테두리로 다시 찍음 — g12 는 ☰ 메뉴를 펼친 모습)
+            (2026-11-03 내 시간표 · 길 공유하기가 들어가 g11 설정 · g12 ☰ 을 다시 찍고, g13 길 공유하기 · g14 내 시간표 · g15 수업 알림을 더함
+             — 사용자 : 「설명은 최대한 간단하고 명확하게」)
             그림의 번호 = 아래 설명의 번호.
    · ui.js 의 GUIDE_PAGES · guideRender 를 이 파일이 갈아 끼운다 (ui.js 는 건드리지 않는다).
    · 그림을 누르면 zoom.js 의 openZoom 으로 크게 본다. */
@@ -20,8 +22,8 @@ var HOWTO = [
        'Scan door QR to start', 'Scan the QR on a building door. The app knows which door you are at and guides you from there. Your phone camera works too.'],
       ['인터넷 표시', '초록 와이파이 그림이면 인터넷이 연결된 거예요. 끊기면 그림이 바뀌어요. 누르면 인터넷 없이 쓰는 방법을 알려 줘요.',
        'Internet', 'A green Wi-Fi icon means you are online. It changes when you go offline. Tap it to see how to use the app offline.'],
-      ['☰ 메뉴', '누르면 밝은 화면 · 처음으로 · 즐겨찾기 · 설정이 아래로 펼쳐져요. 다음 쪽에서 자세히 알려 줘요.',
-       '☰ Menu', 'Tap to open Light mode · Home · Favorites · Settings. See the next page.']
+      ['☰ 메뉴', '누르면 밝은 화면 · 처음으로 · 내 시간표 · 즐겨찾기 · 설정이 아래로 펼쳐져요. 다음 쪽에서 자세히 알려 줘요.',
+       '☰ Menu', 'Tap to open Light mode · Home · My timetable · Favorites · Settings. See the next page.']
     ] },
   { t:['☰ 메뉴', '☰ Menu'], img:'g12_menu',
     lead:['어느 화면에서든 오른쪽 위 ☰을 누르면 펼쳐져요.', 'Tap ☰ at the top right on any screen.'],
@@ -31,8 +33,9 @@ var HOWTO = [
       ['밝은 화면', '스위치를 켜면 흰 바탕의 밝은 화면이 돼요. 햇빛 아래에서 잘 보여요. 한 번 바꾸면 다음에 켤 때도 그대로예요.',
        'Light mode', 'Turn the switch on for a bright white screen, easier to see in sunlight. The app remembers your choice.'],
       ['처음으로', '처음 화면으로 돌아가요.', 'Home', 'Back to the first screen.'],
+      ['내 시간표', '내 수업을 넣어 두는 곳이에요. 뒤에서 자세히 알려 줘요.', 'My timetable', 'Keep your classes here. See the later pages.'],
       ['즐겨찾기', '저장해 둔 곳 목록이 나와요.', 'Favorites', 'Shows the places you saved.'],
-      ['설정', '언어 · 쉬운 사용모드 · 이용안내 · 건의함 · 앱 다운로드', 'Settings', 'Language · Easy mode · User guide · Suggestion box · Install app']
+      ['설정', '언어 · 쉬운 사용모드 · 이용안내 · 건의함 · 길 공유하기 · 내 시간표 · 앱 다운로드', 'Settings', 'Language · Easy mode · User guide · Suggestion box · Share a route · My timetable · Install app']
     ] },
   { t:['쉬운 사용모드', 'Easy mode'], img:'g02_easy',
     lead:['켜 두면 화면마다 「여기를 누르세요」 하고 알려 줘요.', 'When it is on, every screen tells you where to tap.'],
@@ -111,7 +114,38 @@ var HOWTO = [
       ['누르면 크게', '문 앞 사진이 화면 가득 보여요. 문 옆 명패를 누르면 크게 보여서 글씨까지 확인할 수 있어요.', 'Tap to zoom', 'The door fills the screen. Tap the name plate to zoom in and read it.'],
       ['다른 장소 찾기', '다른 곳으로 또 가고 싶으면 눌러요. 「무엇을 찾으세요?」로 바로 가요.', 'Find another place', 'Go somewhere else. Opens "What are you looking for?".'],
       ['처음으로 돌아가기', '처음 화면으로 돌아가요.', 'Back to start', 'Returns to the first screen.']
-    ] },  { t:['즐겨찾기 & 팁', 'Favorites & Tips'],
+    ] },
+  { t:['길 공유하기', 'Share a route'], img:'g13_share',
+    lead:['☰ → 설정 → 길 공유하기. 찾아올 분께 길을 보내요 — 받는 분은 링크만 누르면 바로 길안내가 시작돼요.',
+          '☰ → Settings → Share a route. Send directions — the other person just taps the link.'],
+    items:[
+      ['호실 번호', '찾아올 곳의 5자리 번호를 넣어요. 초록 ✓ 가 뜨면 맞는 번호예요.', 'Room number', 'Enter the 5-digit room. A green ✓ means it is right.'],
+      ['들어올 문', '받는 분이 들어올 문을 골라요. 모르면 아래 「잘 모르겠어요」 — 받는 분이 문 앞에서 골라요.', 'Door', 'Pick the door they will use. Not sure? They can pick it at the door.'],
+      ['보낼 글', '이렇게 보내져요. 링크가 함께 들어가요.', 'Message', 'This is what they get, with the link.'],
+      ['카카오톡 · 문자로 보내기', '휴대폰 공유 창에서 카카오톡이나 문자를 골라 보내요.', 'Send', 'Choose KakaoTalk or SMS in the share window.'],
+      ['링크만 복사하기', '글과 링크를 복사해요. 원하는 곳에 붙여 넣으면 돼요.', 'Copy link', 'Copies the message and link to paste anywhere.']
+    ],
+    tip:['받는 분은 앱을 깔지 않아도 돼요. 도착하면 「보낸 분께 도착했어요 알리기」로 알려 줄 수 있어요.', 'They do not need to install anything, and can tell you when they arrive.'] },
+  { t:['내 시간표', 'My timetable'], img:'g14_tt',
+    lead:['☰ → 내 시간표. 수업을 넣어 두면 수업 시간에 앱을 켜는 순간 그 강의실 길안내가 바로 떠요.',
+          '☰ → My timetable. Open the app around class time and the route to that room starts right away.'],
+    items:[
+      ['바로 길안내', '주로 들어오는 문과 「수업 몇 분 전부터」를 정해요. 끌 수도 있어요.', 'Auto directions', 'Set your usual door and when to start. You can turn it off.'],
+      ['수업 알림', '수업 시작 전에 소리로 알려 줘요. 다음 쪽에서 알려 줘요.', 'Class alerts', 'Alerts before class. See the next page.'],
+      ['수업', '누르면 고치거나 지울 수 있어요. 빈 칸을 누르면 그 시간에 수업을 넣어요.', 'Class', 'Tap to edit or delete. Tap an empty slot to add one.'],
+      ['수업 넣기', '과목 이름 · 강의실 번호 · 요일 · 시간 · 색을 넣어요. 시간 칸을 누르면 숫자판이 떠요.', 'Add class', 'Name · room · days · time · color. Tap a time box for the number pad.']
+    ],
+    tip:['시간표는 이 폰에만 저장돼요.', 'Your timetable stays on this phone.'] },
+  { t:['수업 알림', 'Class alerts'], img:'g15_alarm',
+    lead:['내 시간표 → 수업 알림. 알림을 누르면 그 강의실 길안내가 바로 떠요.', 'My timetable → Class alerts. Tap an alert to start the route to that room.'],
+    items:[
+      ['수업 알림', '켜면 처음 한 번 휴대폰이 알림을 허용할지 물어요.', 'Class alerts', 'Turn on — your phone asks once to allow notifications.'],
+      ['몇 분 전', '숫자 칸을 눌러 몇 분 전에 알릴지 정해요.', 'Minutes before', 'Tap the number to set how early.'],
+      ['소리', '소리를 골라요. 「듣기」로 미리 들어 봐요.', 'Sound', 'Pick a sound. Tap "Play" to hear it.'],
+      ['실제 알림 받아 보기', '10초 뒤에 진짜 알림이 와요. 잘 오는지 확인해 보세요.', 'Test alert', 'A real alert arrives in 10 seconds.']
+    ],
+    tip:['앱이 열려 있을 때 울려요. 앱을 완전히 닫으면 울리지 않아요.', 'Alerts ring while the app is open, not after you close it.'] },
+  { t:['즐겨찾기 & 팁', 'Favorites & Tips'],
     secs:[
       { h:['⭐ 즐겨찾기 — 자주 가는 곳 저장하기', '⭐ Favorites — save places you visit often'], img:'g10_fav',
         pre:['3D 건물 화면 오른쪽 위 ☆을 누르면 ★로 바뀌며 저장돼요.', 'Tap ☆ at the top right of the 3D screen to save a place.'],
@@ -127,15 +161,19 @@ var HOWTO = [
           ['이용안내', '지금 보고 있는 이 안내예요.', 'User guide', 'This guide.'],
           ['건의함', '앱 사진이 실제 모습과 다르면 지금 모습을 찍어서 보내 주세요. 확인한 뒤 고쳐서 다음에 오는 사람에게도 도움이 돼요.',
            'Suggestion box', 'If a photo looks different from reality, send a new photo. It helps the next visitors.'],
+          ['길 공유하기', '호실만 넣으면 카톡 · 문자로 길을 보내요.', 'Share a route', 'Send directions by chat with just a room number.'],
+          ['내 시간표', '내 수업을 넣어 두면 수업 시간에 바로 길안내가 떠요.', 'My timetable', 'Directions to your next class right away.'],
           ['앱 다운로드', '폰 홈 화면에 앱처럼 깔 수 있어요. 삼성(안드로이드)은 버튼 한 번, 아이폰은 그림으로 방법을 알려 줘요.',
            'Install app', 'Add the app to your home screen. One tap on Android; picture steps on iPhone.']
         ] }
     ],
     tip:['💡 더 알아 두면 좋아요<br>· 지하 1층(B1)에는 크리에이티브 존이 있어요. 3D 화면 「층 상세」에서 B1을 누르면 엘리베이터·계단·나가는 문 위치가 보여요.<br>' +
          '· 길안내 중에 앱이 꺼져도 30분 안에 다시 열면 「아까 보던 길안내가 있어요」가 떠요. 「이어서 보기」를 누르면 보던 단계부터 다시 안내해요.<br>' +
+         '· 휴대폰 뒤로가기를 누르면 바로 전 화면으로 가요. 첫 화면에서 누르면 「앱을 종료하시겠어요?」가 떠요.<br>' +
          '· 검색이 안 되면 숫자를 다시 확인해 보세요.<br>· 방향이 헷갈리면 사진과 눈앞 모습을 나란히 비교해 보세요.<br>· 불편한 점은 언제든 건의함으로 알려 주세요.',
          '💡 Good to know<br>· The Creative Zone is on B1. Tap B1 under "Floor" in the 3D screen to see the elevator, stairs and exit.<br>' +
          '· If the app closes during navigation, open it again within 30 minutes and tap "Continue" to pick up where you left off.<br>' +
+         '· The phone back button takes you to the previous screen. On the first screen it asks whether to close the app.<br>' +
          '· If search finds nothing, check the numbers.<br>· If the direction is confusing, compare the photo with what you see.<br>· Tell us anything inconvenient via the Suggestion Box.'] }
 ];
 

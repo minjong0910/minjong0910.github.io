@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '06965cdc2550';   // 파일 254개 · 16.7MB
+var VERSION = '8d03c03d64d4';   // 파일 257개 · 17.1MB
 var FILES = [
   ['3d/realistic.html','9524531d6645',79368],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -220,8 +220,11 @@ var FILES = [
   ['guide/g08_step.jpg','b3bee4aaea07',123473],
   ['guide/g09_arrive.jpg','01a120c4cb7c',78899],
   ['guide/g10_fav.jpg','24b3a50caa92',25747],
-  ['guide/g11_settings.jpg','beb44546020a',60236],
-  ['guide/g12_menu.jpg','9f444169217c',68100],
+  ['guide/g11_settings.jpg','8acb3eff8a45',82505],
+  ['guide/g12_menu.jpg','9157aec4dcf8',76976],
+  ['guide/g13_share.jpg','5efd23200a98',123127],
+  ['guide/g14_tt.jpg','e1b7a9f36308',74555],
+  ['guide/g15_alarm.jpg','19a2881348f4',102548],
   ['img/exit-sign.png','f1b9ed7cd89e',27291],
   ['img/icon-180.png','bd9c894f1d5d',5036],
   ['img/icon-192.png','a6893220bee4',5036],
@@ -232,15 +235,15 @@ var FILES = [
   ['js/app/boot.js','57f3f42e5b9a',10615],
   ['js/app/building.js','95b01af4110d',23489],
   ['js/app/consent.js','d6ce149675df',40844],
-  ['js/app/easy.js','4fc1ffd1ea62',24293],
+  ['js/app/easy.js','91dc970268ae',24935],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','bcc83dabb095',44185],
-  ['js/app/howto.js','ca050ec6837d',19091],
+  ['js/app/howto.js','b17902556aa6',23981],
   ['js/app/icons.js','4cb6e33c5920',21136],
   ['js/app/live.js','641f671b6fff',2510],
   ['js/app/overview3d.js','35ad3a4e8f9a',108858],
   ['js/app/photos.js','9afe2486d7e1',54222],
-  ['js/app/pwa.js','795802be84df',49218],
+  ['js/app/pwa.js','6d835cb08228',49409],
   ['js/app/qrnav.js','1ab04e81bfc1',20800],
   ['js/app/resume.js','b2a9974631f1',8244],
   ['js/app/roadview-1f.js','14696e0f4c2a',46207],
@@ -253,7 +256,7 @@ var FILES = [
   ['js/app/roadview.js','e4ccae279c4a',133370],
   ['js/app/roomfix.js','1b886c300886',22082],
   ['js/app/share.js','3c5152b84955',17599],
-  ['js/app/shell.js','75e5cf045f5f',31903],
+  ['js/app/shell.js','2c94ab5ad1dd',33594],
   ['js/app/start.js','4065777331b0',1505],
   ['js/app/story.js','19c2668151da',11859],
   ['js/app/sugai.js','510d8159462a',132345],

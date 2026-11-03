@@ -217,7 +217,14 @@ var EASY = (function(){
     var cov = (h.cover || []).map(function(sel){ return $(sel); }).filter(function(e){ return e && e.getBoundingClientRect().height > 0; });
     var up = cov.length ? nearSib(cov[0], scr, 'previous', cov) : null, dn = cov.length ? nearSib(cov[cov.length - 1], scr, 'next', cov) : null;
     var bH, bTop;
-    if(up && dn){
+    /* 2026-11-03 : 길안내 · 도착 화면(인스타 + 공항, story.js)은 위 칸에 「동문 → 13310호」 · 오른쪽 위 [인터넷][☰]이 있어
+       말풍선이 그 위에 앉으면 글이 단추에 가려졌다 → 아래 안내판(.stBottom) 바로 위, 사진 한가운데 아래쪽에 앉힌다 */
+    var stb = scr.classList.contains('story') ? scr.querySelector('.stBottom') : null;
+    if(stb && stb.getBoundingClientRect().height > 0){
+      dropGap(); setHid([]); bubble.classList.toggle('compact', !!h.compact);
+      bH = bubble.offsetHeight || 56;
+      bTop = stb.getBoundingClientRect().top - bH - 10;
+    }else if(up && dn){
       dropGap(); setHid(cov); bubble.classList.toggle('compact', !!h.compact);
       bH = bubble.offsetHeight || 56;
       bTop = (inkEdge(up, 'bottom') + inkEdge(dn, 'top')) / 2 - bH / 2;

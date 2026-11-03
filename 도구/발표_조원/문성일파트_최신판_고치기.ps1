@@ -2,7 +2,8 @@
 #   ① 길안내 · 도착 화면 그림을 새 화면(인스타 + 공항)으로 : 12쪽 ⑤ · ⑥, 16쪽 ⑤ — 본 서버를 아이폰 크기(DPR 3)로 정문 → 13310호를 찍은 것
 #      13쪽 ④ 「사진 따라가기」 설명 네 줄도 새 화면에 맞게(공항 안내판 · 화면 가득 · 누른 곳 2배 · 좌우로 밀기)
 #   ② NFC 는 아직 안 붙였다(구매 승인 대기) — 지금 되는 것처럼 읽히는 곳만 고친다
-#   ③ 15쪽 파일 249개 → 251개
+#   ③ 15쪽 파일 249개 → 257개 · 17.1MB (2026-11-03 다시 셈 — 처음엔 251개)
+#   ④ 14쪽 이용안내 11쪽 → 15쪽 (2026-11-03 사용자 「발표 자료 최신화」)
 #   그 밖의 글 · 그림 · 순서는 한 글자도 안 바꾼다. 원본은 같은 폴더의 문성일_12-17쪽_원본.pptx
 param([string]$File = (Join-Path $PSScriptRoot '문성일_12-17쪽.pptx'), [string]$Shots = '')
 $ErrorActionPreference = 'Stop'
@@ -22,6 +23,14 @@ function Rep($k, $name, $from, $to){
   $s = $p.Slides.Item($k); $tr = $s.Shapes.Item($name).TextFrame.TextRange
   if($tr.Text.IndexOf($from) -lt 0){ throw ('{0}쪽 「{1}」에 「{2}」 없음' -f $k, $name, $from) }
   [void]$tr.Replace($from, $to); ('{0}쪽 「{1}」 : {2} → {3}' -f $k, $name, $from, $to)
+}
+# 글상자 이름을 모를 때 — 그 쪽 글상자 전체에서 찾아 바꾼다(묶음 안까지)
+function RepAny($k, $from, $to){
+  function Walk($shapes){ foreach($sh in $shapes){ try{ if($sh.Type -eq 6){ Walk $sh.GroupItems; continue } }catch{}
+    try{ if($sh.HasTextFrame -and $sh.TextFrame.HasText -and $sh.TextFrame.TextRange.Text.IndexOf($from) -ge 0){ [void]$sh.TextFrame.TextRange.Replace($from, $to); $script:hit++ } }catch{} } }
+  $script:hit = 0; Walk $p.Slides.Item($k).Shapes
+  if($script:hit -eq 0){ throw ('{0}쪽에 「{1}」 없음' -f $k, $from) }
+  ('{0}쪽 : {1} → {2}' -f $k, $from, $to)
 }
 function Note($k, $from, $to){
   $tr = $p.Slides.Item($k).NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange
@@ -50,8 +59,10 @@ try{
   Note 15 '문에 QR 스티커나 NFC 태그를 붙이면, 찍거나 휴대폰을 대는 순간 그 문이 출발점이 되고' '문에 QR 스티커를 붙이면, 찍는 순간 그 문이 출발점이 되고(NFC 태그도 승인이 나면 같은 방식으로 붙입니다)'
   Note 15 '입구에서 QR 을 찍거나 NFC 에 대고, 그다음은' '입구에서 QR 을 찍고, 그다음은'
   # ③ 파일 수
-  Rep 15 '오프라인 1 설명' '파일 249개(16.6MB)' '파일 251개(16.6MB)'
-  Note 15 '파일 249개, 16.6MB' '파일 251개, 16.6MB'
+  Rep 15 '오프라인 1 설명' '파일 249개(16.6MB)' '파일 257개(17.1MB)'   # 11/03 다시 셈(오프라인목록.ps1)
+  Note 15 '파일 249개, 16.6MB' '파일 257개, 17.1MB'
+  # ④ 이용안내 쪽 수 — 11/03 길 공유하기 · 내 시간표 · 수업 알림 세 쪽 + 처음 동의 쪽이 더해져 15쪽
+  RepAny 14 '화면별 그림 설명 11쪽' '화면별 그림 설명 15쪽'
   $p.Save()
 } finally {
   try{ $p.Close() }catch{}

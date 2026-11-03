@@ -403,9 +403,12 @@ var B1_ZONE_MID_Z_D = (B1_ZONE_TOP_Z_D + B1_ZONE_BOT_Z_D)/2;
 var B1_ZONE_WIDTH_X_D = GLOBAL_HALF_X*2-2;
 var B1_ZONE_MID_X_D = 0;
 
-function lvName(lv){
-  if(lv==='R') return (LANG==='en') ? 'Rooftop' : '옥상';
-  if(LANG==='en') return lv==='B1' ? 'B1' : 'Floor '+lv;
+function lvName(lv){ return lvNameIn(lv, LANG); }
+/* 언어를 정해서 — 길안내 문장은 한국어(tko) · 영어(ten)를 한꺼번에 만들어서, 지금 언어를 따르면
+   영어 문장에 「Take the elevator up to 1층」처럼 한국어 층이 섞였다(2026-11-04 사용자가 고치라고 함) */
+function lvNameIn(lv, lang){
+  if(lv==='R') return (lang==='en') ? 'Rooftop' : '옥상';
+  if(lang==='en') return lv==='B1' ? 'B1' : 'Floor '+lv;
   return lv==='B1' ? '지하 1층' : lv+'층';
 }
 function lvLabel(lv){ return (lv==='B1'||lv==='R') ? (lv==='R'?'RF':'B1') : lv+'F'; }

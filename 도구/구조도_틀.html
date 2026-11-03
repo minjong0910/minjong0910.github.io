@@ -381,7 +381,7 @@
   <div class="gbox">
     <div class="gt">③ 건물과 3D</div><div class="gs">가장 큰 덩어리 — 전체의 절반 · 12개</div>
     <div class="grid">
-      <button class="b p" data-id="bdata"><span class="n">building.js</span><span class="d">432줄 · 호실 배치 자료</span></button>
+      <button class="b p" data-id="bdata"><span class="n">building.js</span><span class="d">435줄 · 호실 배치 자료</span></button>
       <button class="b p" data-id="show"><span class="n">overview3d.js</span><span class="d">1,662줄 · 건물 전체 3D</span></button>
       <button class="b p" data-id="show"><span class="n">view3d · floor-detail</span><span class="d">1,044줄 · 층 상세</span></button>
       <button class="b p" data-id="roadview"><span class="n">roadview*.js</span><span class="d">10,805줄 · 8개 파일 · 1인칭 걷기</span></button>
@@ -391,7 +391,7 @@
   <div class="gbox">
     <div class="gt">④ 길안내와 사진</div><div class="gs">실제로 길을 알려 주는 부분 · 4개</div>
     <div class="grid">
-      <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">638줄 · 안내 단계 만들기</span></button>
+      <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">639줄 · 안내 단계 만들기</span></button>
       <button class="b p" data-id="f_photos"><span class="n">photos.js</span><span class="d">1,084줄 · 사진 목록 · 사진 상자</span></button>
       <button class="b p" data-id="qr"><span class="n">qrnav.js</span><span class="d">434줄 · 출입문 QR</span></button>
       <button class="b p" data-id="f_roomfix"><span class="n">roomfix.js</span><span class="d">398줄 · 구성 및 변경 · 메모</span></button>
@@ -747,7 +747,7 @@ f_story:{t:'story.js — 길안내 · 도착 화면 (인스타 감성 + 공항 �
 f_consent:{t:'consent.js — 처음 켤 때 동의 · 기능별 허용 · 건의함 사진 개인정보',z:'p',zl:'폰 안에서 돈다',
  kid:'앱을 처음 켜면 켜는 화면 다음에 「시작하기 전에 확인해 주세요」가 한 번 나와요. 한 번 동의하면 다시 묻지 않아요. 카메라 · 알림을 그때 허용하지 않았으면, 그 기능을 켤 때만 「허용할까요?」를 물어요.',
  why:'2026-11-03 사용자가 눌러 보는 견본을 열 번 고쳐 정한 순서 — 「하나하나 켤 때마다 묻는 건 번거롭다, 처음에 한 번에」 · 「처음에 동의했으면 다시 묻지 말 것」 · 「QR 이면 QR 설명만, 건의함이면 건의함 설명만」 · 「설정에 동의 관리 줄은 두지 말고 이용안내 마지막 쪽에」.',
- where:['켜는 화면 → <b>동의 화면</b>(필수 : 이용 안내 · 이 폰에 저장 · 개인정보 처리방침 · 오픈소스 라이선스 고지 / 선택 : 개인정보 수집·이용 · 건의함 사진 개인정보 · 카메라 · 알림 — 처리방침 · 라이선스 · 수집·이용 세 줄은 설명 없이 체크만(사용자 11/03) — 처리방침 · 라이선스는 처음부터 체크된 채로(11/04, 동의가 아니라 알림이라), 나머지는 「보기 ▾」. 동의 항목이 바뀌면(AGREE_V, 지금 3) 예전에 동의한 폰도 한 번 더, 전에 고른 것은 체크된 채로) → 쉬운 사용모드 「처음이세요?」','처음에 허용 안 한 폰만 : 출입문 QR 스캔 · 건의함 📷 칸 · 수업 알림을 켜는 순간 앱이 묻는 창 [허용 안 함][허용]','건의함 : 사진 칸 아래 한 줄 · 맨 아래 「올린 사진 지워 달라고 하기」(글만) → 관리자 화면에 「사진 삭제 요청」 카드','☰ → 설정 → 이용안내 <b>15쪽 「동의 · 권한 안내」</b>'],
+ where:['켜는 화면 → <b>동의 화면</b>(필수 : 이용 안내 · 이 폰에 저장 · 개인정보 처리방침 · 오픈소스 라이선스 고지 / 선택 : 개인정보 수집·이용(건의함 사진 — 11/04 두 줄을 합침) · 카메라 · 알림 — 처리방침 · 라이선스 두 줄은 설명 없이 체크만(사용자 11/03) — 처리방침 · 라이선스는 처음부터 체크된 채로(11/04, 동의가 아니라 알림이라), 나머지는 「보기 ▾」. 동의 항목이 바뀌면(AGREE_V, 지금 3) 예전에 동의한 폰도 한 번 더, 전에 고른 것은 체크된 채로) → 쉬운 사용모드 「처음이세요?」','처음에 허용 안 한 폰만 : 출입문 QR 스캔 · 건의함 📷 칸 · 수업 알림을 켜는 순간 앱이 묻는 창 [허용 안 함][허용]','건의함 : 사진 칸 아래 한 줄 · 맨 아래 「올린 사진 지워 달라고 하기」(글만) → 관리자 화면에 「사진 삭제 요청」 카드','☰ → 설정 → 이용안내 <b>15쪽 「동의 · 권한 안내」</b>'],
  how:'easy.js 의 askFirst · busy 를 감싸 동의 화면을 「처음이세요?」 위(z 945)에 깝니다. 카메라는 getUserMedia 를 켜자마자 끄고, 알림은 Notification.requestPermission — 둘 다 누른 그 순간에 불러야 휴대폰 창이 뜹니다. 공유 링크(?to=)로 연 분에게는 묻지 않습니다(누르기만 하면 바로 길안내). 거절한 사진은 서버에서 바로 지우고, 확인하지 못한 사진은 관리자 화면을 열 때 30일 지난 것을 지웁니다(sugdb.js).',
  tech:['localStorage','getUserMedia','Notification.requestPermission','MutationObserver'],
  src:[['site/js/app/consent.js','동의 화면 · 허용 묻기 · 건의함 · 이용안내 마지막 쪽'],['site/js/app/sugdb.js','거절 즉시 삭제 · 30일 정리'],['site/css/app.css','「처음 켤 때 동의 · 길 공유하기 · 내 시간표」 묶음']]},

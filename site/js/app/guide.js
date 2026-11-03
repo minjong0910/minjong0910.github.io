@@ -126,9 +126,10 @@ function buildSteps(){
     var goUp = lvIndex(lv) > lvIndex(sf);
     out.push({a: goUp?'↑':'↓', type:'lift',
               /* 절차를 정한 문의 문구는 사용자가 정한 그대로 — '엘리베이터를 타고 ○○으로 …' */
-              tko: flow ? ('엘리베이터를 타고 '+lvName(lv)+'으로 '+(goUp?'올라가세요':'내려가세요'))
-                        : ('엘리베이터로 '+lvName(lv)+'까지 '+(goUp?'올라가세요':'내려가세요')),
-              ten: 'Take the elevator '+(goUp?'up to ':'down to ')+lvName(lv),
+              tko: flow ? ('엘리베이터를 타고 '+lvNameIn(lv, 'ko')+'으로 '+(goUp?'올라가세요':'내려가세요'))
+                        : ('엘리베이터로 '+lvNameIn(lv, 'ko')+'까지 '+(goUp?'올라가세요':'내려가세요')),
+              /* 영어는 공항 표지판식 짧은 층 이름(3F · B1) — 길안내 화면이 10/28 부터 「3층」을 「3F」로 바꿔 보여 주던 모양 그대로(story.js enFix) */
+              ten: 'Take the elevator '+(goUp?'up to ':'down to ')+(lv==='R' ? 'Rooftop' : lvLabel(lv)),
               ph:'['+sfName+' 엘리베이터 사진 ]', code:startEV});
   }
   if(target.kind==='zone'){

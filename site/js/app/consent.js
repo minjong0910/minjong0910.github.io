@@ -66,7 +66,8 @@ var CONSENT = (function(){
 
   /* 동의 화면의 판 — 항목이 바뀌면 올린다. 예전 판에 동의한 폰은 동의 화면을 한 번 더 본다(전에 고른 것은 체크된 채로).
      2 = 2026-11-03 사용자 : 「개인정보 수집·이용 동의 · 개인정보 처리방침 · 오픈소스 라이선스 고지를 더해 동의만 구하게(설명 없이)」 */
-  var AGREE_V = 2;
+  /* 3 = 2026-11-04 처리방침 · 라이선스를 처음부터 체크된 채로 — 사용자 「창이 안 뜬다」 : v2 에 이미 동의한 폰(사용자 폰)은 바뀐 화면을 못 봐서, 한 번 더 */
+  var AGREE_V = 3;
 
   /* ── 지금 상태 ── */
   function agreed(){ var a = ls(K.agree); return !!(a && (a.v || 1) >= AGREE_V); }
@@ -197,7 +198,7 @@ var CONSENT = (function(){
     var list = AG(), st = {}, prev = ls(K.agree);
     list.forEach(function(x){ st[x.k] = !!x.on; });
     /* 예전 판에 동의한 폰 — 그때 고른 것은 체크된 채로 보여 주고, 새 항목만 더 체크하면 되게 */
-    if(prev){ st.use = st.local = true; st.photo = pvOK(); st.cam = camOK(); st.noti = ls(K.noti) === 'yes'; }
+    if(prev){ st.use = st.local = true; st.collect = !!prev.collect; st.photo = pvOK(); st.cam = camOK(); st.noti = ls(K.noti) === 'yes'; }
     var a = mk('div', 'syAgree',
       '<div class="sc"><div class="brand">🏫 ' + T('공대 3호관 길안내', 'Engineering Bldg 3 Navigator') + '</div>' +
       '<h2>' + T('시작하기 전에<br>확인해 주세요', 'Before you start') + '</h2><p class="sub">' +

@@ -3,7 +3,9 @@
    견본 : 생성물\견본_링크공유_시간표_개인정보\견본 눌러보기 — 개인정보 동의 · 길 공유하기 · 내 시간표.html (사용자가 눌러 보며 열 번 고침)
 
    · 켜는 화면 → 「시작하기 전에 확인해 주세요」 → 쉬운 사용모드 「처음이세요?」 → 첫 화면.
-     필수 : 이용 안내 · 이 폰에 저장 / 선택 : 건의함 사진 개인정보 · 카메라 · 알림. 한 번 동의하면 앱을 쓰는 동안 다시 묻지 않는다(b3nav_agree).
+     필수 : 이용 안내 · 이 폰에 저장 · 개인정보 처리방침 · 오픈소스 라이선스 고지 / 선택 : 개인정보 수집·이용 · 건의함 사진 개인정보 · 카메라 · 알림.
+     (처리방침 · 라이선스 · 수집·이용 세 줄은 11/03 사용자 — 설명 없이 체크만. 견본 : 생성물\견본_동의화면)
+     한 번 동의하면 앱을 쓰는 동안 다시 묻지 않는다(b3nav_agree) — 항목이 바뀌어 AGREE_V 가 오르면 한 번 더.
      공유 링크(?to=)로 연 분은 묻지 않고 바로 길안내(share.js — 「누르기만 하면 바로」).
    · 카메라 · 알림 체크 = 앱 동의 → 휴대폰(브라우저) 창만 한 번 (카메라 : getUserMedia 를 켜자마자 끈다 · 알림 : Notification.requestPermission).
    · 처음에 동의하지 않았으면, 그 기능이 켜지는 순간에만 앱이 묻는다(appAsk) — 그 기능 설명만 :
@@ -62,8 +64,12 @@ var CONSENT = (function(){
   var U = B3UI, $ = U.$, $$ = U.$$, mk = U.mk, esc = U.esc, ls = U.ls, T = U.T, IC = U.IC;
   var K = {agree: 'b3nav_agree', pv: 'b3nav_pv', cam: 'b3nav_perm_cam', noti: 'b3nav_perm_noti'};   // cam · noti : 'yes' · 'no'
 
+  /* 동의 화면의 판 — 항목이 바뀌면 올린다. 예전 판에 동의한 폰은 동의 화면을 한 번 더 본다(전에 고른 것은 체크된 채로).
+     2 = 2026-11-03 사용자 : 「개인정보 수집·이용 동의 · 개인정보 처리방침 · 오픈소스 라이선스 고지를 더해 동의만 구하게(설명 없이)」 */
+  var AGREE_V = 2;
+
   /* ── 지금 상태 ── */
-  function agreed(){ return !!ls(K.agree); }
+  function agreed(){ var a = ls(K.agree); return !!(a && (a.v || 1) >= AGREE_V); }
   function pvOK(){ return !!ls(K.pv); }
   function camOK(){ return ls(K.cam) === 'yes'; }
   function notiSupported(){ return typeof Notification !== 'undefined'; }
@@ -164,6 +170,10 @@ var CONSENT = (function(){
      d: '<ul><li>' + T('이 폰에 남는 것 : 길안내 이어 하기(30분) · 즐겨찾기 · 최근 찾은 곳 · 내 시간표 · 수업 알림 설정 · 쉬운 사용모드 · 밝은 화면 · 이 동의 기록', 'Kept on this phone: resume (30 min) · favorites · recent searches · timetable · class alerts · easy mode · light mode · this consent') + '</li>' +
         '<li>' + T('인터넷이 없어도 열리게 앱을 이 폰에 저장해 둬요.', 'The app is saved on this phone so it opens offline.') + '</li>' +
         '<li>' + T('모두 이 폰에만 있고 서버로 보내지 않아요. 브라우저의 「사이트 데이터 삭제」로 한 번에 지울 수 있어요.', 'All of it stays on this phone. Clear the site data in your browser to delete it.') + '</li></ul>'},
+    /* 설명 없이 체크만 (사용자 11/03) — 처리방침 · 라이선스는 「확인」, 수집·이용은 길안내에 필요 없어 선택(필수로 묶으면 안 된다) */
+    {k: 'policy', req: true, plain: true, t: T('개인정보 처리방침', 'Privacy policy')},
+    {k: 'oss', req: true, plain: true, t: T('오픈소스 라이선스 고지', 'Open-source licenses')},
+    {k: 'collect', req: false, plain: true, t: T('개인정보 수집·이용 동의', 'Collection & use of personal data')},
     {k: 'photo', req: false, t: T('건의함 사진 개인정보', 'Suggestion photos'), s: T('사진 · 메모를 받아 길안내 사진으로 써요 — 얼굴 X · GPS 지움', 'Photos and notes become guide photos — no faces · GPS removed'),
      d: '<ul><li>' + T('<b>사람 얼굴</b>이나 다른 사람의 화면 · 이름표가 나오지 않게 찍어 주세요.', 'Keep <b>faces</b> and name tags out of the photo.') + '</li><li>' + T('사진 속 위치 정보(GPS)는 올리기 전에 지워져요.', 'GPS data is removed before upload.') + '</li></ul>' + PV_TABLE() +
         '<p style="margin-top:0.4rem;color:#9FB2C8;">' + T('동의하지 않아도 길안내는 모두 쓸 수 있어요. 건의함 「📷 사진」 칸을 누를 때 한 번 더 물어요.', 'Directions work without this. We ask again when you tap the photo box.') + '</p>'},
@@ -182,12 +192,19 @@ var CONSENT = (function(){
   function agreeScreen(done){
     if(document.querySelector('.syAgree')) return;
     shown = true;
-    var list = AG(), st = {use: false, local: false, photo: false, cam: false, noti: false};
+    var list = AG(), st = {}, prev = ls(K.agree);
+    list.forEach(function(x){ st[x.k] = false; });
+    /* 예전 판에 동의한 폰 — 그때 고른 것은 체크된 채로 보여 주고, 새 항목만 더 체크하면 되게 */
+    if(prev){ st.use = st.local = true; st.photo = pvOK(); st.cam = camOK(); st.noti = ls(K.noti) === 'yes'; }
     var a = mk('div', 'syAgree',
       '<div class="sc"><div class="brand">🏫 ' + T('공대 3호관 길안내', 'Engineering Bldg 3 Navigator') + '</div>' +
-      '<h2>' + T('시작하기 전에<br>확인해 주세요', 'Before you start') + '</h2><p class="sub">' + T('한 번만 동의하면 다음부터는 묻지 않아요.', 'Agree once and we will not ask again.') + '</p>' +
+      '<h2>' + T('시작하기 전에<br>확인해 주세요', 'Before you start') + '</h2><p class="sub">' +
+        (prev ? T('동의 항목이 바뀌어서 한 번만 더 여쭤봐요.', 'Our consent items changed, so we ask once more.') : T('한 번만 동의하면 다음부터는 묻지 않아요.', 'Agree once and we will not ask again.')) + '</p>' +
       '<div class="syAgAll" role="checkbox"><span class="syBox">' + IC.check + '</span><div><b>' + T('모두 동의해요', 'Agree to all') + '</b><small>' + T('선택 항목 · 카메라 · 알림까지 한 번에', 'Including optional items, camera and notifications') + '</small></div></div>' +
-      list.map(function(x){ return '<div class="syAgItem" data-k="' + x.k + '"><div class="hd" role="checkbox"><span class="syBox">' + IC.check + '</span><div class="t"><b>' + tagOf(x) + x.t + '</b><small>' + x.s + '</small></div><button class="more" type="button">' + T('보기 ▾', 'More ▾') + '</button></div><div class="det">' + x.d + '</div></div>'; }).join('') +
+      list.map(function(x){
+        if(x.plain) return '<div class="syAgItem plain" data-k="' + x.k + '"><div class="hd" role="checkbox"><span class="syBox">' + IC.check + '</span><div class="t"><b>' + tagOf(x) + x.t + '</b></div></div></div>';
+        return '<div class="syAgItem" data-k="' + x.k + '"><div class="hd" role="checkbox"><span class="syBox">' + IC.check + '</span><div class="t"><b>' + tagOf(x) + x.t + '</b><small>' + x.s + '</small></div><button class="more" type="button">' + T('보기 ▾', 'More ▾') + '</button></div><div class="det">' + x.d + '</div></div>';
+      }).join('') +
       '<div class="syPerm">📍 <b>' + T('GPS 위치는 쓰지 않아요', 'We never use GPS') + '</b> — ' + T('어디 계신지는 출입문 QR 로만 알아요.', 'your position comes only from the door QR.') + '<br>' +
         T('여기서 동의하면 앱을 쓰는 동안 다시 묻지 않아요. 카메라 · 알림은 체크할 때 휴대폰이 한 번만 물어요.', 'Agree here and we never ask again. For camera and notifications your phone asks once when you tick them.') + '</div></div>' +
       '<div class="ft"><button class="big" type="button" disabled>' + T('필수 항목에 동의해 주세요', 'Please agree to the required items') + '</button><small>' + T('동의 · 권한 안내는 ☰ → 설정 → 이용안내 마지막 쪽에 있어요', 'See ☰ → Settings → User guide, last page') + '</small></div>');
@@ -223,10 +240,10 @@ var CONSENT = (function(){
         if(x.perm && !st[k]){ ask([k], 0); return; }
         st[k] = !st[k]; paint();
       };
-      $('.more', it).onclick = function(){ var o = !it.classList.contains('open'); it.classList.toggle('open', o); this.textContent = o ? T('접기 ▴', 'Less ▴') : T('보기 ▾', 'More ▾'); };
+      if($('.more', it)) $('.more', it).onclick = function(){ var o = !it.classList.contains('open'); it.classList.toggle('open', o); this.textContent = o ? T('접기 ▴', 'Less ▴') : T('보기 ▾', 'More ▾'); };
     });
     $('.ft .big', a).onclick = function(){
-      ls(K.agree, {d: U.today()}); ls(K.pv, st.photo ? {d: U.today()} : null);
+      ls(K.agree, {d: U.today(), v: AGREE_V, collect: !!st.collect}); ls(K.pv, st.photo ? {d: U.today()} : null);
       ls(K.cam, st.cam ? 'yes' : 'no'); ls(K.noti, st.noti ? 'yes' : 'no');
       a.remove(); pvPaint();
       U.toast('✓ ' + T('동의했어요 — 다음부터는 묻지 않아요', 'Thank you — we will not ask again'));
@@ -343,12 +360,14 @@ var CONSENT = (function(){
   function li(n, b, sp){ return '<li><i>' + n + '</i><div><b>' + b + '</b><span>' + sp + '</span></div></li>'; }
   /* 2026-11-03 사용자 : 「설명이 너무 자세하다 — 최대한 간단하고 명확하게, 파일 크기 같은 건 보여 줘도 모른다」 → 한 줄씩만 */
   function guideHtml(){
-    return '<div class="hwLead">' + T('처음 켤 때 한 번만 물어요. 그다음부터는 묻지 않아요.', 'We ask only once, the first time you open the app.') + '</div>' +
+    return '<div class="hwLead">' + T('처음 켤 때 한 번만 물어요. 그다음부터는 묻지 않아요. (동의 항목이 바뀌면 한 번 더 물어요)', 'We ask only once, the first time you open the app (and once more if the items change).') + '</div>' +
       '<h5 class="hwHead">✅ ' + T('처음 켤 때 동의하는 것', 'What you agree to') + '</h5><ol class="hwList">' +
         li(1, T('필수 · 이용 안내', 'Required · Terms'), T('길안내는 참고용이에요. 문 옆 명패를 꼭 확인해 주세요.', 'Directions are a guide — please check the door plate.')) +
         li(2, T('필수 · 이 폰에 저장', 'Required · Saved on this phone'), T('즐겨찾기 · 내 시간표 같은 기록은 이 폰에만 남아요.', 'Favorites and your timetable stay on this phone only.')) +
-        li(3, T('선택 · 건의함 사진', 'Optional · Suggestion photos'), T('동의하지 않아도 길안내는 모두 쓸 수 있어요.', 'Directions work without it.')) +
-        li(4, T('선택 · 카메라 · 알림', 'Optional · Camera · Alerts'), T('지금 허용하지 않아도 괜찮아요. 쓸 때 다시 물어요.', 'You can skip — we ask again when you use them.')) + '</ol>' +
+        li(3, T('필수 · 개인정보 처리방침 · 오픈소스 라이선스 고지', 'Required · Privacy policy · Open-source licenses'), T('개인정보를 어떻게 다루는지와, 앱에 쓴 공개 프로그램(오픈소스)의 사용 허가에 관한 것이에요.', 'How we handle personal data, and the licenses of the open-source software in this app.')) +
+        li(4, T('선택 · 개인정보 수집·이용', 'Optional · Personal data'), T('동의하지 않아도 길안내는 모두 쓸 수 있어요.', 'Directions work without it.')) +
+        li(5, T('선택 · 건의함 사진', 'Optional · Suggestion photos'), T('동의하지 않아도 길안내는 모두 쓸 수 있어요.', 'Directions work without it.')) +
+        li(6, T('선택 · 카메라 · 알림', 'Optional · Camera · Alerts'), T('지금 허용하지 않아도 괜찮아요. 쓸 때 다시 물어요.', 'You can skip — we ask again when you use them.')) + '</ol>' +
       '<h5 class="hwHead">📷 ' + T('카메라 · 알림은 쓸 때 물어요', 'Camera and alerts are asked when needed') + '</h5><ol class="hwList">' +
         li(1, T('카메라', 'Camera'), T('출입문 QR 을 찍을 때 · 건의함 사진을 찍을 때', 'Scanning a door QR · taking a suggestion photo')) +
         li(2, T('알림', 'Alerts'), T('내 시간표에서 수업 알림을 켤 때', 'Turning on class alerts in My Timetable')) + '</ol>' +

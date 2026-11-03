@@ -413,7 +413,9 @@ var CONSENT = (function(){
     new MutationObserver(function(){ if(sug.classList.contains('on')) onSug(); }).observe(sug, {attributes: true, attributeFilter: ['class']});
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onSug); else onSug();
+  /* 말을 바꾸면(ui.js applyLang) 건의함에 한 번 그려 둔 줄을 그 말로 다시 */
+  function relang(){ var d = document.getElementById('delLink'); if(d) d.remove(); delLink(); pvPaint(); }
 
   return {agreed: agreed, pvOK: pvOK, camOK: camOK, notiOK: notiOK, notiSupported: notiSupported, need: need, appAsk: appAsk, notiAsk: notiAsk,
-          notiFailMsg: notiFailMsg, guideHtml: guideHtml, openGuideLast: openGuideLast, agreeScreen: agreeScreen, K: K};
+          notiFailMsg: notiFailMsg, guideHtml: guideHtml, openGuideLast: openGuideLast, agreeScreen: agreeScreen, relang: relang, K: K};
 })();

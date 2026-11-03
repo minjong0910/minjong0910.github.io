@@ -14,9 +14,9 @@ var TIMETABLE = (function(){
   var K = {tt: 'b3nav_tt', tts: 'b3nav_tts', tta: 'b3nav_tta', fired: 'b3nav_tt_fired'};
   var DAYS = ['월', '화', '수', '목', '금', '토', '일'], DAYS_EN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   function dayName(d){ return U.ko() ? DAYS[d] : DAYS_EN[d]; }
-  var COL = [['빨강', '#E53935'], ['주황', '#F57C00'], ['노랑', '#F9C80E'], ['연두', '#7CB342'], ['초록', '#2E8B57'], ['청록', '#00897B'], ['하늘', '#039BE5'],
-             ['파랑', '#1E63C4'], ['남색', '#3949AB'], ['보라', '#7E57C2'], ['자주', '#AD1457'], ['분홍', '#EC407A'], ['갈색', '#8D6E63'], ['회색', '#607D8B']];
-  var SND = [['chime', '차임', '띵동'], ['bell', '종소리', '땡 땡 땡'], ['marimba', '마림바', '또로롱'], ['beep', '전자음', '삐삐삐삐'], ['bird', '새소리', '짹짹'], ['vib', '진동만', ''], ['mute', '소리 없음', '']];
+  var COL = [['빨강', '#E53935', 'Red'], ['주황', '#F57C00', 'Orange'], ['노랑', '#F9C80E', 'Yellow'], ['연두', '#7CB342', 'Light green'], ['초록', '#2E8B57', 'Green'], ['청록', '#00897B', 'Teal'], ['하늘', '#039BE5', 'Sky blue'],
+             ['파랑', '#1E63C4', 'Blue'], ['남색', '#3949AB', 'Indigo'], ['보라', '#7E57C2', 'Purple'], ['자주', '#AD1457', 'Magenta'], ['분홍', '#EC407A', 'Pink'], ['갈색', '#8D6E63', 'Brown'], ['회색', '#607D8B', 'Gray']];   // 이름 셋째 칸 = 영어
+  var SND = [['chime', '차임', '띵동', 'Chime'], ['bell', '종소리', '땡 땡 땡', 'Bell'], ['marimba', '마림바', '또로롱', 'Marimba'], ['beep', '전자음', '삐삐삐삐', 'Beep'], ['bird', '새소리', '짹짹', 'Birdsong'], ['vib', '진동만', '', 'Vibrate only'], ['mute', '소리 없음', '', 'Silent']];
   var LIM = {lead: 180, after: 60, min: 120};
   function clone(x){ return JSON.parse(JSON.stringify(x)); }
   var TT = ls(K.tt) || [];
@@ -73,8 +73,8 @@ var TIMETABLE = (function(){
   function back(){ if(from === 'sset' && typeof openOverlay === 'function') openOverlay('sset'); else go(from || 's1'); }
   function render(){
     var st = document.getElementById('ttSet'); if(!st) return;
-    st.innerHTML = '<button type="button" class="syChip2' + (TTS.auto ? '' : ' off') + '" data-a="go">' + IC.nav + '<span><b>' + T('바로 길안내', 'Auto directions') + '</b><small>' + (TTS.auto ? S.GK[TTS.gate] + ' · ' + TTS.lead + T('분 전~', 'm before~') + TTS.after + T('분 뒤', 'm after') : T('꺼짐', 'Off')) + '</small></span></button>' +
-      '<button type="button" class="syChip2' + (alarmOn() ? '' : ' off') + '" data-a="al">' + IC.bell + '<span><b>' + T('수업 알림', 'Class alerts') + '</b><small>' + (alarmOn() ? TTA.min + T('분 전 · ', 'm before · ') + sndName(TTA.snd) : T('꺼짐 · 켜면 허용을 물어요', 'Off · we ask when you turn it on')) + '</small></span></button>';
+    st.innerHTML = '<button type="button" class="syChip2' + (TTS.auto ? '' : ' off') + '" data-a="go">' + IC.nav + '<span><b>' + T('바로 길안내', 'Auto directions') + '</b><small>' + (TTS.auto ? S.gName(TTS.gate) + ' · ' + TTS.lead + T('분 전~', ' min before – ') + TTS.after + T('분 뒤', ' min after') : T('꺼짐', 'Off')) + '</small></span></button>' +
+      '<button type="button" class="syChip2' + (alarmOn() ? '' : ' off') + '" data-a="al">' + IC.bell + '<span><b>' + T('수업 알림', 'Class alerts') + '</b><small>' + (alarmOn() ? TTA.min + T('분 전 · ', ' min before · ') + sndName(TTA.snd) : T('꺼짐 · 켜면 허용을 물어요', 'Off · we ask when you turn it on')) + '</small></span></button>';
     $('[data-a=go]', st).onclick = goSheet;
     $('[data-a=al]', st).onclick = function(){ audio(); go('salm'); };   // 누른 그 순간에 소리 장치를 깨워 둔다 (폰은 누름 없이 소리를 못 낸다)
     grid();
@@ -115,7 +115,7 @@ var TIMETABLE = (function(){
     var s = U.sheet('<h4>' + IC.nav + T('바로 길안내', 'Auto directions') + '</h4><p class="sub">' + T('수업 시간에 앱을 켜면 그 강의실 길안내가 바로 떠요.', 'Open the app around class time and the route to that room starts right away.') + '</p>' +
       '<div class="syRowS"><b>' + T('바로 길안내', 'Auto directions') + '</b><span class="sySw' + (TTS.auto ? ' on' : '') + '" role="switch" aria-checked="' + TTS.auto + '"></span></div>' +
       '<div class="lab">' + T('주로 들어오는 문', 'Usual door') + ' <small style="font-weight:600;color:#8FA3B8;">' + T('— 그날 첫 수업은 이 문에서 출발', '— first class of the day starts here') + '</small></div>' +
-      '<div class="syGateC">' + S.GATES.map(function(k){ return '<button type="button" data-g="' + k + '" class="' + (TTS.gate === k ? 'on' : '') + '">' + S.GK[k] + '</button>'; }).join('') + '</div>' +
+      '<div class="syGateC">' + S.GATES.map(function(k){ return '<button type="button" data-g="' + k + '" class="' + (TTS.gate === k ? 'on' : '') + '">' + S.gName(k) + '</button>'; }).join('') + '</div>' +
       '<div class="lab">' + T('언제 바로 길안내를 할까요?', 'When?') + '</div>' +
       '<div class="syMinRow"><span class="lb">' + T('수업', 'From') + '</span>' + numField('gL', TTS.lead, LIM.lead) + '<span>' + T('분 전부터', 'min before class') + '</span></div>' +
       '<div class="syMinRow"><span class="lb">' + T('시작하고', 'Until') + '</span>' + numField('gA', TTS.after, LIM.after) + '<span>' + T('분 뒤까지', 'min after start') + '</span></div>' +
@@ -144,7 +144,7 @@ var TIMETABLE = (function(){
       '<div class="lab">' + T('이 수업 알림', 'Alert for this class') + '</div><div class="syMinRow"><span class="sySw' + (f.al !== false && alarmOn() ? ' on' : '') + '" role="switch" id="ttAl" style="cursor:pointer;margin-left:0;margin-right:0.3rem;"></span>' +
         numField('ttAm', f.am != null ? f.am : TTA.min, LIM.min) + '<span>' + T('분 전 · ', 'min before · ') + sndName(TTA.snd) + '</span></div>' +
       '<div class="lab">' + T('색', 'Color') + ' <small style="font-weight:600;color:#8FA3B8;">' + T('— 무지개 막대를 밀면 어떤 색이든', '— slide the rainbow for any color') + '</small></div>' +
-      '<div class="syCols">' + COL.map(function(x){ return '<button type="button" data-c="' + x[1] + '" title="' + x[0] + '" aria-label="' + x[0] + '" style="background:' + x[1] + '"></button>'; }).join('') + '</div>' +
+      '<div class="syCols">' + COL.map(function(x){ return '<button type="button" data-c="' + x[1] + '" title="' + T(x[0], x[2]) + '" aria-label="' + T(x[0], x[2]) + '" style="background:' + x[1] + '"></button>'; }).join('') + '</div>' +
       '<div class="syHueRow"><input type="range" class="syHue" id="ttHue" min="0" max="359" value="' + hueOf(colNow) + '" aria-label="' + T('무지개 막대', 'Rainbow') + '"><label class="syPick" title="' + T('직접 고르기', 'Pick') + '"><input type="color" id="ttCol" value="' + colNow + '" aria-label="' + T('직접 고르기', 'Pick') + '"></label></div>' +
       '<div class="syPrev" id="ttPrev"></div>' +
       '<div class="syErr" id="ttErr"></div>' +
@@ -195,7 +195,7 @@ var TIMETABLE = (function(){
   }
 
   /* ════════ 수업 알림 (#salm) ════════ */
-  function sndName(k){ var x = SND.filter(function(s){ return s[0] === k; })[0]; return x ? (U.ko() ? x[1] : k) : k; }
+  function sndName(k){ var x = SND.filter(function(s){ return s[0] === k; })[0]; return x ? (U.ko() ? x[1] : x[3]) : k; }
   var AC = null, MG = null;
   function audio(){
     try{
@@ -236,7 +236,7 @@ var TIMETABLE = (function(){
       '<div id="aPerm"></div>' +
       '<div class="syRowS"><b>' + T('수업 알림', 'Class alerts') + '</b><span class="sySw' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" id="aOn"></span></div>' +
       '<div class="syMinRow"><span class="lb">' + T('수업 시작', 'Alert') + '</span>' + numField('aM', TTA.min, LIM.min) + '<span>' + T('분 전에 알림', 'min before class') + '</span></div>' +
-      '<div class="lab">' + T('소리', 'Sound') + '</div><div class="sySnd">' + SND.map(function(x){ return '<div class="it' + (TTA.snd === x[0] ? ' on' : '') + '" data-k="' + x[0] + '"><span class="rd"></span><b>' + (U.ko() ? x[1] : x[0]) + (x[2] && U.ko() ? '<small>' + x[2] + '</small>' : '') + '</b>' + (x[0] === 'mute' ? '' : '<button class="pl" type="button">' + IC.play + T('듣기', 'Play') + '</button>') + '</div>'; }).join('') + '</div>' +
+      '<div class="lab">' + T('소리', 'Sound') + '</div><div class="sySnd">' + SND.map(function(x){ return '<div class="it' + (TTA.snd === x[0] ? ' on' : '') + '" data-k="' + x[0] + '"><span class="rd"></span><b>' + (U.ko() ? x[1] : x[3]) + (x[2] && U.ko() ? '<small>' + x[2] + '</small>' : '') + '</b>' + (x[0] === 'mute' ? '' : '<button class="pl" type="button">' + IC.play + T('듣기', 'Play') + '</button>') + '</div>'; }).join('') + '</div>' +
       '<div class="lab">' + T('소리 크기', 'Volume') + '</div><div class="syVol">' + IC.vol + '<input type="range" min="0" max="100" value="' + TTA.vol + '" id="aV" aria-label="' + T('소리 크기', 'Volume') + '"><b id="aVt">' + TTA.vol + '</b></div>' +
       '<div class="syRowS"><b>' + T('진동도 함께', 'Vibrate too') + '</b><span class="sySw' + (TTA.vib ? ' on' : '') + '" role="switch" aria-checked="' + TTA.vib + '" id="aVib"></span></div>' +
       '<button class="big" type="button" id="aReal">' + IC.bell + T('실제 알림 받아 보기 — 10초 뒤', 'Test a real alert — in 10 s') + '</button>' +

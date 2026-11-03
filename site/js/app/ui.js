@@ -17,6 +17,20 @@ function applyLang(){
     var v = el.getAttribute(LANG==='ko' ? 'data-ko-placeholder' : 'data-en-placeholder');
     if(v!==null) el.placeholder = v;
   });
+  /* 단추에 손을 올리면 뜨는 말(title) · 화면 읽기 프로그램이 읽는 말(aria-label)도 (2026-11-04 사용자 「영어일 때는 모든 한국어를 영어로」) */
+  document.querySelectorAll('[data-ko-title]').forEach(function(el){
+    var v = el.getAttribute(LANG==='ko' ? 'data-ko-title' : 'data-en-title');
+    if(v!==null){ el.setAttribute('title', v); if(el.hasAttribute('aria-label')) el.setAttribute('aria-label', v); }
+  });
+  document.querySelectorAll('[data-ko-aria]').forEach(function(el){
+    var v = el.getAttribute(LANG==='ko' ? 'data-ko-aria' : 'data-en-aria');
+    if(v!==null) el.setAttribute('aria-label', v);
+  });
+  if(typeof CONSENT!=='undefined' && CONSENT.relang) CONSENT.relang();     // 건의함의 동의 줄 · 「올린 사진 지워 달라고 하기」
+  if(typeof TIMETABLE!=='undefined' && TIMETABLE.refresh) TIMETABLE.refresh();
+  if(typeof DIAG!=='undefined' && DIAG.paint) DIAG.paint();                 // 설정 「문제 기록」 줄
+  if(typeof QRNAV!=='undefined' && QRNAV.paintChip) QRNAV.paintChip();     // 목적지 화면 「⛶ 정문 출발」 배지
+  try{ var b3f = document.getElementById('b3dFrame'); if(b3f && b3f.contentWindow && b3f.contentWindow.setLang3D) b3f.contentWindow.setLang3D(LANG); }catch(e){}   // 「여기가 맞나요?」 실사 3D 안의 글자
   var koBtn=document.getElementById('langKo'), enBtn=document.getElementById('langEn');
   if(koBtn && enBtn){
     koBtn.classList.toggle('langActive', LANG==='ko');

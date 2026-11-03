@@ -98,7 +98,8 @@ function mountBld3D(){
   BLD3D_DONE = true;
   var fr = document.createElement('iframe');
   fr.id = 'b3dFrame';
-  fr.title = '군산대 공대 3호관 실사 3D';
+  fr.title = (LANG === 'ko') ? '군산대 공대 3호관 실사 3D' : "Kunsan Nat'l Univ. Engineering Bldg.3 — 3D view";
+  fr.setAttribute('data-ko-title', '군산대 공대 3호관 실사 3D'); fr.setAttribute('data-en-title', "Kunsan Nat'l Univ. Engineering Bldg.3 — 3D view");   // 말을 바꾸면 ui.js applyLang 이 바꾼다
   fr.setAttribute('allow', 'fullscreen');
   fr.setAttribute('scrolling', 'no');
   fr.onload = function(){

@@ -426,7 +426,7 @@ var QRNAV = (function(){
 
   return {
     open:open, close:close, retry:retry, stopCam:stopCam,
-    pickFile:pickFile, onFile:onFile, manual:manual,
+    pickFile:pickFile, onFile:onFile, manual:manual, paintChip:paintChip,
     confirm:confirm_, floor:floor, gate:gate, gateName:gateName,
     clear:clear, payload:payload, parse:parse, fromUrl:fromUrl, GATES:GATES
   };

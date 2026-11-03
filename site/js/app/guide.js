@@ -117,7 +117,7 @@ function buildSteps(){
   }
 
   // 출발층 엘리베이터 앞 사진(있으면). B1은 EV 사진이 없으므로 EV1로 대체.
-  var startEV = (typeof sf==='number') ? ('EV'+sf) : 'EV1';
+  var startEV = (typeof sf==='number') ? ('EV'+sf) : (sf==='B1' ? 'EVB1' : 'EV1');   // 2026-11-04 : 지하 1층 엘리베이터 사진(EVB1)이 생겨서 — 예전에는 1층 사진을 대신 썼다
   var sfName = typeof sf==='number' ? lvName(sf) : lvName(1);
 
   /* 멘트 규칙 : 한 줄에 들어가게 짧게, 모두 '~세요'로 끝을 맞춘다.

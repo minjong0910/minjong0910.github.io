@@ -47,7 +47,7 @@
     <button class="iconBtn" id="netBtn" title="인터넷 상태" onclick="PWA.netInfo()"><i id="netDot"></i><b id="netTxt" data-ko="오프라인" data-en="Offline">오프라인</b></button>
     <!-- 세 줄(☰) 메뉴 — 처음으로 · 즐겨찾기 · 설정 · 밝은 화면은 여기 안에 세로 목록으로 (2026-10-19 사용자, js/app/topmenu.js) -->
     <div class="tmMenu" id="tmMenu">
-      <button class="iconBtn tmBtn" id="tmBtn" title="메뉴" aria-label="메뉴" aria-haspopup="true" aria-expanded="false" onclick="TOPMENU.toggle(event)">☰</button>
+      <button class="iconBtn tmBtn" id="tmBtn" title="메뉴" aria-label="메뉴" data-ko-title="메뉴" data-en-title="Menu" aria-haspopup="true" aria-expanded="false" onclick="TOPMENU.toggle(event)">☰</button>
       <div class="tmList" id="tmList" role="menu">
         <button class="ln" role="menuitemcheckbox" aria-checked="false" onclick="TOPMENU.light(event)">☀<span data-ko="밝은 화면" data-en="Light mode">밝은 화면</span><span class="tmSw" id="tmSw"></span></button>
         <button class="ln" role="menuitem" onclick="TOPMENU.pick(function(){ go(1); })">🏠<span data-ko="처음으로" data-en="Home">처음으로</span></button>
@@ -157,7 +157,7 @@
       </div>
     </div>
     <div class="navrow">
-      <button class="big" id="gPv" onclick="guidePrev()">‹ 이전</button>
+      <button class="big" id="gPv" onclick="guidePrev()" data-ko="‹ 이전" data-en="‹ Prev">‹ 이전</button>
       <button class="big" id="gNx" onclick="guideNext()">다음 ›</button>
     </div>
   </section>
@@ -337,11 +337,11 @@
         <button onclick="fpStairGo(-1)">↓ B1</button>
         <button class="x" onclick="fpB1PanelClose()">✕</button>
       </div>
-      <button class="fsBtn" id="fsBtn" title="전체화면" onclick="enterFullscreen3D()">⛶</button>
-      <button class="favFloat" id="favBtn" title="즐겨찾기" onclick="toggleFav()">☆</button>
+      <button class="fsBtn" id="fsBtn" title="전체화면" data-ko-title="전체화면" data-en-title="Full screen" onclick="enterFullscreen3D()">⛶</button>
+      <button class="favFloat" id="favBtn" title="즐겨찾기" data-ko-title="즐겨찾기" data-en-title="Favorite" onclick="toggleFav()">☆</button>
       <div class="fsBar" id="fsBar">
-        <button class="iconBtn" title="뒤로" onclick="exitFullscreen3D()">←</button>
-        <button class="iconBtn" title="처음 시점으로" onclick="cycleView3D()">⟳</button>
+        <button class="iconBtn" title="뒤로" data-ko-title="뒤로" data-en-title="Back" onclick="exitFullscreen3D()">←</button>
+        <button class="iconBtn" title="처음 시점으로" data-ko-title="처음 시점으로" data-en-title="Reset view" onclick="cycleView3D()">⟳</button>
         <button class="trip" id="tripBtnFS" onclick="toggleTrip()" data-ko="▶ 경로 미리보기" data-en="▶ Route Preview">▶ 경로 미리보기</button>
         <button class="trip ghost2" id="pauseBtnFS" style="display:none" onclick="togglePause()">⏸ 일시정지</button>
         <button class="trip ghost2" id="freeBtnFS" onclick="toggleFree()" data-ko="🚶 직접 걸어보기" data-en="🚶 Walk It Yourself">🚶 직접 걸어보기</button>
@@ -410,9 +410,9 @@
       <img id="pkShot" alt="">
       <div class="pkWhy" id="pkWhy"></div>
     </div>
-    <div class="pkLab" id="pkSugLab">AI가 짐작한 곳 — 맞는 것을 눌러 주세요</div>
+    <div class="pkLab" id="pkSugLab" data-ko="AI가 짐작한 곳 — 맞는 것을 눌러 주세요" data-en="AI's guesses — tap the right one">AI가 짐작한 곳 — 맞는 것을 눌러 주세요</div>
     <div class="pkGrid" id="pkSug"></div>
-    <div class="pkLab">여기 없다면 — 번호·이름으로 찾거나 층을 고르세요</div>
+    <div class="pkLab" data-ko="여기 없다면 — 번호·이름으로 찾거나 층을 고르세요" data-en="Not here? Search by number or name, or pick a floor">여기 없다면 — 번호·이름으로 찾거나 층을 고르세요</div>
     <input type="text" id="pkQ" class="pkQ" autocomplete="off" oninput="pickSearch()"
            data-ko-placeholder="예 : 13312 · 실험실 · 복도 · 화장실" data-en-placeholder="e.g. 13312 · lab · hall"
            placeholder="예 : 13312 · 실험실 · 복도 · 화장실">
@@ -421,7 +421,7 @@
     <div class="row">
       <button class="big ghost" onclick="pickUnknown()" data-ko="모르겠어요 · 그냥 보내기" data-en="Not sure · send anyway">모르겠어요 · 그냥 보내기</button>
     </div>
-    <div class="mini">고른 곳은 AI가 바로 배웁니다 — 다음부터 같은 자리는 AI가 알아봅니다.</div>
+    <div class="mini" data-ko="고른 곳은 AI가 바로 배웁니다 — 다음부터 같은 자리는 AI가 알아봅니다." data-en="The AI learns from your pick right away — next time it will recognize this spot.">고른 곳은 AI가 바로 배웁니다 — 다음부터 같은 자리는 AI가 알아봅니다.</div>
   </section>
 
   <!-- 사진 등록 -->
@@ -746,19 +746,19 @@
   <div class="izBar">
     <span class="izCap" id="izCap"></span>
     <span class="izNum" id="izNum" style="display:none"></span>
-    <button class="izBtn" onclick="closeZoom()" aria-label="닫기">✕</button>
+    <button class="izBtn" onclick="closeZoom()" aria-label="닫기" data-ko-aria="닫기" data-en-aria="Close">✕</button>
   </div>
   <div class="izStage" id="izStage">
     <img id="izImg" alt="사진 크게 보기">
     <!-- 2026-10-26 : 길안내 사진이 여러 장이면 크게 본 채로 넘긴다 (zoom.js izNav) -->
-    <button class="izNav izPrev" id="izPrev" style="display:none" onclick="event.stopPropagation();izNav(-1)" aria-label="이전 사진">‹</button>
-    <button class="izNav izNext" id="izNext" style="display:none" onclick="event.stopPropagation();izNav(1)" aria-label="다음 사진">›</button>
+    <button class="izNav izPrev" id="izPrev" style="display:none" onclick="event.stopPropagation();izNav(-1)" aria-label="이전 사진" data-ko-aria="이전 사진" data-en-aria="Previous photo">‹</button>
+    <button class="izNav izNext" id="izNext" style="display:none" onclick="event.stopPropagation();izNav(1)" aria-label="다음 사진" data-ko-aria="다음 사진" data-en-aria="Next photo">›</button>
   </div>
   <div class="izFoot">
-    <button class="izBtn" onclick="izStep(-1)" aria-label="축소">－</button>
+    <button class="izBtn" onclick="izStep(-1)" aria-label="축소" data-ko-aria="축소" data-en-aria="Zoom out">－</button>
     <span class="izPct" id="izPct">100%</span>
-    <button class="izBtn" onclick="izStep(1)" aria-label="확대">＋</button>
-    <button class="izBtn" onclick="izReset()" aria-label="원래대로">⟲</button>
+    <button class="izBtn" onclick="izStep(1)" aria-label="확대" data-ko-aria="확대" data-en-aria="Zoom in">＋</button>
+    <button class="izBtn" onclick="izReset()" aria-label="원래대로" data-ko-aria="원래대로" data-en-aria="Reset">⟲</button>
   </div>
   <div class="izHint" id="izHint"></div>
 </div>

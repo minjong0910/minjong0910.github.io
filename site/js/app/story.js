@@ -57,7 +57,7 @@
     try{
       if(target && target.kind === 'room'){
         var raw = ROOM_NAME[target.code]; if(!raw) return '';
-        return ko() ? raw : ((typeof ROOM_NAME_EN !== 'undefined' && ROOM_NAME_EN[raw]) || raw);
+        return ko() ? raw : ((typeof roomEn === 'function') ? roomEn(raw) : raw);
       }
     }catch(e){}
     return '';
@@ -90,7 +90,7 @@
   /* ── 길안내 화면(s6) ── */
   s6.classList.add('story');
   var top6 = mk('div', 'stTop'), shade6 = mk('div', 'stShade'), zm6 = mk('div', 'stZm'), bot6 = mk('div', 'stBottom'), sign = mk('div', 'stSign');
-  top6.innerHTML = '<div class="row"><button class="stBack" type="button" aria-label="뒤로">←</button><span class="rt"></span><span class="no"></span></div>' +
+  top6.innerHTML = '<div class="row"><button class="stBack" type="button" aria-label="뒤로" data-ko-aria="뒤로" data-en-aria="Back">←</button><span class="rt"></span><span class="no"></span></div>' +
                    '<div class="stSegs"></div><div class="stWhere"></div>';
   sign.innerHTML = '<div class="ic"></div><div class="tx"><div class="ko"></div><div class="en"></div></div>';
   var nav = $('.navrow', s6), hint6 = mk('div', 'stHint');
@@ -112,7 +112,8 @@
     $('.stWhere', top6).innerHTML = CAM; $('.stWhere', top6).appendChild(document.createTextNode(' ' + placeOf(s)));
     var ic = iconOf(s), icEl = $('.ic', sign);
     icEl.className = 'ic' + (ic.c ? ' ' + ic.c : ''); icEl.innerHTML = ic.h;
-    var big = ko() ? s.tko : enFix(s.ten), small = ko() ? enFix(s.ten) : s.tko;
+    /* 한국어일 때만 아래에 영어 한 줄(공항 표지판식) — 영어로 쓸 때는 영어만(사용자 11/04 「영어 길안내를 쓸 때는 한국어가 안 보이게」) */
+    var big = ko() ? s.tko : enFix(s.ten), small = ko() ? enFix(s.ten) : '';
     $('.ko', sign).textContent = big; $('.ko', sign).classList.toggle('long', big.length > 30);
     $('.en', sign).textContent = small;
     hint6.textContent = ko() ? '사진을 누르면 크게 · 작게 — 좌우로 밀면 이전 · 다음' : 'Tap the photo to zoom · swipe for back / next';

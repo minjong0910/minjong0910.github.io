@@ -486,7 +486,7 @@ function pickCard(code, sim, best){
     (u ? '<img src="' + u + '" alt="">' : '<span class="noimg">🏛</span>') +
     '<span class="nm">' + pickName(code) + '</span>' +
     (sub ? '<span class="sub">' + sub + '</span>' : '') +
-    (sim ? '<span class="sim">닮은 정도 ' + Math.round(sim*100) + '%</span>' : '') +
+    (sim ? '<span class="sim">' + (LANG==='ko' ? '닮은 정도 ' : 'Match ') + Math.round(sim*100) + '%</span>' : '') +
     '</button>';
 }
 /* 접수 범위 안의 장소를 층별로 모은다 */
@@ -528,7 +528,7 @@ function pickSearch(){
   if(row) Array.prototype.forEach.call(row.querySelectorAll('button'), function(b){ b.classList.remove('on'); });
   PICK.floor = '';
   box.innerHTML = hit.length ? hit.map(function(c){ return pickCard(c, 0, false); }).join('')
-                             : '<div class="mini">찾는 곳이 없습니다. 층을 골라 목록에서 찾아보세요.</div>';
+                             : '<div class="mini">' + (LANG==='ko' ? '찾는 곳이 없습니다. 층을 골라 목록에서 찾아보세요.' : 'Nothing found. Pick a floor and look in the list.') + '</div>';
 }
 function pickFloorSel(f){
   PICK.floor = f;
@@ -541,7 +541,7 @@ function pickFloorSel(f){
   if(!box) return;
   var list = pickPlaces(f);
   box.innerHTML = list.length ? list.map(function(c){ return pickCard(c, 0, false); }).join('')
-                              : '<div class="mini">이 층에 등록된 장소가 없습니다.</div>';
+                              : '<div class="mini">' + (LANG==='ko' ? '이 층에 등록된 장소가 없습니다.' : 'No places registered on this floor.') + '</div>';
 }
 /* 판정 결과를 들고 고르기 화면을 연다.
    after(code) 로 고른 결과를 돌려준다 (code 가 '' 면 모르겠음). */
@@ -552,11 +552,11 @@ function pickOpen(url, note, ai, after){
   if(why){
     var v = ai && ai.verdict, txt;
     if(ai && ai.ocr && ai.ocr.code && ai.codeSource === 'ocr')
-      txt = '문패에서 <b>' + ai.ocr.code + '</b> 을(를) 읽었어요. 맞는지 확인해 주세요.';
+      txt = (LANG==='ko') ? '문패에서 <b>' + ai.ocr.code + '</b> 을(를) 읽었어요. 맞는지 확인해 주세요.' : 'Read <b>' + ai.ocr.code + '</b> from the room plate. Please check it.';
     else if(v === 'irrelevant' || v === 'out_of_scope')
-      txt = '<b>AI가 이 사진의 위치를 찾지 못했어요.</b><br>공대 3호관은 문과 복도가 층마다 비슷하게 생겨서, 문패가 안 보이면 AI도 헷갈립니다.';
+      txt = (LANG==='ko') ? '<b>AI가 이 사진의 위치를 찾지 못했어요.</b><br>공대 3호관은 문과 복도가 층마다 비슷하게 생겨서, 문패가 안 보이면 AI도 헷갈립니다.' : '<b>The AI could not find where this photo was taken.</b><br>Doors and hallways look alike on every floor of Bldg.3, so without a room plate the AI gets confused.';
     else
-      txt = '<b>AI가 확신하지 못했어요.</b><br>아래에서 <span class="hi">맞는 곳을 눌러 주세요.</span> 한 번만 골라 주시면 AI가 배웁니다.';
+      txt = (LANG==='ko') ? '<b>AI가 확신하지 못했어요.</b><br>아래에서 <span class="hi">맞는 곳을 눌러 주세요.</span> 한 번만 골라 주시면 AI가 배웁니다.' : '<b>The AI is not sure.</b><br><span class="hi">Tap the right place below.</span> Pick it once and the AI learns.';
     why.innerHTML = txt;
   }
   var sug = document.getElementById('pkSug'), lab = document.getElementById('pkSugLab');
@@ -569,7 +569,8 @@ function pickOpen(url, note, ai, after){
   if(fr){
     var fs = ['지하 1층','1층','2층','3층','4층','5층','건물 외부'];
     fr.innerHTML = fs.map(function(f){
-      return '<button type="button" data-f="' + f + '" onclick="pickFloorSel(\'' + f + '\')">' + f + '</button>';
+      /* data-f 는 그대로 한국어 층 이름(목록을 찾는 열쇠) — 보이는 글자만 영어로 */
+      return '<button type="button" data-f="' + f + '" onclick="pickFloorSel(\'' + f + '\')">' + (LANG === 'ko' ? f : ({'지하 1층': 'B1', '1층': '1F', '2층': '2F', '3층': '3F', '4층': '4F', '5층': '5F', '건물 외부': 'Outside'})[f]) + '</button>';
     }).join('');
   }
   var all = document.getElementById('pkAll'); if(all) all.innerHTML = '';

@@ -274,6 +274,7 @@ var PWA = (function(){
 
   /* 설정의 「앱 다운로드」 버튼 글자 */
   function sync(){
+    netSync();                                    // 말을 바꿀 때(ui.js applyLang)도 인터넷 단추 말(title)을 그 말로
     var b = document.getElementById('pwaBtn');
     if(!b) return;
     var done = standalone() || justInstalled;
@@ -337,10 +338,10 @@ var PWA = (function(){
     '<path d="M18 18h3v3h-3zM23 18h3M18 23h3M23 23v3" stroke="#E7F6FF" stroke-width="2" fill="#E7F6FF" stroke-linecap="round"/></svg>';
   function iconImg(){ return '<img src="img/icon-180.png" alt="">'; }
   function head(sub){
-    return '<div class="pwaHead">' + iconImg() + '<div><b>' + APP_NAME + '</b><span>' + sub + '</span></div></div>';
+    return '<div class="pwaHead">' + iconImg() + '<div><b>' + (ko() ? APP_NAME : 'Bldg.3 Navigation') + '</b><span>' + sub + '</span></div></div>';
   }
   function step(n, icon, html){ return '<li><i>' + n + '</i>' + (icon || '') + '<span>' + html + '</span></li>'; }
-  function sizeText(){ return off.bytes ? (Math.round(off.bytes / 1048576 * 10) / 10) + 'MB' : '약 12MB'; }
+  function sizeText(){ return off.bytes ? (Math.round(off.bytes / 1048576 * 10) / 10) + 'MB' : (ko() ? '약 12MB' : 'about 12 MB'); }
 
   function sheet(kind, app){
     close();
@@ -403,9 +404,9 @@ var PWA = (function(){
                             : 'Tap <b>Install app</b>.<br><small>No such item? Tap <b>Add to Home screen</b>.</small>') +
         step(3, iconImg().replace('<img', '<img style="width:30px;height:30px;border-radius:7px"'),
              K ? '<b>설치</b>를 누르면 홈 화면에<br><b>' + APP_NAME + '</b> 아이콘이 생겨요.'
-               : 'Tap <b>Install</b> — the <b>' + APP_NAME + '</b> icon appears on your home screen.') +
+               : 'Tap <b>Install</b> — the app icon appears on your home screen.') +
         '</ol><p class="pwaNote">' + (K ? '처음 한 번만 인터넷이 될 때 열어 주세요 — 그때 ' + sizeText() + '를 저장하고, 그 뒤로는 인터넷 없이도 열려요.<br>이미 설치했다면 홈 화면에서 <b>' + APP_NAME + '</b>를 찾아 주세요.'
-                                          : 'Open it once while online — it saves ' + sizeText() + ', then it works offline.<br>Already installed? Look for <b>' + APP_NAME + '</b> on your home screen.') + '</p>';
+                                          : 'Open it once while online — it saves ' + sizeText() + ', then it works offline.<br>Already installed? Look for the app icon on your home screen.') + '</p>';
     } else if(kind === 'desktop'){
       h = head(sub) + '<p class="pwaNote">' + (K
         ? '주소창 오른쪽의 <b>설치</b> 아이콘(⊕)이나 브라우저 메뉴 → <b>앱 설치</b>를 누르세요.<br>휴대폰에서는 출입문 QR을 찍어 연 뒤 설정 → 앱 다운로드를 누르면 돼요.'
@@ -425,7 +426,7 @@ var PWA = (function(){
     } else if(kind === 'done'){
       h = head(K ? '설치했어요!' : 'Installed!') + '<p class="pwaNote">' + (K
         ? '홈 화면의 <b>' + APP_NAME + '</b> 아이콘으로 여세요. 인터넷이 없어도 열려요.'
-        : 'Open it from the <b>' + APP_NAME + '</b> icon on your home screen. It works offline.') + '</p>';
+        : 'Open it from the app icon on your home screen. It works offline.') + '</p>';
     } else if(kind === 'already'){
       h = head(K ? '이미 앱으로 쓰고 있어요 ✓' : 'You are already using the app ✓') + '<p class="pwaNote">' + (K
         ? '인터넷 없이 열기 : ' + offText() : 'Offline: ' + offText()) + '</p>';

@@ -20,7 +20,7 @@
   function rname(code){ try{ return (typeof ROOM_NAME === 'object' && ROOM_NAME[code]) || ''; }catch(e){ return ''; } }
   function floorOf(code){ try{ return VALID_FULL5[code] ? VALID_FULL5[code].floor : null; }catch(e){ return null; } }
   function flName(f){ try{ return typeof lvName === 'function' ? lvName(f) : f + '층'; }catch(e){ return f + '층'; } }
-  function roomLine(code){ var n = rname(code), f = floorOf(code); return dno(code) + T('호', '') + (n ? ' · ' + n : '') + (f != null ? ' · ' + flName(f) : ''); }
+  function roomLine(code){ var n = rname(code), f = floorOf(code); if(n && !U.ko() && typeof rn === 'function') n = rn(n); return T(dno(code) + '호', 'Room ' + dno(code)) + (n ? ' · ' + n : '') + (f != null ? ' · ' + flName(f) : ''); }
   function photoOf(code){
     try{ var c = typeof phResolve === 'function' ? phResolve(code) : code, l = ROOM_PHOTOS[c]; return (l && l[0] && l[0].u) || ''; }catch(e){ return ''; }
   }
@@ -116,6 +116,9 @@
   var SH = {code: null, gate: 'MAIN'};
   function msgText(code, gate){
     var n = rname(code);
+    /* 영어로 쓰는 분이 보낼 때는 보낼 글도 영어로 (2026-11-04 사용자 「영어일 때는 모든 한국어를 영어로」) */
+    if(!U.ko()) return '[Engineering Bldg.3 Navigation]\nDirections to Room ' + dno(code) + (n ? ' — ' + (typeof rn === 'function' ? rn(n) : n) : '') + '.\n' +
+      (gate ? 'At the ' + GE[gate] : 'At any Bldg.3 entrance') + ', tap the link below for step-by-step photo directions.\n';
     return '[공대 3호관 길안내]\n' + dno(code) + '호' + (n ? '(' + n + ')' : '') + '로 오시는 길이에요.\n' +
       (gate ? GK[gate] + ' 앞에서' : '3호관 출입문 앞에서') + ' 아래 링크를 누르면 사진으로 한 단계씩 알려 드려요.\n';
   }
@@ -169,7 +172,7 @@
     $('#shSend', s).onclick = function(){
       var msg = userText(), url = linkText(SH.code, SH.gate);
       if(navigator.share){
-        navigator.share({title: '공대 3호관 길안내', text: msg, url: url}).then(function(){ U.closeSheet(); U.toast('✓ ' + T('보냈어요', 'Sent')); }, function(){});
+        navigator.share({title: T('공대 3호관 길안내', 'Engineering Bldg.3 Navigation'), text: msg, url: url}).then(function(){ U.closeSheet(); U.toast('✓ ' + T('보냈어요', 'Sent')); }, function(){});
         return;
       }
       copy(msg + url, function(){ U.toast(T('✓ 복사했어요 — 이 기기는 공유 창이 없어요. 카톡 · 문자에 붙여 넣어 주세요', '✓ Copied — paste it into a chat')); });
@@ -201,7 +204,7 @@
     if(!CTX || CTX.mode !== 'recv' || typeof target === 'undefined' || !target) return;
     var code = target.code, b = mk('button', 'syTell', IC.send + T('보낸 분께 「도착했어요」 알리기', 'Tell them “I have arrived”')); b.type = 'button';
     b.onclick = function(){
-      var txt = dno(code) + '호에 도착했어요 😊\n(공대 3호관 길안내에서 보냄)';
+      var txt = T(dno(code) + '호에 도착했어요 😊\n(공대 3호관 길안내에서 보냄)', "I've arrived at Room " + dno(code) + ' 😊\n(sent from Engineering Bldg.3 Navigation)');
       if(navigator.share){ navigator.share({text: txt}).then(function(){ U.toast('✓ ' + T('알렸어요', 'Sent')); }, function(){}); return; }
       copy(txt, function(){ U.toast(T('✓ 복사했어요 — 보내 주신 분과의 대화방에 붙여 넣어 주세요', '✓ Copied — paste it into your chat')); });
     };

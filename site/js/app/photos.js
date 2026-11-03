@@ -92,6 +92,8 @@ var PH_LABEL_EN = {BLD:'Engineering Bldg.3', B1:'B1',
     PH_LABEL_EN['EMS'+i]     = 'Floor '+i+' emergency stairs';
     PH_LABEL_EN['EVIN'+i]    = 'Inside the elevator (floor '+i+')';
   }
+  /* 2026-11-04 : 지하 1층 엘리베이터 사진(EVB1)은 설명이 없어 「EVB1」이 그대로 보였다 */
+  PH_LABEL['EVB1'] = '지하 1층 엘리베이터 앞'; PH_LABEL_EN['EVB1'] = 'B1 elevator';
 })();
 function phCap(code){
   if(LANG==='en' && PH_LABEL_EN[code]) return PH_LABEL_EN[code];
@@ -113,9 +115,49 @@ var ROOM_NAME_EN = {
   '캡스톤디자인실':'Capstone Design Room', '캡스톤디자인 취업실':'Capstone Design Career Room',
   '캡스톤 디자인 실습실':'Capstone Design Practice Room', '캡스톤디자인 회의실':'Capstone Design Meeting Room',
   '명예교수 및 시간강사실':'Emeritus & Adjunct Faculty Office',
-  '프로그래밍 동아리실':'Programming Club Room'
+  '프로그래밍 동아리실':'Programming Club Room',
+  /* 2026-11-04 사용자 「영어 길안내를 쓸 때는 앱 안의 모든 한국어를 영어로(파파고 번역 기준)」 — 사진 파일명에서 나온 나머지 이름 전부.
+     교수님 연구실은 아래 ROOM_PROF_EN · ROOM_DEPT_EN 으로 만든다(roomEn) */
+  'ICT특성화 취업연계형 사업단':'ICT Specialized Employment-Linked Program Office', '전자에너지변환 실험실':'Electronic Energy Conversion Lab',
+  '광반도체 소자 및 공정 실험실':'Optical Semiconductor Device & Process Lab', '스마트모빌리티 실험실':'Smart Mobility Lab',
+  '전공 동아리실':'Major Club Room', '임베디드 시스템 실험실':'Embedded Systems Lab', '스마트팩토리 및 인공지능 실험실':'Smart Factory & AI Lab',
+  '센서 및 AI 시스템 실험실':'Sensor & AI Systems Lab', '그린에너지 메카트로닉스 실험실':'Green Energy Mechatronics Lab',
+  '음성 및 신호처리 실험실':'Speech & Signal Processing Lab', '전력계통 실험실':'Power Systems Lab',
+  '전기공학과 회의실 및 스터디룸':'Electrical Engineering Meeting & Study Room', '초전도및마그넷실험실':'Superconductivity & Magnet Lab',
+  'RF 및 안테나 실험실':'RF & Antenna Lab', 'SoC설계 실험실':'SoC Design Lab', '복합재료 연구실':'Composite Materials Lab',
+  'Aim 동아리 및 학생회실':'Aim Club & Student Council Room', '지능제어 실험실':'Intelligent Control Lab',
+  'IoT 응용시스템 실험실':'IoT Application Systems Lab', '집적회로 연구실':'Integrated Circuits Lab', '벤처 동아리 1':'Venture Club 1',
+  '벤처 동아리 2':'Venture Club 2', '신호처리 실험실':'Signal Processing Lab', '지능형 무선통신 연구실':'Intelligent Wireless Communications Lab',
+  '유비쿼터스 시스템즈 실험실':'Ubiquitous Systems Lab', '전자회로 실험실':'Electronic Circuits Lab', '기계시각 실험실':'Machine Vision Lab',
+  '정보통신기술연구소':'ICT Research Institute', '무선기술 실험실':'Wireless Technology Lab', '보안 및 이동컴퓨팅 실험실':'Security & Mobile Computing Lab',
+  '전자파 및 안테나 실험실 · 무선통신 실험실':'Electromagnetics & Antenna Lab · Wireless Communications Lab', '차세대통신 연구실':'Next-Generation Communications Lab',
+  'AI융합 실험실':'AI Convergence Lab', '마이크로파 · 캡스톤디자인 · 기초전자회로 실험실':'Microwave · Capstone Design · Basic Electronic Circuits Lab',
+  '멀티미디어 통신 실험실':'Multimedia Communications Lab', '사물지능 연구실':'Intelligence of Things Lab'
 };
-function rn(nm){ if(!nm || LANG!=='en') return nm; return ROOM_NAME_EN[nm] || nm; }
+/* 「(학과) ○○○ 교수님 연구실」 → 「Prof. ○○○'s Office (학과)」 — 이름은 흔히 쓰는 로마자 표기(성 먼저) */
+var ROOM_PROF_EN = {
+  '김현섭':'Kim Hyun-seop', '박남진':'Park Nam-jin', '이정효':'Lee Jung-hyo', '김병택':'Kim Byung-taek', '김덕영':'Kim Deok-young', '김원구':'Kim Won-gu', '안민철':'Ahn Min-cheol',
+  '이성렬':'Lee Seong-ryeol', '김성호':'Kim Sung-ho', '이연석':'Lee Yeon-seok', '류상문':'Ryu Sang-mun', '우주':'Woo Ju',
+  '이재호':'Lee Jae-ho', '김변곤':'Kim Byun-gon', '유상선':'Yoo Sang-sun', '정준모':'Jeong Jun-mo', '이태윤':'Lee Tae-yoon',
+  '강상기':'Kang Sang-gi', '이영석':'Lee Young-seok', '최연성':'Choi Yeon-sung', '양현호':'Yang Hyun-ho', '조한규':'Cho Han-gyu', '배한별':'Bae Han-byeol',
+  '강영흥':'Kang Young-heung', '나인호':'Na In-ho', '고종현':'Ko Jong-hyun',
+  '문상미':'Moon Sang-mi', '지석근':'Ji Seok-geun', '김영완':'Kim Young-wan', '강규창':'Kang Gyu-chang', '조주필':'Cho Ju-pil', '신호섭':'Shin Ho-seop',
+  '정재훈':'Jung Jae-hoon'
+};
+var ROOM_DEPT_EN = {
+  '전기공학과':'Electrical Engineering', '전자공학과':'Electronic Engineering', '임베디드소프트웨어전공':'Embedded Software',
+  '인공지능융합전공':'AI Convergence', '인공지능융합학과':'AI Convergence', 'IT융합통신공학과':'IT Convergence & Communication Engineering'
+};
+function roomEn(nm){
+  if(!nm) return nm;
+  if(ROOM_NAME_EN[nm]) return ROOM_NAME_EN[nm];
+  var m = /^(?:(\S+)\s+)?(\S{2,4}) 교수님 연구실$/.exec(nm);
+  if(m && ROOM_PROF_EN[m[2]] && (!m[1] || ROOM_DEPT_EN[m[1]])){
+    return (ROOM_NAME_EN[nm] = 'Prof. ' + ROOM_PROF_EN[m[2]] + "'s Office" + (m[1] ? ' (' + ROOM_DEPT_EN[m[1]] + ')' : ''));
+  }
+  return nm;
+}
+function rn(nm){ if(!nm || LANG!=='en') return nm; return roomEn(nm); }
 /* 방 이름은 아래 phRebuildRoomNames() 가 사진 파일명에서 뽑는다 — 다만 그 규칙은 5자리 호실번호만
    보므로 KTC 처럼 번호가 없는 곳은 이름이 비어 '왼쪽에서 첫 번째 방에 KTC호가 있습니다' 가 됐다.
    층 상세에 적힌 대로 여기에 미리 적어 둔다 (2026-09-27 사용자 요청). */
@@ -143,6 +185,12 @@ phRebuildRoomNames();
    앞의 학과·전공 표기와 '·' 뒤 두 번째 이름을 떼고, 그래도 길면 끝을 줄인다. */
 function shortRoomName(nm){
   if(!nm) return '';
+  /* 영어 이름(rn 을 거친 것) — 「Prof. Lee Jae-ho's Office (…)」 → 「Prof. Lee Jae-ho」, 괄호 · 두 번째 이름은 떼고, 영어는 글자가 좁아 조금 더 길게 */
+  if(!/[가-힣]/.test(nm)){
+    var e = String(nm).split(' · ')[0].replace(/\s*\([^)]*\)\s*$/, '').replace(/'s Office$/, '').trim();
+    if(e.length > 20) e = e.slice(0, 19).trim() + '…';
+    return e;
+  }
   var t = String(nm).split('·')[0].trim();
   t = t.replace(/^\S*(?:공학과|공학전공|융합전공|전공|학과)\s+/, '');
   if(t.length > 13) t = t.slice(0,12) + '…';
@@ -151,7 +199,7 @@ function shortRoomName(nm){
 function roomTitle(code, forceLang){
   var lang = forceLang || LANG;
   var raw = ROOM_NAME[code];
-  var nm = (lang==='en') ? ((ROOM_NAME_EN[raw]) || raw) : raw;
+  var nm = (lang==='en') ? roomEn(raw) : raw;
   /* KTC 처럼 5자리 호실번호가 아닌 곳은 '호'를 붙이지 않는다 — phCap() 과 같은 규칙.
      이름이 있으면 'KTC 프로그래밍 동아리실' 처럼 곧바로 이어 붙인다. */
   if(!/^\d{5}/.test(code)) return nm ? (code+' '+nm) : code;

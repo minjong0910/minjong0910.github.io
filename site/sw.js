@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '8d03c03d64d4';   // 파일 257개 · 17.1MB
+var VERSION = '9911411b5daa';   // 파일 260개 · 17.4MB
 var FILES = [
   ['3d/realistic.html','9524531d6645',79368],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -37,7 +37,7 @@ var FILES = [
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
   ['css/app.css','0aab85e104b8',151293],
-  ['css/boot.css','b77d5cd2fa9b',1658],
+  ['css/boot.css','1e7d45b453c4',2545],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
   ['data/photos/13102/01.jpg','2b1331ee4ba3',58742],
@@ -230,12 +230,15 @@ var FILES = [
   ['img/icon-192.png','a6893220bee4',5036],
   ['img/icon-512.png','de753e3f6802',14880],
   ['img/icon.svg','99ad3cbde680',2002],
-  ['index.html','c580aac8a7bb',60661],
+  ['img/splash.mp4','d2f01cf420ad',277674],
+  ['img/splash_end.jpg','040a235d9bd8',43535],
+  ['img/splash_first.jpg','c68ac1b0d37e',29924],
+  ['index.html','48a1792f386d',60881],
   ['js/app/aid.js','daa92696b9a7',32661],
-  ['js/app/boot.js','57f3f42e5b9a',10615],
+  ['js/app/boot.js','ce8d10b5cebf',8397],
   ['js/app/building.js','95b01af4110d',23489],
-  ['js/app/consent.js','d6ce149675df',40844],
-  ['js/app/easy.js','91dc970268ae',24935],
+  ['js/app/consent.js','579a32951a48',40850],
+  ['js/app/easy.js','85f437a23975',24923],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','bcc83dabb095',44185],
   ['js/app/howto.js','b17902556aa6',23981],
@@ -245,7 +248,7 @@ var FILES = [
   ['js/app/photos.js','9afe2486d7e1',54222],
   ['js/app/pwa.js','6d835cb08228',49409],
   ['js/app/qrnav.js','1ab04e81bfc1',20800],
-  ['js/app/resume.js','b2a9974631f1',8244],
+  ['js/app/resume.js','6a90b4ce9d54',8237],
   ['js/app/roadview-1f.js','14696e0f4c2a',46207],
   ['js/app/roadview-b1.js','7d5ac6c79e08',157916],
   ['js/app/roadview-corr.js','99c04eefa56c',51166],
@@ -255,7 +258,7 @@ var FILES = [
   ['js/app/roadview-stairs.js','7f992b896804',70498],
   ['js/app/roadview.js','e4ccae279c4a',133370],
   ['js/app/roomfix.js','1b886c300886',22082],
-  ['js/app/share.js','3c5152b84955',17599],
+  ['js/app/share.js','47a7a02298b9',17608],
   ['js/app/shell.js','2c94ab5ad1dd',33594],
   ['js/app/start.js','4065777331b0',1505],
   ['js/app/story.js','19c2668151da',11859],
@@ -420,13 +423,28 @@ function font(req){
   });
 }
 
+/* 동영상(켜는 화면 img/splash.mp4 · 2026-11-03) : 사파리는 동영상을 조각(Range)으로 달라고 한다 — 통째(200)로 주면 재생을 못 한다.
+   저장한 것을 그 조각만 잘라 206 으로 준다(저장한 것이 없으면 인터넷). 그래서 비행기 모드 아이폰에서도 켜는 화면이 나온다 */
+function ranged(req, url){
+  var m = /bytes=(\d+)-(\d*)/.exec(req.headers.get('range') || '');
+  return caches.open(CACHE).then(function(c){ return c.match(url.origin + url.pathname); }).then(function(hit){
+    if(!hit || !m) return net(req);
+    return hit.arrayBuffer().then(function(buf){
+      var start = +m[1], end = m[2] ? Math.min(+m[2], buf.byteLength - 1) : buf.byteLength - 1;
+      return new Response(buf.slice(start, end + 1), { status:206, statusText:'Partial Content', headers:{
+        'Content-Type':hit.headers.get('Content-Type') || 'video/mp4', 'Content-Range':'bytes ' + start + '-' + end + '/' + buf.byteLength,
+        'Content-Length':String(end - start + 1), 'Accept-Ranges':'bytes' } });
+    });
+  });
+}
+
 self.addEventListener('fetch', function(e){
   var req = e.request;
   if(req.method !== 'GET') return;
   var url = new URL(req.url);
   if(url.origin === self.location.origin){
     if(url.pathname.indexOf(new URL(self.registration.scope).pathname) !== 0) return;
-    e.respondWith(local(req, url));
+    e.respondWith(req.headers.get('range') ? ranged(req, url) : local(req, url));
   } else if(FONT_RX.test(req.url)){
     e.respondWith(font(req));
   } else if(SIM_OFFLINE){

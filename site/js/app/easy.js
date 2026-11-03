@@ -24,7 +24,7 @@ var EASY = (function(){
   if(/[?&]easy=0(&|$)/.test(qs)){ on = false; lsSet(KEY_ON, '0'); lsSet(KEY_ASK, '1'); }
   if(/[?&]easyask=1(&|$)/.test(qs)){ try{ localStorage.removeItem(KEY_ASK); }catch(e){} }
   /* 2026-10-20 사용자 순서 (정문 · 후문 · 동문 · 서문 모두 — NFC 도 같은 주소라 같다) :
-       출입문 QR 을 찍는다 → 초록 켜는 화면 → 쉬운 사용모드(「처음이세요?」 켜기/끄기) → 「여기가 맞나요?」
+       출입문 QR 을 찍는다 → 켜는 화면 → 쉬운 사용모드(「처음이세요?」 켜기/끄기) → 「여기가 맞나요?」
      시험판 QR(?easyask=1)처럼, 예전에 답한 폰이라도 출입문 QR 로 들어오면 **매번** 묻는다.
      이미 켜 둔 사람은 묻지 않고 켜진 채로 「여기가 맞나요?」부터 안내한다. ?gate= 는 pwa.js 가 먼저 떼어 두므로 PWA 에 묻는다. */
   var forceAsk = false;
@@ -266,11 +266,11 @@ var EASY = (function(){
   function toggle(){ set(!on); }
 
   /* ── 처음 묻기 ── 사용자 순서 (2026-10-20 · 한 단계씩) :
-       QR 인식 → 앱 켜짐 → 초록 글 화면(boot.js) → 쉬운 사용모드 켜기/끄기(이 화면) → 「여기가 맞나요?」
-     · 초록 글 화면이 끝나면 boot.js 가 askFirst() 로 이 화면을 초록 화면 **바로 아래**(z 940, 불투명)에 깔고 초록 화면을 걷는다.
-       그래서 초록 글과 함께 뜨지 않고(사용자 : 「동시에 켜지면 안 된다」), 앱도 그 사이에 비치지 않는다. 답하면 이 화면이 사라지고 앱이 보인다.
+       QR 인식 → 앱 켜짐 → 켜는 화면(boot.js) → 쉬운 사용모드 켜기/끄기(이 화면) → 「여기가 맞나요?」
+     · 켜는 화면이 끝나면 boot.js 가 askFirst() 로 이 화면을 켜는 화면 **바로 아래**(z 940, 불투명)에 깔고 켜는 화면을 걷는다.
+       그래서 켜는 화면과 함께 뜨지 않고(사용자 : 「동시에 켜지면 안 된다」), 앱도 그 사이에 비치지 않는다. 답하면 이 화면이 사라지고 앱이 보인다.
      · 켜는 화면이 아예 없으면(새 판으로 조용히 바꿔 단 직후 — b3nav_quiet) 앱이 뜨자마자 이 화면을 띄운다.
-     (10-18 「켜는 화면보다 먼저」 · 10-20 오전 「초록 화면 위에」는 둘 다 사용자가 아니라고 함) */
+     (10-18 「켜는 화면보다 먼저」 · 10-20 오전 「켜는 화면 위에」는 둘 다 사용자가 아니라고 함) */
   function ask(){
     if(asked() || !phone || $('.ezAsk')) return;   // 이미 떠 있으면 또 띄우지 않는다
     var a = document.createElement('div'); a.className = 'ezAsk';
@@ -286,7 +286,7 @@ var EASY = (function(){
     });
     phone.appendChild(a);
   }
-  /* boot.js 가 초록 화면을 걷기 직전에 부른다 — 물을 게 있으면 이 화면을 깔아 두고 true, 없으면(이미 답함 · 켜 둠) false */
+  /* boot.js 가 켜는 화면을 걷기 직전에 부른다 — 물을 게 있으면 이 화면을 깔아 두고 true, 없으면(이미 답함 · 켜 둠) false */
   function askFirst(){
     if(askFired || on || asked()) return false;
     if(!phone) build();

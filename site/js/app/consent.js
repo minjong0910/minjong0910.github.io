@@ -2,7 +2,7 @@
 /* consent.js — 처음 켤 때 동의 · 기능별 허용 · 건의함 사진 개인정보 · 이용안내 마지막 쪽 (2026-11-03 사용자가 견본으로 정한 것)
    견본 : 생성물\견본_링크공유_시간표_개인정보\견본 눌러보기 — 개인정보 동의 · 길 공유하기 · 내 시간표.html (사용자가 눌러 보며 열 번 고침)
 
-   · 초록 글 → 「시작하기 전에 확인해 주세요」 → 쉬운 사용모드 「처음이세요?」 → 첫 화면.
+   · 켜는 화면 → 「시작하기 전에 확인해 주세요」 → 쉬운 사용모드 「처음이세요?」 → 첫 화면.
      필수 : 이용 안내 · 이 폰에 저장 / 선택 : 건의함 사진 개인정보 · 카메라 · 알림. 한 번 동의하면 앱을 쓰는 동안 다시 묻지 않는다(b3nav_agree).
      공유 링크(?to=)로 연 분은 묻지 않고 바로 길안내(share.js — 「누르기만 하면 바로」).
    · 카메라 · 알림 체크 = 앱 동의 → 휴대폰(브라우저) 창만 한 번 (카메라 : getUserMedia 를 켜자마자 끈다 · 알림 : Notification.requestPermission).
@@ -236,15 +236,15 @@ var CONSENT = (function(){
     U.phone().appendChild(a); paint();
   }
 
-  /* ── 켜는 순서 : 초록 글 → (처음이면) 동의 화면 → 쉬운 사용모드 「처음이세요?」 ──
-     easy.js askFirst 는 초록 화면 바로 아래에 「처음이세요?」를 깔아 둔다 — 동의 화면은 그 위(z 945)에 깔아, 스캔이 지나가면 동의 화면이 먼저 보인다. */
+  /* ── 켜는 순서 : 켜는 화면 → (처음이면) 동의 화면 → 쉬운 사용모드 「처음이세요?」 ──
+     easy.js askFirst 는 켜는 화면 바로 아래에 「처음이세요?」를 깔아 둔다 — 동의 화면은 그 위(z 945)에 깔아, 스캔이 지나가면 동의 화면이 먼저 보인다. */
   function needScreen(){ return !agreed() && !cameFromShare() && !document.querySelector('.syAgree'); }
   if(typeof EASY !== 'undefined'){
     var _askFirst = EASY.askFirst, _busy = EASY.busy;
     EASY.askFirst = function(){ var r = _askFirst ? _askFirst.apply(this, arguments) : false; if(needScreen()) agreeScreen(); return r || !!document.querySelector('.syAgree'); };
     EASY.busy = function(){ return (_busy ? _busy.apply(this, arguments) : false) || !!document.querySelector('.syAgree'); };
   }
-  /* 켜는 화면 없이 바로 뜬 경우(새 판으로 조용히 갈아탄 직후 등) — 앱이 준비되고 초록 화면이 없으면 띄운다 */
+  /* 켜는 화면 없이 바로 뜬 경우(새 판으로 조용히 갈아탄 직후 등) — 앱이 준비되고 켜는 화면이 없으면 띄운다 */
   (function wait(){
     var t0 = Date.now();
     (function tick(){

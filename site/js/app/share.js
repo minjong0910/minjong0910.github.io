@@ -2,7 +2,7 @@
 /* share.js — 길 공유하기 (2026-11-03 사용자가 견본으로 정한 것)
    · 보내는 분 : 설정 → 길 공유하기 → 호실 번호 · (받는 분이 들어올 문) → 카카오톡 · 문자로 보내기 / 링크만 복사하기
      링크 : https://minjong0910.github.io/?to=호실&from=문   (문을 정하지 않으면 from 이 없다)
-   · 받는 분 : 링크를 누르면 초록 글 → 바로 길안내 1단계 (「보내 주신 길」 카드). 문이 없으면 문 사진 넷 중 고르기(#srcv).
+   · 받는 분 : 링크를 누르면 켜는 화면 → 바로 길안내 1단계 (「보내 주신 길」 카드). 문이 없으면 문 사진 넷 중 고르기(#srcv).
      도착하면 「보낸 분께 「도착했어요」 알리기」. 처음 동의 화면 · 쉬운 사용모드는 묻지 않는다(누르기만 하면 바로).
    · 주소의 ?to= · from= 은 pwa.js 가 먼저 떼어 둔다(PWA.takeShare). 시간표 알림을 눌러 열린 것(tt=1)은 timetable.js 가 받는다.
    · 길안내를 여는 길(route)과 길안내 위 카드(ctx)는 시간표(timetable.js)도 같이 쓴다. */
@@ -195,7 +195,7 @@
   var s7 = document.getElementById('s7');
   if(s7 && window.MutationObserver) new MutationObserver(function(){ if(s7.classList.contains('on')) paintTell(); }).observe(s7, {attributes: true, attributeFilter: ['class']});
 
-  /* 링크로 열렸으면 — 앱이 준비되는 대로(초록 글 아래에서) 길안내를 깔아 둔다. 초록 글이 걷히면 바로 1단계가 보인다. */
+  /* 링크로 열렸으면 — 앱이 준비되는 대로(켜는 화면 아래에서) 길안내를 깔아 둔다. 켜는 화면이 걷히면 바로 1단계가 보인다. */
   function take(){
     var sh = (typeof PWA !== 'undefined' && PWA.takeShare) ? PWA.takeShare() : null;
     if(!sh) return;

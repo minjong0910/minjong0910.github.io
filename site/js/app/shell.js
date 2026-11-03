@@ -157,6 +157,7 @@ function go(id){
   if(typeof TOPMENU!=='undefined') TOPMENU.close();      /* 화면이 바뀌면 오른쪽 위 ☰ 메뉴는 닫는다 */
   if(typeof RESUME!=='undefined') RESUME.onScreen(typeof id==='number' ? 's'+id : id);   /* 길안내 이어 하기 — 새로 시작했거나 다 왔으면 지운다 */
   if(typeof id==='number') id='s'+id;
+  navRecord(id);                                         /* 지나온 화면 기록 — 휴대폰 뒤로가기가 이것을 따라 한 칸씩 돌아간다 */
   var target=document.getElementById(id);
   SCREENS.forEach(function(sid){
     var el=document.getElementById(sid);
@@ -200,6 +201,7 @@ function go(id){
   if(id==='saidat' && typeof aidEnter==='function') aidEnter();     /* v55 : AI 사진 파악 자료집 */
   if(id==='sfav') renderFavorites();
   if(id==='s7') spawnParticles('arrivalFx');   // "안내를 마칩니다" 도착 파티클 효과
+  if(typeof B3BACK!=='undefined') B3BACK.topUp();   // 누른 그 순간이면 뒤로가기 칸을 넉넉히 채워 둔다
 }
 /* 즐겨찾기·설정은 어느 화면에서 열었든, 닫으면 그 이전 화면으로 되돌아간다 */
 var beforeOverlay='s1';
@@ -216,19 +218,68 @@ function closeOverlay(){ go(beforeOverlay); }
 function reset(){ clearSearch(); go('s1'); }
 /* 도착 화면 '다른 곳 찾기' : 처음(시작) 화면이 아니라 카테고리 선택 화면으로 바로 연결 */
 function findAnother(){ clearSearch(); go('scat'); }
-/* ========== 안드로이드 하드웨어 뒤로가기 ==========
-   갤럭시 등 안드로이드의 뒤로가기 키는 '브라우저 히스토리를 한 칸 되돌리는' 동작이다.
-   그런데 이 앱은 화면 전환을 전부 자바스크립트(go)로만 처리해서 히스토리에 아무것도
-   쌓이지 않았고, 그래서 어느 화면에서 눌러도 곧장 앱이 종료돼 버렸다.
-   → 항상 '더미 히스토리 한 칸'을 채워 두고(backGuardArm), 뒤로가기가 눌리면(popstate)
-     앱 안에서 한 단계만 뒤로 간 뒤 그 칸을 다시 채운다.
-     첫 화면(s1)에서는 다시 채우지 않고 그대로 흘려보내 앱이 종료되게 한다. */
+/* ========== 휴대폰 뒤로가기 (2026-11-03 다시 만듦 — 사용자가 견본으로 정한 규칙) ==========
+   사용자 : 「앱 안에서 뒤로가기를 누르면 어떤 곳은 전 화면으로 가는데 어떤 페이지에서는 바로 앱이 꺼진다 —
+             전 화면으로 가게, 첫 화면에서 뒤로가기는 '정말로 앱을 종료하시겠습니까?'」 · 「핸드폰 중심으로」.
+   왜 꺼졌나 : 예전에는 히스토리 칸을 하나만 깔고, 뒤로가기를 받은 뒤(popstate 안에서) 다시 깔았다.
+     그런데 뒤로가기 단추는 화면을 「누른」 것이 아니라서, 그때 깐 칸은 크롬 · 삼성 인터넷이
+     「사용자가 누르지 않은 사이 페이지가 넣은 칸」으로 보고 다음 뒤로가기 때 건너뛴다(history manipulation intervention).
+     → 화면을 안 누르고 뒤로가기를 연달아 누르면 앱 밖으로 나갔다. 깊은 화면일수록 여러 번 눌러야 해서 「어떤 페이지에서만」으로 보였다.
+   이제 :
+     ① 지나온 화면을 순서대로 기억한다(navRecord) — 뒤로가기는 바로 전에 있던 화면으로.
+        첫 화면으로 가면 비우고, 이미 지나온 화면으로 다시 가면 그 앞까지만 남긴다.
+        한 번에 여러 화면을 건너뛰는 길(공유 링크 · 이어 보기 · QR 확인 → 찾기 → 목적지 → 길안내)은 거쳐 간 화면을 쌓지 않는다.
+     ② 히스토리 칸은 「화면을 누른 그 순간」에만 넉넉히 채운다(B3BACK.topUp) — 그 칸은 건너뛰지 않으므로 연달아 눌러도 앱 안에서 받는다.
+     ③ 떠 있는 것(사진 크게 보기 · ☰ · 아래 창 · 확인창)부터 닫고, 길안내 단계 · 이용안내 쪽은 한 칸씩.
+     ④ 첫 화면에서 누르면 「앱을 종료하시겠어요?」 — [취소] · [종료]. 창이 떠 있을 때 한 번 더 누르면 [취소].
+     ⑤ 화면 왼쪽 위 ← 도 같은 규칙(창 · 단계는 건너뛰고 화면만 한 칸).
+   아이폰은 뒤로가기 단추가 없지만 사파리의 「왼쪽 끝에서 밀기」가 같은 히스토리 뒤로가기라 똑같이 움직인다. */
+var NAV = {stack: [], cur: 's1', backing: false, chainFrom: null, chainTo: null};
+var NAV_SKIP = {sqr: 1};          // 카메라 화면은 되돌아가지 않는다 — 돌아가면 카메라가 꺼진 빈 화면이다
+/* 관리자 화면은 각자의 ← (정리할 것이 있다 — 고르기 취소 등)를 그대로 쓴다 */
+var NAV_ADMIN = {sph: 1, sadmin: 1, sphmgr: 1, spwgate: 1, phsort: 1, saidat: 1, spick: 1};
+/* 한 번의 동작(누름 하나 · 링크로 열기 하나) 안에서 화면이 이어서 바뀌면 처음 화면만 기록한다 —
+   공유 링크 · 이어 보기는 「여기가 맞나요? → 찾기 → 목적지 → 길안내」를 한꺼번에 지나가는데, 사용자는 그 화면들을 본 적이 없다.
+   (처음에는 시간(80ms)으로 갈랐는데, 목적지 3D 준비가 그보다 오래 걸려 목적지가 기록에 남았다 — 같은 동작인지로 가른다) */
+function navRecord(id){
+  var from = NAV.cur;
+  if(id === from) return;
+  NAV.cur = id;
+  if(NAV.backing) return;
+  if(NAV.chainFrom === null){ NAV.chainFrom = from; setTimeout(navCommit, 0); }
+  NAV.chainTo = id;
+}
+function navCommit(){
+  var from = NAV.chainFrom, id = NAV.chainTo;
+  NAV.chainFrom = NAV.chainTo = null;
+  if(from === null || from === id) return;
+  if(id === 's1'){ NAV.stack = []; return; }
+  var k = NAV.stack.indexOf(id);
+  if(k >= 0){ NAV.stack = NAV.stack.slice(0, k); return; }
+  if(!NAV_SKIP[from]) NAV.stack.push(from);
+}
+function navGo(id){ NAV.backing = true; try{ go(id); }finally{ NAV.backing = false; } }
+/* 화면 한 칸 뒤로 (떠 있는 것 · 단계는 보지 않는다) */
+function navBack(){
+  if(NAV.chainFrom !== null) navCommit();                // 막 옮긴 기록이 아직 안 적혔으면 먼저
+  var cur = document.querySelector('.screen.on'), id = cur ? cur.id : 's1';
+  if(NAV_ADMIN[id]){ var btn = cur.querySelector('.bar .back'); if(btn){ btn.click(); return true; } }
+  if(NAV.stack.length){ navGo(NAV.stack.pop()); return true; }
+  if(id !== 's1'){ navGo('s1'); return true; }          // 링크 · QR 로 바로 연 화면 — 지나온 화면이 없으면 첫 화면으로
+  exitAsk(); return true;
+}
 function appBackStep(){
+  // ⓪ 「앱을 종료하시겠어요?」가 떠 있으면 닫는다 (= 취소)
+  if(document.querySelector('.syExit')){ exitClose(); return true; }
   // ⓪ 사진 크게 보기 창이 떠 있으면 그것부터 닫는다 (2026-10-26 — 길안내 사진도 한 번 누르면 이 창이 뜬다)
   if(typeof izIsOpen==='function' && izIsOpen()){ closeZoom(); return true; }
   // ⓪ 오른쪽 위 ☰ 메뉴가 펼쳐져 있으면 그것부터 닫는다 (2026-10-19)
   if(typeof TOPMENU!=='undefined' && TOPMENU.isOpen()){ TOPMENU.close(); return true; }
   if(typeof RESUME!=='undefined' && RESUME.isAsking()){ RESUME.dismiss(); return true; }   // 「아까 보던 길안내」 카드
+  // 앱 설치 · 인터넷 상태 안내 창
+  if(document.getElementById('pwaSheet') && typeof PWA!=='undefined'){ PWA.close(); return true; }
+  // 쉬운 사용모드 「처음이세요?」 — 「아니요, 혼자 할게요」와 같다
+  var ez = document.querySelector('.ezAsk button[data-a="0"]'); if(ez){ ez.click(); return true; }
   // ① 직접 그린 확인창(삭제 확인 등)이 떠 있으면 그것부터 닫는다
   var cf = document.querySelector('.appConfirmOverlay');
   if(cf && cf.parentNode){ cf.parentNode.removeChild(cf); return true; }
@@ -246,61 +297,94 @@ function appBackStep(){
   // ⑤ 3D 전체화면이면 전체화면만 빠져나온다
   var s4 = document.getElementById('s4');
   if(s4 && s4.classList.contains('fsMode')){ exitFullscreen3D(); return true; }
-  // ⑥ 화면별 뒤로가기
-  var cur = document.querySelector('.screen.on');
-  var id  = cur ? cur.id : 's1';
-  if(id === 's1') return false;                    // 첫 화면 → 앱 종료
-  if(id === 's6'){                                 // 길안내 : 단계를 하나씩 되돌린다
-    if(typeof si==='number' && si>0){ si--; render6(); return true; }
-    go(4); return true;
+  // ⑥ 화면 안의 단계 — 길안내는 단계를 · 이용안내는 쪽을 하나씩
+  var cur = document.querySelector('.screen.on'), id = cur ? cur.id : 's1';
+  if(id === 's6' && typeof si==='number' && si>0){ si--; render6(); return true; }
+  if(id === 'sguide' && typeof guideIdx==='number' && guideIdx>0){ guidePrev(); return true; }
+  // ⑦ 바로 전에 있던 화면 · 첫 화면이면 종료 확인
+  return navBack();
+}
+/* 화면 왼쪽 위 ← 도 휴대폰 뒤로가기와 같은 규칙 — 화면마다 따로 적어 둔 목적지(go('sset') 등) 대신 지나온 화면으로 */
+document.addEventListener('click', function(e){
+  var b = e.target && e.target.closest ? e.target.closest('.bar .back, #s6 .stBack') : null;
+  if(!b) return;
+  var scr = b.closest('.screen');
+  if(!scr || NAV_ADMIN[scr.id] || scr.id === 'sqr' || scr.id === 's4' && scr.classList.contains('fsMode')) return;   // QR 카메라 ← 는 카메라를 끄는 일을 한다(QRNAV.close)
+  e.preventDefault(); e.stopPropagation();
+  navBack();
+}, true);
+
+/* ── 첫 화면에서 뒤로가기 : 「앱을 종료하시겠어요?」 ── */
+function exitAsk(){
+  if(document.querySelector('.syExit')) return;
+  var ph = document.querySelector('.phone'); if(!ph) return;
+  var ko = (typeof LANG === 'undefined' || LANG !== 'en');
+  var w = document.createElement('div'); w.className = 'syExit';
+  w.innerHTML = '<div class="card" role="dialog" aria-label="' + (ko ? '앱 종료' : 'Exit') + '"><div class="ic"><img src="img/icon-192.png" alt=""></div>' +
+    '<b>' + (ko ? '앱을 종료하시겠어요?' : 'Close the app?') + '</b>' +
+    '<p>' + (ko ? '「종료」를 누르면 공대 3호관 길안내가 닫혀요.<br>즐겨찾기 · 내 시간표는 그대로 남아 있어요.' : 'Tap “Close” to exit.<br>Your favorites and timetable stay saved.') + '</p>' +
+    '<div class="bt"><button type="button" class="no">' + (ko ? '취소' : 'Cancel') + '</button><button type="button" class="yes">' + (ko ? '종료' : 'Close') + '</button></div></div>';
+  w.addEventListener('click', function(e){ if(e.target === w) exitClose(); });          // 창 바깥을 눌러도 취소
+  w.querySelector('.no').onclick = exitClose;
+  w.querySelector('.yes').onclick = function(){ exitClose(); B3BACK.leave(); };
+  ph.appendChild(w);
+}
+function exitClose(){ var w = document.querySelector('.syExit'); if(w) w.remove(); }
+
+/* ── 히스토리 칸 (휴대폰 뒤로가기를 앱 안에서 받는 받침) ── */
+var B3BACK = (function(){
+  var ok = !!(window.history && history.pushState);
+  var pos = 0, leaving = false;
+  /* 지금 화면에서 뒤로가기를 몇 번 눌러야 종료 확인까지 가는지 + 넉넉히 */
+  function want(){
+    var n = NAV.stack.length + 3;
+    var cur = document.querySelector('.screen.on'), id = cur ? cur.id : '';
+    if(id === 's6' && typeof si === 'number') n += si;
+    if(id === 'sguide' && typeof guideIdx === 'number') n += guideIdx;
+    return Math.min(n, 30);
   }
-  if(id === 's7'){ go(6); return true; }           // 도착 화면 → 마지막 안내 단계로
-  if(id === 'sguide'){                             // 이용안내 : 페이지를 하나씩 되돌린다
-    if(typeof guideIdx==='number' && guideIdx>0){ guidePrev(); return true; }
-    go('sset'); return true;
+  function push(){ try{ history.pushState({b3i: pos + 1}, ''); pos++; return true; }catch(e){ return false; } }
+  /* 누른 그 순간에만 — 누르지 않은 사이 넣은 칸은 크롬이 건너뛴다 */
+  function topUp(){
+    if(!ok || leaving) return;
+    if(navigator.userActivation && !navigator.userActivation.isActive) return;
+    var w = want(), guard = 0;
+    while(pos < w && guard++ < 30){ if(!push()) break; }
   }
-  /* 나머지 화면은 그 화면 좌측 상단 '←' 버튼과 똑같이 동작시킨다.
-     (뒤로가기 규칙을 두 군데에 따로 적어 두면 나중에 어긋나므로) */
-  var btn = cur.querySelector('.bar .back');
-  if(btn){ btn.click(); return true; }
-  go('s1'); return true;
-}
-var backGuardOn = false, backGuardTouched = false;
-function backGuardArm(){
-  if(backGuardOn) return;
-  try{ history.pushState({gunsanGuard:1}, ''); backGuardOn = true; }catch(e){}
-}
-/* 사용자가 화면을 처음 건드렸을 때 한 칸을 '더' 쌓는다 — 아래 설명 참고 */
-function backGuardTouch(){
-  if(backGuardTouched) return;
-  backGuardTouched = true;
-  try{ history.pushState({gunsanGuard:2}, ''); backGuardOn = true; }catch(e){}
-}
-(function backGuardInit(){
-  if(!window.history || !history.pushState) return;
-  /* ★ 2026-09-25 : 칸을 두 번에 나눠 쌓는다.
-     ① 앱이 켜질 때 한 칸 — 사용자가 아무것도 안 하고 바로 뒤로가기를 눌러도 앱 안에서 받는다.
-     ② 사용자가 화면을 처음 건드렸을 때 한 칸 더 — 크로미움 계열 브라우저는
-        "사용자가 손대기 전에 페이지가 스스로 쌓은 칸"을 뒤로가기 때 건너뛰기 때문이다
-        (Chrome 74 부터의 history manipulation intervention · 삼성 인터넷도 크로미움이라 같다).
-        ①만 있으면 삼성 폰에서는 그 칸이 무시되어 한 번에 앱이 꺼졌다.
-        같은 장치가 없는 아이폰 사파리는 멀쩡해서 기종을 타는 것처럼 보였다.
-     뒤로가기가 한 번 먹은 뒤의 다시 채우기는 popstate 안에서 하므로 손짓 뒤라 건너뛰지 않는다. */
-  backGuardArm();
-  ['pointerdown','touchstart','keydown'].forEach(function(ev){
-    window.addEventListener(ev, backGuardTouch, {passive:true, capture:true});
-  });
-  window.addEventListener('popstate', function(){
-    backGuardOn = false;
-    if(appBackStep()){
-      backGuardArm();                 // 앱 안에서 처리했으면 다음 뒤로가기를 위해 다시 채워 둔다
-    }else{
-      /* 첫 화면에서 눌렀을 때 : 남은 히스토리를 한 칸 더 되돌려
-         웹뷰·홈화면 앱이 닫히게 한다(일반 브라우저 탭이면 이전 페이지로 나간다). */
+  if(ok){
+    try{ pos = (history.state && typeof history.state.b3i === 'number') ? history.state.b3i : 0; }catch(e){ pos = 0; }
+    if(pos === 0) push();          // 켜자마자 뒤로가기를 눌러도 받도록 한 칸 (아직 안 눌러서 크롬은 건너뛸 수 있다 — 처음 누를 때 다시 채운다)
+    window.addEventListener('click', topUp);                    // 누른 일이 다 끝난 뒤(단계 · 화면이 바뀐 뒤) 채운다
+    window.addEventListener('keydown', topUp);
+    window.addEventListener('popstate', function(e){
+      var to = (e.state && typeof e.state.b3i === 'number') ? e.state.b3i : 0;
+      if(leaving){ pos = to; return; }
+      if(to >= pos){ pos = to; return; }                        // 앞으로 가기 — 할 일 없음
+      var n = pos - to; pos = to;
+      for(var i = 0; i < n; i++) appBackStep();                // 보통 한 번
+      if(pos === 0) push();                                      // 칸이 다 떨어졌으면 하나라도 다시 (다음에 누를 때 넉넉히 채운다)
+    });
+    window.addEventListener('pageshow', function(){ leaving = false; });
+  }
+  /* 「종료」 — 이 앱이 쌓은 칸을 다 걷고 앱을 닫는다.
+     브라우저 탭으로 열었으면 앞 페이지로 나가고, 창을 닫을 수 있으면 닫는다.
+     홈 화면에 설치한 앱은 웹 페이지가 스스로 창을 못 닫는 폰이 있다 — 그때는 다음 뒤로가기 한 번에 닫히게 받침을 비우고 알린다. */
+  function leave(){
+    if(!ok){ try{ window.close(); }catch(e){} return; }
+    leaving = true;
+    var n = pos;
+    if(n > 0) history.go(-n);
+    setTimeout(function(){
       try{ window.close(); }catch(e){}
       try{ history.back(); }catch(e){}
-    }
-  });
+      setTimeout(function(){
+        leaving = false; pos = 0;
+        var ko = (typeof LANG === 'undefined' || LANG !== 'en');
+        if(typeof B3UI !== 'undefined') B3UI.toast(ko ? '뒤로가기를 한 번 더 누르면 앱이 닫혀요' : 'Press back once more to close the app', true);
+      }, 700);
+    }, n > 0 ? 350 : 0);
+  }
+  return {topUp: topUp, leave: leave, depth: function(){ return pos; }, want: want};
 })();
 
 /* 검색창·결과·안내문을 처음 상태로 */

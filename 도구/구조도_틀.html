@@ -362,7 +362,7 @@
   <div class="gbox">
     <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 13개</div>
     <div class="grid">
-      <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">378줄 · 화면 전환 go()</span></button>
+      <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">462줄 · 화면 전환 go() · 휴대폰 뒤로가기</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
       <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">777줄 · 화면 24개</span></button>
       <button class="b p" data-id="f_easy"><span class="n">easy.js</span><span class="d">324줄 · 쉬운 사용모드</span></button>
@@ -372,7 +372,7 @@
       <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">135줄 · 길안내 이어 하기</span></button>
       <button class="b p" data-id="f_story"><span class="n">story.js</span><span class="d">168줄 · 길안내 · 도착 화면 (인스타 + 공항)</span></button>
       <button class="b p" data-id="f_live"><span class="n">live.js</span><span class="d">34줄 · 발표장 「지금 켜 둔 사람」</span></button>
-      <button class="b p" data-id="f_consent"><span class="n">consent.js</span><span class="d">400줄 · 처음 켤 때 동의 · 기능별 허용</span></button>
+      <button class="b p" data-id="f_consent"><span class="n">consent.js</span><span class="d">398줄 · 처음 켤 때 동의 · 기능별 허용</span></button>
       <button class="b p" data-id="f_share"><span class="n">share.js</span><span class="d">218줄 · 길 공유하기 (링크)</span></button>
       <button class="b p" data-id="f_timetable"><span class="n">timetable.js</span><span class="d">407줄 · 내 시간표 · 수업 알림</span></button>
     </div>
@@ -684,7 +684,7 @@ f_start:{t:'start.js — 글꼴을 기다렸다 시작',z:'p',zl:'폰 안에서 
 f_shell:{t:'shell.js — 화면 전환과 상태',z:'p',zl:'폰 안에서 돈다',
  kid:'지금 어느 화면을 보여 줄지 정하는 <b>리모컨</b>이에요.',
  why:'보통 웹앱은 화면을 바꿀 때 <b>서버에서 새 화면을 받아옵니다.</b> 그러면 인터넷이 없을 때 화면이 안 바뀝니다.<br>그래서 <b>화면 24개를 미리 다 넣어 두고</b> 보여 줄 것만 켜는 방식으로 했습니다. 화면을 바꿀 때 인터넷을 전혀 안 씁니다.',
- where:['앱의 <b>모든 화면 전환</b>','<b>뒤로가기</b> 버튼'],
+ where:['앱의 <b>모든 화면 전환</b>','<b>휴대폰 뒤로가기</b> — 지나온 화면을 한 칸씩 되돌아가고, 첫 화면에서는 「앱을 종료하시겠어요?」 (2026-11-03)'],
  how:'라우터가 없습니다. <code>go(id)</code> 가 <code>.on</code> 클래스만 옮깁니다. 앱 전체의 상태는 사실상 <b>변수 다섯 개</b>뿐입니다(목적지 · 현재층 · 안내단계 · 단계번호 · 출발층).',
  tech:['바닐라 JS','전역 변수 상태','DOM 클래스 토글','history.pushState'],
  src:[['site/js/app/shell.js','화면 전환 · 상태 전부']],

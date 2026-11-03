@@ -162,7 +162,7 @@ var CONSENT = (function(){
         '<li>' + T('실제와 다르면 설정 → 건의함으로 알려 주세요. 관리자가 확인해 고쳐요.', 'If something differs, tell us via Settings → Suggestion Box.') + '</li></ul>'},
     {k: 'local', req: true, t: T('이 폰에 저장', 'Saved on this phone'), s: T('이어 하기 · 즐겨찾기 · 시간표 · 화면 설정은 이 폰에만 — 서버로 보내지 않아요', 'Resume · favorites · timetable · settings stay on this phone — never sent to a server'),
      d: '<ul><li>' + T('이 폰에 남는 것 : 길안내 이어 하기(30분) · 즐겨찾기 · 최근 찾은 곳 · 내 시간표 · 수업 알림 설정 · 쉬운 사용모드 · 밝은 화면 · 이 동의 기록', 'Kept on this phone: resume (30 min) · favorites · recent searches · timetable · class alerts · easy mode · light mode · this consent') + '</li>' +
-        '<li>' + T('인터넷이 없어도 열리게 앱 파일과 사진(약 16.6MB)을 이 폰에 저장해요.', 'App files and photos (about 16.6MB) are saved so the app opens offline.') + '</li>' +
+        '<li>' + T('인터넷이 없어도 열리게 앱을 이 폰에 저장해 둬요.', 'The app is saved on this phone so it opens offline.') + '</li>' +
         '<li>' + T('모두 이 폰에만 있고 서버로 보내지 않아요. 브라우저의 「사이트 데이터 삭제」로 한 번에 지울 수 있어요.', 'All of it stays on this phone. Clear the site data in your browser to delete it.') + '</li></ul>'},
     {k: 'photo', req: false, t: T('건의함 사진 개인정보', 'Suggestion photos'), s: T('사진 · 메모를 받아 길안내 사진으로 써요 — 얼굴 X · GPS 지움', 'Photos and notes become guide photos — no faces · GPS removed'),
      d: '<ul><li>' + T('<b>사람 얼굴</b>이나 다른 사람의 화면 · 이름표가 나오지 않게 찍어 주세요.', 'Keep <b>faces</b> and name tags out of the photo.') + '</li><li>' + T('사진 속 위치 정보(GPS)는 올리기 전에 지워져요.', 'GPS data is removed before upload.') + '</li></ul>' + PV_TABLE() +
@@ -341,26 +341,24 @@ var CONSENT = (function(){
 
   /* ════════ 이용안내 12쪽 「동의 · 권한 안내」 ════════ */
   function li(n, b, sp){ return '<li><i>' + n + '</i><div><b>' + b + '</b><span>' + sp + '</span></div></li>'; }
+  /* 2026-11-03 사용자 : 「설명이 너무 자세하다 — 최대한 간단하고 명확하게, 파일 크기 같은 건 보여 줘도 모른다」 → 한 줄씩만 */
   function guideHtml(){
-    return '<div class="hwLead">' + T('이 앱이 받는 동의와 휴대폰 권한을 한 쪽에 모았어요.', 'Everything this app asks you to agree to, on one page.') + '</div>' +
-      '<h5 class="hwHead">✅ ' + T('처음 켤 때 받는 동의 — 한 번 동의하면 앱을 쓰는 동안 다시 묻지 않아요', 'At first launch — agree once and we never ask again') + '</h5><ol class="hwList">' +
-        li(1, T('필수 · 이용 안내', 'Required · Terms'), T('길안내는 참고용이에요. 공사나 방 이동으로 실제와 다를 수 있으니 문 옆 명패를 꼭 확인해 주세요. 회원가입 · 로그인은 없어요.', 'Directions are a guide — always check the door plate. No sign-up or login.')) +
-        li(2, T('필수 · 이 폰에 저장', 'Required · Saved on this phone'), T('이어 하기 · 즐겨찾기 · 최근 찾은 곳 · 내 시간표 · 화면 설정은 이 폰에만 있고 서버로 보내지 않아요. 인터넷 없이 열리게 앱 파일과 사진(약 16.6MB)을 저장해요.', 'Resume, favorites, timetable and settings stay on this phone. About 16.6MB is saved for offline use.')) +
-        li(3, T('선택 · 건의함 사진 개인정보', 'Optional · Suggestion photos'), T('동의하지 않아도 길안내는 모두 쓸 수 있어요. 건의함 「📷 사진」 칸을 누를 때 한 번 더 물어요.', 'Directions work without it. We ask again when you tap the photo box.')) +
-        li(4, T('선택 · 카메라 · 알림', 'Optional · Camera · Notifications'), T('체크할 때 휴대폰이 한 번 물어요. 허용하면 앱을 쓰는 동안 다시 묻지 않아요. 체크하지 않았다면 그 기능이 켜질 때 허용할지 물어요.', 'Your phone asks once when you tick them. If you skip, we ask when the feature starts.')) + '</ol>' +
-      '<h5 class="hwHead">📷 ' + T('카메라 — 처음에 동의하지 않았다면 이럴 때 물어요', 'Camera — if you skipped it, we ask when') + '</h5><ol class="hwList">' +
-        li(1, T('건의함 「📷 사진」 칸을 누를 때', 'You tap the photo box'), T('지금 보이는 모습을 찍어 올릴 때 카메라를 켜요.', 'The camera opens to take your photo.')) +
-        li(2, T('「출입문 QR 스캔하고 시작」을 누를 때', 'You start the door QR scan'), T('QR 을 비추는 카메라를 켜요. 사진은 남기지 않고 QR 글자만 읽어요.', 'The camera reads only the QR text — no photo is kept.')) + '</ol>' +
-      '<h5 class="hwHead">🔔 ' + T('알림 — 처음에 동의하지 않았다면 이럴 때 물어요', 'Notifications — if you skipped them, we ask when') + '</h5><ol class="hwList">' +
-        li(1, T('내 시간표 → 수업 알림을 켤 때', 'You turn on class alerts'), T('수업 시작 몇 분 전에 소리 · 진동으로 알려 줘요. 수업 알림만 보내요. 광고 알림은 없어요.', 'Alerts before classes only. No ads.')) + '</ol>' +
-      '<h5 class="hwHead">🛠 ' + T('「허용」을 눌러도 켜지지 않으면', 'If it still does not turn on') + '</h5><div class="hwLead" style="font-size:0.9rem;">' + T('예전에 휴대폰 창에서 「차단」을 눌렀던 폰이에요. 휴대폰에서 직접 켜 주세요.', 'You blocked it on your phone before. Turn it on in your phone settings.') + '</div><ol class="hwList">' +
-        li(1, T('안드로이드 (삼성 인터넷 · 크롬)', 'Android (Samsung Internet · Chrome)'), T('주소창 왼쪽 자물쇠(또는 ⓘ) → 권한 → 카메라 · 알림 → 허용', 'Lock icon (or ⓘ) → Permissions → Camera · Notifications → Allow')) +
-        li(2, T('아이폰 (사파리)', 'iPhone (Safari)'), T('카메라 : 주소창 왼쪽 「ᴀA」 → 웹 사이트 설정 → 카메라 → 허용<br>알림 : 홈 화면에 추가한 앱에서만 돼요 — 설정 → 알림 → 3호관 길안내', 'Camera: aA → Website Settings → Camera → Allow<br>Notifications: only in the app added to the home screen')) + '</ol>' +
-      '<h5 class="hwHead">🗂 ' + T('건의함 사진 — 받는 것 · 지우는 때', 'Suggestion photos — what and how long') + '</h5>' + PV_TABLE() +
-      '<h5 class="hwHead">🧹 ' + T('지우거나 그만두려면', 'Deleting your data') + '</h5><ol class="hwList">' +
-        li(1, T('이 폰에 저장한 것', 'Data on this phone'), T('브라우저의 「사이트 데이터 삭제」로 한 번에 지워져요. 지운 뒤 앱을 켜면 처음 동의 화면이 다시 나와요.', 'Clear the site data in your browser. The consent screen appears again next time.')) +
-        li(2, T('올린 건의함 사진', 'Photos you sent'), T('건의함 맨 아래 「올린 사진 지워 달라고 하기」로 보내 주세요. 관리자가 확인하고 지워요.', 'Use “Ask us to delete a photo” at the bottom of the Suggestion Box.')) +
-        li(3, T('위치', 'Location'), T('📍 GPS 위치는 쓰지 않아요. 어디 계신지는 출입문 QR 로만 알아요.', '📍 We never use GPS — only the door QR.')) + '</ol>';
+    return '<div class="hwLead">' + T('처음 켤 때 한 번만 물어요. 그다음부터는 묻지 않아요.', 'We ask only once, the first time you open the app.') + '</div>' +
+      '<h5 class="hwHead">✅ ' + T('처음 켤 때 동의하는 것', 'What you agree to') + '</h5><ol class="hwList">' +
+        li(1, T('필수 · 이용 안내', 'Required · Terms'), T('길안내는 참고용이에요. 문 옆 명패를 꼭 확인해 주세요.', 'Directions are a guide — please check the door plate.')) +
+        li(2, T('필수 · 이 폰에 저장', 'Required · Saved on this phone'), T('즐겨찾기 · 내 시간표 같은 기록은 이 폰에만 남아요.', 'Favorites and your timetable stay on this phone only.')) +
+        li(3, T('선택 · 건의함 사진', 'Optional · Suggestion photos'), T('동의하지 않아도 길안내는 모두 쓸 수 있어요.', 'Directions work without it.')) +
+        li(4, T('선택 · 카메라 · 알림', 'Optional · Camera · Alerts'), T('지금 허용하지 않아도 괜찮아요. 쓸 때 다시 물어요.', 'You can skip — we ask again when you use them.')) + '</ol>' +
+      '<h5 class="hwHead">📷 ' + T('카메라 · 알림은 쓸 때 물어요', 'Camera and alerts are asked when needed') + '</h5><ol class="hwList">' +
+        li(1, T('카메라', 'Camera'), T('출입문 QR 을 찍을 때 · 건의함 사진을 찍을 때', 'Scanning a door QR · taking a suggestion photo')) +
+        li(2, T('알림', 'Alerts'), T('내 시간표에서 수업 알림을 켤 때', 'Turning on class alerts in My Timetable')) + '</ol>' +
+      '<div class="hwTip">💡 ' + T('「허용」을 눌러도 안 켜지면 휴대폰에서 켜 주세요<br>안드로이드 : 주소창 왼쪽 자물쇠 → 권한 → 허용<br>아이폰 : 주소창 왼쪽 「가가」 → 웹 사이트 설정 → 허용',
+        'If “Allow” does not work, turn it on in your phone<br>Android: lock icon in the address bar → Permissions → Allow<br>iPhone: “AA” in the address bar → Website Settings → Allow') + '</div>' +
+      '<h5 class="hwHead">🗂 ' + T('건의함 사진', 'Suggestion photos') + '</h5><ol class="hwList">' +
+        li(1, T('받지 않는 것', 'Never collected'), T('이름 · 전화번호 · 위치(GPS)', 'Name · phone number · location (GPS)')) +
+        li(2, T('지우는 때', 'When deleted'), T('쓰지 않는 사진은 바로, 확인 못 한 사진은 30일 뒤에 지워요.', 'Unused photos right away, unchecked ones after 30 days.')) +
+        li(3, T('지워 달라고 하려면', 'To ask for deletion'), T('건의함 맨 아래 「올린 사진 지워 달라고 하기」', '“Ask us to delete a photo” at the bottom of the Suggestion Box')) + '</ol>' +
+      '<div class="hwTip">📍 ' + T('GPS 위치는 쓰지 않아요. 어디 계신지는 출입문 QR 로만 알아요.', 'We never use GPS — only the door QR.') + '</div>';
   }
   if(typeof HOWTO !== 'undefined' && HOWTO.push){
     HOWTO.push({t: ['동의 · 권한 안내', 'Consent & permissions'], html: guideHtml});

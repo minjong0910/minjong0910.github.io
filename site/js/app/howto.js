@@ -102,6 +102,9 @@ var HOWTO = [
       ['진행 표시', '어디서 어디로 가는지, 지금 몇 번째 단계인지 보여 줘요. 📷 옆은 지금 사진 속 자리예요.', 'Progress', 'Shows where you are going, which step you are on, and where the photo was taken.'],
       ['누르면 크게', '사진을 누르면 누른 곳이 크게 보이고, 다시 누르면 원래대로 돌아와요. 「1/2 · 다음 사진 ›」이 보이면 그걸 눌러 다음 사진을 봐요.',
        'Tap to zoom', 'Tap the photo to zoom in where you tapped; tap again to zoom out. If it shows "1/2 · Next ›", tap that for the next photo.'],
+      /* 2026-11-04 사용자 「사진 골라 다시 출발」을 앱에 — 그림도 그 단추가 보이게 다시 찍음(번호 3) */
+      ['여기가 어디인지 모르겠어요', '사진 속 자리가 안 보이면 눌러요. 지금 보이는 사진이나 지금 계신 층(엘리베이터 사진)을 고르면 그 자리부터 다시 안내해요.',
+       'Lost?', 'Tap if you can’t find the place in the photo. Pick the photo you see, or your floor (elevator photos), and the steps start again from there.'],
       ['안내판', '공항 안내판처럼 노란 칸의 그림이 갈 방향(화살표 · 엘리베이터)을, 큰 글씨가 지금 할 일을 알려 줘요. 아래 작은 글씨는 영어예요.',
        'Sign', 'Like an airport sign: the yellow box shows the way (arrow or elevator) and the big text tells you what to do.'],
       ['다음', '사진 속 자리에 오면 눌러요. 마지막 단계에서는 「도착했어요」로 바뀌어요. 왼쪽 버튼은 앞 단계로 돌아가요. 사진을 좌우로 밀어도 넘어가요.',

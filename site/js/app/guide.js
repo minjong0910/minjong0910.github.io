@@ -119,6 +119,10 @@ function buildSteps(){
   // 출발층 엘리베이터 앞 사진(있으면). B1은 EV 사진이 없으므로 EV1로 대체.
   var startEV = (typeof sf==='number') ? ('EV'+sf) : (sf==='B1' ? 'EVB1' : 'EV1');   // 2026-11-04 : 지하 1층 엘리베이터 사진(EVB1)이 생겨서 — 예전에는 1층 사진을 대신 썼다
   var sfName = typeof sf==='number' ? lvName(sf) : lvName(1);
+  /* 2026-11-04 사용자 「『내려서 어디로 도세요』를 『몇 층에서 내려서 어디로 도세요』로 — 더 세세하고 정확하게」
+     엘리베이터에서 내리는 단계는 모두 내리는 층을 앞에 붙인다 : 「3층에서 내려서 오른쪽으로 도세요」 · 「3층 엘리베이터에서 내려서 우회전 하세요」
+     영어는 공항 표지판식 층 이름 : 「Get off at 3F and turn right」 · 「Get off the elevator at 3F and turn right」 */
+  var offKo = lvNameIn(lv, 'ko'), offEn = (lv==='R') ? 'the rooftop' : lvLabel(lv);
 
   /* 멘트 규칙 : 한 줄에 들어가게 짧게, 모두 '~세요'로 끝을 맞춘다.
      예전에는 '~으로 이동'(명사끝)과 '~하세요'가 섞여 있고 문장이 길어 두 줄로 넘어갔다. */
@@ -139,7 +143,7 @@ function buildSteps(){
          ⑥ 존 문 정면                            — 크리에이티브 존에 도착했습니다 */
     if(flow && !sameFloor && ROOM_PHOTOS['EVB1'] && ROOM_PHOTOS['B1WAY']){
       out.push({a:'←', type:'turn',
-                tko:'내려서 왼쪽으로 가세요', ten:'Get off and turn left',
+                tko:'지하 1층에서 내려서 왼쪽으로 가세요', ten:'Get off at B1 and turn left',
                 ph:'[ 지하 1층 엘리베이터 사진 ]', code:'EVB1'});
       out.push({a:'↑', type:'straight',
                 tko:'정면에 크리에이티브 존이 있습니다', ten:'The Creative Zone is straight ahead',
@@ -150,7 +154,7 @@ function buildSteps(){
       return out;
     }
     if(sameFloor) out.push({a:'↑', type:'straight', tko:'정면 넓은 곳으로 가세요', ten:'Head to the open area ahead', ph:'[ 지하 1층 사진 ]', code:'B1'});
-    else          out.push({a:'↑', type:'straight', tko:'내려서 정면으로 가세요', ten:'Get off and head to the open area ahead', ph:'[ 지하 1층 사진 ]', code:'B1'});
+    else          out.push({a:'↑', type:'straight', tko:'지하 1층에서 내려서 정면으로 가세요', ten:'Get off at B1 and head to the open area ahead', ph:'[ 지하 1층 사진 ]', code:'B1'});
     out.push({a:'✓', type:'arrive', tko:'크리에이티브 존에 도착했습니다', ten:'You have arrived at the Creative Zone', ph:'[ 크리에이티브 존 사진 ]', code:'B1'});
     return out;
   }
@@ -274,8 +278,8 @@ function buildSteps(){
     var nthU = 0;
     for(var mu = 0; mu < matesU.length; mu++) if(matesU[mu].code === baseU) nthU = mu + 1;
     out.push({a: dirU > 0 ? '←' : '→', type:'turn',
-              tko:'엘리베이터에서 내려서 ' + (dirU > 0 ? '좌회전' : '우회전') + ' 하세요',
-              ten:'Get off the elevator and turn ' + (dirU > 0 ? 'left' : 'right'),
+              tko:offKo+' 엘리베이터에서 내려서 ' + (dirU > 0 ? '좌회전' : '우회전') + ' 하세요',
+              ten:'Get off the elevator at '+offEn+' and turn ' + (dirU > 0 ? 'left' : 'right'),
               ph:'['+lvName(lv)+' 엘리베이터 안 사진 ]', code:'EVIN'+lv});
     out.push({a:'↑', type:'straight',
               tko:'복도를 따라 직진하세요', ten:'Go straight along the hallway',
@@ -359,10 +363,10 @@ function buildSteps(){
   /* 어느 자세에서 도는지 말로도 분명히 한다 — 1층은 '엘리베이터를 마주 보고'가 기준이다 */
   var lead = fromGateHere ? '복도로 나와 '
            : (facingEV ? '엘리베이터를 마주 보고 '
-           : (sameFloor ? '엘리베이터 앞에서 ' : '내려서 '));
+           : (sameFloor ? '엘리베이터 앞에서 ' : offKo+'에서 내려서 '));
   var leadEn = fromGateHere ? 'Step into the hallway and turn '
              : (facingEV ? 'Facing the elevator, turn '
-             : (sameFloor ? 'At the elevator, turn ' : 'Get off and turn '));
+             : (sameFloor ? 'At the elevator, turn ' : 'Get off at '+offEn+' and turn '));
   /* v151: 돌기 단계 사진.
      예전엔 문에서 출발하면 1단계와 똑같은 문 사진을 그대로 다시 썼다 —
      "복도로 나와 왼쪽으로 도세요"인데 화면은 아직 문 앞이라 어긋났다.
@@ -381,8 +385,8 @@ function buildSteps(){
        1층은 엘리베이터를 마주 보고 서는 자세라 예전 그대로 둔다(문에서 오는 길은 위의 WC1_FLOW). */
     if(!facingEV && ROOM_PHOTOS['EVIN'+lv])
       out.push({a:arw, type:'turn',
-                tko:'엘리베이터에서 내려서 '+(turnLeft ? '좌회전' : '우회전')+' 하세요',
-                ten:'Get off the elevator and turn '+turnWordEn,
+                tko:offKo+' 엘리베이터에서 내려서 '+(turnLeft ? '좌회전' : '우회전')+' 하세요',
+                ten:'Get off the elevator at '+offEn+' and turn '+turnWordEn,
                 ph:'['+lvName(lv)+' 엘리베이터 안 사진 ]', code:'EVIN'+lv});
     else
       out.push({a:arw, type:'turn',

@@ -402,5 +402,5 @@ var TIMETABLE = (function(){
   $$('.icPlus').forEach(function(e){ e.outerHTML = IC.plus; });
   $$('.icShare').forEach(function(e){ e.outerHTML = IC.share; });
 
-  return {open: open, back: back, add: function(){ classSheet(null); }, render: render, refresh: function(){ render(); almRender(); }, fromNoti: fromNoti, launch: launch, _tick: tick, _notify: notify};
+  return {open: open, back: back, add: function(){ classSheet(null); }, render: render, refresh: function(){ render(); var ab = document.getElementById('almBody'); if(ab && ab.innerHTML) almRender(); },   /* 알림 쪽은 한 번 열어 그려 둔 것만 다시 — 켤 때(applyLang)마다 그리면 파일 읽는 순서에 따라 안전망이 흔들렸다(11/04) */ fromNoti: fromNoti, launch: launch, _tick: tick, _notify: notify};
 })();

@@ -355,7 +355,7 @@
       <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">680줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
       <button class="b p" data-id="f_boot"><span class="n">boot.js</span><span class="d">123줄 · 켜는 화면(동영상)</span></button>
       <button class="b p" data-id="f_start"><span class="n">start.js</span><span class="d">32줄 · 글꼴 기다렸다 시작</span></button>
-      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">490줄 · 오프라인 저장소</span></button>
+      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">497줄 · 오프라인 저장소</span></button>
     </div>
   </div>
 
@@ -364,13 +364,14 @@
     <div class="grid">
       <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">529줄 · 화면 전환 go() · 휴대폰 뒤로가기 · 종료</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
-      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">778줄 · 화면 24개</span></button>
+      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">780줄 · 화면 24개</span></button>
       <button class="b p" data-id="f_easy"><span class="n">easy.js</span><span class="d">339줄 · 쉬운 사용모드</span></button>
-      <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">227줄 · 사진 이용안내</span></button>
+      <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">230줄 · 사진 이용안내</span></button>
       <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">219줄 · 사진 확대</span></button>
       <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">64줄 · ☰ 메뉴 · 밝은 화면</span></button>
       <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">135줄 · 길안내 이어 하기</span></button>
       <button class="b p" data-id="f_story"><span class="n">story.js</span><span class="d">169줄 · 길안내 · 도착 화면 (인스타 + 공항)</span></button>
+      <button class="b p" data-id="f_restart"><span class="n">restart.js</span><span class="d">140줄 · 여기가 어디인지 모르겠어요 (다시 출발)</span></button>
       <button class="b p" data-id="f_live"><span class="n">live.js</span><span class="d">34줄 · 발표장 「지금 켜 둔 사람」</span></button>
       <button class="b p" data-id="f_consent"><span class="n">consent.js</span><span class="d">442줄 · 처음 켤 때 동의 · 기능별 허용 · 처리방침 · 라이선스</span></button>
       <button class="b p" data-id="f_share"><span class="n">share.js</span><span class="d">236줄 · 길 공유하기 (링크)</span></button>
@@ -391,7 +392,7 @@
   <div class="gbox">
     <div class="gt">④ 길안내와 사진</div><div class="gs">실제로 길을 알려 주는 부분 · 4개</div>
     <div class="grid">
-      <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">639줄 · 안내 단계 만들기</span></button>
+      <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">643줄 · 안내 단계 만들기</span></button>
       <button class="b p" data-id="f_photos"><span class="n">photos.js</span><span class="d">1,132줄 · 사진 목록 · 사진 상자 · 방 이름(한 · 영)</span></button>
       <button class="b p" data-id="qr"><span class="n">qrnav.js</span><span class="d">434줄 · 출입문 QR</span></button>
       <button class="b p" data-id="f_roomfix"><span class="n">roomfix.js</span><span class="d">398줄 · 구성 및 변경 · 메모</span></button>
@@ -744,6 +745,13 @@ f_story:{t:'story.js — 길안내 · 도착 화면 (인스타 감성 + 공항 �
  how:'guide.js 의 render6 · startGuide 와 photos.js 의 phFill 을 감싸서 위에 얹기만 합니다 — 단계를 만드는 표 · 이어 하기 · 쉬운 사용모드는 그대로이고, 예전 글자 칸(#ar · #ins · #stepno)은 감춘 채 남겨 둡니다. 밝은 화면에서도 이 두 화면은 사진 + 표지판 그대로입니다.',
  tech:['CSS transform(scale 2 · transform-origin)','pointer 이벤트(누르기 · 밀기)','MutationObserver'],
  src:[['site/js/app/story.js','위 · 아래 칸 · 누르기 · 밀기'],['site/css/app.css','「인스타 감성 + 공항 표지판」 묶음'],['site/js/app/photos.js','문 · 엘리베이터 안 사진 이름표']]},
+f_restart:{t:'restart.js — 여기가 어디인지 모르겠어요 (사진 골라 다시 출발 · 현재 계신 층)',z:'p',zl:'폰 안에서 돈다',
+ kid:'길안내 중에 사진 속 자리가 안 보이면 「여기가 어디인지 모르겠어요」를 눌러요. 지금 보이는 사진을 고르면 그 단계부터, 「현재 계신 층이 어디신가요?」에서 층(엘리베이터 사진)을 고르면 그 층 엘리베이터 앞부터 다시 안내해요.',
+ why:'2026-10-27 견본 「사진 골라 다시 출발」 → 11/04 사용자가 고침 : 「다 아니에요 — 출입문 QR 다시 찍기」 대신 「현재 계신 층이 어디신가요?」 · 지하 1층 ~ 5층 엘리베이터 정면 사진 · 「몇 층에서 내려서」. 길 위에서 헤맬 때 처음(출입문)으로 돌아가게 하면 안 되므로.',
+ where:['길안내 화면 — 아래 안내판 바로 위 노란 테두리 단추','사진 고르기 창 — 지금 단계 앞뒤의 <b>길 위</b> 사진(많아야 3장) + 그 층에서 이 길이 안 지나는 <b>옆길</b> 복도 한 장','층 고르기 창 — B1 · 1F ~ 5F 엘리베이터 정면 사진(site/img/evfront/ — 2~5층은 정면 사진이 없어 문이 보이는 비스듬한 사진)'],
+ how:'길 위 사진을 고르면 그 단계로 바로 갑니다(si). 옆길 · 층을 고르면 출입문(QR)을 지우고 출발층(startFloor)만 바꿔 guide.js 의 startGuide 로 길을 새로 만듭니다 — 1층을 골랐는데 「동문으로 들어오세요」부터 다시 나오지 않게. 휴대폰 뒤로가기는 층 창 → 사진 창 → 닫기. 이어 하기(resume.js)는 새 출발층을 그대로 적어 둡니다.',
+ tech:['guide.js startGuide · buildSteps','shell.js appBackStep 감싸기','MutationObserver'],
+ src:[['site/js/app/restart.js','단추 · 사진 고르기 · 층 고르기 · 다시 출발'],['site/css/app.css','「사진 골라 다시 출발」 묶음'],['site/js/app/guide.js','「3층에서 내려서 …」 문장']]},
 f_consent:{t:'consent.js — 처음 켤 때 동의 · 기능별 허용 · 건의함 사진 개인정보',z:'p',zl:'폰 안에서 돈다',
  kid:'앱을 처음 켜면 켜는 화면 다음에 「시작하기 전에 확인해 주세요」가 한 번 나와요. 한 번 동의하면 다시 묻지 않아요. 카메라 · 알림을 그때 허용하지 않았으면, 그 기능을 켤 때만 「허용할까요?」를 물어요.',
  why:'2026-11-03 사용자가 눌러 보는 견본을 열 번 고쳐 정한 순서 — 「하나하나 켤 때마다 묻는 건 번거롭다, 처음에 한 번에」 · 「처음에 동의했으면 다시 묻지 말 것」 · 「QR 이면 QR 설명만, 건의함이면 건의함 설명만」 · 「설정에 동의 관리 줄은 두지 말고 이용안내 마지막 쪽에」.',

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<title>오픈소스 라이선스 — 공대 3호관 길안내</title>
+<!-- 만들기 : 도구\법적고지_라이선스_만들기.ps1 (손으로 고치지 말 것) -->
+<style>
+  :root{--bg:#0B0E13;--fg:#E7F6FF;--sub:#9FB2C8;--line:#1F2B3A;--acc:#00E5FF;--card:#111722;}
+  html.lt{--bg:#F4F7FB;--fg:#0F1B2D;--sub:#44546A;--line:#D5DEE8;--acc:#0B6FB8;--card:#FFFFFF;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--bg);color:var(--fg);font-family:'Pretendard',"맑은 고딕","Malgun Gothic","Noto Sans CJK KR",sans-serif;-webkit-text-size-adjust:100%;}
+  body{padding:18px 16px calc(28px + env(safe-area-inset-bottom));line-height:1.6;font-size:15px;word-break:keep-all;}
+  .wrap{max-width:720px;margin:0 auto;}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px;font-size:13px;color:var(--sub);}
+  .top a{color:var(--acc);text-decoration:none;font-weight:700;}
+  html.embed .top{display:none;}
+  h1{font-size:22px;line-height:1.3;margin-bottom:6px;}
+  .lead{color:var(--sub);font-size:14px;margin-bottom:14px;}
+  h2{font-size:16px;margin:20px 0 8px;color:var(--acc);}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  td{border-top:1px solid var(--line);padding:9px 6px;vertical-align:top;}
+  td:first-child{width:58%;}
+  small{color:var(--sub);font-weight:600;}
+  .u{color:var(--sub);font-size:13px;}
+  .c{color:var(--sub);font-size:12px;word-break:break-word;}
+  a{color:var(--acc);}
+  details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:8px 0;}
+  summary{cursor:pointer;padding:11px 14px;font-weight:800;}
+  pre{white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.5;padding:0 14px 14px;color:var(--sub);font-family:Consolas,"D2Coding",monospace;}
+  [data-lang]{display:none;}
+  html[lang="ko"] [data-lang="ko"], html[lang="en"] [data-lang="en"]{display:block;}
+</style>
+<script>
+  (function(){
+    var q = location.search, h = document.documentElement;
+    if(/[?&]lang=en(&|$)/.test(q)) h.lang = 'en';
+    if(/[?&]embed=1(&|$)/.test(q)) h.classList.add('embed');
+    if(/[?&]lt=1(&|$)/.test(q)) h.classList.add('lt');
+  })();
+</script>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><span>공대 3호관 길안내 · Engineering Bldg.3 Navigation</span><span><a href="?lang=ko">한국어</a> · <a href="?lang=en">English</a></span></div>
+<section data-lang="ko">
+  <h1>오픈소스 라이선스 고지</h1>
+  <p class="lead">이 앱은 아래 공개 프로그램(오픈소스)을 써서 만들었습니다. 각 프로그램을 만든 분들과 사용 허가(라이선스)를 알려 드립니다. 라이선스 이름을 누르면 원문이 열립니다.</p>
+  <table>
+<tr><td><b>three.js</b> <small>r128</small><br><span class="u">3D 건물 &#183; 층 평면도</span></td><td><a href="#MIT">MIT</a><br><span class="c">Copyright 2010-2021 Three.js Authors</span></td></tr>
+<tr><td><b>jsQR</b> <small>1.4.0</small><br><span class="u">출입문 QR 읽기</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">jsQR authors (Cosmo Wolfe)</span></td></tr>
+<tr><td><b>JSZip</b> <small>3.10.1</small><br><span class="u">사진 묶음(zip) 만들기 &#183; 읽기 (관리자)</span></td><td><a href="#MIT">MIT</a><br><span class="c">(c) 2009-2016 Stuart Knightley — dual MIT / GPLv3, used under MIT</span></td></tr>
+<tr><td><b>pako (JSZip 안 &#183; inside JSZip)</b><br><span class="u">압축</span></td><td><a href="#MIT">MIT</a><br><span class="c">(C) 2014-2017 Vitaly Puzrin and Andrei Tupitcin</span></td></tr>
+<tr><td><b>TensorFlow.js</b> <small>4.22.0</small><br><span class="u">건의함 사진 AI 비교</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">Copyright 2024 Google LLC</span></td></tr>
+<tr><td><b>MobileNet (TensorFlow.js Models)</b> <small>2.1.1 &#183; mobilenet_v2_050_224</small><br><span class="u">건의함 사진 AI 비교</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">Copyright 2023 Google LLC</span></td></tr>
+<tr><td><b>Tesseract.js &#183; tesseract.js-core</b> <small>5.1.1</small><br><span class="u">방 번호판 글자 읽기</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">Tesseract.js contributors (Project Naptha)</span></td></tr>
+<tr><td><b>Tesseract 영어 글자 자료 &#183; English data (tessdata_fast)</b> <small>4.0.0</small><br><span class="u">방 번호판 글자 읽기</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">Tesseract OCR contributors (Google)</span></td></tr>
+<tr><td><b>heic2any</b> <small>0.0.4</small><br><span class="u">아이폰 사진(HEIC) 바꾸기</span></td><td><a href="#MIT">MIT</a><br><span class="c">heic2any authors (Alex Corvi)</span></td></tr>
+<tr><td><b>Firebase JavaScript SDK</b> <small>12.3.0</small><br><span class="u">건의함 서버 &#183; 관리자 로그인</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">Copyright Google LLC</span></td></tr>
+<tr><td><b>Pretendard</b> <small>1.3.9</small><br><span class="u">글꼴</span></td><td><a href="#OFL-1.1">OFL-1.1</a><br><span class="c">Copyright (c) 2021, Kil Hyung-jin, with Reserved Font Name &#39;Pretendard&#39;</span></td></tr>
+<tr><td><b>Lucide</b> <small>0.460.0</small><br><span class="u">아이콘</span></td><td><a href="#ISC">ISC</a><br><span class="c">Lucide Contributors 2022 &#183; portions Cole Bemis 2013-2022 (Feather, MIT)</span></td></tr>
+  </table>
+  <h2>라이선스 원문</h2>
+</section>
+<section data-lang="en">
+  <h1>Open-Source Licenses</h1>
+  <p class="lead">This app is built with the open-source software below. Here are their authors and licenses. Tap a license name to read the full text.</p>
+  <table>
+<tr><td><b>three.js</b> <small>r128</small><br><span class="u">3D building and floor plans</span></td><td><a href="#MIT">MIT</a><br><span class="c">Copyright 2010-2021 Three.js Authors</span></td></tr>
+<tr><td><b>jsQR</b> <small>1.4.0</small><br><span class="u">Reading the entrance QR codes</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">jsQR authors (Cosmo Wolfe)</span></td></tr>
+<tr><td><b>JSZip</b> <small>3.10.1</small><br><span class="u">Making and reading photo zips (admin)</span></td><td><a href="#MIT">MIT</a><br><span class="c">(c) 2009-2016 Stuart Knightley — dual MIT / GPLv3, used under MIT</span></td></tr>
+<tr><td><b>pako (JSZip 안 &#183; inside JSZip)</b><br><span class="u">Compression</span></td><td><a href="#MIT">MIT</a><br><span class="c">(C) 2014-2017 Vitaly Puzrin and Andrei Tupitcin</span></td></tr>
+<tr><td><b>TensorFlow.js</b> <small>4.22.0</small><br><span class="u">AI photo matching for the Suggestion Box</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">Copyright 2024 Google LLC</span></td></tr>
+<tr><td><b>MobileNet (TensorFlow.js Models)</b> <small>2.1.1 &#183; mobilenet_v2_050_224</small><br><span class="u">AI photo matching for the Suggestion Box</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">Copyright 2023 Google LLC</span></td></tr>
+<tr><td><b>Tesseract.js &#183; tesseract.js-core</b> <small>5.1.1</small><br><span class="u">Reading room number plates</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">Tesseract.js contributors (Project Naptha)</span></td></tr>
+<tr><td><b>Tesseract 영어 글자 자료 &#183; English data (tessdata_fast)</b> <small>4.0.0</small><br><span class="u">Reading room number plates</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">Tesseract OCR contributors (Google)</span></td></tr>
+<tr><td><b>heic2any</b> <small>0.0.4</small><br><span class="u">Converting iPhone (HEIC) photos</span></td><td><a href="#MIT">MIT</a><br><span class="c">heic2any authors (Alex Corvi)</span></td></tr>
+<tr><td><b>Firebase JavaScript SDK</b> <small>12.3.0</small><br><span class="u">Suggestion Box server and admin login</span></td><td><a href="#Apache-2.0">Apache-2.0</a><br><span class="c">Copyright Google LLC</span></td></tr>
+<tr><td><b>Pretendard</b> <small>1.3.9</small><br><span class="u">Font</span></td><td><a href="#OFL-1.1">OFL-1.1</a><br><span class="c">Copyright (c) 2021, Kil Hyung-jin, with Reserved Font Name &#39;Pretendard&#39;</span></td></tr>
+<tr><td><b>Lucide</b> <small>0.460.0</small><br><span class="u">Icons</span></td><td><a href="#ISC">ISC</a><br><span class="c">Lucide Contributors 2022 &#183; portions Cole Bemis 2013-2022 (Feather, MIT)</span></td></tr>
+  </table>
+  <h2>Full license texts</h2>
+</section>
+<details id="MIT"><summary>MIT License</summary><pre>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</pre></details>
+<details id="Apache-2.0"><summary>Apache License 2.0</summary><pre>
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      &quot;License&quot; shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      &quot;Licensor&quot; shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      &quot;Legal Entity&quot; shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      &quot;control&quot; means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      &quot;You&quot; (or &quot;Your&quot;) shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      &quot;Source&quot; form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      &quot;Object&quot; form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      &quot;Work&quot; shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      &quot;Derivative Works&quot; shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      &quot;Contribution&quot; shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, &quot;submitted&quot;
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as &quot;Not a Contribution.&quot;
+
+      &quot;Contributor&quot; shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a &quot;NOTICE&quot; text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an &quot;AS IS&quot; BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets &quot;[]&quot;
+      replaced with your own identifying information. (Don&#39;t include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same &quot;printed page&quot; as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+</pre></details>
+<details id="ISC"><summary>ISC License (Lucide)</summary><pre>ISC License
+Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022 as part of Feather (MIT). All other copyright (c) for Lucide are held by Lucide Contributors 2022.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+</pre></details>
+<details id="OFL-1.1"><summary>SIL Open Font License 1.1 (Pretendard)</summary><pre>Copyright (c) 2021, Kil Hyung-jin (https://github.com/orioncactus/pretendard),
+with Reserved Font Name &#39;Pretendard&#39;.
+
+Copyright 2014-2021 Adobe (http://www.adobe.com/),
+with Reserved Font Name &#39;Source&#39;.
+Source is a trademark of Adobe in the United States and/or other countries.
+
+Copyright (c) 2016 The Inter Project Authors (https://github.com/rsms/inter),
+with Reserved Font Name &#39;Inter&#39;.
+
+Copyright 2021 The M+ FONTS Project Authors (https://github.com/coz-m/MPLUS_FONTS),
+with Reserved Font Name &#39;M PLUS 1&#39;.
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at:
+https://scripts.sil.org/OFL
+
+
+-----------------------------------------------------------
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+-----------------------------------------------------------
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded, 
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+&quot;Font Software&quot; refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+&quot;Reserved Font Name&quot; refers to any names specified as such after the
+copyright statement(s).
+
+&quot;Original Version&quot; refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+&quot;Modified Version&quot; refers to any derivative made by adding to, deleting,
+or substituting -- in part or in whole -- any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+&quot;Author&quot; refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+PERMISSION &amp; CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components,
+in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the corresponding
+Copyright Holder. This restriction only applies to the primary font name as
+presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created
+using the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+</pre></details>
+</div>
+<script>
+  /* 표의 라이선스 이름을 누르면 그 원문 칸을 펼친다 */
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a[href^="#"]'); if(!a) return;
+    var d = document.getElementById(a.getAttribute('href').slice(1)); if(d && d.tagName === 'DETAILS') d.open = true;
+  });
+</script>
+</body>
+</html>

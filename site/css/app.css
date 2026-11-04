@@ -1803,6 +1803,16 @@ textarea.syInp{resize:none;line-height:1.5;}
 .syAgItem.open .det{display:block;}
 .syAgItem.plain .hd{align-items:center;}   /* 설명 없이 체크만 있는 줄(처리방침 · 라이선스 · 수집·이용) */
 .syAgItem.plain .t{line-height:1.4rem;min-height:1.6rem;}   /* 글꼴이 늦게 받아지면 글줄 높이가 19 · 20px 로 흔들려서(안전망) — 글줄 높이를 정하고, 칸은 그보다 조금 높게 */
+/* 개인정보 처리방침 · 오픈소스 라이선스 쪽 (consent.js doc — 동의 화면 z945 위) */
+.syDoc{position:absolute;inset:0;z-index:985;background:#0B0E13;display:flex;flex-direction:column;}
+.syDoc .hd{display:flex;align-items:center;justify-content:space-between;gap:0.6rem;padding:calc(0.8rem + env(safe-area-inset-top)) 1rem 0.65rem;border-bottom:1px solid #1A2430;}
+.syDoc .hd b{display:flex;align-items:center;gap:0.45rem;color:#E7F6FF;font-size:1.02rem;font-weight:900;}
+.syDoc .hd .syI{width:1.15rem;height:1.15rem;color:#00E5FF;}
+.syDoc .x{flex:none;width:2.4rem;height:2.4rem;border-radius:0.6rem;border:2px solid #00E5FF;background:transparent;color:#00E5FF;font-size:1.05rem;font-family:inherit;cursor:pointer;}
+.syDoc iframe{flex:1;width:100%;border:0;background:#0B0E13;}
+.syDocLinks{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.85rem;}
+.syDocLinks button{flex:1 1 9rem;display:flex;align-items:center;justify-content:center;gap:0.4rem;padding:0.7rem 0.8rem;border-radius:0.7rem;border:2px solid #2A3A4E;background:#121A26;color:#E7F6FF;font-family:inherit;font-size:0.9rem;font-weight:800;cursor:pointer;}
+.syDocLinks .syI{width:1rem;height:1rem;color:#00E5FF;}
 .syPerm{margin-top:0.85rem;padding:0.65rem 0.75rem;border-radius:0.7rem;background:#121822;border:1.5px dashed #33404F;font-size:0.78rem;color:#CFE3F5;line-height:1.55;}
 .syPerm b{color:#fff;}
 .syAgree .ft{padding:0.7rem 1.1rem calc(0.85rem + env(safe-area-inset-bottom));border-top:1px solid #1A2430;background:#0B0E13;}
@@ -1857,6 +1867,12 @@ html.lt .syAgree,html.lt .syAgree .ft{background:#EEF3F8;color:#0F1B2D;}
 html.lt .syAgree .sub,html.lt .syAgItem .t small{color:#44546A;}
 html.lt .syAgAll{background:#FFFFFF;border-color:#2B88C8;}
 html.lt .syAgItem{border-color:#D5DEE8;}
+html.lt .syDoc,html.lt .syDoc iframe{background:#F4F7FB;}
+html.lt .syDoc .hd{border-bottom-color:#D5DEE8;}
+html.lt .syDoc .hd b{color:#0F1B2D;}
+html.lt .syDoc .hd .syI,html.lt .syDocLinks .syI{color:#0B6FB8;}
+html.lt .syDoc .x{border-color:#0B6FB8;color:#0B6FB8;}
+html.lt .syDocLinks button{background:#FFFFFF;border-color:#C9D6E4;color:#0F1B2D;}
 html.lt .syAgItem .det,html.lt .syPerm{color:#24364D;}
 html.lt .syAgItem .det b,html.lt .syPerm b{color:#0F1B2D;}
 html.lt .syPerm{background:#FFFFFF;border-color:#B9C6D6;}

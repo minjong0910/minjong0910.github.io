@@ -174,8 +174,8 @@ var CONSENT = (function(){
     /* 설명 없이 체크만 (사용자 11/03) — 처리방침 · 라이선스는 「확인」.
        처리방침 · 라이선스는 처음부터 체크된 채로(on) — 사용자 11/04 「하나하나 체크하기 번거롭다, 원하지 않으면 끄면 된다」.
        동의가 아니라 알림이라 미리 체크해도 된다. 진짜 동의(수집·이용 · 카메라 · 알림)는 미리 체크하지 않는다 */
-    {k: 'policy', req: true, plain: true, on: true, t: T('개인정보 처리방침', 'Privacy policy')},
-    {k: 'oss', req: true, plain: true, on: true, t: T('오픈소스 라이선스 고지', 'Open-source licenses')},
+    {k: 'policy', req: true, plain: true, on: true, doc: 'privacy', t: T('개인정보 처리방침', 'Privacy policy')},
+    {k: 'oss', req: true, plain: true, on: true, doc: 'licenses', t: T('오픈소스 라이선스 고지', 'Open-source licenses')},
     /* 「개인정보 수집·이용 동의」와 「건의함 사진 개인정보」는 같은 동의라 하나로(사용자 11/04 「합쳐줘」) — 이름은 수집·이용,
        받는 것 · 쓰는 곳 · 지우는 때는 「보기 ▾」에 그대로(동의를 받으려면 알려야 하는 것). 길안내에 필요 없어 선택(필수로 묶으면 안 된다) */
     {k: 'photo', req: false, t: T('개인정보 수집·이용 동의', 'Collection & use of personal data'), s: T('건의함 사진 · 메모를 받아 길안내 사진으로 써요 — 얼굴 X · GPS 지움', 'Photos and notes become guide photos — no faces · GPS removed'),
@@ -206,7 +206,9 @@ var CONSENT = (function(){
         (prev ? T('동의 항목이 바뀌어서 한 번만 더 여쭤봐요.', 'Our consent items changed, so we ask once more.') : T('한 번만 동의하면 다음부터는 묻지 않아요.', 'Agree once and we will not ask again.')) + '</p>' +
       '<div class="syAgAll" role="checkbox"><span class="syBox">' + IC.check + '</span><div><b>' + T('모두 동의해요', 'Agree to all') + '</b><small>' + T('선택 항목 · 카메라 · 알림까지 한 번에', 'Including optional items, camera and notifications') + '</small></div></div>' +
       list.map(function(x){
-        if(x.plain) return '<div class="syAgItem plain" data-k="' + x.k + '"><div class="hd" role="checkbox"><span class="syBox">' + IC.check + '</span><div class="t"><b>' + tagOf(x) + x.t + '</b></div></div></div>';
+        /* 설명 없는 줄 — 처리방침 · 라이선스는 「보기 ›」로 본문 쪽을 연다(11/04 — 펼치는 설명이 아니라 문서 전체) */
+        if(x.plain) return '<div class="syAgItem plain" data-k="' + x.k + '"><div class="hd" role="checkbox"><span class="syBox">' + IC.check + '</span><div class="t"><b>' + tagOf(x) + x.t + '</b></div>' +
+          (x.doc ? '<button class="more" type="button" data-doc="' + x.doc + '">' + T('보기 ›', 'View ›') + '</button>' : '') + '</div></div>';
         return '<div class="syAgItem" data-k="' + x.k + '"><div class="hd" role="checkbox"><span class="syBox">' + IC.check + '</span><div class="t"><b>' + tagOf(x) + x.t + '</b><small>' + x.s + '</small></div><button class="more" type="button">' + T('보기 ▾', 'More ▾') + '</button></div><div class="det">' + x.d + '</div></div>';
       }).join('') +
       '<div class="syPerm">📍 <b>' + T('GPS 위치는 쓰지 않아요', 'We never use GPS') + '</b> — ' + T('어디 계신지는 출입문 QR 로만 알아요.', 'your position comes only from the door QR.') + '<br>' +
@@ -244,6 +246,7 @@ var CONSENT = (function(){
         if(x.perm && !st[k]){ ask([k], 0); return; }
         st[k] = !st[k]; paint();
       };
+      if($('.more[data-doc]', it)){ $('.more', it).onclick = function(){ doc(this.getAttribute('data-doc')); }; return; }
       if($('.more', it)) $('.more', it).onclick = function(){ var o = !it.classList.contains('open'); it.classList.toggle('open', o); this.textContent = o ? T('접기 ▴', 'Less ▴') : T('보기 ▾', 'More ▾'); };
     });
     $('.ft .big', a).onclick = function(){
@@ -380,7 +383,10 @@ var CONSENT = (function(){
         li(1, T('받지 않는 것', 'Never collected'), T('이름 · 전화번호 · 위치(GPS)', 'Name · phone number · location (GPS)')) +
         li(2, T('지우는 때', 'When deleted'), T('쓰지 않는 사진은 바로, 확인 못 한 사진은 30일 뒤에 지워요.', 'Unused photos right away, unchecked ones after 30 days.')) +
         li(3, T('지워 달라고 하려면', 'To ask for deletion'), T('건의함 맨 아래 「올린 사진 지워 달라고 하기」', '“Ask us to delete a photo” at the bottom of the Suggestion Box')) + '</ol>' +
-      '<div class="hwTip">📍 ' + T('GPS 위치는 쓰지 않아요. 어디 계신지는 출입문 QR 로만 알아요.', 'We never use GPS — only the door QR.') + '</div>';
+      '<div class="hwTip">📍 ' + T('GPS 위치는 쓰지 않아요. 어디 계신지는 출입문 QR 로만 알아요.', 'We never use GPS — only the door QR.') + '</div>' +
+      /* 11/04 — 처리방침 · 라이선스 본문은 언제든 여기서 */
+      '<div class="syDocLinks"><button type="button" onclick="CONSENT.doc(\'privacy\')">' + IC.shield + T('개인정보 처리방침', 'Privacy policy') + '</button>' +
+        '<button type="button" onclick="CONSENT.doc(\'licenses\')">' + IC.shield + T('오픈소스 라이선스', 'Open-source licenses') + '</button></div>';
   }
   if(typeof HOWTO !== 'undefined' && HOWTO.push){
     HOWTO.push({t: ['동의 · 권한 안내', 'Consent & permissions'], html: guideHtml});
@@ -394,10 +400,24 @@ var CONSENT = (function(){
     if(typeof guideRender === 'function' && typeof HOWTO !== 'undefined') guideRender(HOWTO.length - 1);
   }
 
+  /* ── 개인정보 처리방침 · 오픈소스 라이선스 쪽 (2026-11-04 사용자 「실제 앱에」) ──
+     본문은 site/legal/privacy.html · licenses.html (주소로 바로 열어도 읽힌다 — 공개 의무). 앱 안에서는 맨 위에 한 쪽으로 띄운다(동의 화면 z945 위).
+     말 · 밝은 화면은 주소 뒤에 붙여 넘긴다. 인터넷 없이도 열리게 sw.js 저장 목록에 들어 있다(도구\오프라인목록.ps1). */
+  function doc(kind){
+    $$('.syDoc').forEach(function(e){ e.remove(); });
+    var t = kind === 'licenses' ? T('오픈소스 라이선스 고지', 'Open-source licenses') : T('개인정보 처리방침', 'Privacy policy');
+    var lt = document.documentElement.classList.contains('lt') ? '&lt=1' : '';
+    var d = mk('div', 'syDoc', '<div class="hd"><b>' + IC.shield + esc(t) + '</b><button type="button" class="x" aria-label="' + T('닫기', 'Close') + '">✕</button></div>' +
+      '<iframe title="' + esc(t) + '" src="legal/' + (kind === 'licenses' ? 'licenses' : 'privacy') + '.html?embed=1&lang=' + (U.ko() ? 'ko' : 'en') + lt + '"></iframe>');
+    $('.x', d).onclick = function(){ d.remove(); };
+    U.phone().appendChild(d);
+  }
+
   /* ── 휴대폰 뒤로가기 (shell.js appBackStep) — 새로 그린 창부터 닫는다 ── */
   if(typeof appBackStep === 'function'){
     var _back = appBackStep;
     window.appBackStep = function(){
+      var dv = document.querySelector('.syDoc'); if(dv){ dv.remove(); return true; }   // 처리방침 · 라이선스 쪽이 맨 위
       var dlg = document.querySelector('.syPermDlg'); if(dlg){ var no = dlg.querySelector('button[data-a="0"]'); if(no) no.click(); else dlg.remove(); return true; }
       if(document.querySelector('.phone > .sySheet')){ U.closeSheet(); return true; }
       if(document.querySelector('.syAgree')) return true;          // 처음 동의 화면은 뒤로가기로 건너뛰지 않는다
@@ -417,5 +437,5 @@ var CONSENT = (function(){
   function relang(){ var d = document.getElementById('delLink'); if(d) d.remove(); delLink(); pvPaint(); }
 
   return {agreed: agreed, pvOK: pvOK, camOK: camOK, notiOK: notiOK, notiSupported: notiSupported, need: need, appAsk: appAsk, notiAsk: notiAsk,
-          notiFailMsg: notiFailMsg, guideHtml: guideHtml, openGuideLast: openGuideLast, agreeScreen: agreeScreen, relang: relang, K: K};
+          notiFailMsg: notiFailMsg, guideHtml: guideHtml, openGuideLast: openGuideLast, agreeScreen: agreeScreen, relang: relang, doc: doc, K: K};
 })();

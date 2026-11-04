@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<title>개인정보 처리방침 — 공대 3호관 길안내</title>
+<!-- 2026-11-04 사용자 「개인정보 처리방침을 실제 앱에」 — 앱 안(동의 화면 · 이용안내 마지막 쪽)에서는 consent.js 가 ?embed=1&lang=ko|en(&lt=1) 로 띄운다.
+     주소로 바로 열어도 읽히게(공개 의무) 한 장으로. 내용은 앱이 실제로 하는 일과 맞춰야 한다 — sugdb.js 가 보내는 칸(u · note · ts · ai · qr · ua · uid)을 고치면 2번도 고칠 것. -->
+<style>
+  :root{--bg:#0B0E13;--fg:#E7F6FF;--sub:#9FB2C8;--line:#1F2B3A;--acc:#00E5FF;--card:#111722;}
+  html.lt{--bg:#F4F7FB;--fg:#0F1B2D;--sub:#44546A;--line:#D5DEE8;--acc:#0B6FB8;--card:#FFFFFF;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--bg);color:var(--fg);font-family:'Pretendard',"맑은 고딕","Malgun Gothic","Noto Sans CJK KR",sans-serif;-webkit-text-size-adjust:100%;}
+  body{padding:18px 16px calc(28px + env(safe-area-inset-bottom));line-height:1.65;font-size:15px;word-break:keep-all;}
+  .wrap{max-width:720px;margin:0 auto;}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px;font-size:13px;color:var(--sub);}
+  .top a{color:var(--acc);text-decoration:none;font-weight:700;}
+  html.embed .top{display:none;}
+  h1{font-size:22px;line-height:1.3;margin-bottom:6px;}
+  .lead{color:var(--sub);font-size:14px;margin-bottom:16px;}
+  h2{font-size:16px;margin:20px 0 6px;color:var(--acc);}
+  ul{padding-left:18px;}
+  li{margin:3px 0;}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:8px;}
+  .foot{margin-top:22px;padding-top:12px;border-top:1px solid var(--line);color:var(--sub);font-size:13px;}
+  [data-lang]{display:none;}
+  html[lang="ko"] [data-lang="ko"], html[lang="en"] [data-lang="en"]{display:block;}
+</style>
+<script>
+  (function(){
+    var q = location.search, h = document.documentElement;
+    if(/[?&]lang=en(&|$)/.test(q)) h.lang = 'en';
+    if(/[?&]embed=1(&|$)/.test(q)) h.classList.add('embed');
+    if(/[?&]lt=1(&|$)/.test(q)) h.classList.add('lt');
+  })();
+</script>
+</head>
+<body>
+<div class="wrap">
+
+<div class="top"><span>공대 3호관 길안내 · Engineering Bldg.3 Navigation</span><span><a href="?lang=ko">한국어</a> · <a href="?lang=en">English</a></span></div>
+
+<section data-lang="ko">
+  <h1>개인정보 처리방침</h1>
+  <p class="lead">졸업작품 팀 「공3길」(이하 「저희」)은 「공대 3호관 길안내」 앱을 쓰시는 분의 개인정보를 소중히 다루며, 「개인정보 보호법」에 따라 아래와 같이 알려 드립니다.</p>
+
+  <h2>1. 개인정보를 받는 곳과 쓰는 곳</h2>
+  <ul>
+    <li>길안내만 쓰실 때는 개인정보를 받지 않습니다. 회원가입 · 로그인이 없습니다.</li>
+    <li>건의함에 사진을 올리실 때만 받으며, 관리자가 사진을 보고 맞는 곳의 길안내 사진으로 바꾸는 데에만 씁니다. 다른 곳에는 쓰지 않습니다.</li>
+  </ul>
+
+  <h2>2. 받는 것</h2>
+  <ul>
+    <li>사진 1장, 적어 주신 메모(고른 층 포함, 선택), 올린 시각</li>
+    <li>AI가 짐작한 사진 속 장소, 출입문 QR로 들어오셨다면 그 출입문</li>
+    <li>휴대폰 종류(브라우저 정보)</li>
+    <li>하루 3번까지만 올릴 수 있게 세는, 이름 없는 번호(익명 번호)</li>
+  </ul>
+  <div class="box">받지 않는 것 : 이름 · 전화번호 · 이메일 · 위치(GPS). 사진 속 위치 정보는 올리기 전에 지웁니다.</div>
+
+  <h2>3. 보관하는 기간과 지우는 때</h2>
+  <ul>
+    <li>쓰지 않기로 한 사진 : 바로 지웁니다.</li>
+    <li>확인하지 못한 사진 : 30일이 지나면 지웁니다.</li>
+    <li>길안내 사진이 된 사진 : 더 새 사진으로 바뀔 때까지 보관하고, 바뀌면 지웁니다.</li>
+    <li>지울 때는 서버에서 다시 살릴 수 없게 지웁니다.</li>
+  </ul>
+
+  <h2>4. 다른 곳에 주는 것</h2>
+  <ul><li>개인정보를 다른 사람이나 회사에 주지 않습니다.</li></ul>
+
+  <h2>5. 맡겨서 처리하는 것(처리 위탁)</h2>
+  <ul>
+    <li>사진과 메모는 Google LLC 의 Firebase 서버에 저장합니다.</li>
+    <li>서버 위치 : 대한민국 서울 (Google Cloud asia-northeast3) — 해외로 옮기지 않습니다.</li>
+  </ul>
+
+  <h2>6. 이 폰에만 저장되는 것</h2>
+  <ul>
+    <li>길안내 이어 하기, 즐겨찾기, 최근 찾은 곳, 내 시간표, 수업 알림 설정, 화면 설정, 동의 기록은 이 폰에만 남고 서버로 보내지 않습니다.</li>
+    <li>브라우저의 「사이트 데이터 삭제」로 한 번에 지울 수 있습니다.</li>
+    <li>광고 · 방문 분석 도구(쿠키)를 쓰지 않습니다.</li>
+  </ul>
+
+  <h2>7. 위치 정보</h2>
+  <ul><li>앱은 GPS 위치를 쓰지 않습니다. 어디 계신지는 출입문 QR 로만 압니다.</li></ul>
+
+  <h2>8. 이용자의 권리와 요청 방법</h2>
+  <ul>
+    <li>올린 사진을 보거나 지워 달라고 하실 수 있습니다.</li>
+    <li>건의함 맨 아래 「올린 사진 지워 달라고 하기」로 보내 주시거나, 아래 이메일로 알려 주세요.</li>
+    <li>사진 제보 동의는 거부하실 수 있으며, 거부해도 길안내는 모두 쓸 수 있습니다(사진 제보만 못 합니다).</li>
+  </ul>
+
+  <h2>9. 안전하게 지키는 방법</h2>
+  <ul>
+    <li>올린 사진은 관리자 계정으로만 볼 수 있습니다.</li>
+    <li>서버 보안 규칙으로 정해진 일만 할 수 있게 막아 두었습니다.</li>
+    <li>앱과 서버 사이의 통신은 암호화(HTTPS)됩니다.</li>
+  </ul>
+
+  <h2>10. 개인정보 보호책임자</h2>
+  <ul>
+    <li>이름 : 김민종 (졸업작품 팀 「공3길」)</li>
+    <li>이메일 : jralien0910@naver.com</li>
+  </ul>
+
+  <h2>11. 도움을 받을 수 있는 곳</h2>
+  <ul>
+    <li>개인정보분쟁조정위원회 : 1833-6972 (www.kopico.go.kr)</li>
+    <li>개인정보침해신고센터 : 118 (privacy.kisa.or.kr)</li>
+    <li>대검찰청 사이버수사과 : 1301 (www.spo.go.kr)</li>
+    <li>경찰청 사이버수사국 : 182 (ecrm.police.go.kr)</li>
+  </ul>
+
+  <h2>12. 바뀔 때 알리는 방법과 시행일</h2>
+  <ul>
+    <li>이 방침이 바뀌면 앱을 켤 때 동의 화면으로 한 번 알려 드립니다.</li>
+    <li>시행일 : 2026년 11월 4일</li>
+  </ul>
+  <p class="foot">공대 3호관 길안내 · 졸업작품 팀 「공3길」 (군산대학교 공과대학)</p>
+</section>
+
+<section data-lang="en">
+  <h1>Privacy Policy</h1>
+  <p class="lead">Graduation project team “Gong3gil” (“we”) values the personal data of people who use the Engineering Bldg.3 Navigation app. In line with Korea’s Personal Information Protection Act, we explain below how we handle it.</p>
+
+  <h2>1. When we collect data and what for</h2>
+  <ul>
+    <li>We collect no personal data when you only use directions. There is no sign-up or login.</li>
+    <li>We collect data only when you upload a photo to the Suggestion Box, and use it only so an admin can replace the guide photo of that place. It is not used for anything else.</li>
+  </ul>
+
+  <h2>2. What we collect</h2>
+  <ul>
+    <li>One photo, your note (including the floor you chose; optional), and the upload time</li>
+    <li>The place the AI guessed from the photo, and the entrance if you came in by its QR code</li>
+    <li>Phone type (browser information)</li>
+    <li>An anonymous number used only to limit uploads to 3 per day</li>
+  </ul>
+  <div class="box">We never collect your name, phone number, email or location (GPS). Location data inside the photo is removed before upload.</div>
+
+  <h2>3. How long we keep it</h2>
+  <ul>
+    <li>Photos we decide not to use: deleted right away.</li>
+    <li>Photos not yet reviewed: deleted after 30 days.</li>
+    <li>Photos used as guide photos: kept until a newer photo replaces them, then deleted.</li>
+    <li>Deleted data cannot be recovered from the server.</li>
+  </ul>
+
+  <h2>4. Sharing with others</h2>
+  <ul><li>We do not give personal data to any other person or company.</li></ul>
+
+  <h2>5. Outsourced processing</h2>
+  <ul>
+    <li>Photos and notes are stored on Firebase servers of Google LLC.</li>
+    <li>Server location: Seoul, Republic of Korea (Google Cloud asia-northeast3) — not transferred abroad.</li>
+  </ul>
+
+  <h2>6. Data kept only on your phone</h2>
+  <ul>
+    <li>Resume, favorites, recent searches, your timetable, class alert settings, display settings and your consent record stay only on your phone and are never sent to a server.</li>
+    <li>You can delete them all at once with your browser’s “clear site data”.</li>
+    <li>We use no advertising or analytics tools (cookies).</li>
+  </ul>
+
+  <h2>7. Location</h2>
+  <ul><li>The app does not use GPS. It knows where you are only from the entrance QR code.</li></ul>
+
+  <h2>8. Your rights and how to ask</h2>
+  <ul>
+    <li>You may ask to see or delete a photo you uploaded.</li>
+    <li>Use “Ask us to delete a photo” at the bottom of the Suggestion Box, or email us below.</li>
+    <li>You may refuse consent for photo reports; directions still work fully (only photo reports are unavailable).</li>
+  </ul>
+
+  <h2>9. How we protect it</h2>
+  <ul>
+    <li>Uploaded photos can be viewed only with an admin account.</li>
+    <li>Server security rules allow only the actions we define.</li>
+    <li>Communication between the app and the server is encrypted (HTTPS).</li>
+  </ul>
+
+  <h2>10. Privacy officer</h2>
+  <ul>
+    <li>Name: Kim Min-jong (team “Gong3gil”)</li>
+    <li>Email: jralien0910@naver.com</li>
+  </ul>
+
+  <h2>11. Where to get help (Korea)</h2>
+  <ul>
+    <li>Personal Information Dispute Mediation Committee: 1833-6972 (www.kopico.go.kr)</li>
+    <li>Privacy Infringement Report Center: 118 (privacy.kisa.or.kr)</li>
+    <li>Supreme Prosecutors’ Office, Cyber Investigation: 1301 (www.spo.go.kr)</li>
+    <li>Korean National Police Agency, Cyber Bureau: 182 (ecrm.police.go.kr)</li>
+  </ul>
+
+  <h2>12. Changes and effective date</h2>
+  <ul>
+    <li>If this policy changes, we will let you know once on the consent screen when you open the app.</li>
+    <li>Effective date: November 4, 2026</li>
+  </ul>
+  <p class="foot">Engineering Bldg.3 Navigation · Graduation project team “Gong3gil” (Kunsan National University, College of Engineering)</p>
+</section>
+
+</div>
+</body>
+</html>

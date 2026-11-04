@@ -402,5 +402,5 @@ var TIMETABLE = (function(){
   $$('.icPlus').forEach(function(e){ e.outerHTML = IC.plus; });
   $$('.icShare').forEach(function(e){ e.outerHTML = IC.share; });
 
-  return {open: open, back: back, add: function(){ classSheet(null); }, render: render, refresh: function(){ render(); var ab = document.getElementById('almBody'); if(ab && ab.innerHTML) almRender(); },   /* 알림 쪽은 한 번 열어 그려 둔 것만 다시 — 켤 때(applyLang)마다 그리면 파일 읽는 순서에 따라 안전망이 흔들렸다(11/04) */ fromNoti: fromNoti, launch: launch, _tick: tick, _notify: notify};
+  return {open: open, back: back, add: function(){ classSheet(null); }, render: render, refresh: function(){ var st = document.getElementById('ttSet'), ab = document.getElementById('almBody'); if(st && st.innerHTML) render(); if(ab && ab.innerHTML) almRender(); },   /* 한 번 열어 그려 둔 쪽만 다시 (안 연 쪽은 열 때 그린다) — 켤 때(applyLang)마다 그리면 파일 읽는 순서에 따라 그려지기도 안 그려지기도 해서 안전망이 흔들렸다(11/04 배포 검사 실패) */ fromNoti: fromNoti, launch: launch, _tick: tick, _notify: notify};
 })();

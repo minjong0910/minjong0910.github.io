@@ -10,7 +10,8 @@ function ordWordEn(k){ return (k>=1 && k<=ORD_EN.length) ? ORD_EN[k-1] : (k+'th'
    · 계단 길은 1층에서 2~5층으로 올라갈 때만(호실 · 화장실 · 비상계단). 지하 · 옥상 · 같은 층은 예전 그대로다.
    · 중앙계단은 모든 층에서 엘리베이터 바로 옆(서문 쪽, building.js stZ)에 붙어 있다 →
      위층에서 계단을 나오면 엘리베이터에서 내릴 때처럼 복도(-X)를 보고 선다 : 좌회전 = 서문 쪽(+Z) · 우회전 = 동문 쪽(-Z).
-   · 1층 사진 : 엘리베이터 바로 오른쪽 검은 틀 입구가 중앙계단이다(EV1 · EV1WEST 사진에 함께 찍혀 있다) · 계단 사진은 ES1.
+   · 1층 사진 : 엘리베이터 바로 오른쪽 검은 틀 입구가 중앙계단이다(EV1 · EV1WEST 사진에 함께 찍혀 있다).
+     1층 계단 단계는 어느 문이든 한 단계 · 사진은 1층 중앙계단(ES1) 하나 — 2026-11-05 사용자.
      2~5층 계단 사진은 아직 없어서 그 층 엘리베이터 앞 사진(EV2~EV5 — 계단 바로 옆에서 복도 건너편을 본 모습)을 쓴다. */
 var GUIDE_VIA = (function(){ try{ return localStorage.getItem('b3nav_via') === 'stairs' ? 'stairs' : 'ev'; }catch(e){ return 'ev'; } })();
 function setGuideVia(v){
@@ -153,23 +154,23 @@ function buildSteps(){
   /* 계단으로 갈 때 위층에서 계단을 나오는 단계의 사진 설명 — 사진은 그 층 엘리베이터 앞(계단 바로 옆)이다 */
   var stairCap = {ko: lvNameIn(lv, 'ko')+' 계단 · 엘리베이터 앞', en: offEn+' stairs & elevator'};
   if(!sameFloor && viaStairs){
-    /* ① 1층 중앙계단 입구까지 — 문마다 계단이 보이는 쪽이 다르다(엘리베이터를 마주 보면 계단은 오른쪽)
-         동문 : 복도를 걸어오면 엘리베이터를 먼저 지나고 바로 왼쪽 · 서문 : 엘리베이터 바로 앞 오른쪽
-         정문 : 들어서면 정면 엘리베이터의 오른쪽 · 후문 : 들어선 곳이 바로 계단 홀이라 따로 걷는 단계가 없다(아래 ② 에 「왼쪽」) */
+    /* 1층 중앙계단으로 올라가기 — 한 단계, 사진은 어느 문으로 들어왔든 1층 중앙계단(ES1)
+         문마다 계단이 보이는 쪽만 말로 붙인다(엘리베이터를 마주 보면 계단은 오른쪽) :
+         동문 : 복도를 걸어오면 엘리베이터를 먼저 지나고 바로 왼쪽 · 서문 : 엘리베이터 바로 옆 오른쪽
+         정문 : 들어서면 정면 엘리베이터의 오른쪽 · 후문 : 들어선 곳이 바로 계단 홀이라 왼쪽
+       ★ 2026-11-05 사용자 「지금 쓰는 1층 중앙계단 사진이 입구를 어디로 하든 계단 안내할 때 나오면 좋겠다」
+         → 예전에는 「○○ 중앙계단으로 가세요」(엘리베이터 사진 EV1 · EV1WEST) + 「중앙계단으로 N층까지 올라가세요」(ES1) 두 단계였다.
+           계단으로 가라는데 엘리베이터 사진이 먼저 나와서, 두 단계를 하나로 합치고 사진은 중앙계단만 쓴다. */
     var STAIR_IN = {
-      EAST: {a:'←', type:'turn',     code:'EV1WEST', tko:'엘리베이터를 지나 왼쪽 중앙계단으로 가세요', ten:'Pass the elevator and go to the main stairs on your left'},
-      WEST: {a:'→', type:'turn',     code:'EV1',     tko:'엘리베이터 옆 오른쪽 중앙계단으로 가세요',   ten:'Go to the main stairs on your right, next to the elevator'},
-      MAIN: {a:'↑', type:'straight', code:'EV1',     tko:'엘리베이터 오른쪽 중앙계단으로 가세요',     ten:'Go to the main stairs to the right of the elevator'}
+      EAST: {ko:'엘리베이터를 지나 왼쪽 중앙계단으로 ', en:'Pass the elevator and take the main stairs on your left'},
+      WEST: {ko:'엘리베이터 옆 오른쪽 중앙계단으로 ',   en:'Take the main stairs on your right, next to the elevator,'},
+      MAIN: {ko:'엘리베이터 오른쪽 중앙계단으로 ',     en:'Take the main stairs to the right of the elevator'},
+      BACK: {ko:'왼쪽 중앙계단으로 ',                  en:'Take the main stairs on your left'}
     };
-    var sIn = (gk && sf === 1) ? STAIR_IN[gk] : null;
-    if(sIn && ROOM_PHOTOS[sIn.code])
-      out.push({a:sIn.a, type:sIn.type, tko:sIn.tko, ten:sIn.ten,
-                ph:'[ 1층 중앙계단 입구 사진 ]', code:sIn.code,
-                cap:{ko:'1층 엘리베이터 옆 중앙계단', en:'1F main stairs, next to the elevator'}});
-    /* ② 계단으로 올라가기 */
+    var sIn = (gk && sf === 1 && STAIR_IN[gk]) ? STAIR_IN[gk] : {ko:'중앙계단으로 ', en:'Take the main stairs'};
     out.push({a:'↑', type:'stairs',
-              tko:(gk === 'BACK' ? '왼쪽 중앙계단으로 ' : '중앙계단으로 ')+lvNameIn(lv, 'ko')+'까지 올라가세요',
-              ten:'Take the main stairs '+(gk === 'BACK' ? 'on your left ' : '')+'up to '+lvLabel(lv),
+              tko:sIn.ko+lvNameIn(lv, 'ko')+'까지 올라가세요',
+              ten:sIn.en+' up to '+lvLabel(lv),
               ph:'[ 1층 중앙계단 사진 ]', code:'ES1', cap:{ko:'1층 중앙계단', en:'1F main stairs'}});
   }
   else if(!sameFloor){

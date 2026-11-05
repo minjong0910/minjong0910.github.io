@@ -1,6 +1,7 @@
 /* 길안내 · 도착 화면 — 인스타 감성 + 공항 표지판 (2026-10-28 사용자)
    견본(9_합친3_눌러보기.html)을 사용자가 고쳐 가며 정한 모양 :
      · 실제 사진이 화면 맨 위부터 맨 아래까지 — 경로(동문 → 13310호) · 단계 막대 · 「📷 지금 자리」는 사진 위에
+       (2026-11-05 사용자 「너무 확대돼 전체가 안 보인다」 → 사진은 위 · 아래 칸 사이에 통째로, 둘레는 같은 사진을 흐리게 — 아래 「사진 전체가 보이게」)
      · 아래 공항 안내판 : 노란 칸 그림(직진 = 굵은 화살표 · 좌/우회전 = 앱의 원래 화살표(Lucide) · 엘리베이터 그림 · 도착 ✓) + 큰 글 + 영어
      · 사진을 누르면 누른 곳이 2배(「🔍 누르면 크게 / 작게」) · 좌우로 밀면 이전 · 다음
    guide.js 의 render6 · startGuide 와 photos.js 의 phFill 을 감싸서 얹기만 한다 — 단계 만들기 · 이어 하기 · 쉬운 사용모드는 그대로.
@@ -161,6 +162,7 @@
     hint6.textContent = ko() ? '사진을 누르면 크게 · 작게 — 좌우로 밀면 이전 · 다음' : 'Tap the photo to zoom · swipe for back / next';
     paintVia();
     unzoom(s6);
+    fit6();
   }
   hook(s6, document.getElementById('ph'), function(d){ if(d > 0){ if(typeof next === 'function') next(); } else if(typeof prev === 'function') prev(); });
 
@@ -180,15 +182,48 @@
     who.innerHTML = '';
     if(nm){ who.appendChild(document.createTextNode(nm)); var sm = mk('small'); sm.innerHTML = CAM.replace('#FFC400', '#B5B5B5'); sm.appendChild(document.createTextNode(' ' + (ko() ? d + ' 문 앞 — 문 옆 명패를 확인하세요' : 'At the door of ' + d + ' — check the name plate'))); who.appendChild(sm); }
     unzoom(s7);
+    fit7();
   }
   hook(s7, document.getElementById('ph7'), null);
+
+  /* ── 사진 전체가 보이게 (2026-11-05 사용자 「길안내 사진이 너무 확대돼 전체가 안 보인다」) ──
+     사진은 위 칸(경로 · 단계 · 자리 · [엘리베이터|계단] · 오른쪽 칩)의 아래 끝과 아래 칸(안내판 · 버튼)의 위 끝 사이에 통째로 들어간다(app.css).
+     두 칸의 높이는 폰 크기 · 글 길이 · 단추가 보이는지에 따라 달라서, 그릴 때마다 재어 --phT · --phB 로 넘긴다.
+     둘레의 흐린 배경은 같은 사진(--phBg) — 「1 / 3 · 다음 사진」으로 바꾸면 사진이 다시 읽힐 때 따라 바뀐다. */
+  var ph6 = document.getElementById('ph'), ph7 = document.getElementById('ph7');
+  function fitArea(scr, items, bot){
+    if(!scr.offsetHeight) return;                                    // 안 보이는 화면은 잴 수 없다 — 보일 때 다시(sync)
+    var sr = scr.getBoundingClientRect(), t = 0;
+    items.forEach(function(e){
+      if(!e || e.hidden || !e.getClientRects().length) return;
+      var r = e.getBoundingClientRect(); if(r.height) t = Math.max(t, r.bottom - sr.top);
+    });
+    var b = bot ? Math.max(0, sr.bottom - bot.getBoundingClientRect().top) : 0;
+    scr.style.setProperty('--phT', Math.round(t + 8) + 'px');
+    scr.style.setProperty('--phB', Math.round(b + 8) + 'px');
+  }
+  function fit6(){ fitArea(s6, [$('.row', top6), $('.stSegs', top6), $('.stWhere', top6), via, zm6, ph6 && $('.cnt', ph6)], bot6); }
+  function fit7(){ fitArea(s7, [band, $('.rfMemo', s7), zm7, ph7 && $('.cnt', ph7)], bot7); }
+  function fitAll(){ try{ fit6(); fit7(); }catch(e){} }
+  function backdrop(el){
+    var im = el && $('img', el); if(!im) return;
+    function set(){ el.style.setProperty('--phBg', 'url("' + String(im.currentSrc || im.src).replace(/["\\]/g, '\\$&') + '")'); }
+    set(); im.addEventListener('load', set);
+  }
+  window.addEventListener('resize', fitAll);
+  window.addEventListener('orientationchange', function(){ setTimeout(fitAll, 300); });
+  if(window.ResizeObserver){ var ro = new ResizeObserver(fitAll); [top6, bot6, band, bot7].forEach(function(e){ ro.observe(e); }); }
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
 
   /* ── 감싸기 : 그릴 때마다 위 칸을 새로, 사진 상자의 「누르면 크게 보기 창」 대신 제자리 2배 ── */
   var _render6 = render6, _phFill = phFill, _startGuide = (typeof startGuide === 'function') ? startGuide : null;
   window.render6 = function(){ var r = _render6.apply(this, arguments); try{ paint6(); paint7(); }catch(e){} return r; };   // 말을 바꿀 때(ui.js setLang)도 이것을 부른다
   window.phFill = function(el){
     var r = _phFill.apply(this, arguments);
-    if(el && (el.id === 'ph' || el.id === 'ph7')) el.onclick = null;
+    if(el && (el.id === 'ph' || el.id === 'ph7')){
+      el.onclick = null; backdrop(el);
+      requestAnimationFrame(fitAll);                                 // 「1 / 3 · 다음 사진」 칩이 생기고 없어짐에 따라 위 칸 끝이 달라진다
+    }
     return r;
   };
   if(_startGuide) window.startGuide = function(){ var r = _startGuide.apply(this, arguments); try{ paint7(); }catch(e){} return r; };
@@ -198,8 +233,8 @@
   function sync(){
     var on6 = s6.classList.contains('on'), on7 = s7.classList.contains('on');
     document.documentElement.classList.toggle('stOn', on6 || on7);
-    if(on6 && !was6) unzoom(s6);
-    if(on7 && !was7){ try{ paint7(); }catch(e){} }
+    if(on6 && !was6){ unzoom(s6); fitAll(); requestAnimationFrame(fitAll); }
+    if(on7 && !was7){ try{ paint7(); }catch(e){} fitAll(); requestAnimationFrame(fitAll); }
     was6 = on6; was7 = on7;
   }
   if(window.MutationObserver){

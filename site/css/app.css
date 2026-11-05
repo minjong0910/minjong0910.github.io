@@ -118,7 +118,7 @@
   #ssug .shot{display:block;border:2px dashed #2A3345;border-radius:0.875rem;padding:1.375rem 0.875rem;text-align:center;
     color:#7C8AA0;font-size:0.7812rem;line-height:1.6;background:#0D0F18;cursor:pointer;}
   #ssug .shot.has{padding:0;border-style:solid;border-color:#00E5FF;overflow:hidden;}
-  #ssug .shot img{width:100%;max-height:13.75rem;object-fit:cover;display:block;}
+  #ssug .shot img{width:100%;max-height:13.75rem;object-fit:contain;display:block;background:#05060A;}   /* 11/05 사진 전체가 보이게(예전 cover) */
   #ssug .shot .ic{font-size:1.875rem;display:block;margin-bottom:0.375rem;}
   /* v69 : 같은 자리에서 한 장 더 (선택) */
   #ssug .shot2{display:none;margin:-0.25rem 0 0.625rem;padding:0.5625rem 0.625rem;border:1px dashed #33507A;border-radius:0.5625rem;
@@ -323,7 +323,8 @@
 
   /* ===== 사진 기능 ===== */
   .photo.has{padding:0;border-style:solid;border-color:#FF2E88;overflow:hidden;position:relative;cursor:pointer;}
-  .photo.has img{width:100%;height:100%;object-fit:cover;display:block;}
+  .photo.has{background:#05060A;}
+  .photo.has img{width:100%;height:100%;object-fit:contain;display:block;}   /* 11/05 사용자 「사진이 너무 확대돼 전체가 안 보인다」 — 자르지 않고 통째로(예전 cover) */
   .photo .cap{position:absolute;left:0;right:0;bottom:0;background:rgba(5,6,10,.78);
     color:#E7F6FF;font-size:0.6875rem;padding:0.375rem 0.5rem;text-align:left;line-height:1.35;}
   /* '여기가 맞나요?' 화면의 실사 3D 상자 */
@@ -905,8 +906,8 @@
   #sqrok .okTick{font-size:2.75rem;line-height:1;}
   #sqrok .okName{font-size:1.625rem;font-weight:800;color:#39FF88;letter-spacing:-.5px;}
   #sqrok .okSub{color:#7C8AA0;font-size:0.8438rem;line-height:1.6;}
-  #sqrok .okPhoto{width:100%;max-height:38vh;border-radius:0.75rem;border:1px solid #232D3A;
-    object-fit:cover;background:#05070B;}
+  #sqrok .okPhoto{width:auto;height:auto;max-width:100%;max-height:38vh;border-radius:0.75rem;border:1px solid #232D3A;
+    object-fit:contain;background:#05070B;}   /* 11/05 세로 사진도 잘리지 않게 — 사진 비율 그대로 줄인다(예전 width 100% + cover) */
   #sqrok .okPhoto.hide{display:none;}
   #sqrok .okChip{display:inline-flex;align-items:center;gap:0.375rem;background:rgba(57,255,136,.10);
     border:1px solid rgba(57,255,136,.45);color:#39FF88;border-radius:62.4375rem;
@@ -1071,7 +1072,7 @@
   /* ── v57 : 어디인지 고르기 ─────────────────────────────── */
   #spick{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:1.75rem;}
   #spick .pkTop{display:flex;gap:0.75rem;align-items:flex-start;margin:0.25rem 2px 0.875rem;}
-  #spick .pkTop img{width:7rem;height:7rem;object-fit:cover;border-radius:0.75rem;
+  #spick .pkTop img{width:7rem;height:7rem;object-fit:contain;border-radius:0.75rem;
     border:1px solid rgba(90,140,200,.30);background:#0A1018;flex:0 0 auto;}
   #spick .pkWhy{font-size:0.7812rem;color:#7C8AA0;line-height:1.7;}
   #spick .pkWhy b{color:#94B8E0;font-weight:600;}
@@ -1088,7 +1089,7 @@
   #spick .pkGrid:empty{display:none;}
   #spick .pkCard{background:rgba(14,22,36,.92);border:1px solid rgba(90,140,200,.22);
     border-radius:0.75rem;overflow:hidden;text-align:left;padding:0 0 0.4375rem;}
-  #spick .pkCard img{width:100%;height:4.875rem;object-fit:cover;display:block;background:#0A1018;}
+  #spick .pkCard img{width:100%;height:4.875rem;object-fit:contain;display:block;background:#0A1018;}   /* 11/05 사진 전체(예전 cover) */
   #spick .pkCard .noimg{width:100%;height:4.875rem;display:flex;align-items:center;justify-content:center;
     color:#3C4A5A;font-size:1.375rem;background:#0A1018;}
   #spick .pkCard .nm{display:block;font-size:0.75rem;color:#E8EDF2;font-weight:600;margin:0.375rem 0.4375rem 0;line-height:1.35;}
@@ -1369,7 +1370,7 @@
   .rsHead{display:flex;align-items:center;gap:0.5rem;font-weight:800;font-size:1rem;color:#9FEFFF;}
   .rsHead .lc{width:1.3rem;height:1.3rem;margin:0;}
   .rsBody{display:flex;gap:0.75rem;align-items:center;margin:0.625rem 0 0.75rem;padding:0.5rem;border-radius:0.75rem;background:rgba(0,229,255,.06);}
-  .rsBody img{width:4.25rem;height:4.25rem;object-fit:cover;border-radius:0.5rem;border:2px solid #FF2E88;flex:none;}
+  .rsBody img{width:3.4rem;height:4.5rem;object-fit:contain;background:#05060A;border-radius:0.5rem;border:2px solid #FF2E88;flex:none;}
   .rsBody b{display:block;font-size:1.0625rem;line-height:1.35;word-break:keep-all;}
   .rsBody small{display:block;font-size:0.8125rem;color:#9FB2C8;margin-top:0.1875rem;line-height:1.4;word-break:keep-all;}
   .rsBody .pg{display:inline-block;margin-top:0.3125rem;padding:0.125rem 0.5rem;border-radius:1rem;background:#00E5FF;color:#04121A;font-size:0.75rem;font-weight:800;}
@@ -1509,13 +1510,23 @@
     border:0;border-radius:0;background:#000;color:#8A8A8A;z-index:0;cursor:pointer;touch-action:pan-y;}
   #s6.story #ph img,#s7.story #ph7 img{transition:transform .38s ease;will-change:transform;-webkit-user-drag:none;user-select:none;}
   #s6.story.zoomed #ph img,#s7.story.zoomed #ph7 img{transform:scale(2);}
+  /* 사진 전체가 보이게 (2026-11-05 사용자 「길안내 사진이 너무 확대돼 전체가 안 보인다」)
+     예전 : 사진으로 화면을 꽉 채워(cover) 폰에서는 세로 사진 양옆 · 가로 사진은 2/3 가 잘렸다.
+     지금 : 사진 전체를 위 칸(경로 · 단계 · 자리)과 아래 안내판 사이에 통째로(contain) 넣고, 둘레는 같은 사진을 흐리게 깔아 채운다.
+     --phT · --phB = 위 칸 · 아래 칸 높이(story.js 가 그릴 때마다 잰다). 괄호 안 값은 재기 전 기본값. */
+  #s6.story #ph::before,#s7.story #ph7::before{content:"";position:absolute;inset:-3rem;z-index:0;pointer-events:none;
+    background:#000 var(--phBg,none) center/cover no-repeat;filter:blur(1.5rem) brightness(.4);}
+  #s6.story #ph img,#s7.story #ph7 img{position:absolute;left:0;top:var(--phT,10.5rem);z-index:1;width:100% !important;
+    height:calc(100% - var(--phT,10.5rem) - var(--phB,15rem)) !important;object-fit:contain !important;}
+  #s7.story #ph7 img{top:var(--phT,8.5rem);height:calc(100% - var(--phT,8.5rem) - var(--phB,10rem)) !important;}
+  @media (max-height:700px){ #s6.story .stHint{display:none;} }   /* 작은 폰은 사진 자리를 조금이라도 더 — 「누르면 크게」 칩은 위에 그대로 */
   #s6.story #ph .cap,#s6.story #ph .zm,#s7.story #ph7 .cap,#s7.story #ph7 .zm{display:none;}
   #s6.story #ph .cnt,#s7.story #ph7 .cnt{top:auto;right:0.9rem;bottom:auto;z-index:4;background:rgba(15,15,16,.92);color:#FFC400;
     border:1.5px solid #FFC400;border-radius:0.375rem;font-size:0.75rem;font-weight:900;padding:0.3rem 0.6rem;}
   #s6.story #ph .cnt{top:calc(env(safe-area-inset-top) + 8.85rem);}
   #s7.story #ph7 .cnt{top:calc(env(safe-area-inset-top) + 11.1rem);}
   .stShade{position:absolute;inset:0;z-index:1;pointer-events:none;
-    background:linear-gradient(to top,rgba(10,10,11,.88) 0%,rgba(10,10,11,.45) 30%,rgba(10,10,11,0) 52%);}
+    background:linear-gradient(to top,rgba(10,10,11,.8) 0,rgba(10,10,11,.3) calc(var(--phB,15rem) - 1rem),rgba(10,10,11,0) var(--phB,15rem));}   /* 사진 아래(안내판 뒤)만 어둡게 — 사진은 가리지 않는다 */
   .stTop{position:absolute;left:0;right:0;top:0;z-index:3;padding:calc(3.55rem + env(safe-area-inset-top)) 0.9rem 1.5rem;
     background:linear-gradient(to bottom,rgba(0,0,0,.62) 0%,rgba(0,0,0,.3) 62%,rgba(0,0,0,0) 100%);color:#fff;}
   .stTop .row{display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;font-weight:800;color:#EDEDED;text-shadow:0 1px 5px rgba(0,0,0,.85);}
@@ -1598,7 +1609,7 @@
   .rxGrid{display:grid;grid-template-columns:1fr 1fr;gap:0.55rem;}
   .rxCard{position:relative;display:block;width:100%;margin:0;padding:0;border:2px solid #2C2C2C;border-radius:0.5rem;overflow:hidden;background:#1A1A1A;cursor:pointer;font:inherit;text-align:left;}
   .rxCard:active,.rxCard:hover{border-color:#FFC400;}
-  .rxCard img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;}
+  .rxCard img{display:block;width:100%;aspect-ratio:3/4;object-fit:contain;background:#000;}   /* 11/05 사진 전체(예전 정사각형으로 잘림) — 사진 대부분이 세로 3:4 */
   .rxCard .cp{display:block;padding:0.5rem 0.6rem;color:#fff;font-weight:800;font-size:0.86rem;}
   .rxCard .tg{position:absolute;left:0.4rem;top:0.4rem;padding:0.18rem 0.45rem;border-radius:0.3rem;font-size:0.7rem;font-weight:900;background:#FFC400;color:#111;}
   .rxCard .tg.side{background:#3A3A3A;color:#E5E5E5;}
@@ -1674,7 +1685,7 @@ textarea.syInp{resize:none;line-height:1.5;}
 /* 길 공유하기 */
 .syGates{display:grid;grid-template-columns:repeat(4,1fr);gap:0.4rem;}
 .syGate{position:relative;border-radius:0.6rem;overflow:hidden;border:2px solid #26354A;background:#0B0E13;cursor:pointer;padding:0;}
-.syGate img{display:block;width:100%;aspect-ratio:3/3.4;object-fit:cover;}
+.syGate img{display:block;width:100%;aspect-ratio:3/3.4;object-fit:contain;background:#000;}   /* 11/05 사진 전체(예전 cover) */
 .syGate b{position:absolute;left:0;right:0;bottom:0;padding:1rem 0.2rem 0.3rem;text-align:center;font-size:0.85rem;font-weight:900;color:#fff;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,0));}
 .syGate.pick{border-color:#39FF88;box-shadow:0 0 0 2px #39FF88;}
 .syGate.pick:after{content:"";position:absolute;top:0.3rem;right:0.3rem;width:1.25rem;height:1.25rem;border-radius:50%;background:#39FF88 url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%2304121A%27 stroke-width=%273.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M20 6 9 17l-5-5%27/%3E%3C/svg%3E") center/70% no-repeat;}
@@ -1706,7 +1717,7 @@ textarea.syInp{resize:none;line-height:1.5;}
 #srcv .qe{font-size:0.8rem;color:#B5B5B5;font-weight:700;margin-bottom:0.7rem;}
 #srcv .grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:0.55rem;min-height:0;}
 #srcv .g{position:relative;border-radius:0.4rem;overflow:hidden;border:2px solid #3A3B40;min-height:0;cursor:pointer;}
-#srcv .g img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+#srcv .g img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;}   /* 11/05 사진 전체(예전 cover) */
 #srcv .g b{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:0.4rem;padding:1.4rem 0.6rem 0.5rem;background:linear-gradient(to top,rgba(0,0,0,.92),rgba(0,0,0,0));font-size:1.25rem;font-weight:900;}
 #srcv .g b small{font-size:0.7rem;color:#B5B5B5;font-weight:800;}
 #srcv .g.pick{border-color:#FFC400;box-shadow:0 0 0 2px #FFC400;}

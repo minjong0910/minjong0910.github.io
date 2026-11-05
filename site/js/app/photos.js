@@ -1078,8 +1078,10 @@ function phFill(el, code, placeholder, capOverride){
   // 가로로 넓은 사진(건물 전경 등)은 cover로 자르면 안 되므로 상자를 사진 비율에 맞춰 줄이고,
   // 세로 사진으로 되돌아오면 원래(상자 꽉 채우기) 모양으로 복구한다.
   /* 예전에는 사진의 가로세로 비율에 따라 상자 크기를 바꿔서, 사진마다 틀 크기가 들쭉날쭉했음.
-     → 상자 크기는 그대로 두고, 사진을 상자에 맞춰 잘라 꽉 채운다(크기 통일). */
-  img.style.objectFit = 'cover';
+     → 상자 크기는 그대로 두고, 사진을 상자에 맞춰 잘라 꽉 채운다(크기 통일).
+     2026-11-05 사용자 「사진이 너무 확대돼 전체가 안 보인다」 → 상자 크기는 그대로, 사진은 자르지 않고 통째로(contain).
+     길안내 · 도착 화면은 story.js 가 사진을 위 · 아래 칸 사이에 놓고 둘레를 흐린 같은 사진으로 채운다. */
+  img.style.objectFit = 'contain';
   img.style.width = '100%';
   img.style.height = '100%';
   img.src = list[0].u; el.appendChild(img);

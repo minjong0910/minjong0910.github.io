@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '1807ed7dfc73';   // 파일 269개 · 17.9MB
+var VERSION = '020e37057cca';   // 파일 269개 · 17.9MB
 var FILES = [
   ['3d/realistic.html','97d7383db21e',81305],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','74974986bf48',158498],
+  ['css/app.css','2c3c5a2ad68f',160588],
   ['css/boot.css','0b23cf08e0b6',2841],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
@@ -217,8 +217,8 @@ var FILES = [
   ['guide/g05_search.jpg','aa54cc2d0655',30962],
   ['guide/g06_3d.jpg','6b51ff0988da',94498],
   ['guide/g07_floor.jpg','71e7e512e012',68313],
-  ['guide/g08_step.jpg','65b056378eff',115186],
-  ['guide/g09_arrive.jpg','01a120c4cb7c',78899],
+  ['guide/g08_step.jpg','d68fb2f2df34',130650],
+  ['guide/g09_arrive.jpg','22079be4a34b',88226],
   ['guide/g10_fav.jpg','24b3a50caa92',25747],
   ['guide/g11_settings.jpg','199aab72b946',80862],
   ['guide/g12_menu.jpg','b79f8d521356',76290],
@@ -247,11 +247,11 @@ var FILES = [
   ['js/app/easy.js','894c4f66be72',26399],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','5007cc7f0d7c',51568],
-  ['js/app/howto.js','53c1e598abdf',24594],
+  ['js/app/howto.js','4763f7f4705a',25220],
   ['js/app/icons.js','4cb6e33c5920',21136],
   ['js/app/live.js','641f671b6fff',2510],
   ['js/app/overview3d.js','35ad3a4e8f9a',108858],
-  ['js/app/photos.js','314bd7218e68',59257],
+  ['js/app/photos.js','6dc0ffc21890',59562],
   ['js/app/pwa.js','21b1f691c62d',50650],
   ['js/app/qrnav.js','40cc05287f36',20821],
   ['js/app/restart.js','a41ece25417f',9524],
@@ -268,7 +268,7 @@ var FILES = [
   ['js/app/share.js','b38f95737bd5',19895],
   ['js/app/shell.js','d46771146f14',33879],
   ['js/app/start.js','4065777331b0',1505],
-  ['js/app/story.js','8dcde624717c',15131],
+  ['js/app/story.js','3229968c3d19',17872],
   ['js/app/sugai.js','510d8159462a',132345],
   ['js/app/sugdb.js','dd4a6d4201ea',24944],
   ['js/app/suggest.js','6b14f3772fc9',52266],

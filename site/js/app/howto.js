@@ -97,9 +97,12 @@ var HOWTO = [
       ['길안내 시작', '여기서 바로 길안내를 시작할 수 있어요.', 'Start navigation', 'You can start navigation right here.']
     ] },
   { t:['길안내 따라가기', 'Following the steps'], img:'g08_step',
-    lead:['그 자리의 실제 사진이 화면 가득 — 한 단계씩 따라가요.', 'The real photo fills the screen — follow one step at a time.'],
+    /* 2026-11-05 사용자 「사진이 너무 확대돼 전체가 안 보인다」 → 사진 전체가 보이게 바꾸고 그림도 다시 찍음 · 같은 날 [엘리베이터 | 계단] 단추(번호 2)도 더함 */
+    lead:['그 자리의 실제 사진이 통째로 보여요 — 한 단계씩 따라가요.', 'The whole real photo of each spot — follow one step at a time.'],
     items:[
       ['진행 표시', '어디서 어디로 가는지, 지금 몇 번째 단계인지 보여 줘요. 📷 옆은 지금 사진 속 자리예요.', 'Progress', 'Shows where you are going, which step you are on, and where the photo was taken.'],
+      ['엘리베이터 · 계단', '1층에서 위층으로 갈 때 보여요. 「계단」을 누르면 엘리베이터 대신 중앙계단으로 걸어 올라가는 길로 바뀌고, 다음에도 그대로 계단으로 안내해요.',
+       'Elevator · Stairs', 'Shown when going up from 1F. Tap "Stairs" to walk up the main stairs instead of the elevator — it stays that way next time.'],
       ['누르면 크게', '사진을 누르면 누른 곳이 크게 보이고, 다시 누르면 원래대로 돌아와요. 「1/2 · 다음 사진 ›」이 보이면 그걸 눌러 다음 사진을 봐요.',
        'Tap to zoom', 'Tap the photo to zoom in where you tapped; tap again to zoom out. If it shows "1/2 · Next ›", tap that for the next photo.'],
       /* 2026-11-04 사용자 「사진 골라 다시 출발」을 앱에 — 그림도 그 단추가 보이게 다시 찍음(번호 3) */
@@ -114,7 +117,7 @@ var HOWTO = [
     lead:['다 왔어요!', 'You made it!'],
     items:[
       ['도착한 곳', '도착한 방 번호예요. 아래에 방 이름이 나와요.', 'Destination', 'The room you reached. Its name is shown below.'],
-      ['누르면 크게', '문 앞 사진이 화면 가득 보여요. 문 옆 명패를 누르면 크게 보여서 글씨까지 확인할 수 있어요.', 'Tap to zoom', 'The door fills the screen. Tap the name plate to zoom in and read it.'],
+      ['누르면 크게', '문 앞 사진이 통째로 보여요. 문 옆 명패를 누르면 크게 보여서 글씨까지 확인할 수 있어요.', 'Tap to zoom', 'The whole door photo is shown. Tap the name plate to zoom in and read it.'],
       ['다른 장소 찾기', '다른 곳으로 또 가고 싶으면 눌러요. 「무엇을 찾으세요?」로 바로 가요.', 'Find another place', 'Go somewhere else. Opens "What are you looking for?".'],
       ['처음으로 돌아가기', '처음 화면으로 돌아가요.', 'Back to start', 'Returns to the first screen.']
     ] },

@@ -70,7 +70,9 @@ var CONSENT = (function(){
   var AGREE_V = 4;   // 11/05 : 일곱 줄 모두 미리 체크 — 이미 동의한 폰(사용자 폰 포함)도 새 화면을 한 번 보게
 
   /* ── 지금 상태 ── */
-  function agreed(){ var a = ls(K.agree); return !!(a && (a.v || 1) >= AGREE_V); }
+  /* 다시 보기 주소(?consent · ?동의 — pwa.js 가 떼어 b3nav_consent_again 으로 넘김)로 들어오면 이미 동의한 폰에도 한 번 더 (11/05 사용자) */
+  function again(){ try{ return sessionStorage.getItem('b3nav_consent_again') === '1'; }catch(e){ return false; } }
+  function agreed(){ if(again()) return false; var a = ls(K.agree); return !!(a && (a.v || 1) >= AGREE_V); }
   function pvOK(){ return !!ls(K.pv); }
   function camOK(){ return ls(K.cam) === 'yes'; }
   function notiSupported(){ return typeof Notification !== 'undefined'; }
@@ -205,7 +207,7 @@ var CONSENT = (function(){
     var a = mk('div', 'syAgree',
       '<div class="sc"><div class="brand">🏫 ' + T('공대 3호관 길안내', 'Engineering Bldg 3 Navigator') + '</div>' +
       '<h2>' + T('시작하기 전에<br>확인해 주세요', 'Before you start') + '</h2><p class="sub">' +
-        (prev ? T('동의 항목이 바뀌어서 한 번만 더 여쭤봐요.', 'Our consent items changed, so we ask once more.') : T('한 번만 동의하면 다음부터는 묻지 않아요.', 'Agree once and we will not ask again.')) + '</p>' +
+        (prev && (prev.v || 1) < AGREE_V ? T('동의 항목이 바뀌어서 한 번만 더 여쭤봐요.', 'Our consent items changed, so we ask once more.') : T('한 번만 동의하면 다음부터는 묻지 않아요.', 'Agree once and we will not ask again.')) + '</p>' +
       '<div class="syAgAll" role="checkbox"><span class="syBox">' + IC.check + '</span><div><b>' + T('모두 동의해요', 'Agree to all') + '</b><small>' + T('선택 항목 · 카메라 · 알림까지 한 번에', 'Including optional items, camera and notifications') + '</small></div></div>' +
       list.map(function(x){
         /* 설명 없는 줄 — 처리방침 · 라이선스는 「보기 ›」로 본문 쪽을 연다(11/04 — 펼치는 설명이 아니라 문서 전체) */
@@ -271,6 +273,7 @@ var CONSENT = (function(){
       })(0);
     };
     function start(){
+      try{ sessionStorage.removeItem('b3nav_consent_again'); }catch(e){}   // 다시 보기 주소로 한 번 보여 줬으면 끝
       ls(K.agree, {d: U.today(), v: AGREE_V}); ls(K.pv, st.photo ? {d: U.today()} : null);
       ls(K.cam, st.cam ? 'yes' : 'no'); ls(K.noti, st.noti ? 'yes' : 'no');
       a.remove(); pvPaint();

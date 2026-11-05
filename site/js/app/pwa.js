@@ -196,6 +196,21 @@ var PWA = (function(){
       history.replaceState(history.state, '', location.pathname + rest + location.hash);
     }
   }catch(e){}
+  /* ── ①-1 동의 화면 다시 보기 (2026-11-05 사용자 「NFC 로 들어가도 동의란이 안 뜬다」 → 폰마다 한 번은 그대로 두고 다시 보기 주소를 따로) ──
+     주소 뒤에 ?consent (또는 ?동의) 가 있으면 이미 동의한 폰에도 동의 화면을 한 번 더 띄운다 — 발표 · 시험용.
+     주소에서 떼어 이 탭에만 적어 두고(b3nav_consent_again), consent.js 가 동의를 받으면 지운다(새 판으로 갈아타며 새로 고쳐도 남는다). */
+  try{
+    var qs0 = location.search, dq0 = qs0;
+    try{ dq0 = decodeURIComponent(qs0); }catch(e){}
+    if(/[?&](consent|동의)(=[^&]*)?(&|$)/.test(dq0)){
+      sessionStorage.setItem('b3nav_consent_again', '1');
+      var keep = qs0.replace(/^\?/, '').split('&').filter(function(p){
+        var k = p.split('=')[0]; try{ k = decodeURIComponent(k); }catch(e){}
+        return p && k !== 'consent' && k !== '동의';
+      });
+      history.replaceState(history.state, '', location.pathname + (keep.length ? '?' + keep.join('&') : '') + location.hash);
+    }
+  }catch(e){}
   /* 2026-10-20 : 옛 판이 깔린 폰으로 출입문 QR 을 찍으면, 「여기가 맞나요?」가 뜨자마자 새 판으로 갈아타며
      새로 고쳐(아래 applyUpdate) 문 정보를 잃고 첫 화면이 떴다(주소의 ?gate= 는 이미 떼어 냈으므로).
      → 새로 고치기 직전에 문을 이 탭에만 적어 두고(b3nav_gate_carry), 다시 뜨면 주소로 들어온 것처럼 받는다. */

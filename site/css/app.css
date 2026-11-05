@@ -1530,6 +1530,15 @@
   .stWhere{display:inline-flex;align-items:center;gap:0.3rem;margin-top:0.55rem;max-width:100%;font-size:0.75rem;font-weight:800;color:#fff;
     border-left:3px solid #FFC400;padding:0.25rem 0.5rem;background:#1E1F22;border-radius:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 8.5rem);}
   .stWhere svg{flex:none;width:0.9rem;height:0.9rem;}
+  /* [엘리베이터 | 계단] — 2026-11-05 사용자 「계단으로 올라가면서 라이브」 (story.js · guide.js GUIDE_VIA) */
+  .stVia{display:flex;width:max-content;max-width:calc(100% - 8.5rem);margin-top:0.45rem;border:1.5px solid #FFC400;border-radius:0.375rem;overflow:hidden;
+    background:rgba(15,15,16,.9);box-shadow:0 4px 14px rgba(0,0,0,.4);}
+  .stVia[hidden]{display:none;}
+  .stVia button{display:flex;align-items:center;gap:0.3rem;margin:0;padding:0.36rem 0.62rem;border:0;border-radius:0;background:transparent;color:#FFC400;
+    font:inherit;font-size:0.8rem;font-weight:900;cursor:pointer;white-space:nowrap;}
+  .stVia button + button{border-left:1.5px solid #FFC400;}
+  .stVia button.on{background:#FFC400;color:#111;}
+  .stVia .vi{flex:none;width:1rem;height:1rem;}
   .stZm{position:absolute;right:0.9rem;z-index:4;display:flex;align-items:center;gap:0.3rem;background:rgba(15,15,16,.92);color:#FFC400;
     font-size:0.78rem;font-weight:900;padding:0.3rem 0.6rem;border-radius:0.375rem;pointer-events:none;}
   .stZm svg{width:0.95rem;height:0.95rem;flex:none;}

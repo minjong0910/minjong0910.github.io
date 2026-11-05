@@ -23,6 +23,9 @@
   }
   var LIFT = SV.replace('>', ' fill="none" stroke="#111" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">') +
     '<rect x="8" y="5" width="32" height="38" rx="2"/><path d="M24 9 V39" stroke-width="2"/><path d="M12 20 L16 14 L20 20 Z M28 28 L32 34 L36 28 Z" fill="#111" stroke-width="1.5"/></svg>';
+  /* 계단(2026-11-05) : 오른쪽 위로 오르는 계단 네 칸 + 위쪽 화살표 */
+  var STAIRS = SV.replace('>', ' fill="none" stroke="#111" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">') +
+    '<path d="M5 42 H15 V33 H24 V24 H33 V15 H43"/><path d="M8 25 L22 11 M13 10 H23 V20"/></svg>';
   function check(c){ return '<svg viewBox="0 0 48 48" fill="none" stroke="' + c + '" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 25 L20 36 L40 12"/></svg>'; }
   function mag(plus){ return '<svg viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M15 15 L21 21 M7 10 h6' + (plus ? ' M10 7 v6' : '') + '"/></svg>'; }
   var CAM = '<svg viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>';
@@ -30,6 +33,7 @@
   function iconOf(s){
     if(s.a === '✓' || s.type === 'arrive') return {h: check('#111'), c: ''};
     if(s.type === 'lift') return {h: LIFT, c: ''};
+    if(s.type === 'stairs') return {h: STAIRS, c: ''};
     if(s.type === 'turn' && (s.a === '→' || s.a === '←')) return {h: arrowLucide(s.a === '←' ? 'left' : 'right'), c: s.a === '←' ? 'turnL' : 'turnR'};
     return {h: arrowFill(ROT[s.a] || 0), c: ''};
   }
@@ -100,6 +104,44 @@
   s6.appendChild(bot6);
   $('.stBack', top6).onclick = function(){ if(typeof go === 'function') go(4); };
 
+  /* ── [엘리베이터 | 계단] (2026-11-05 사용자 「계단으로 올라가면서 라이브를 찍겠다」 · guide.js GUIDE_VIA) ──
+     1층에서 2~5층으로 올라가는 길에만 보인다. 바꾸면 단계를 다시 만들되, 이미 지나온 같은 단계는 그 자리 그대로 둔다. */
+  var via = mk('div', 'stVia'); via.setAttribute('role', 'group'); top6.appendChild(via);
+  function viaIc(svg){ return svg.replace('<svg ', '<svg class="vi" ').replace(/#111/g, 'currentColor'); }
+  function paintVia(){
+    var ok = (typeof guideStairsOK === 'function') && guideStairsOK();
+    via.hidden = !ok; if(!ok) return;
+    var st = (GUIDE_VIA === 'stairs');
+    via.setAttribute('aria-label', ko() ? '어떻게 올라갈까요' : 'How to go up');
+    via.innerHTML = '<button type="button" data-v="ev" class="' + (st ? '' : 'on') + '" aria-pressed="' + !st + '">' + viaIc(LIFT) + (ko() ? '엘리베이터' : 'Elevator') + '</button>' +
+                    '<button type="button" data-v="stairs" class="' + (st ? 'on' : '') + '" aria-pressed="' + st + '">' + viaIc(STAIRS) + (ko() ? '계단' : 'Stairs') + '</button>';
+  }
+  function viaToast(t){
+    var ph = document.querySelector('.phone') || document.body;
+    [].forEach.call(document.querySelectorAll('.syToast'), function(e){ e.remove(); });
+    var e = mk('div', 'syToast info'); e.textContent = t; ph.appendChild(e);
+    setTimeout(function(){ e.classList.add('out'); }, 2200); setTimeout(function(){ e.remove(); }, 2700);
+  }
+  via.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('button[data-v]') : null; if(!b) return;
+    var v = b.getAttribute('data-v'); if(v === GUIDE_VIA || typeof buildSteps !== 'function') return;
+    var old = steps.slice(), cur = steps[si], oldSi = si;
+    setGuideVia(v);
+    steps = buildSteps();
+    /* 앞부분(문 · 복도)이 같으면 그 자리 그대로, 달라진 곳부터는 같은 사진의 단계(위층 복도 등)가 있으면 거기로 */
+    var d = 0;
+    while(d < old.length && d < steps.length && old[d].code === steps[d].code && old[d].tko === steps[d].tko) d++;
+    var ni = oldSi;
+    if(oldSi >= d){
+      ni = d;
+      for(var k = d; k < steps.length; k++) if(cur && steps[k].code === cur.code && steps[k].type === cur.type){ ni = k; break; }
+    }
+    si = Math.max(0, Math.min(steps.length - 1, ni));
+    render6(true);
+    viaToast(v === 'stairs' ? (ko() ? '🚶 중앙계단으로 가는 길로 바꿨어요' : '🚶 Switched to the main stairs')
+                            : (ko() ? '🛗 엘리베이터로 가는 길로 바꿨어요' : '🛗 Switched to the elevator'));
+  });
+
   function paint6(){
     if(typeof steps === 'undefined' || !steps.length) return;
     var s = steps[si]; if(!s) return;
@@ -117,6 +159,7 @@
     $('.ko', sign).textContent = big; $('.ko', sign).classList.toggle('long', big.length > 30);
     $('.en', sign).textContent = small;
     hint6.textContent = ko() ? '사진을 누르면 크게 · 작게 — 좌우로 밀면 이전 · 다음' : 'Tap the photo to zoom · swipe for back / next';
+    paintVia();
     unzoom(s6);
   }
   hook(s6, document.getElementById('ph'), function(d){ if(d > 0){ if(typeof next === 'function') next(); } else if(typeof prev === 'function') prev(); });

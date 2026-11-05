@@ -4,10 +4,32 @@
 /* ========== 안내 단계 생성 ========== */
 var ORD_EN = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
 function ordWordEn(k){ return (k>=1 && k<=ORD_EN.length) ? ORD_EN[k-1] : (k+'th'); }
+/* ★ 2026-11-05 : 엘리베이터 대신 중앙계단으로 올라가는 길 — 사용자 「엘리베이터에 들어가면 네트워크가 안 좋아 영상통화가 끊긴다,
+     계단으로 올라가면서 라이브를 찍겠다 — 동문 · 서문 · 후문 · 정문에서 올라가는 모든 과정에 중앙계단으로도 갈 수 있는 경로를」
+   · 길안내 화면 위쪽 [엘리베이터 | 계단] 단추로 고른다(story.js). 고른 것은 이 폰에만 남는다(b3nav_via). 기본은 엘리베이터 — 예전 안내 그대로.
+   · 계단 길은 1층에서 2~5층으로 올라갈 때만(호실 · 화장실 · 비상계단). 지하 · 옥상 · 같은 층은 예전 그대로다.
+   · 중앙계단은 모든 층에서 엘리베이터 바로 옆(서문 쪽, building.js stZ)에 붙어 있다 →
+     위층에서 계단을 나오면 엘리베이터에서 내릴 때처럼 복도(-X)를 보고 선다 : 좌회전 = 서문 쪽(+Z) · 우회전 = 동문 쪽(-Z).
+   · 1층 사진 : 엘리베이터 바로 오른쪽 검은 틀 입구가 중앙계단이다(EV1 · EV1WEST 사진에 함께 찍혀 있다) · 계단 사진은 ES1.
+     2~5층 계단 사진은 아직 없어서 그 층 엘리베이터 앞 사진(EV2~EV5 — 계단 바로 옆에서 복도 건너편을 본 모습)을 쓴다. */
+var GUIDE_VIA = (function(){ try{ return localStorage.getItem('b3nav_via') === 'stairs' ? 'stairs' : 'ev'; }catch(e){ return 'ev'; } })();
+function setGuideVia(v){
+  GUIDE_VIA = (v === 'stairs') ? 'stairs' : 'ev';
+  try{ localStorage.setItem('b3nav_via', GUIDE_VIA); }catch(e){}
+}
+/* 지금 길에 「계단으로」를 고를 수 있는가 */
+function guideStairsOK(){
+  if(typeof target === 'undefined' || !target) return false;
+  var lv = target.floor;
+  return startFloor === 1 && typeof lv === 'number' && lv >= 2 && lv <= 5 &&
+         (target.kind === 'room' || target.kind === 'toilet' || target.kind === 'emstair') &&
+         !!(ROOM_PHOTOS['ES1'] && ROOM_PHOTOS['EV' + lv]);
+}
 function buildSteps(){
   var lv=target.floor, out=[];
   var sf = startFloor;                        // 지금 계신 층
   var sameFloor = (sf===lv);                  // 목적지와 같은 층이면 엘리베이터 불필요
+  var viaStairs = (GUIDE_VIA === 'stairs') && guideStairsOK();   // 엘리베이터 대신 중앙계단으로 (위 GUIDE_VIA)
 
   /* v147: QR·직접선택으로 문이 정해져 있고 지금 1층이면,
      '그 문으로 들어와 복도로 나온다'를 맨 앞 단계로 하나 더 넣는다(4단계 → 5단계).
@@ -59,7 +81,9 @@ function buildSteps(){
               code: (gk && GATE_OUT[gk] && ROOM_PHOTOS[GATE_OUT[gk]]) ? GATE_OUT[gk] : ('GATE_'+gk)});
     /* 이 복도 단계는 '문 → 엘리베이터' 구간이다. 목적지가 1층이면 엘리베이터에 갈 일이 없고,
        아래에서 어차피 '복도를 따라 쭉 가세요'가 나오므로 같은 말이 두 번 겹친다 → 그때는 넣지 않는다. */
-    if(flow && !sameFloor && !backStairZone && !(flow.skipOnUp && onUpFlow) && ROOM_PHOTOS[flow.hall])
+    /* 계단으로 갈 때 정문 「엘리베이터 앞으로」 · 후문 「라운지에서 우회전(= 엘리베이터 쪽)」은 넣지 않는다 — 아래 계단 단계가 대신한다 */
+    if(flow && !sameFloor && !backStairZone && !(flow.skipOnUp && onUpFlow) &&
+       !(viaStairs && (gk === 'MAIN' || gk === 'BACK')) && ROOM_PHOTOS[flow.hall])
       out.push({a:'↑', type:'straight',
                 tko:flow.tko, ten:flow.ten,
                 ph:'[ '+gn.ko+' 안쪽 사진 ]', code:flow.hall});
@@ -126,7 +150,29 @@ function buildSteps(){
 
   /* 멘트 규칙 : 한 줄에 들어가게 짧게, 모두 '~세요'로 끝을 맞춘다.
      예전에는 '~으로 이동'(명사끝)과 '~하세요'가 섞여 있고 문장이 길어 두 줄로 넘어갔다. */
-  if(!sameFloor){
+  /* 계단으로 갈 때 위층에서 계단을 나오는 단계의 사진 설명 — 사진은 그 층 엘리베이터 앞(계단 바로 옆)이다 */
+  var stairCap = {ko: lvNameIn(lv, 'ko')+' 계단 · 엘리베이터 앞', en: offEn+' stairs & elevator'};
+  if(!sameFloor && viaStairs){
+    /* ① 1층 중앙계단 입구까지 — 문마다 계단이 보이는 쪽이 다르다(엘리베이터를 마주 보면 계단은 오른쪽)
+         동문 : 복도를 걸어오면 엘리베이터를 먼저 지나고 바로 왼쪽 · 서문 : 엘리베이터 바로 앞 오른쪽
+         정문 : 들어서면 정면 엘리베이터의 오른쪽 · 후문 : 들어선 곳이 바로 계단 홀이라 따로 걷는 단계가 없다(아래 ② 에 「왼쪽」) */
+    var STAIR_IN = {
+      EAST: {a:'←', type:'turn',     code:'EV1WEST', tko:'엘리베이터를 지나 왼쪽 중앙계단으로 가세요', ten:'Pass the elevator and go to the main stairs on your left'},
+      WEST: {a:'→', type:'turn',     code:'EV1',     tko:'엘리베이터 옆 오른쪽 중앙계단으로 가세요',   ten:'Go to the main stairs on your right, next to the elevator'},
+      MAIN: {a:'↑', type:'straight', code:'EV1',     tko:'엘리베이터 오른쪽 중앙계단으로 가세요',     ten:'Go to the main stairs to the right of the elevator'}
+    };
+    var sIn = (gk && sf === 1) ? STAIR_IN[gk] : null;
+    if(sIn && ROOM_PHOTOS[sIn.code])
+      out.push({a:sIn.a, type:sIn.type, tko:sIn.tko, ten:sIn.ten,
+                ph:'[ 1층 중앙계단 입구 사진 ]', code:sIn.code,
+                cap:{ko:'1층 엘리베이터 옆 중앙계단', en:'1F main stairs, next to the elevator'}});
+    /* ② 계단으로 올라가기 */
+    out.push({a:'↑', type:'stairs',
+              tko:(gk === 'BACK' ? '왼쪽 중앙계단으로 ' : '중앙계단으로 ')+lvNameIn(lv, 'ko')+'까지 올라가세요',
+              ten:'Take the main stairs '+(gk === 'BACK' ? 'on your left ' : '')+'up to '+lvLabel(lv),
+              ph:'[ 1층 중앙계단 사진 ]', code:'ES1', cap:{ko:'1층 중앙계단', en:'1F main stairs'}});
+  }
+  else if(!sameFloor){
     var goUp = lvIndex(lv) > lvIndex(sf);
     out.push({a: goUp?'↑':'↓', type:'lift',
               /* 절차를 정한 문의 문구는 사용자가 정한 그대로 — '엘리베이터를 타고 ○○으로 …' */
@@ -264,7 +310,8 @@ function buildSteps(){
      엘리베이터에서 내린 뒤는 어느 문으로 들어왔든 똑같으므로, 위쪽 UP_FLOW 표에 문을 한 줄
      더 적으면 그대로 따라온다 — 지금은 네 문의 2·3·4·5층이 모두 정해져 있다. */
   if(onUpFlow && ROOM_PHOTOS['EVIN'+lv] && ROOM_PHOTOS['HALL'+lv+'L'] && ROOM_PHOTOS['HALL'+lv+'R']){
-    var evZu   = evXZ(lv).z;
+    /* 계단으로 왔으면 기준점이 계단(엘리베이터 바로 옆 · 서문 쪽)이다. 둘 사이(코어 구간)에는 호실이 없어서 좌우 · 몇 번째는 같다 */
+    var evZu   = viaStairs ? stZOf(lv) : evXZ(lv).z;
     var dirU   = (p.z >= evZu) ? 1 : -1;                // +1 = 서문 쪽(좌회전) · -1 = 동문 쪽(우회전)
     var isLeftU = function(x){ return (dirU > 0) ? (x > 0) : (x < 0); };
     var leftU  = isLeftU(p.x);
@@ -277,6 +324,12 @@ function buildSteps(){
     matesU.sort(function(a, b){ return (a.z - b.z) * dirU; });   // 엘리베이터에서 가까운 순
     var nthU = 0;
     for(var mu = 0; mu < matesU.length; mu++) if(matesU[mu].code === baseU) nthU = mu + 1;
+    if(viaStairs)
+      out.push({a: dirU > 0 ? '←' : '→', type:'turn',
+                tko:offKo+'에서 계단을 나와 ' + (dirU > 0 ? '좌회전' : '우회전') + ' 하세요',
+                ten:'Leave the stairs at '+offEn+' and turn ' + (dirU > 0 ? 'left' : 'right'),
+                ph:'['+lvName(lv)+' 계단 앞 사진 ]', code:'EV'+lv, cap:stairCap});
+    else
     out.push({a: dirU > 0 ? '←' : '→', type:'turn',
               tko:offKo+' 엘리베이터에서 내려서 ' + (dirU > 0 ? '좌회전' : '우회전') + ' 하세요',
               ten:'Get off the elevator at '+offEn+' and turn ' + (dirU > 0 ? 'left' : 'right'),
@@ -316,7 +369,8 @@ function buildSteps(){
      ※ 문(QR)으로 들어온 경우는 아래에서 문 기준으로 따로 다시 계산한다. */
   var facingEV = (lv === 1 && sameFloor);             // 1층에서 엘리베이터를 마주 보고 선 자세
   var faceX = ((evp.x >= 0) ? -1 : 1) * (facingEV ? -1 : 1);
-  var dz    = (p.z >= evp.z) ? 1 : -1;                // 복도에서 걸어갈 방향
+  /* 계단으로 왔으면 계단(엘리베이터 바로 옆)에서 나와 복도(-X)를 본다 — 보는 방향은 엘리베이터에서 내릴 때와 같고 기준점만 계단 */
+  var dz    = (p.z >= (viaStairs ? stZOf(lv) : evp.z)) ? 1 : -1;   // 복도에서 걸어갈 방향
   var turnLeft = ((dz === -faceX) !== GUIDE_FLIP);            // 그 자세에서 도는 방향
 
   /* 복도 사진은 '어느 쪽으로 도는가'가 아니라 '목적지가 어느 복도에 있는가'로 골라야 한다.
@@ -363,10 +417,10 @@ function buildSteps(){
   /* 어느 자세에서 도는지 말로도 분명히 한다 — 1층은 '엘리베이터를 마주 보고'가 기준이다 */
   var lead = fromGateHere ? '복도로 나와 '
            : (facingEV ? '엘리베이터를 마주 보고 '
-           : (sameFloor ? '엘리베이터 앞에서 ' : offKo+'에서 내려서 '));
+           : (sameFloor ? '엘리베이터 앞에서 ' : (viaStairs ? offKo+'에서 계단을 나와 ' : offKo+'에서 내려서 ')));
   var leadEn = fromGateHere ? 'Step into the hallway and turn '
              : (facingEV ? 'Facing the elevator, turn '
-             : (sameFloor ? 'At the elevator, turn ' : 'Get off at '+offEn+' and turn '));
+             : (sameFloor ? 'At the elevator, turn ' : (viaStairs ? 'Leave the stairs at '+offEn+' and turn ' : 'Get off at '+offEn+' and turn ')));
   /* v151: 돌기 단계 사진.
      예전엔 문에서 출발하면 1단계와 똑같은 문 사진을 그대로 다시 썼다 —
      "복도로 나와 왼쪽으로 도세요"인데 화면은 아직 문 앞이라 어긋났다.
@@ -374,7 +428,8 @@ function buildSteps(){
      (엘리베이터에서 출발할 때는 예전대로 엘리베이터 앞 사진) */
   var turnPhCode = fromGateHere ? hallCode : ('EV'+lv);
   var turnPhTxt  = fromGateHere ? ('['+lvName(lv)+' 복도 사진 ]')
-                                : ('['+lvName(lv)+' 엘리베이터 앞 사진 ]');
+                                : ('['+lvName(lv)+(viaStairs ? ' 계단 앞 사진 ]' : ' 엘리베이터 앞 사진 ]'));
+  var turnCap    = (turnPhCode===hallCode) ? hallCap : (viaStairs ? stairCap : null);
 
   if(target.kind==='toilet'){
     /* ★ 2026-09-28 : 2~5층 화장실은 '엘리베이터를 나갈 때'가 기준이다(사용자 확인) —
@@ -383,7 +438,12 @@ function buildSteps(){
        '복도 건너' + 엘리베이터를 **마주 본** 사진(EV). 이제 '엘리베이터에서 내려서 …' +
        엘리베이터 **안에서 밖을 본** 사진(EVIN)으로 맞춘다 — 방향은 그대로다.
        1층은 엘리베이터를 마주 보고 서는 자세라 예전 그대로 둔다(문에서 오는 길은 위의 WC1_FLOW). */
-    if(!facingEV && ROOM_PHOTOS['EVIN'+lv])
+    if(viaStairs)   /* 계단으로 왔으면 「○층에서 계단을 나와 …」 + 그 층 엘리베이터 앞(계단 바로 옆) 사진 */
+      out.push({a:arw, type:'turn',
+                tko:offKo+'에서 계단을 나와 '+(turnLeft ? '좌회전' : '우회전')+' 하세요',
+                ten:'Leave the stairs at '+offEn+' and turn '+turnWordEn,
+                ph:turnPhTxt, code:'EV'+lv, cap:stairCap});
+    else if(!facingEV && ROOM_PHOTOS['EVIN'+lv])
       out.push({a:arw, type:'turn',
                 tko:offKo+' 엘리베이터에서 내려서 '+(turnLeft ? '좌회전' : '우회전')+' 하세요',
                 ten:'Get off the elevator at '+offEn+' and turn '+turnWordEn,
@@ -405,6 +465,12 @@ function buildSteps(){
      ③ 의 '오른쪽 복도'는 그 복도의 이름(HALL..R)이면서, 복도를 따라 걸을 때 비상계단이
      오른손 쪽(x=+6.6)에 있다는 뜻이기도 하다. */
   if(target.kind==='emstair'){
+    /* 계단으로 왔으면 계단을 나와 복도(-X)를 보고 선다 — 비상계단(동문 쪽 -Z)은 오른손 쪽 */
+    if(viaStairs)
+      out.push({a:'→', type:'turn',
+                tko:offKo+'에서 계단을 나와 우회전 하세요', ten:'Leave the stairs at '+offEn+' and turn right',
+                ph:turnPhTxt, code:'EV'+lv, cap:stairCap});
+    else
     out.push({a:'←', type:'turn',
               tko:'엘리베이터 정면에서 좌측으로 꺾으세요', ten:'Facing the elevator, turn left',
               ph:'['+lvName(lv)+' 엘리베이터 사진 ]', code:'EV'+lv});
@@ -440,7 +506,7 @@ function buildSteps(){
   var _rtEn = roomTitle(target.code, 'en');
 
   if(!noTurn)   // v150: 동문·서문으로 들어오면 이미 복도 정면이라 돌 필요가 없다
-    out.push({a:arw, type:'turn', tko:lead+turnWord+'으로 도세요', ten:leadEn+turnWordEn, ph:turnPhTxt, code:turnPhCode, cap:(turnPhCode===hallCode ? hallCap : null)});
+    out.push({a:arw, type:'turn', tko:lead+turnWord+'으로 도세요', ten:leadEn+turnWordEn, ph:turnPhTxt, code:turnPhCode, cap:turnCap});
   /* 문 바로 앞 방(들어와서 첫 번째)이면 '쭉 가세요'가 오히려 헷갈린다 → 생략 */
   var justInside = !!(fromGateHere && ord && ord.n === 1);
   if(!justInside)

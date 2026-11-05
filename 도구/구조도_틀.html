@@ -370,7 +370,7 @@
       <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">219줄 · 사진 확대</span></button>
       <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">64줄 · ☰ 메뉴 · 밝은 화면</span></button>
       <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">135줄 · 길안내 이어 하기</span></button>
-      <button class="b p" data-id="f_story"><span class="n">story.js</span><span class="d">169줄 · 길안내 · 도착 화면 (인스타 + 공항)</span></button>
+      <button class="b p" data-id="f_story"><span class="n">story.js</span><span class="d">212줄 · 길안내 · 도착 화면 (인스타 + 공항)</span></button>
       <button class="b p" data-id="f_restart"><span class="n">restart.js</span><span class="d">140줄 · 여기가 어디인지 모르겠어요 (다시 출발)</span></button>
       <button class="b p" data-id="f_live"><span class="n">live.js</span><span class="d">34줄 · 발표장 「지금 켜 둔 사람」</span></button>
       <button class="b p" data-id="f_consent"><span class="n">consent.js</span><span class="d">466줄 · 처음 켤 때 동의 · 기능별 허용 · 처리방침 · 라이선스</span></button>
@@ -392,7 +392,7 @@
   <div class="gbox">
     <div class="gt">④ 길안내와 사진</div><div class="gs">실제로 길을 알려 주는 부분 · 4개</div>
     <div class="grid">
-      <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">643줄 · 안내 단계 만들기</span></button>
+      <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">709줄 · 안내 단계 만들기</span></button>
       <button class="b p" data-id="f_photos"><span class="n">photos.js</span><span class="d">1,132줄 · 사진 목록 · 사진 상자 · 방 이름(한 · 영)</span></button>
       <button class="b p" data-id="qr"><span class="n">qrnav.js</span><span class="d">434줄 · 출입문 QR</span></button>
       <button class="b p" data-id="f_roomfix"><span class="n">roomfix.js</span><span class="d">398줄 · 구성 및 변경 · 메모</span></button>
@@ -497,7 +497,7 @@ bdata:{t:'건물 자료표 — 호실이 어디 있는가',z:'p',zl:'폰 안에�
 route:{t:'길 만들기 — 안내 단계를 만든다',z:'p',zl:'폰 안에서 돈다 · 인터넷 없어도 됨',
  kid:'「엘리베이터 타고 → 4층 → 왼쪽으로 → 세 번째 방」 처럼 <b>순서를 만들어 주는</b> 부분이에요.',
  why:'길찾기라고 하면 보통 <b>지도에서 최단 경로를 계산</b>하는 걸 떠올립니다. 그런데 3호관은 복도가 일직선이고 계단·엘리베이터 위치도 정해져 있어서, <b>계산할 게 거의 없습니다.</b><br>그래서 알고리즘 대신 <b>표 네 개</b>로 풀었습니다. 코드가 단순해져 버그가 적고, 층을 하나 더 붙이려면 <b>숫자 하나만</b> 넣으면 됩니다.',
- where:['길안내 화면의 <b>단계 목록</b> (1/5, 2/5 …)','각 단계의 <b>「왼쪽 복도로 가세요」</b> 같은 문장','<b>「세 번째 방입니다」</b> 하고 방 개수를 세어 주는 부분'],
+ where:['길안내 화면의 <b>단계 목록</b> (1/5, 2/5 …)','각 단계의 <b>「왼쪽 복도로 가세요」</b> 같은 문장','<b>「세 번째 방입니다」</b> 하고 방 개수를 세어 주는 부분','<b>엘리베이터 | 계단</b> — 계단을 고르면 1층 중앙계단으로 걸어 올라가는 단계로 바뀝니다(2026-11-05, 엘리베이터 안에서 영상통화가 끊겨 계단으로 라이브 시연). 기본은 엘리베이터, 고른 것은 그 폰에 남습니다(GUIDE_VIA)'],
  how:'<b>경로 탐색 알고리즘(A*·다익스트라)을 쓰지 않습니다.</b> 표 네 개 — 출발 유형, 수직 이동, 복도 방향, 도착 — 를 목적지 층과 출발 층에 맞춰 조합해 단계 배열을 만듭니다.',
  tech:['규칙 기반 경로 생성','표 4개','그래프 탐색 없음'],
  src:[['site/js/app/guide.js','길안내 만들기 전부']],
@@ -741,7 +741,7 @@ f_live:{t:'live.js — 발표장 「지금 켜 둔 사람」',z:'p',zl:'폰 안�
 f_story:{t:'story.js — 길안내 · 도착 화면 (인스타 감성 + 공항 표지판)',z:'p',zl:'폰 안에서 돈다',
  kid:'길을 안내하는 화면에서 그 자리의 실제 사진이 화면 가득 보이고, 아래에 공항 안내판처럼 노란 화살표와 큰 글씨로 「어디로 가세요」가 나와요.',
  why:'2026-10-27 사용자 「앱이 식상하다」 → 견본 여러 판을 보고 고른 모양(인스타 감성 + 공항 느낌). 사진이 작은 칸에 갇혀 있으면 눈앞 풍경과 맞춰 보기 어렵고, 표지판처럼 생긴 안내는 처음 봐도 바로 읽힌다.',
- where:['길안내 화면 — 위 : 「동문 → 13310호」 · 단계 막대 · 📷 지금 자리 / 아래 : 노란 칸 그림(직진 굵은 화살표 · 좌우회전은 앱의 원래 화살표 · 엘리베이터 · 도착 ✓) + 큰 글 + 영어 + 이전 · 다음','사진을 누르면 <b>누른 곳이 2배</b>(「🔍 누르면 크게 / 작게」) · 좌우로 밀면 이전 · 다음','도착 화면 — 문 사진 가득 + 노란 띠 「13310호 도착」 + 방 이름'],
+ where:['길안내 화면 — 위 : 「동문 → 13310호」 · 단계 막대 · 📷 지금 자리 / 아래 : 노란 칸 그림(직진 굵은 화살표 · 좌우회전은 앱의 원래 화살표 · 엘리베이터 · 도착 ✓) + 큰 글 + 영어 + 이전 · 다음','사진을 누르면 <b>누른 곳이 2배</b>(「🔍 누르면 크게 / 작게」) · 좌우로 밀면 이전 · 다음','1층에서 2~5층으로 가는 길이면 위쪽에 <b>[엘리베이터 | 계단]</b> 단추 — 바꿔도 지나온 단계는 그 자리 그대로(2026-11-05)','도착 화면 — 문 사진 가득 + 노란 띠 「13310호 도착」 + 방 이름'],
  how:'guide.js 의 render6 · startGuide 와 photos.js 의 phFill 을 감싸서 위에 얹기만 합니다 — 단계를 만드는 표 · 이어 하기 · 쉬운 사용모드는 그대로이고, 예전 글자 칸(#ar · #ins · #stepno)은 감춘 채 남겨 둡니다. 밝은 화면에서도 이 두 화면은 사진 + 표지판 그대로입니다.',
  tech:['CSS transform(scale 2 · transform-origin)','pointer 이벤트(누르기 · 밀기)','MutationObserver'],
  src:[['site/js/app/story.js','위 · 아래 칸 · 누르기 · 밀기'],['site/css/app.css','「인스타 감성 + 공항 표지판」 묶음'],['site/js/app/photos.js','문 · 엘리베이터 안 사진 이름표']]},

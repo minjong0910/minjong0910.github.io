@@ -67,7 +67,7 @@ var CONSENT = (function(){
   /* 동의 화면의 판 — 항목이 바뀌면 올린다. 예전 판에 동의한 폰은 동의 화면을 한 번 더 본다(전에 고른 것은 체크된 채로).
      2 = 2026-11-03 사용자 : 「개인정보 수집·이용 동의 · 개인정보 처리방침 · 오픈소스 라이선스 고지를 더해 동의만 구하게(설명 없이)」 */
   /* 3 = 2026-11-04 처리방침 · 라이선스를 처음부터 체크된 채로 — 사용자 「창이 안 뜬다」 : v2 에 이미 동의한 폰(사용자 폰)은 바뀐 화면을 못 봐서, 한 번 더 */
-  var AGREE_V = 3;
+  var AGREE_V = 4;   // 11/05 : 일곱 줄 모두 미리 체크 — 이미 동의한 폰(사용자 폰 포함)도 새 화면을 한 번 보게
 
   /* ── 지금 상태 ── */
   function agreed(){ var a = ls(K.agree); return !!(a && (a.v || 1) >= AGREE_V); }
@@ -163,11 +163,14 @@ var CONSENT = (function(){
 
   /* ── 처음 켤 때 동의 화면 ── */
   var AG = function(){ return [
-    {k: 'use', req: true, t: T('이용 안내', 'Terms of use'), s: T('길안내는 참고용이에요 — 공사 · 방 이동으로 실제와 다를 수 있어요', 'Directions are a guide — rooms may move or be under construction'),
+    /* 11/05 사용자 「처음 동의 받는 란이 전부 체크돼 있으면 좋겠다 — 하나하나 체크하기 어렵다」 → 일곱 줄 모두 on (선택까지).
+       선택 동의를 미리 체크해 두면 개인정보보호위원회 안내서상 「명확한 동의」로 보기 어렵다는 점을 알렸고, 사용자가 그래도 전부로 정함.
+       카메라 · 알림은 미리 체크돼 있어도 휴대폰 허락 창은 「동의하고 시작하기」를 누를 때 한 번씩 뜬다(아래 start). */
+    {k: 'use', req: true, on: true, t: T('이용 안내', 'Terms of use'), s: T('길안내는 참고용이에요 — 공사 · 방 이동으로 실제와 다를 수 있어요', 'Directions are a guide — rooms may move or be under construction'),
      d: '<ul><li>' + T('공대 3호관 길안내는 졸업작품 팀 「공3길」이 만든 앱이에요. 회원가입 · 로그인은 없어요.', 'This app was made by the graduation project team. No sign-up or login.') + '</li>' +
         '<li>' + T('사진과 안내 문장은 참고용이에요. 공사나 방 이동으로 실제와 다를 수 있으니 <b>문 옆 명패를 꼭 확인</b>해 주세요.', 'Photos and directions are a guide. <b>Always check the door plate.</b>') + '</li>' +
         '<li>' + T('실제와 다르면 설정 → 건의함으로 알려 주세요. 관리자가 확인해 고쳐요.', 'If something differs, tell us via Settings → Suggestion Box.') + '</li></ul>'},
-    {k: 'local', req: true, t: T('이 폰에 저장', 'Saved on this phone'), s: T('이어 하기 · 즐겨찾기 · 시간표 · 화면 설정은 이 폰에만 — 서버로 보내지 않아요', 'Resume · favorites · timetable · settings stay on this phone — never sent to a server'),
+    {k: 'local', req: true, on: true, t: T('이 폰에 저장', 'Saved on this phone'), s: T('이어 하기 · 즐겨찾기 · 시간표 · 화면 설정은 이 폰에만 — 서버로 보내지 않아요', 'Resume · favorites · timetable · settings stay on this phone — never sent to a server'),
      d: '<ul><li>' + T('이 폰에 남는 것 : 길안내 이어 하기(30분) · 즐겨찾기 · 최근 찾은 곳 · 내 시간표 · 수업 알림 설정 · 쉬운 사용모드 · 밝은 화면 · 이 동의 기록', 'Kept on this phone: resume (30 min) · favorites · recent searches · timetable · class alerts · easy mode · light mode · this consent') + '</li>' +
         '<li>' + T('인터넷이 없어도 열리게 앱을 이 폰에 저장해 둬요.', 'The app is saved on this phone so it opens offline.') + '</li>' +
         '<li>' + T('모두 이 폰에만 있고 서버로 보내지 않아요. 브라우저의 「사이트 데이터 삭제」로 한 번에 지울 수 있어요.', 'All of it stays on this phone. Clear the site data in your browser to delete it.') + '</li></ul>'},
@@ -178,18 +181,18 @@ var CONSENT = (function(){
     {k: 'oss', req: true, plain: true, on: true, doc: 'licenses', t: T('오픈소스 라이선스 고지', 'Open-source licenses')},
     /* 「개인정보 수집·이용 동의」와 「건의함 사진 개인정보」는 같은 동의라 하나로(사용자 11/04 「합쳐줘」) — 이름은 수집·이용,
        받는 것 · 쓰는 곳 · 지우는 때는 「보기 ▾」에 그대로(동의를 받으려면 알려야 하는 것). 길안내에 필요 없어 선택(필수로 묶으면 안 된다) */
-    {k: 'photo', req: false, t: T('개인정보 수집·이용 동의', 'Collection & use of personal data'), s: T('건의함 사진 · 메모를 받아 길안내 사진으로 써요 — 얼굴 X · GPS 지움', 'Photos and notes become guide photos — no faces · GPS removed'),
+    {k: 'photo', req: false, on: true, t: T('개인정보 수집·이용 동의', 'Collection & use of personal data'), s: T('건의함 사진 · 메모를 받아 길안내 사진으로 써요 — 얼굴 X · GPS 지움', 'Photos and notes become guide photos — no faces · GPS removed'),
      d: '<ul><li>' + T('<b>사람 얼굴</b>이나 다른 사람의 화면 · 이름표가 나오지 않게 찍어 주세요.', 'Keep <b>faces</b> and name tags out of the photo.') + '</li><li>' + T('사진 속 위치 정보(GPS)는 올리기 전에 지워져요.', 'GPS data is removed before upload.') + '</li></ul>' + PV_TABLE() +
         '<p style="margin-top:0.4rem;color:#9FB2C8;">' + T('동의하지 않아도 길안내는 모두 쓸 수 있어요. 건의함 「📷 사진」 칸을 누를 때 한 번 더 물어요.', 'Directions work without this. We ask again when you tap the photo box.') + '</p>'},
-    {k: 'cam', req: false, perm: 'cam', t: T('카메라', 'Camera'), s: T('건의함 사진 찍기 · 앱 안에서 출입문 QR 찍기', 'Suggestion photos · scanning the door QR in the app'),
+    {k: 'cam', req: false, on: true, perm: 'cam', t: T('카메라', 'Camera'), s: T('건의함 사진 찍기 · 앱 안에서 출입문 QR 찍기', 'Suggestion photos · scanning the door QR in the app'),
      d: '<ul><li>' + T('건의함 사진을 찍을 때, 앱 안의 「출입문 QR 스캔」을 쓸 때만 카메라를 켜요. QR 은 사진을 남기지 않고 글자만 읽어요.', 'Used only for suggestion photos and the in-app QR scanner. QR scans keep no photo.') + '</li>' +
-        '<li>' + T('체크하면 휴대폰이 「카메라를 허용할까요?」를 한 번 물어요 — 여기서 허용하면 <b>앱을 쓰는 동안 다시 묻지 않아요.</b>', 'Your phone asks once — allow it and <b>we never ask again.</b>') + '</li>' +
-        '<li>' + T('체크하지 않아도 괜찮아요 — 건의함 사진 칸 · QR 스캔을 누를 때 허용할지 물어요.', 'You can skip this — we ask when you tap the photo box or QR scan.') + '</li>' +
+        '<li>' + T('체크된 채로 「동의하고 시작하기」를 누르면 휴대폰이 「카메라를 허용할까요?」를 한 번 물어요 — 여기서 허용하면 <b>앱을 쓰는 동안 다시 묻지 않아요.</b>', 'When you tap “Agree and start”, your phone asks once — allow it and <b>we never ask again.</b>') + '</li>' +
+        '<li>' + T('체크를 꺼도 괜찮아요 — 건의함 사진 칸 · QR 스캔을 누를 때 허용할지 물어요.', 'You can untick this — we ask when you tap the photo box or QR scan.') + '</li>' +
         '<li>' + T('아이폰 사파리는 다시 물을 수 있어요 — 사파리 설정 → 카메라 → 「허용」으로 두면 안 물어요.', 'iPhone Safari may ask again — set Safari Settings → Camera → Allow.') + '</li></ul>'},
-    {k: 'noti', req: false, perm: 'noti', t: T('알림', 'Notifications'), s: T('내 시간표의 수업 시작 전 알림 (소리 · 진동)', 'Alerts before your classes (sound · vibration)'),
+    {k: 'noti', req: false, on: true, perm: 'noti', t: T('알림', 'Notifications'), s: T('내 시간표의 수업 시작 전 알림 (소리 · 진동)', 'Alerts before your classes (sound · vibration)'),
      d: '<ul><li>' + T('내 시간표에 넣은 수업이 시작하기 전에 알려 드려요. 몇 분 전 · 소리는 시간표에서 정해요. 광고 알림은 보내지 않아요.', 'We alert you before classes in My Timetable. No ads.') + '</li>' +
-        '<li>' + T('체크하면 휴대폰이 「알림을 허용할까요?」를 한 번 물어요 — 여기서 허용하면 <b>앱을 쓰는 동안 다시 묻지 않아요.</b>', 'Your phone asks once — allow it and <b>we never ask again.</b>') + '</li>' +
-        '<li>' + T('체크하지 않아도 괜찮아요 — 내 시간표에서 수업 알림을 켤 때 허용할지 물어요.', 'You can skip this — we ask when you turn on class alerts.') + '</li></ul>'}
+        '<li>' + T('체크된 채로 「동의하고 시작하기」를 누르면 휴대폰이 「알림을 허용할까요?」를 한 번 물어요 — 여기서 허용하면 <b>앱을 쓰는 동안 다시 묻지 않아요.</b>', 'When you tap “Agree and start”, your phone asks once — allow it and <b>we never ask again.</b>') + '</li>' +
+        '<li>' + T('체크를 꺼도 괜찮아요 — 내 시간표에서 수업 알림을 켤 때 허용할지 물어요.', 'You can untick this — we ask when you turn on class alerts.') + '</li></ul>'}
   ]; };
   function tagOf(x){ return '<em class="syTg ' + (x.req ? 'req">' + T('필수', 'Req') : 'opt">' + T('선택', 'Opt')) + '</em>'; }
   var shown = false;
@@ -198,8 +201,7 @@ var CONSENT = (function(){
     shown = true;
     var list = AG(), st = {}, prev = ls(K.agree);
     list.forEach(function(x){ st[x.k] = !!x.on; });
-    /* 예전 판에 동의한 폰 — 그때 고른 것은 체크된 채로 보여 주고, 새 항목만 더 체크하면 되게 */
-    if(prev){ st.use = st.local = true; st.photo = pvOK() || !!prev.collect; st.cam = camOK(); st.noti = ls(K.noti) === 'yes'; }   // collect : 따로 있던 v2 · v3 줄
+    /* 예전 판에 동의한 폰도 11/05 부터는 새 폰과 똑같이 일곱 줄 모두 체크된 채로(사용자 「전부 체크」) — 예전에 고른 것으로 덮지 않는다 */
     var a = mk('div', 'syAgree',
       '<div class="sc"><div class="brand">🏫 ' + T('공대 3호관 길안내', 'Engineering Bldg 3 Navigator') + '</div>' +
       '<h2>' + T('시작하기 전에<br>확인해 주세요', 'Before you start') + '</h2><p class="sub">' +
@@ -212,7 +214,7 @@ var CONSENT = (function(){
         return '<div class="syAgItem" data-k="' + x.k + '"><div class="hd" role="checkbox"><span class="syBox">' + IC.check + '</span><div class="t"><b>' + tagOf(x) + x.t + '</b><small>' + x.s + '</small></div><button class="more" type="button">' + T('보기 ▾', 'More ▾') + '</button></div><div class="det">' + x.d + '</div></div>';
       }).join('') +
       '<div class="syPerm">📍 <b>' + T('GPS 위치는 쓰지 않아요', 'We never use GPS') + '</b> — ' + T('어디 계신지는 출입문 QR 로만 알아요.', 'your position comes only from the door QR.') + '<br>' +
-        T('여기서 동의하면 앱을 쓰는 동안 다시 묻지 않아요. 카메라 · 알림은 체크할 때 휴대폰이 한 번만 물어요.', 'Agree here and we never ask again. For camera and notifications your phone asks once when you tick them.') + '</div></div>' +
+        T('여기서 동의하면 앱을 쓰는 동안 다시 묻지 않아요. 카메라 · 알림은 「동의하고 시작하기」를 누를 때 휴대폰이 한 번만 물어요.', 'Agree here and we never ask again. For camera and notifications your phone asks once when you tap “Agree and start”.') + '</div></div>' +
       '<div class="ft"><button class="big" type="button" disabled>' + T('필수 항목에 동의해 주세요', 'Please agree to the required items') + '</button><small>' + T('동의 · 권한 안내는 ☰ → 설정 → 이용안내 마지막 쪽에 있어요', 'See ☰ → Settings → User guide, last page') + '</small></div>');
     function paint(){
       list.forEach(function(x){ var hd = $('.syAgItem[data-k=' + x.k + '] .hd', a); hd.classList.toggle('on', st[x.k]); hd.setAttribute('aria-checked', st[x.k]); });
@@ -249,7 +251,26 @@ var CONSENT = (function(){
       if($('.more[data-doc]', it)){ $('.more', it).onclick = function(){ doc(this.getAttribute('data-doc')); }; return; }
       if($('.more', it)) $('.more', it).onclick = function(){ var o = !it.classList.contains('open'); it.classList.toggle('open', o); this.textContent = o ? T('접기 ▴', 'Less ▴') : T('보기 ▾', 'More ▾'); };
     });
+    /* 「동의하고 시작하기」 — 미리 체크된 카메라 · 알림은 이 누름에서 휴대폰 창을 한 번씩(알림 먼저 : 아이폰은 누른 그 순간에만 알림 창이 뜬다) */
     $('.ft .big', a).onclick = function(){
+      var btn = this; if(btn.disabled) return;
+      var need = [];
+      if(st.noti && !(notiSupported() && Notification.permission === 'granted')) need.push('noti');
+      if(st.cam && !camOK()) need.push('cam');
+      btn.disabled = true;
+      (function next(i){
+        if(i >= need.length){ start(); return; }
+        var k = need[i];
+        (k === 'cam' ? camAsk : notiAsk)(function(ok, why){
+          st[k] = ok;
+          if(!ok) U.toast(k === 'cam'
+            ? (why === 'none' ? T('이 기기에서 카메라를 찾지 못했어요 — QR 을 찍을 때 다시 물어볼게요', 'No camera found — we will ask again when you scan a QR') : T('괜찮아요 — QR · 건의함 사진을 찍을 때 다시 물어볼게요', 'OK — we will ask again when you use the camera'))
+            : notiFailMsg(why), true);
+          next(i + 1);
+        });
+      })(0);
+    };
+    function start(){
       ls(K.agree, {d: U.today(), v: AGREE_V}); ls(K.pv, st.photo ? {d: U.today()} : null);
       ls(K.cam, st.cam ? 'yes' : 'no'); ls(K.noti, st.noti ? 'yes' : 'no');
       a.remove(); pvPaint();

@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '7f73b76d2141';   // 파일 269개 · 17.9MB
+var VERSION = '7121488d7c52';   // 파일 269개 · 17.9MB
 var FILES = [
   ['3d/realistic.html','97d7383db21e',81305],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -243,7 +243,7 @@ var FILES = [
   ['js/app/aid.js','809336b52995',33502],
   ['js/app/boot.js','9a7f3034fbe7',9242],
   ['js/app/building.js','6ae383d48918',23814],
-  ['js/app/consent.js','6420741c3e82',46539],
+  ['js/app/consent.js','2cd144da9498',48455],
   ['js/app/easy.js','894c4f66be72',26399],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','b986ea64797c',45265],

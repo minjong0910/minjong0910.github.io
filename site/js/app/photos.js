@@ -94,6 +94,23 @@ var PH_LABEL_EN = {BLD:'Engineering Bldg.3', B1:'B1',
   }
   /* 2026-11-04 : 지하 1층 엘리베이터 사진(EVB1)은 설명이 없어 「EVB1」이 그대로 보였다 */
   PH_LABEL['EVB1'] = '지하 1층 엘리베이터 앞'; PH_LABEL_EN['EVB1'] = 'B1 elevator';
+  /* 2026-11-05 사용자 「동문 설명이 잘못됐다 — 전체를 다시 봐 줘」 : 길안내 화면 위 「📷 지금 자리」에 코드가 그대로 보이던 곳들
+       동문 → 1층 엘리베이터 너머 방 「EV1WEST」 · 서문 → 「EV1EAST」 · 후문 → 1층 방 「LNG1」 · 1층 화장실 길 「WC1…」 · 크리에이티브 존 길 「B1WAY · B1PATH」
+     사진은 모두 맞는 자리였고 이름표만 없었다. 이름은 사진원본 파일 이름(어디서 찍었는지)을 따른다. */
+  for(var j=1;j<=5;j++){
+    PH_LABEL['LNG'+j]  = (j===1) ? '1층 로비' : (j+'층 라운지');   PH_LABEL_EN['LNG'+j]  = (j===1) ? '1F lobby' : ('Floor '+j+' lounge');
+    PH_LABEL['SIGN'+j] = j+'층 비상대피 안내판';                    PH_LABEL_EN['SIGN'+j] = 'Floor '+j+' evacuation map';
+  }
+  [['WIN2','2층 창밖','View from floor 2'], ['WIN3','3층 창밖','View from floor 3'], ['WIN4','4층 창밖','View from floor 4'],
+   ['WIN5L','5층 왼쪽 창밖','View from floor 5 (left)'], ['WIN5R','5층 오른쪽 창밖','View from floor 5 (right)'],
+   ['EV1WEST','1층 엘리베이터 옆 복도 (서문 쪽)','1F hallway past the elevator (toward the west gate)'],   // 동문에서 걸어와 엘리베이터를 지나는 자리
+   ['EV1EAST','1층 엘리베이터 옆 복도 (동문 쪽)','1F hallway past the elevator (toward the east gate)'],   // 서문에서 걸어와 엘리베이터를 지나는 자리
+   ['WC1WEST','1층 13119호 앞 복도','1F hallway by room 13119'], ['WC1BACK','후문 안쪽 · 1층 로비 쪽','Inside the back gate, toward the lobby'],
+   ['WC1MAIN','1층 로비','1F lobby'], ['WC1NEAR','1층 로비 · 화장실 쪽','1F lobby, restroom side'],
+   ['B1WAY','크리에이티브 존 입구','Creative Zone entrance'], ['B1PATH','지하 1층 크리에이티브 존 통로','B1 passage to the Creative Zone'],
+   ['GATE_MAIN','정문 안쪽','Inside the front gate'], ['GATE_BACK','후문 안쪽','Inside the back gate'],
+   ['GATE_EAST','동문 안쪽','Inside the east gate'], ['GATE_WEST','서문 안쪽','Inside the west gate']
+  ].forEach(function(r){ PH_LABEL[r[0]] = r[1]; PH_LABEL_EN[r[0]] = r[2]; });
 })();
 function phCap(code){
   if(LANG==='en' && PH_LABEL_EN[code]) return PH_LABEL_EN[code];

@@ -280,6 +280,7 @@ function appBackStep(){
   // ⓪ 오른쪽 위 ☰ 메뉴가 펼쳐져 있으면 그것부터 닫는다 (2026-10-19)
   if(typeof TOPMENU!=='undefined' && TOPMENU.isOpen()){ TOPMENU.close(); return true; }
   if(typeof RESUME!=='undefined' && RESUME.isAsking()){ RESUME.dismiss(); return true; }   // 「아까 보던 길안내」 카드
+  if(typeof VIACHOOSE!=='undefined' && VIACHOOSE.isOpen()){ VIACHOOSE.close(); return true; }   // 「○층까지 어떻게 갈까요?」 창 (via.js) — 강의실 찾기에 그대로
   // 앱 설치 · 인터넷 상태 안내 창
   if(document.getElementById('pwaSheet') && typeof PWA!=='undefined'){ PWA.close(); return true; }
   // 쉬운 사용모드 「처음이세요?」 — 「아니요, 혼자 할게요」와 같다

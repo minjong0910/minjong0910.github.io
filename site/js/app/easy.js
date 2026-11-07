@@ -198,7 +198,7 @@ var EASY = (function(){
   function update(){
     if(!on){ hide(); return; }
     if(!layer && !build()) return;
-    if($('.ezAsk') || $('.rsCard')){ hide(); return; }      // 「처음이세요?」 · 「아까 보던 길안내」를 묻는 동안은 쉰다
+    if($('.ezAsk') || $('.rsCard') || $('.vcWrap')){ hide(); return; }      // 「처음이세요?」 · 「아까 보던 길안내」 · 「어떻게 갈까요?」(via.js)를 묻는 동안은 쉰다
     var scr = $('.screen.on'); var fn = scr && HINTS[scr.id];
     if(!fn || document.querySelector('.fx-overlay')){ hide(); return; }   // 설정·즐겨찾기 같은 화면, 부팅 연출 중
     var h = fn(); var el = shown(h.el);

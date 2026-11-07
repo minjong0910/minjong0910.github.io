@@ -5,7 +5,9 @@
    · 길안내 단계를 넘길 때마다 「목적지 · 출발 위치 · 몇 단계 · 시각」을 이 폰에만 적어 둔다(b3nav_resume — 서버로 보내지 않음).
    · 앱을 다시 열어 첫 화면이 뜨면 아래에 카드 「아까 보던 길안내가 있어요」 → [이어서 보기] [괜찮아요, 새로 찾을게요].
    · 순서(사용자) : 켜는 화면 → 쉬운 사용모드 「처음이세요?」(처음인 사람만) → 이 카드.
-   · 30분이 지난 기억 · 도착한 길 · 출입문 QR 로 새로 들어온 경우(첫 화면이 아니라 「여기가 맞나요?」)는 묻지 않는다.
+   · 30분이 지난 기억 · 도착한 길은 묻지 않는다.
+   · 2026-11-07 사용자 「QR 로 들어와도 기본 주소로 들어와도 같은 화면이어야 한다」 — 출입문 QR 로 들어와 「여기가 맞나요?」가 떠도
+     같은 카드를 띄운다(예전엔 QR 이면 묻지 않았다). 이어서 보면 그때 출발한 문(g)으로 길을 다시 만든다 — 단계 번호가 어긋나지 않게.
    · 첫 화면 · 찾기 · 검색 · 도착 화면으로 가면 지운다(새로 시작했거나 다 왔다). 3D · 층 상세 · 설정을 잠깐 보고 오는 건 남겨 둔다. */
 var RESUME = (function(){
   var KEY = 'b3nav_resume', MAX_AGE = 30 * 60 * 1000;
@@ -19,7 +21,8 @@ var RESUME = (function(){
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
   /* 앱이 켜질 때 남아 있던 기억 — 첫 화면으로 가면서 지워지기 전에 먼저 들고 있는다 */
-  var pending = lsGet(), asking = false, resuming = false;
+  var pending = lsGet(), asking = false, resuming = false, askedOn = 's1';
+  var ASK_ON = {s1:1, sqrok:1};                                   // 카드를 띄우는 화면 : 첫 화면 · 출입문 QR 「여기가 맞나요?」
   if(pending && (!pending.t || !pending.ts || Date.now() - pending.ts > MAX_AGE)){ pending = null; lsSet(null); }
 
   function sameTarget(a, b){ return !!(a && b && a.kind === b.kind && String(a.code || '') === String(b.code || '') && String(a.floor) === String(b.floor)); }
@@ -40,7 +43,7 @@ var RESUME = (function(){
   /* 화면이 바뀔 때 (shell.js go) — 새로 시작했거나 다 왔으면 지운다 */
   function onScreen(id){
     if(resuming) return;
-    if(card()){ if(id !== 's1') dismiss(); return; }            // 카드를 두고 다른 화면으로 갔다 = 새로 찾는다
+    if(card()){ if(id !== askedOn) dismiss(); return; }         // 카드를 두고 다른 화면으로 갔다 = 새로 찾는다
     if(CLEAR_ON[id]){ lsSet(null); return; }
     if(id === 's4'){
       var cur = lsGet();
@@ -69,6 +72,7 @@ var RESUME = (function(){
   function show(p){
     var phone = document.querySelector('.phone'); if(!phone || card()) return;
     asking = true;
+    var on = document.querySelector('.screen.on'); askedOn = on ? on.id : 's1';
     var c = document.createElement('div'); c.className = 'rsCard'; c.id = 'rsCard';
     c.setAttribute('role', 'dialog');
     c.innerHTML = '<div class="rsHead">🗺 ' + esc(T('아까 보던 길안내가 있어요', 'You were in the middle of a route')) + '</div>' +
@@ -90,6 +94,10 @@ var RESUME = (function(){
   function resume(p){
     closeCard(); pending = null; resuming = true;
     try{
+      /* 그때 출발한 문으로 — QR 로 막 들어와 「여기가 맞나요?」에 아직 답하지 않았거나, 문 기억(3시간)이 지났으면 문이 달라 단계가 어긋난다 */
+      if(typeof QRNAV !== 'undefined' && QRNAV.gate && (QRNAV.gate() || null) !== (p.g || null)){
+        if(p.g && QRNAV.setEntry) QRNAV.setEntry(p.g); else if(!p.g && QRNAV.clear) QRNAV.clear();
+      }
       openTarget({kind:p.t.kind, floor:p.t.floor, code:p.t.code}, p.t.floor);
       startFloor = p.sf;
       if(typeof buildStartFloorPicker === 'function') buildStartFloorPicker();
@@ -112,7 +120,7 @@ var RESUME = (function(){
   /* 언제 묻나 : 켜는 화면이 끝나고(또는 없고) · 앱이 준비되고 · 쉬운 사용모드가 묻는 중이 아니고 · 첫 화면일 때 */
   (function wait(){
     if(!pending) return;
-    var t0 = Date.now(), sawBoot = false;
+    var t0 = Date.now(), sawBoot = false, readyAt = 0;
     (function tick(){
       if(!pending) return;
       var boot = document.querySelector('.fx-boot');
@@ -122,8 +130,12 @@ var RESUME = (function(){
       var easyBusy = (typeof EASY !== 'undefined' && EASY.busy && EASY.busy());
       var scr = document.querySelector('.screen.on');
       if(bootDone && appOk && !easyBusy && scr){
-        if(scr.id === 's1' && Date.now() - pending.ts <= MAX_AGE) show(pending);
-        else { pending = null; lsSet(null); }                     // QR 로 새로 들어옴 등 — 묻지 않는다
+        if(!readyAt) readyAt = Date.now();
+        /* 출입문 QR 로 들어왔으면 첫 화면이 「여기가 맞나요?」로 바뀌는 것을 잠깐 기다린다 — 첫 화면에 띄웠다가 바로 닫히지 않게 */
+        var viaGate = (typeof PWA !== 'undefined' && PWA.cameFromGate && PWA.cameFromGate());
+        if(scr.id === 's1' && viaGate && Date.now() - readyAt < 1500){ setTimeout(tick, 50); return; }
+        if(ASK_ON[scr.id] && Date.now() - pending.ts <= MAX_AGE) show(pending);
+        else { pending = null; lsSet(null); }                     // 공유 링크로 바로 길안내 등 — 묻지 않는다
         return;
       }
       if(Date.now() - t0 < 180000) setTimeout(tick, 50);

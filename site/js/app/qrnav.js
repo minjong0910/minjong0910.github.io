@@ -406,6 +406,8 @@ var QRNAV = (function(){
   function gate(){  return entry ? entry.key : null; }
   function gateName(){ return entry ? (ko()? GATES[entry.key].ko : GATES[entry.key].en) : ''; }
   function clear(){ entry=null; save(); paintChip(); }
+  /* 이어 하기(resume.js) — 그때 출발한 문을 확인 화면 없이 다시 정한다 (2026-11-07) */
+  function setEntry(key){ if(!GATES[key]) return; pending = null; entry = {key:key, ts:Date.now()}; save(); paintChip(); }
 
   /* ── QR 원문 생성 (인쇄용 도구와 반드시 같은 문자열) ── */
   function payload(key){ return SITE_URL + '?gate=' + key; }
@@ -428,6 +430,6 @@ var QRNAV = (function(){
     open:open, close:close, retry:retry, stopCam:stopCam,
     pickFile:pickFile, onFile:onFile, manual:manual, paintChip:paintChip,
     confirm:confirm_, floor:floor, gate:gate, gateName:gateName,
-    clear:clear, payload:payload, parse:parse, fromUrl:fromUrl, GATES:GATES
+    clear:clear, setEntry:setEntry, payload:payload, parse:parse, fromUrl:fromUrl, GATES:GATES
   };
 })();

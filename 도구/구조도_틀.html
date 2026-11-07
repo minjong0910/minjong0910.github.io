@@ -355,27 +355,28 @@
       <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">695줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
       <button class="b p" data-id="f_boot"><span class="n">boot.js</span><span class="d">123줄 · 켜는 화면(동영상)</span></button>
       <button class="b p" data-id="f_start"><span class="n">start.js</span><span class="d">32줄 · 글꼴 기다렸다 시작</span></button>
-      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">497줄 · 오프라인 저장소</span></button>
+      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">498줄 · 오프라인 저장소</span></button>
     </div>
   </div>
 
   <div class="gbox">
     <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 13개</div>
     <div class="grid">
-      <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">529줄 · 화면 전환 go() · 휴대폰 뒤로가기 · 종료</span></button>
+      <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">530줄 · 화면 전환 go() · 휴대폰 뒤로가기 · 종료</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
-      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">780줄 · 화면 24개</span></button>
+      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">782줄 · 화면 24개</span></button>
       <button class="b p" data-id="f_easy"><span class="n">easy.js</span><span class="d">339줄 · 쉬운 사용모드</span></button>
       <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">233줄 · 사진 이용안내</span></button>
       <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">219줄 · 사진 확대</span></button>
       <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">64줄 · ☰ 메뉴 · 밝은 화면</span></button>
-      <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">135줄 · 길안내 이어 하기</span></button>
+      <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">147줄 · 길안내 이어 하기</span></button>
       <button class="b p" data-id="f_story"><span class="n">story.js</span><span class="d">247줄 · 길안내 · 도착 화면 (인스타 + 공항)</span></button>
       <button class="b p" data-id="f_restart"><span class="n">restart.js</span><span class="d">140줄 · 여기가 어디인지 모르겠어요 (다시 출발)</span></button>
       <button class="b p" data-id="f_live"><span class="n">live.js</span><span class="d">34줄 · 발표장 「지금 켜 둔 사람」</span></button>
       <button class="b p" data-id="f_consent"><span class="n">consent.js</span><span class="d">466줄 · 처음 켤 때 동의 · 기능별 허용 · 처리방침 · 라이선스</span></button>
       <button class="b p" data-id="f_share"><span class="n">share.js</span><span class="d">236줄 · 길 공유하기 (링크)</span></button>
       <button class="b p" data-id="f_timetable"><span class="n">timetable.js</span><span class="d">407줄 · 내 시간표 · 수업 알림</span></button>
+      <button class="b p" data-id="f_via"><span class="n">via.js</span><span class="d">
     </div>
   </div>
 
@@ -394,7 +395,7 @@
     <div class="grid">
       <button class="b p" data-id="route"><span class="n">guide.js</span><span class="d">710줄 · 안내 단계 만들기</span></button>
       <button class="b p" data-id="f_photos"><span class="n">photos.js</span><span class="d">1,151줄 · 사진 목록 · 사진 상자 · 방 이름(한 · 영)</span></button>
-      <button class="b p" data-id="qr"><span class="n">qrnav.js</span><span class="d">434줄 · 출입문 QR</span></button>
+      <button class="b p" data-id="qr"><span class="n">qrnav.js</span><span class="d">436줄 · 출입문 QR</span></button>
       <button class="b p" data-id="f_roomfix"><span class="n">roomfix.js</span><span class="d">398줄 · 구성 및 변경 · 메모</span></button>
     </div>
   </div>
@@ -727,10 +728,17 @@ f_topmenu:{t:'topmenu.js — 세 줄(☰) 메뉴 · 밝은 화면',z:'p',zl:'폰
 f_resume:{t:'resume.js — 길안내 이어 하기',z:'p',zl:'폰 안에서 돈다',
  kid:'길안내 중에 앱이 꺼졌다 켜지면 「아까 보던 길안내가 있어요」 하고 그 단계부터 다시 보여 줘요.',
  why:'길안내 중에 카카오톡을 보러 나갔다 오면, 폰이 앱을 새로 읽어 첫 화면으로 돌아갈 때가 있습니다. 처음부터 다시 찾게 하면 길 위에서 헤매게 됩니다.',
- where:['길안내 단계를 넘길 때마다 <b>이 폰에만</b> 적어 둠(서버로 보내지 않음)','다시 열면 첫 화면 아래 <b>카드</b> — [이어서 보기] [괜찮아요, 새로 찾을게요]'],
- how:'순서는 켜는 화면(동영상) → 쉬운 사용모드 「처음이세요?」(처음인 사람만) → 이 카드. 30분이 지났거나, 다 왔거나, 출입문 QR 로 새로 들어왔으면 묻지 않습니다. 첫 화면·찾기·검색·도착 화면으로 가면 기억을 지웁니다.',
+ where:['길안내 단계를 넘길 때마다 <b>이 폰에만</b> 적어 둠(서버로 보내지 않음)','다시 열면 첫 화면(또는 출입문 QR 「여기가 맞나요?」) 아래 <b>카드</b> — [이어서 보기] [괜찮아요, 새로 찾을게요]'],
+ how:'순서는 켜는 화면(동영상) → 쉬운 사용모드 「처음이세요?」(처음인 사람만) → 이 카드. 30분이 지났거나, 다 왔거나, 출입문 QR 로 들어와 「여기가 맞나요?」가 떠도 같은 카드가 뜹니다(11/07 — 두 입구를 같게). 이어서 보면 그때 출발한 문으로 길을 다시 만듭니다. 첫 화면·찾기·검색·도착 화면으로 가면 기억을 지웁니다.',
  tech:['localStorage','길안내 다시 만들기(startGuide)'],
  src:[['site/js/app/resume.js','기억 · 묻기 · 이어 보기'],['site/js/app/guide.js','단계마다 적어 두기(render6)']]},
+f_via:{t:'via.js — 엘리베이터 · 중앙계단 고르기',z:'p',zl:'폰 안에서 돈다',
+ kid:'강의실을 고르면 3D 로 가기 전에 「3층까지 어떻게 갈까요?」 하고 엘리베이터 사진 · 중앙계단 사진 두 장을 보여 줘요. 고른 길로 길안내를 해요.',
+ why:'엘리베이터 안에서는 휴대폰 신호가 끊기고, 엘리베이터를 기다리기 싫은 사람도 있습니다. 처음 온 사람이 어떤 길로 갈지 먼저 고르게 했습니다.',
+ where:['강의실 찾기에서 결과를 누를 때 — <b>1층에서 2~5층 강의실</b>로 올라갈 때만(1층 강의실은 바로 3D)','출입문 QR 로 들어오든 기본 주소로 들어오든 같게','3D 화면 「가는 방법」 줄 · 길안내 화면 위 [엘리베이터 | 계단] 단추에서도 바꿀 수 있음'],
+ how:'두 길의 단계 수는 실제 길안내(buildSteps)로 잠깐 만들어 보고 보여 줍니다. 고른 것은 이 폰에만 기억합니다(b3nav_via — guide.js 의 계단 길과 같은 값). 3D 「경로 미리보기」 움직임은 아직 엘리베이터 길 그대로입니다.',
+ tech:['localStorage','길안내 다시 만들기(buildSteps)'],
+ src:[['site/js/app/via.js','고르는 창 · 3D 가는 방법 줄'],['site/js/app/guide.js','계단 길 단계(GUIDE_VIA)']]},
 f_live:{t:'live.js — 발표장 「지금 켜 둔 사람」',z:'p',zl:'폰 안에서 돈다 · 발표장 QR 로 들어온 폰만',
  kid:'발표장 QR 로 앱을 연 사람이 앱을 켜 두는 동안, 발표 화면에 「지금 N명이 켜 두고 있어요」가 보이게 해요. 앱을 끄면 숫자가 줄어요.',
  why:'졸업작품 발표회(20쪽 Q&A)에서 「휴대폰 하나로 끝내시죠」를 말로만이 아니라 그 자리에서 보여 주려고 만들었습니다(2026-10-27 · 28 사용자).',

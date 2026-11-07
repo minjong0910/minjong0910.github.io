@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = 'fadfa53fa828';   // 파일 269개 · 17.9MB
+var VERSION = '08de871959f8';   // 파일 270개 · 18MB
 var FILES = [
   ['3d/realistic.html','97d7383db21e',81305],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','2c3c5a2ad68f',160588],
+  ['css/app.css','8384e1c22fd4',165828],
   ['css/boot.css','0b23cf08e0b6',2841],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
@@ -239,12 +239,12 @@ var FILES = [
   ['img/splash.mp4','d2f01cf420ad',277674],
   ['img/splash_end.jpg','040a235d9bd8',43535],
   ['img/splash_first.jpg','c68ac1b0d37e',29924],
-  ['index.html','c514398657e6',61919],
+  ['index.html','b1e78a8ae4b6',62184],
   ['js/app/aid.js','809336b52995',33502],
   ['js/app/boot.js','9a7f3034fbe7',9242],
   ['js/app/building.js','6ae383d48918',23814],
   ['js/app/consent.js','8724ab82fc6e',48934],
-  ['js/app/easy.js','894c4f66be72',26399],
+  ['js/app/easy.js','c4d503eeaa8b',26453],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','60e54dd09ede',51753],
   ['js/app/howto.js','4763f7f4705a',25220],
@@ -253,9 +253,9 @@ var FILES = [
   ['js/app/overview3d.js','35ad3a4e8f9a',108858],
   ['js/app/photos.js','7fe07e8a9e51',61755],
   ['js/app/pwa.js','21b1f691c62d',50650],
-  ['js/app/qrnav.js','40cc05287f36',20821],
+  ['js/app/qrnav.js','0e2a68185910',21075],
   ['js/app/restart.js','a41ece25417f',9524],
-  ['js/app/resume.js','6a90b4ce9d54',8237],
+  ['js/app/resume.js','0cfb59c9113e',9602],
   ['js/app/roadview-1f.js','14696e0f4c2a',46207],
   ['js/app/roadview-b1.js','7d5ac6c79e08',157916],
   ['js/app/roadview-corr.js','99c04eefa56c',51166],
@@ -266,7 +266,7 @@ var FILES = [
   ['js/app/roadview.js','e4ccae279c4a',133370],
   ['js/app/roomfix.js','1b886c300886',22082],
   ['js/app/share.js','b38f95737bd5',19895],
-  ['js/app/shell.js','d46771146f14',33879],
+  ['js/app/shell.js','5c49b9a73646',34065],
   ['js/app/start.js','4065777331b0',1505],
   ['js/app/story.js','3229968c3d19',17872],
   ['js/app/sugai.js','510d8159462a',132345],
@@ -275,6 +275,7 @@ var FILES = [
   ['js/app/timetable.js','0d5a67e63151',37352],
   ['js/app/topmenu.js','0351042966f1',4319],
   ['js/app/ui.js','fd0ccd5bd70a',29957],
+  ['js/app/via.js','733a4164a750',10356],
   ['js/app/view3d.js','27c66181cc45',51621],
   ['js/app/zoom.js','bc7bdb1b586f',10093],
   ['js/vendor/jsqr.min.js','a07c909282f1',130501],

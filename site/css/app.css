@@ -1940,3 +1940,74 @@ html.lt .syPermDlg .bt button[data-a="1"]{background:#0B6FB8;color:#fff;}
 html.lt .syExit .card{background:#FFFFFF;color:#0F1B2D;border-color:#2B88C8;}
 html.lt .syExit p{color:#44546A;}
 html.lt .syExit .bt .no{color:#24364D;border-color:#B9C6D6;}
+
+/* ════════ 강의실 찾기 → 「○층까지 어떻게 갈까요?」 엘리베이터 · 중앙계단 고르기 (2026-11-07 · js/app/via.js) ════════
+   11/05 견본의 「A · 사진 카드 두 장」 그대로 — 앱 색(어두운 남색 · 하늘색 #00E5FF · 분홍 #FF2E88) · 사진은 자르지 않는다(contain) */
+.vcDim{position:absolute;inset:0;z-index:900;background:rgba(4,6,10,.74);animation:vcFade .18s;}
+@keyframes vcFade{from{opacity:0;}to{opacity:1;}}
+@keyframes vcPop{from{transform:translateY(14px) scale(.97);opacity:0;}to{transform:none;opacity:1;}}
+.vcWrap{position:absolute;inset:0;z-index:901;display:flex;align-items:center;justify-content:center;padding:1rem;color:#E7F6FF;text-align:left;word-break:keep-all;}
+.vcCard{width:100%;max-height:100%;overflow:auto;background:#121722;border:2px solid #00E5FF;border-radius:1.25rem;padding:1rem 0.9rem 0.85rem;
+  box-shadow:0 0 30px rgba(0,229,255,.18),0 18px 50px rgba(0,0,0,.6);animation:vcPop .26s cubic-bezier(.22,.68,.36,1);}
+.vcHead{display:flex;align-items:center;gap:0.5rem;}
+.vcTo{flex:1;min-width:0;font-size:0.8rem;font-weight:700;color:#8FA3BA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vcTo b{color:#FF2E88;font-weight:900;}
+.vcX{flex:none;width:2rem;height:2rem;border-radius:50%;border:1.5px solid #2A3646;background:#0D121B;color:#C7D3E3;font:inherit;font-size:0.9rem;cursor:pointer;}
+.vcWrap h4{margin:0.35rem 0 0;font-size:1.45rem;font-weight:900;letter-spacing:-0.02em;color:#fff;}
+.vcSub{margin:0.2rem 0 0.8rem;font-size:0.82rem;color:#9FB2C8;}
+.vcFoot{margin:0.75rem 0 0;font-size:0.72rem;color:#7C8AA0;text-align:center;line-height:1.45;}
+.vcGrid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;}
+.vcOpt{position:relative;display:flex;flex-direction:column;gap:0.3rem;margin:0;padding:0.45rem 0.45rem 0.6rem;border-radius:0.9rem;
+  border:2px solid #263445;background:#0D121B;color:#E7F6FF;font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,transform .12s;}
+.vcOpt:hover,.vcOpt:focus-visible{border-color:#00E5FF;outline:none;}
+.vcOpt:active{transform:scale(.98);}
+.vcOpt.last{border-color:#00E5FF;box-shadow:0 0 0 1px rgba(0,229,255,.35);}
+.vcPh{position:relative;display:block;border-radius:0.6rem;overflow:hidden;background:#000;}
+.vcPh img{display:block;width:100%;aspect-ratio:3/4;object-fit:contain;background:#000;}
+.vcCap{position:absolute;left:0;right:0;bottom:0;padding:1rem 0.4rem 0.3rem;font-size:0.66rem;font-weight:700;color:#E7F6FF;
+  background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,0));}
+.vcNm{display:flex;align-items:center;gap:0.35rem;margin-top:0.15rem;font-size:1.08rem;font-weight:900;color:#fff;}
+.vcNm .vi{width:1.3rem;height:1.3rem;flex:none;color:#00E5FF;}
+.vcOpt[data-v="stairs"] .vcNm .vi{color:#7FB069;}
+.vcWhat{font-size:0.76rem;line-height:1.35;color:#C7D3E3;font-weight:600;}
+.vcMeta{font-size:0.7rem;color:#8FA3BA;line-height:1.35;}
+.vcMeta b{color:#39FF88;font-weight:900;}
+.vcTag{position:absolute;z-index:2;left:0.75rem;top:0.75rem;padding:0.15rem 0.45rem;border-radius:0.35rem;background:#00E5FF;color:#06111C;font-size:0.66rem;font-weight:900;}
+/* 3D 전체 건물도 : 가는 방법 한 줄 */
+.vcRow{display:flex;align-items:center;justify-content:center;gap:0.55rem;margin:0.35rem 0 0.1rem;}
+.vcRow[hidden]{display:none;}
+.vcRow .lb{font-size:0.78rem;font-weight:800;color:#8FA3BA;}
+.vcRow .seg{display:flex;border:1.5px solid #00E5FF;border-radius:0.6rem;overflow:hidden;}
+.vcRow button{display:flex;align-items:center;gap:0.3rem;margin:0;padding:0.38rem 0.75rem;border:0;border-radius:0;background:#0D121B;color:#00E5FF;
+  font:inherit;font-size:0.8rem;font-weight:900;cursor:pointer;}
+.vcRow button + button{border-left:1.5px solid #00E5FF;}
+.vcRow button.on{background:#00E5FF;color:#06111C;}
+.vcRow .vi{width:1rem;height:1rem;flex:none;}
+/* 작은 폰 : 사진을 조금 줄여 창이 화면 안에 다 들어오게(사진은 자르지 않는다) */
+@media (max-height: 700px){
+  .vcPh img{max-height:27vh;aspect-ratio:auto;height:27vh;}
+  .vcWrap h4{font-size:1.25rem;}
+  .vcSub{margin-bottom:0.55rem;}
+  .vcMeta .nt{display:none;}
+}
+/* 밝은 화면 */
+html.lt .vcDim{background:rgba(15,27,45,.45);}
+html.lt .vcWrap{color:#0F1B2D;}
+html.lt .vcCard{background:#FFFFFF;border-color:#2B88C8;box-shadow:0 18px 50px rgba(15,27,45,.25);}
+html.lt .vcWrap h4,html.lt .vcNm{color:#0F1B2D;}
+html.lt .vcSub,html.lt .vcTo,html.lt .vcMeta{color:#44546A;}
+html.lt .vcFoot{color:#5B6B80;}
+html.lt .vcTo b{color:#D61F69;}
+html.lt .vcX{background:#FFFFFF;border-color:#B9C6D6;color:#24364D;}
+html.lt .vcOpt{background:#F4F7FB;border-color:#C9D5E3;color:#0F1B2D;}
+html.lt .vcOpt:hover,html.lt .vcOpt:focus-visible,html.lt .vcOpt.last{border-color:#0B6FB8;}
+html.lt .vcWhat{color:#24364D;}
+html.lt .vcMeta b{color:#0E8A45;}
+html.lt .vcNm .vi{color:#0B6FB8;}
+html.lt .vcOpt[data-v="stairs"] .vcNm .vi{color:#3E8A2E;}
+html.lt .vcTag{background:#0B6FB8;color:#FFFFFF;}
+html.lt .vcRow .lb{color:#44546A;}
+html.lt .vcRow .seg{border-color:#0B6FB8;}
+html.lt .vcRow button{background:#FFFFFF;color:#0B6FB8;}
+html.lt .vcRow button + button{border-left-color:#0B6FB8;}
+html.lt .vcRow button.on{background:#0B6FB8;color:#FFFFFF;}

@@ -105,6 +105,8 @@ var DIAG = (function(){
     L.push('화면 : ' + innerWidth + 'x' + innerHeight + ' · 배율 ' + (window.devicePixelRatio || 1));
     L.push('그래픽 : ' + gpu());
     L.push('3D : ' + check3d());
+    /* 걷기 화면 부드러움(overview3d.js WALKQ, 2026-11-10) — 이 폰이 고른 화질 · 60장인지 30장으로 돌아갔는지 · 최근 그림 간격 */
+    try{ if(typeof WALKQ !== 'undefined'){ var wq = WALKQ.info(); L.push('걷기 그리기 : 화질 ' + wq.pr + '배 · ' + (wq.cap30 ? '1초 30장(폰이 느려 되돌림)' : '1초 60장 시도') + ' · 그림 간격 ' + wq.ms + 'ms'); } }catch(e){}
     /* 「직접 걸어보기」가 실제로 지어졌는지 — 안 지어졌으면 화면에 조감도가 그대로 남아
        "벽이 노랗다 · 바닥이 없다"로 보인다. 걷기에 들어가 본 뒤 이 줄을 보면 바로 갈린다.
        (걷기에 안 들어갔으면 '들어간 적 없음' — 기록을 보낼 때 꼭 먼저 들어가 봐야 한다) */

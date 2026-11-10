@@ -13,7 +13,8 @@ var fpB1WasInExit=false;     // 버그 수정: 지하 나가는 계단(exit1/exi
 var fpSeq=false, fpSeqDone=null;   // 자유 탐색 안에서 잠깐 도는 연출 대본
 var fpFloorNow=1;            // 지금 서 있는 층
 var fpNodes=[], fpNodeG=null;
-var fpPath=null;             // 걸어가는 중 {wp,i,t,dur,x0,z0,node}
+var fpPath=null;             // 걸어가는 중 {pts,segL,total,s(간 거리),v(지금 속도),node} — fpFreeTick 이 속도를 붙였다 줄인다
+var fpWalkV=0;               // 지금 걷는 속도(유닛/초) — 걷는 도중 다른 곳을 누르면 이 속도로 이어 걷는다(2026-11-10)
 var fpFaceYaw=null;          // 멈춰 서서 바라볼 방향
 var fpBusy=false;            // 엘리베이터·계단 연출 중(입력 잠금)
 
@@ -1147,19 +1148,32 @@ function fpFreeTick(dt){
   if(fpPaused){ fpCommit(fpYaw, 0, 0); return; }
   var want=fpYaw, bob=0;
   if(fpPath){
-    fpPath.t += dt;
-    var k=(fpPath.dur>0) ? Math.min(1, fpPath.t/fpPath.dur) : 1;
-    var p=fpPathAt(easeIO(k)*fpPath.total);
+    /* 2026-11-10 사용자 「직접 걸어보기가 뚝뚝 끊긴다」 — 예전엔 길 전체를 easeIO 한 번으로 걸어서,
+       누를 때마다 속도 0 에서 다시 출발했고(걷는 도중 다른 곳을 누르면 멈칫) 먼 곳은 한가운데서 2배 빠르게 달렸다.
+       → 사람처럼 : 0.35초 만에 걷는 속도(FP_WALK)까지 붙고 · 그대로 걷다가 · 남은 거리에 맞춰 0.5초쯤 서서히 선다.
+         걷는 도중 새로 누르면 지금 속도(fpWalkV)를 그대로 이어 받는다. */
+    var A_UP = FP_WALK/0.35, A_DN = FP_WALK/0.5;
+    if(fpPath.s===undefined){ fpPath.s = 0; fpPath.v = fpWalkV || 0; }
+    var rem = fpPath.total - fpPath.s;
+    var vT = Math.min(FP_WALK, Math.sqrt(Math.max(0, 2*A_DN*rem)));       // 이 속도면 남은 거리 안에서 설 수 있다
+    fpPath.v = (fpPath.v < vT) ? Math.min(vT, fpPath.v + A_UP*dt) : vT;
+    fpPath.s = Math.min(fpPath.total, fpPath.s + Math.max(fpPath.v, 0.12)*dt);
+    fpWalkV = fpPath.v;
+    var p=fpPathAt(fpPath.s);
     fpBob += Math.abs(p.x-fpPos.x)+Math.abs(p.z-fpPos.z);
     fpPos.x=p.x; fpPos.z=p.z;
     if(Math.abs(p.dx)+Math.abs(p.dz)>0.03) want=Math.atan2(p.dx, p.dz);
     bob=Math.sin(fpBob*1.9)*0.045;
-    if(k>=1){
+    if(fpPath.total - fpPath.s < 0.004){
       var nd=fpPath.node;
       nd._lastDx=Math.abs(nd.x-fpPath.sx); nd._lastDz=Math.abs(nd.z-fpPath.sz);
+      fpWalkV = 0;
       fpPath=null; fpArriveNode(nd);
     }
-  }else if(fpFaceYaw!==null){ want=fpFaceYaw; }
+  }else{
+    fpWalkV = 0;
+    if(fpFaceYaw!==null){ want=fpFaceYaw; }
+  }
   /* 지하 나가는 계단(exit1/exit2)에서는 정해진 연출 없이 자유롭게 걸어 다녀도
      실제로 계단을 밟은 만큼 눈높이가 저절로 따라오게, 매 프레임 위치 기준으로 다시 계산한다. */
   /* v122: 옥상 — 데크 계단·데크 위에 서 있으면 그 높이로(옥탑방은 옥상 바닥 fpSlabY('R') 기준) */

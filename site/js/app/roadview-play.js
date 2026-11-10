@@ -304,7 +304,7 @@ function fpStart(){
 /* 재생 종료 공통 처리. silent=true 면 목적지가 바뀌어 조용히 정리하는 경우. */
 function fpEnd(done, silent){
   fpArriveHide();                                  // v148: 도착 고리는 끝나면 반드시 끈다
-  fpFree=false; fpSeq=false; fpSeqDone=null; fpBusy=false; fpPath=null; fpFaceYaw=null;
+  fpFree=false; fpSeq=false; fpSeqDone=null; fpBusy=false; fpPath=null; fpFaceYaw=null; fpWalkV=0;
   if(typeof fpSelHide==='function') fpSelHide('fpEnd');
   if(typeof fpClearNodeG==='function') fpClearNodeG();
   var gd=document.getElementById('fpGuide'); if(gd) gd.classList.remove('on');
@@ -392,7 +392,9 @@ function fpTick(dt){
       var ns = st.stairs, kk = k*ns, ci = Math.floor(kk), fr = kk-ci;
       var lift = fpClamp((fr-0.18)/0.62, 0, 1);          // 발을 올리는 구간
       stepLift = lift;
-      var sK = fpClamp((ci + easeIO(lift))/ns, 0, 1);
+      /* 2026-11-10 사용자 「너무 뚝뚝 끊긴다」 — 한 단마다 멈췄다 올라가니(계단 모양 그대로) 폰에서는 뚝뚝 끊겨 보였다.
+         → 높이의 65%는 일정하게 오르고, 35%만 한 단 한 단 밟는 리듬으로. 엘리베이터처럼 미끄러지지도, 멈칫하지도 않게. */
+      var sK = fpClamp(k*0.65 + ((ci + easeIO(lift))/ns)*0.35, 0, 1);
       fpPos.y = st.y0 + (st.y-st.y0)*sK;
     }else{
       fpPos.y = st.y0 + (st.y-st.y0)*easeIO(k);

@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '55e83acff635';   // 파일 270개 · 18MB
+var VERSION = 'a8b1c0506c02';   // 파일 270개 · 18MB
 var FILES = [
   ['3d/realistic.html','97d7383db21e',81305],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -250,17 +250,17 @@ var FILES = [
   ['js/app/howto.js','4763f7f4705a',25220],
   ['js/app/icons.js','4cb6e33c5920',21136],
   ['js/app/live.js','641f671b6fff',2510],
-  ['js/app/overview3d.js','9d761425ad06',111907],
+  ['js/app/overview3d.js','5568efd586df',115350],
   ['js/app/photos.js','7fe07e8a9e51',61755],
-  ['js/app/pwa.js','21b1f691c62d',50650],
+  ['js/app/pwa.js','737a0f16830d',51067],
   ['js/app/qrnav.js','0e2a68185910',21075],
   ['js/app/restart.js','a41ece25417f',9524],
   ['js/app/resume.js','0cfb59c9113e',9602],
   ['js/app/roadview-1f.js','14696e0f4c2a',46207],
   ['js/app/roadview-b1.js','7d5ac6c79e08',157916],
   ['js/app/roadview-corr.js','99c04eefa56c',51166],
-  ['js/app/roadview-free.js','c0d1249f0b54',92167],
-  ['js/app/roadview-play.js','924cf60b1b95',28603],
+  ['js/app/roadview-free.js','bf134c3f9713',93377],
+  ['js/app/roadview-play.js','ebd3628a7370',28961],
   ['js/app/roadview-roof.js','21f2a5e8678f',119576],
   ['js/app/roadview-stairs.js','7f992b896804',70498],
   ['js/app/roadview.js','e4ccae279c4a',133370],

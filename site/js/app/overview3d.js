@@ -1124,10 +1124,56 @@ function fitRadius(cam, halfW, halfH){
    1인칭으로 들어가면 예전 값(1.4)으로 되돌린다 — 프레임은 그대로 지키면서 평소 화면이 또렷해진다.
    값이 바뀔 때만 다시 잡는다(매 프레임 부르면 그리기 버퍼를 계속 새로 만들게 된다). */
 var _prNow = 0;
+/* ── 걷기(1인칭) 화면의 부드러움 : 1초 60장 + 화질 자동 조절 (2026-11-10) ──
+   사용자 「미리보기 · 직접 걸어보기가 너무 뚝뚝 끊긴다 — 랙 없이, 용량도 늘리지 않고 부드럽게」.
+   폰은 배터리 때문에 늘 1초 30장으로 그렸다(아래 animate). 앞으로 걸어가는 화면은 30장이면 뚝뚝 끊겨 보인다.
+   → 걷는 동안만 60장을 그려 보고, 폰이 못 따라오면(그림 간격이 21ms 를 넘는 상태가 0.7초) 화질(픽셀 배율)을
+     1.4 → 1.2 → 1.0 으로 한 단계씩 낮춘다. 1.0 에서도 못 따라오면 예전처럼 30장으로 돌아간다 — 지금보다 나빠지는 폰은 없다.
+     넉넉하면(16.6ms 근처가 5초) 한 단계 올린다. 고른 화질은 이 폰에 기억해 다음 걷기는 그 화질로 시작한다(b3nav_walkq).
+   조감도(건물 밖에서 보기)는 예전 그대로 30장 · 배율 2. 그림 · 파일은 하나도 늘지 않는다. */
+var WALKQ = (function(){
+  var PR = [1.4, 1.2, 1.0];
+  var lv = 0;
+  try{ var sv = parseInt(localStorage.getItem('b3nav_walkq'), 10); if(sv >= 0 && sv < PR.length) lv = sv; }catch(e){}
+  var cap30 = false, ema = 16.7, slow = 0, fast = 0, warm = 0, wasIn = false, probe = null;
+  function save(){ try{ localStorage.setItem('b3nav_walkq', String(lv)); }catch(e){} }
+  /* g : 바로 앞 그림과의 간격(ms) · inFP : 지금 걷기 화면인가 */
+  function drew(g, inFP){
+    if(!inFP){ wasIn = false; return; }
+    if(!wasIn){ wasIn = true; warm = 0; ema = 16.7; slow = 0; fast = 0; probe = null; }
+    if(g > 250) return;                                  // 다른 앱에 갔다 온 것 등 — 재지 않는다
+    if(warm < 1200){ warm += g; return; }                // 걷기 시작 1.2초(복도 짓기 · 처음 그리기)는 재지 않는다
+    ema += (g - ema)*0.12;
+    if(cap30) return;
+    /* 화질을 한 단계 낮춘 뒤 0.9초 — 정말 빨라졌나? 15% 도 안 나아졌으면 그리기가 아니라 계산이 바쁜 폰이다
+       (화질을 낮춰 봐야 흐려지기만 한다) → 화질은 되돌리고 예전처럼 30장. */
+    if(probe){
+      probe.t += g; if(probe.t < 900) return;
+      if(ema > probe.ema*0.85){ lv = probe.from; cap30 = true; }
+      probe = null; slow = 0; fast = 0; save();
+      return;
+    }
+    if(ema > 21){ slow += g; fast = 0; }
+    else if(ema < 17.6){ fast += g; slow = 0; }
+    else { slow = 0; fast = 0; }
+    if(slow > 700){
+      slow = 0;
+      if(lv < PR.length-1){ probe = {from:lv, ema:ema, t:0}; lv++; warm = 600; }   // 바꾼 뒤 0.6초는 재지 않는다(버퍼를 새로 잡는 한 장)
+      else cap30 = true;
+      save();
+    }else if(fast > 5000 && lv > 0){ fast = 0; lv--; save(); }
+  }
+  return {
+    pr:function(){ return PR[lv]; },
+    gap:function(){ return cap30 ? 26 : 10; },           // 그림 사이 최소 간격(ms) — 10 : 60Hz 폰은 매번, 120Hz 폰은 한 번 걸러(60장)
+    drew:drew,
+    info:function(){ return {lv:lv, pr:PR[lv], cap30:cap30, ms:Math.round(ema*10)/10}; }
+  };
+})();
 function tunePixelRatio(){
   if(!renderer) return;
   var heavy = !!(window.fpActive || window.fpFree || (typeof rideBlend !== 'undefined' && rideBlend > 0.01));
-  var cap = A3D_MOBILE ? (heavy ? 1.4 : 2) : 2;
+  var cap = A3D_MOBILE ? (heavy ? WALKQ.pr() : 2) : 2;
   var want = Math.min(devicePixelRatio || 1, cap);
   if(Math.abs(want - _prNow) < 0.01) return;
   _prNow = want;
@@ -1185,10 +1231,13 @@ function animate(){
   if(!animateRunning) return;
   requestAnimationFrame(animate);
   /* 폰에서는 초당 30장으로 제한 — 상태 갱신(사람 이동·회전·반짝임)은 매 프레임 하고 그리기만 거른다.
-     (사람 이동은 시간 기준(dt)이라 그리기를 걸러도 속도는 그대로) */
+     (사람 이동은 시간 기준(dt)이라 그리기를 걸러도 속도는 그대로)
+     2026-11-10 : 걷기(1인칭) 화면에서만은 60장을 그려 본다 — 폰이 못 따라오면 화질을 낮추고, 끝내 안 되면 30장(위 WALKQ). */
   if(A3D_MOBILE){
-    var _now = performance.now();
-    if(_now - A3D_LAST < 26){ A3D_SKIP = true; } else { A3D_SKIP = false; A3D_LAST = _now; }
+    var _now = performance.now(), _gap = _now - A3D_LAST;
+    var _walkNow = !!window.fpActive || !!window.fpFree || (typeof rideBlend !== 'undefined' && rideBlend > 0.01);
+    if(_gap < (_walkNow ? WALKQ.gap() : 26)){ A3D_SKIP = true; }
+    else { A3D_SKIP = false; WALKQ.drew(_gap, _walkNow); A3D_LAST = _now; }
   }
   if(fpHoloGrid) fpHoloGrid.visible = !fpActive;   // 걷기 모드에서는 홀로그램 격자를 끈다
   ghostSlabTune();                                   // 줄일수록 위층 바닥판을 밝게 (아래 highlight3D 앞 주석)

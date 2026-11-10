@@ -645,6 +645,8 @@ var PWA = (function(){
         var splash = !!(bootEl && bootEl.style.willChange !== 'clip-path');   // 걷히는 중이면 이미 끝난 것으로 본다
         var asking = !!document.querySelector('.ezAsk');
         var busy = (id === 's6' || id === 's7' || id === 'sqr' || id === 'sqrok' || asking);
+        /* 11/11 : 휴대폰 허락 창(마이크 · 카메라 · 알림)이 떠 있는 동안은 새로 고치지 않는다 — 창이 닫히면 크롬은 「닫음」으로 쳐서 그 기능이 안 된다 */
+        try{ if(typeof CONSENT !== 'undefined' && CONSENT.asking && CONSENT.asking()) return; }catch(err){}
         /* 2026-10-28 사용자 「발표장 QR 을 찍고 여는데 초록 로고 글이 두 번 뜬다」 — 켜는 화면 도중에 갈아타면 「이어서」 보여 줘도
            새로 고치는 순간 화면이 한 번 끊겼다 다시 초록으로 떠서 눈에는 두 번으로 보였다(새 판을 올린 직후 · 전에 열어 본 폰).
            → 켜는 화면이 떠 있는 동안에는 갈아타지 않는다. 다 켜진 뒤 사용자가 잃을 것이 없는 때(아래)에 조용히(b3nav_quiet — 초록 없이) 갈아탄다. */

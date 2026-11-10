@@ -118,7 +118,24 @@ var CONSENT = (function(){
     p.then(function(st){ try{ st.getTracks().forEach(function(t){ t.stop(); }); }catch(e){} cb(true); },
            function(err){ cb(false, err && err.name === 'NotAllowedError' ? 'denied' : 'none'); });
   }
-  function permAsk(k){ return k === 'cam' ? camAsk : (k === 'mic' ? micAsk : notiAsk); }
+  /* 휴대폰 허락 창이 떠 있는 동안 — pwa.js 가 이때는 새 판으로 갈아타며 새로 고치지 않는다
+     (11/11 : 동의 화면에서 마이크 창이 떠 있을 때 새로 고쳐져 창이 닫혀 버리면 크롬은 「닫음」으로 치고, 여러 번이면 그 사이트 마이크를 한동안 막는다) */
+  var ASKING = 0;
+  function permAsk(k){
+    var f = k === 'cam' ? camAsk : (k === 'mic' ? micAsk : notiAsk);
+    return function(cb){ ASKING++; f(function(ok, why){ ASKING = Math.max(0, ASKING - 1); if(k === 'mic' && ok) MIC_PERM = 'granted'; cb(ok, why); }); };
+  }
+  /* 말로 찾기 직전 — 휴대폰이 마이크를 아직 허락하지 않았으면(크롬 「이번만 허용」이 끝났거나 창을 닫았을 때) 이 누름에서 휴대폰 창을 띄운다.
+     크롬 안드로이드의 음성 인식은 허락이 없으면 묻지 않고 그냥 멈춰서, 오브를 눌러도 아무것도 안 들렸다(11/11 사용자 「음성 인식이 안 된다」).
+     아이폰 사파리는 듣기를 누른 그 순간에 시작해야 해서 미리 묻지 않는다(사파리가 스스로 묻는다). cb(true) · cb(false, 'denied'|'none'|'err') */
+  function isIOS(){ return /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1); }
+  function micEnsure(cb, force){
+    if(MIC_PERM === 'denied' && !force){ cb(false, 'denied'); return; }
+    if(isIOS() || !(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){ cb(true); return; }
+    if(MIC_PERM === 'granted' && !force){ cb(true); return; }
+    if(!MIC_PERM && !force){ cb(true); return; }                     // 상태를 모르는 브라우저 — 음성 인식에 맡긴다
+    permAsk('mic')(function(ok, why){ cb(ok, why); });
+  }
   function permFailMsg(k, why){
     if(k === 'cam') return why === 'none' ? T('이 기기에서 카메라를 찾지 못했어요 — QR 을 찍을 때 다시 물어볼게요', 'No camera found — we will ask again when you scan a QR') : T('괜찮아요 — QR · 건의함 사진을 찍을 때 다시 물어볼게요', 'OK — we will ask again when you use the camera');
     if(k === 'mic') return why === 'none' ? T('이 기기에서 마이크를 찾지 못했어요', 'No microphone found on this device') : T('휴대폰이 마이크를 아직 허락하지 않았어요 — 오브를 누를 때 휴대폰이 물으면 「허용」을 눌러 주세요', 'Your phone has not allowed the microphone yet — tap “Allow” when it asks after you tap the orb');
@@ -506,6 +523,6 @@ var CONSENT = (function(){
   /* 말을 바꾸면(ui.js applyLang) 건의함에 한 번 그려 둔 줄을 그 말로 다시 */
   function relang(){ var d = document.getElementById('delLink'); if(d) d.remove(); delLink(); pvPaint(); }
 
-  return {agreed: agreed, pvOK: pvOK, camOK: camOK, micOK: micOK, notiOK: notiOK, notiSupported: notiSupported, need: need, appAsk: appAsk, notiAsk: notiAsk,
+  return {agreed: agreed, pvOK: pvOK, camOK: camOK, micOK: micOK, micEnsure: micEnsure, micPerm: function(){ return MIC_PERM; }, asking: function(){ return ASKING > 0; }, notiOK: notiOK, notiSupported: notiSupported, need: need, appAsk: appAsk, notiAsk: notiAsk,
           notiFailMsg: notiFailMsg, guideHtml: guideHtml, openGuideLast: openGuideLast, agreeScreen: agreeScreen, relang: relang, doc: doc, K: K};
 })();

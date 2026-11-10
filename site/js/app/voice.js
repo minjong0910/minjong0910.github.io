@@ -257,9 +257,11 @@ var VOICE = (function(){
   }
   function stopRec(){ clearTimeout(timer); if(REC){ try{ REC.onend = null; REC.onerror = null; REC.abort(); }catch(e){} REC = null; } }
   function closeAll(){ stopRec(); card.classList.remove('on'); setActive(false); setTimeout(function(){ place(true); }, 0); }
-  function listen(){
+  var errCode = '';
+  function listen(retried){
+    retried = retried === true;                                        // 이벤트 객체가 들어와도 「다시 물음」으로 치지 않게
     card.classList.remove('on'); stopRec(); setActive(true);
-    finalTxt = ''; alts = []; lastLen = 0; errMsg = ''; ROOMS = null;
+    finalTxt = ''; alts = []; lastLen = 0; errMsg = ''; errCode = ''; ROOMS = null;
     var SR = recCtor();
     if(!SR){
       orb.set('none');
@@ -288,14 +290,18 @@ var VOICE = (function(){
       var m = {'not-allowed':T('마이크 사용을 허락해 주세요', 'Please allow the microphone'), 'service-not-allowed':T('마이크 사용을 허락해 주세요', 'Please allow the microphone'),
                'no-speech':T('잘 안 들렸어요', "I couldn't hear you"), 'audio-capture':T('마이크를 찾지 못했어요', 'No microphone found'), 'network':T('음성 인식은 인터넷이 필요해요', 'Voice needs the internet')}[e.error];
       if(e.error === 'aborted') return;
+      errCode = e.error || '';
       errMsg = m || T('음성 인식이 멈췄어요', 'Voice stopped');
+      if(errCode && errCode !== 'no-speech'){ try{ if(window.DIAG && DIAG.add) DIAG.add('말로 찾기 멈춤 : ' + errCode + ' · 마이크 ' + ((typeof CONSENT !== 'undefined' && CONSENT.micPerm && CONSENT.micPerm()) || '상태 모름')); }catch(x){} }
     };
     r.onend = function(){
       clearTimeout(timer); REC = null;
       if(finalTxt){ think(alts.length ? alts : [finalTxt], finalTxt); return; }
+      /* 휴대폰 허락이 없어 멈췄으면 — 한 번만 휴대폰 창을 띄워 다시 듣는다(아이폰 제외 · micEnsure) */
+      if((errCode === 'not-allowed' || errCode === 'service-not-allowed') && !retried && typeof CONSENT !== 'undefined' && CONSENT.micEnsure){ ensureThen(true); return; }
+      if(errCode === 'not-allowed' || errCode === 'service-not-allowed'){ blocked('denied'); return; }
       orb.set('none');
-      bubble(esc(errMsg || T('잘 안 들렸어요', "I couldn't hear you")) + '<small>' + T('구슬을 다시 누르고 말해 주세요 · 화면을 누르면 닫혀요', 'Tap the orb and try again · tap to close') + '</small>', true);
-      if(errMsg && /허락|allow/.test(errMsg)) bub.querySelector('small').textContent = T('주소창 왼쪽 자물쇠 → 마이크 → 허용', 'Address bar lock icon → Microphone → Allow');
+      bubble(esc(errMsg || T('잘 안 들렸어요', "I couldn't hear you")) + '<small>' + T('구슬을 다시 누르고 말해 주세요 · 화면을 누르면 닫혀요', 'Tap the orb and try again · tap to close') + (errCode && errCode !== 'no-speech' ? ' · ' + esc(errCode) : '') + '</small>', true);
     };
     try{ r.start(); }catch(e){ orb.set('none'); bubble(T('음성 인식을 시작하지 못했어요', 'Could not start voice'), true); return; }
     timer = setTimeout(function(){ try{ r.stop(); }catch(e){} }, 10000);
@@ -366,7 +372,7 @@ var VOICE = (function(){
       card.innerHTML = h; card.classList.add('on');
       card.querySelector('.vsText').onclick = function(){ closeAll(); try{ plainStart(); }catch(e){} };
     }
-    card.querySelector('.vsAgain').onclick = listen;
+    card.querySelector('.vsAgain').onclick = function(){ listen(); };
     card.querySelector('.x').onclick = closeAll;
   }
 
@@ -374,7 +380,30 @@ var VOICE = (function(){
      끈 폰만 이 누름에서 「마이크를 켤까요?」를 한 번(CONSENT.need). 음성 인식이 없는 브라우저는 묻지 않고 바로 「안 돼요」 */
   function start(){
     if(!recCtor() || typeof CONSENT === 'undefined' || !CONSENT.need){ listen(); return; }
-    CONSENT.need('voice', listen);
+    CONSENT.need('voice', function(){ ensureThen(false); });
+  }
+  /* 11/11 사용자 「오브를 눌러도 음성 인식이 안 된다」 — 크롬 안드로이드는 휴대폰이 마이크를 허락하지 않은 상태면(「이번만 허용」이 끝남 ·
+     창을 닫음) 음성 인식이 묻지도 않고 멈춘다. → 듣기 전에 휴대폰 허락을 확인해, 없으면 이 누름에서 휴대폰 창을 띄우고 허용되면 바로 듣는다.
+     막혀 있으면 푸는 길을 말풍선에. 듣다가 「허락 없음」으로 멈추면 한 번만 다시 묻고 다시 듣는다(force) */
+  function ensureThen(force){
+    if(!CONSENT.micEnsure){ listen(); return; }
+    var done = false, waiting = false;
+    CONSENT.micEnsure(function(ok, why){
+      if(waiting && !ACTIVE) return;                                    // 휴대폰 창을 기다리는 사이에 닫았으면 듣지 않는다
+      done = true;
+      if(ok) listen(force); else blocked(why);
+    }, force);
+    if(!done){ waiting = true; card.classList.remove('on'); stopRec(); setActive(true); orb.set('think');
+      bubble(T('마이크를 켜는 중이에요', 'Turning on the microphone') + '<small>' + T('휴대폰이 물으면 「허용」(사이트 방문 중 허용)을 눌러 주세요', 'If your phone asks, tap “Allow”') + '</small>'); }
+  }
+  function blocked(why){
+    card.classList.remove('on'); stopRec(); setActive(true); orb.set('none');
+    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    bubble((why === 'none' ? T('이 휴대폰에서 마이크를 찾지 못했어요', 'No microphone found') : T('휴대폰이 마이크를 막고 있어요', 'Your phone is blocking the microphone')) +
+      '<small>' + (why === 'none' ? T('「시작하기」에서 글자로 찾아 주세요 · 화면을 누르면 닫혀요', 'Please search by typing · tap to close') :
+        ios ? T('설정 → 사파리 → 마이크 → 「허용」 → 구슬을 다시 눌러 주세요', 'Settings → Safari → Microphone → Allow, then tap the orb again') :
+              T('주소창 왼쪽 자물쇠(ⓘ) → 권한 → 마이크 → 「허용」(없으면 「권한 초기화」) → 구슬을 다시 눌러 주세요', 'Lock icon (ⓘ) in the address bar → Permissions → Microphone → Allow (or Reset permissions), then tap the orb again')) + '</small>', true);
+    try{ if(window.DIAG && DIAG.add) DIAG.add('말로 찾기 : 마이크 허락 없음 (' + (why || '?') + ' · ' + ((CONSENT.micPerm && CONSENT.micPerm()) || '상태 모름') + ')'); }catch(e){}
   }
   btn.onclick = function(){ if(ACTIVE && REC){ try{ REC.stop(); }catch(e){} return; } start(); };   // 듣는 중에 한 번 더 누르면 바로 끝낸다
   hint.onclick = function(){ start(); };

@@ -26,7 +26,7 @@ window.__VS_HOST = true;
     try{
       var d = f.contentDocument; if(!d || d.getElementById('vsScript')) return;
       var s = d.createElement('script'); s.id = 'vsScript';
-      s.src = new URL('voice.js?v=3', location.href).href;
+      s.src = new URL('voice.js?v=4', location.href).href;
       d.body.appendChild(s);
     }catch(e){ console.warn('말로 찾기 견본을 붙이지 못했습니다', e); }
   });

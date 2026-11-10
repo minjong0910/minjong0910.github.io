@@ -383,11 +383,18 @@
         [].forEach.call(box.querySelectorAll('.vsAlt button'), function(b){ b.onclick = function(){ cur = +b.getAttribute('data-i'); paint(); }; });
       }
       paint();
+      /* 「길안내 시작」 → 3D 전체 건물도를 거치지 않고 길안내 첫 화면(s6 · 1단계)으로 바로 (2026-11-10 사용자 :
+         「3D 건물도 전체로 들어가라는 게 아니라 바로 길안내 시작한 후 첫 화면에 들어가지게」).
+         목적지 · 출발 층은 앱의 openTarget 이 정하고(3D 화면도 뒤에서 준비만), 이어서 그 화면의 「길안내 시작」(startGuide)을 바로 누른다.
+         둘이 한 번에 일어나서 3D 화면은 그려지지 않고, 지나온 화면 기록도 첫 화면 → 길안내 — 뒤로 가면 첫 화면으로 돌아온다.
+         엘리베이터 / 중앙계단은 길안내 화면 위 단추로 바꿀 수 있다. */
       card.querySelector('.vsGo').onclick = function(){
         closeAll();
-        if(m.kind === 'toilet'){ try{ openTarget({kind:'toilet', floor:m.floor}, m.floor); }catch(e){} return; }
-        var r = items[cur];
-        try{ openSearchHit({code:r.code, floor:r.floor}); }catch(e){}   // 검색해서 고른 것과 똑같이 — 엘리베이터/중앙계단 고르기 → 3D 길안내
+        try{
+          if(m.kind === 'toilet') openTarget({kind:'toilet', floor:m.floor}, m.floor);
+          else { var r = items[cur]; openSearchHit({code:r.code, floor:r.floor}); }   // 검색해서 고른 것과 같다(최근 찾은 곳에도 남는다)
+          if(typeof startGuide === 'function') startGuide();
+        }catch(e){ console.warn('길안내를 시작하지 못했습니다', e); }
       };
     } else {
       orb.set('none');

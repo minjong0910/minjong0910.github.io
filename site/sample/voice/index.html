@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>말로 찾기 견본 — 공대 3호관 길안내</title>
+<!-- 견본 (2026-11-10 사용자) : 「음성 인식을 넣고 싶다 — 참고 영상(Thinking Orbs : 상태마다 움직이는 점 구슬)을 보고 샘플부터」
+     정한 것 : 말로 목적지 찾기 · 구슬(오브)을 한 번 누르면 듣기(말이 끝나면 저절로 멈춤) · 아래에서 올라오는 창 · 폰에서 열 수 있는 주소.
+     실제 앱(site/index.html)은 건드리지 않는다. 「길안내 시작」은 실제 앱의 길 공유 주소(?to=호실)로 연다.
+     음성 인식 = 브라우저 기본 기능(Web Speech API) — 크롬 · 삼성 인터넷은 구글 서버, 아이폰 사파리는 애플(Siri) 받아쓰기를 쓴다. 인터넷 필요.
+     구슬 = 참고 영상의 Thinking Orbs(React 전용, MIT)를 보고 2D 캔버스로 새로 그린 것 — 대기(숨쉬기) · 듣는 중(파도) · 찾는 중(훑는 선) · 찾음 · 못 찾음. -->
+<style>
+:root{ --bg:#0B0F16; --card:#121822; --line:#1F2A38; --tx:#E7F6FF; --tx2:#9FB2C8; --dim:#6F8296; --cy:#00E5FF; --vi:#7C5CFF; --ok:#39FF88; --warn:#FF9A5C; }
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ margin:0; height:100%; background:#05080D; color:var(--tx); font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif; }
+body{ display:flex; justify-content:center; }
+.phone{ position:relative; width:100%; max-width:440px; min-height:100%; background:var(--bg); overflow:hidden; }
+@media (min-width:600px){ body{ align-items:center; padding:24px 0; } .phone{ min-height:0; height:880px; border:2px solid #1B5468; border-radius:36px; box-shadow:0 0 60px rgba(0,229,255,.12); } }
+.top{ padding:calc(18px + env(safe-area-inset-top)) 20px 0; display:flex; align-items:center; gap:10px; }
+.top .badge{ font-size:11px; font-weight:800; color:#0B0F16; background:linear-gradient(90deg,var(--cy),var(--vi)); padding:3px 8px; border-radius:99px; }
+.top b{ font-size:15px; font-weight:800; color:var(--tx2); }
+h1{ margin:26px 20px 6px; font-size:28px; font-weight:900; letter-spacing:-.02em; line-height:1.25; }
+h1 em{ font-style:normal; background:linear-gradient(90deg,var(--cy),var(--vi)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.lead{ margin:0 20px 18px; color:var(--tx2); font-size:15px; line-height:1.55; }
+.search{ margin:0 20px; display:flex; align-items:center; gap:10px; padding:14px 14px 14px 16px; border:3px solid var(--cy); border-radius:14px; background:#0B1118; color:var(--dim); font-size:16px; font-weight:700; cursor:pointer; }
+.search .mic{ margin-left:auto; width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:rgba(0,229,255,.12); color:var(--cy); }
+.examples{ margin:22px 20px 0; padding:16px; border-radius:16px; background:var(--card); border:1px solid var(--line); }
+.examples .t{ font-size:13px; font-weight:800; color:var(--tx2); margin-bottom:10px; }
+.examples ul{ margin:0; padding-left:18px; color:var(--tx); font-size:15px; line-height:1.9; }
+.examples small{ display:block; margin-top:10px; color:var(--dim); font-size:12px; line-height:1.5; }
+/* 떠 있는 구슬 버튼 */
+.fab{ position:absolute; left:50%; bottom:calc(26px + env(safe-area-inset-bottom)); transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:6px; border:0; background:none; color:var(--tx); cursor:pointer; font:inherit; }
+.fab canvas{ width:92px; height:92px; border-radius:50%; background:radial-gradient(circle at 50% 45%, rgba(0,229,255,.22), rgba(124,92,255,.12) 55%, rgba(0,0,0,0) 72%); box-shadow:0 0 0 2px rgba(0,229,255,.35), 0 0 28px rgba(0,229,255,.25); }
+.fab span{ font-size:13px; font-weight:800; color:var(--tx2); }
+/* 아래에서 올라오는 창 */
+.dim{ position:absolute; inset:0; background:rgba(2,4,8,.62); opacity:0; pointer-events:none; transition:opacity .25s; z-index:10; }
+.dim.on{ opacity:1; pointer-events:auto; }
+.sheet{ position:absolute; left:0; right:0; bottom:0; z-index:11; background:#101722; border-top:3px solid #1FA9C9; border-radius:26px 26px 0 0;
+  padding:10px 18px calc(18px + env(safe-area-inset-bottom)); transform:translateY(105%); transition:transform .32s cubic-bezier(.2,.9,.3,1.05); max-height:92%; overflow:auto; }
+.sheet.on{ transform:none; }
+.grab{ width:44px; height:5px; border-radius:9px; background:#33404F; margin:0 auto 6px; }
+.st{ text-align:center; font-size:17px; font-weight:900; margin-top:4px; min-height:24px; }
+.st.ok{ color:var(--ok); } .st.warn{ color:var(--warn); }
+.orbBig{ display:block; width:220px; height:220px; margin:2px auto 0; transition:width .3s, height .3s; }
+.sheet.has .orbBig{ width:130px; height:130px; }      /* 찾은 뒤에는 결과가 위로 오게 구슬을 줄이고 예시를 감춘다 */
+.sheet.has .chips{ display:none; }
+.said{ min-height:52px; text-align:center; font-size:20px; font-weight:800; line-height:1.35; padding:0 6px; word-break:keep-all; }
+.said .interim{ color:var(--dim); }
+.hint{ text-align:center; color:var(--dim); font-size:13px; margin-top:4px; }
+.chips{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:12px; }
+.chips button{ border:1.5px solid #2A6F86; background:rgba(0,229,255,.07); color:#CFEFFF; border-radius:99px; padding:7px 12px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+.res{ margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+.card{ display:flex; align-items:center; gap:12px; padding:14px; border-radius:16px; background:var(--card); border:1.5px solid var(--line); }
+.card.top1{ border-color:var(--cy); box-shadow:0 0 0 3px rgba(0,229,255,.12); }
+.card .no{ flex:none; width:64px; text-align:center; }
+.card .no b{ display:block; font-size:18px; font-weight:900; }
+.card .no small{ color:var(--tx2); font-size:12px; font-weight:700; }
+.card .nm{ flex:1; font-size:15px; font-weight:700; line-height:1.4; word-break:keep-all; }
+.card a{ flex:none; text-decoration:none; color:#0B0F16; font-weight:900; font-size:14px; padding:10px 12px; border-radius:12px; background:linear-gradient(90deg,var(--cy),var(--vi)); white-space:nowrap; }
+.info{ padding:14px; border-radius:16px; background:var(--card); border:1.5px solid var(--line); font-size:15px; line-height:1.55; color:var(--tx); }
+.info b{ color:#9FEFFF; }
+.row{ display:flex; gap:10px; margin-top:14px; }
+.row button{ flex:1; padding:14px 10px; border-radius:14px; font:inherit; font-size:15px; font-weight:800; cursor:pointer; border:2px solid var(--cy); background:transparent; color:var(--cy); }
+.row button.main{ border:0; background:linear-gradient(90deg,var(--cy),var(--vi)); color:#0B0F16; }
+.kb{ display:none; gap:8px; margin-top:12px; }
+.kb.on{ display:flex; }
+.kb input{ flex:1; min-width:0; background:#0B1118; border:1.5px solid #33404F; border-radius:12px; padding:12px; color:#fff; font:inherit; font-size:16px; font-weight:700; outline:none; }
+.kb input:focus{ border-color:var(--cy); }
+.kb button{ border:0; border-radius:12px; padding:0 16px; font:inherit; font-weight:900; background:var(--cy); color:#0B0F16; }
+.note{ margin:14px 20px 0; color:var(--dim); font-size:12px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="top"><span class="badge">견본</span><b>공대 3호관 길안내 · 말로 찾기</b></div>
+  <h1>어디로 가세요?<br><em>말로 찾아 드릴게요</em></h1>
+  <p class="lead">아래 구슬을 한 번 누르고 가고 싶은 곳을 말해 보세요. 말이 끝나면 저절로 멈추고 바로 찾아 드려요.</p>
+  <div class="search" id="fakeSearch" role="button" aria-label="말로 찾기 열기">호실 번호 · 교수님 · 학과 사무실
+    <span class="mic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg></span></div>
+  <div class="examples">
+    <div class="t">이렇게 말해 보세요</div>
+    <ul><li>「13524호 어디야」</li><li>「김현섭 교수님 연구실」</li><li>「5층 PC실」 · 「학과사무실」</li><li>「만삼천삼백십 호」 · 「3층 10호」</li></ul>
+    <small>※ 견본입니다 — 「길안내 시작」을 누르면 실제 앱의 길안내가 열려요. 음성 인식은 인터넷이 필요하고, 크롬 · 삼성 인터넷 · 아이폰 사파리에서 됩니다(카카오톡 안 브라우저는 안 될 수 있어요).</small>
+  </div>
+  <button class="fab" id="fab" type="button" aria-label="말로 찾기"><canvas id="orbSmall" width="168" height="168"></canvas><span>말로 찾기</span></button>
+
+  <div class="dim" id="dim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-label="말로 찾기">
+    <div class="grab"></div>
+    <div class="st" id="st">눌러서 말해 주세요</div>
+    <canvas class="orbBig" id="orbBig" width="440" height="440"></canvas>
+    <div class="said" id="said"></div>
+    <div class="hint" id="hint">예) 「13524호 어디야」 「김현섭 교수님」</div>
+    <div class="chips" id="chips"></div>
+    <div class="res" id="res"></div>
+    <div class="kb" id="kb"><input id="kbIn" type="text" placeholder="글자로 입력 (예 : 13524)" enterkeyhint="search"><button type="button" id="kbGo">찾기</button></div>
+    <div class="row"><button type="button" id="btnKb">⌨ 글자로</button><button type="button" class="main" id="btnAgain">다시 말하기</button><button type="button" id="btnClose">닫기</button></div>
+  </div>
+</div>
+<script>
+(function(){
+'use strict';
+/* ── 실제 앱의 방 목록 (2026-11-10 앱에서 그대로 뽑음 : 번호 · 층 · 이름) ── */
+var ROOMS = [["13101",1,"강의실"],["13102",1,"강의실"],["13103",1,"강의실"],["13104",1,"강의실"],["13107",1,"캡스톤디자인실"],["13108",1,"전기공학과 김현섭 교수님 연구실"],["13109",1,"전기공학과 박남진 교수님 연구실"],["13110",1,"임베디드소프트웨어전공 이성렬 교수님 연구실"],["13111",1,"전기공학과 이정효 교수님 연구실"],["13112",1,"ICT특성화 취업연계형 사업단"],["13113",1,"캡스톤디자인 회의실"],["13114",1,"PC 실습실"],["13115",1,"학과사무실"],["13116",1,"학부장실"],["13117",1,"안내실"],["13119",1,"강의실"],["13120",1,"강의실"],["13121",1,"전자에너지변환 실험실"],["13125",1,"캡스톤디자인실"],["13201",2,"광반도체 소자 및 공정 실험실"],["13202",2,"스마트모빌리티 실험실"],["13203",2,"전공 동아리실"],["13204",2,"임베디드 시스템 실험실"],["13205",2,"스마트팩토리 및 인공지능 실험실"],["13207",2,"임베디드소프트웨어전공 김성호 교수님 연구실"],["13208",2,"전기공학과 김병택 교수님 연구실"],["13209",2,"임베디드소프트웨어전공 이연석 교수님 연구실"],["13210",2,"전기공학과 김덕영 교수님 연구실"],["13211",2,"전기공학과 김원구 교수님 연구실"],["13212",2,"정재훈 교수님 연구실"],["13213",2,"전기공학과 안민철 교수님 연구실"],["13214",2,"명예교수 및 시간강사실"],["13215",2,"센서 및 AI 시스템 실험실"],["13217",2,"그린에너지 메카트로닉스 실험실"],["13218",2,"음성 및 신호처리 실험실"],["13219",2,"전력계통 실험실"],["13221",2,"전기공학과 회의실 및 스터디룸"],["13224",2,"초전도및마그넷실험실"],["13225",2,"강의실"],["13226",2,"임베디드실습실"],["13301",3,"RF 및 안테나 실험실"],["13303",3,"대학원 강의실"],["13304",3,"SoC설계 실험실"],["13306",3,"복합재료 연구실"],["13310",3,"전자공학과 이재호 교수님 연구실"],["13311",3,"전자공학과 김변곤 교수님 연구실"],["13312",3,"전자공학과 유상선 교수님 연구실"],["13313",3,"전자공학과 정준모 교수님 연구실"],["13314",3,"전자공학과 이태윤 교수님 연구실"],["13315",3,"임베디드소프트웨어전공 류상문 교수님 연구실"],["13316",3,"임베디드소프트웨어전공 우주 교수님 연구실"],["13317",3,"Aim 동아리 및 학생회실"],["13318",3,"지능제어 실험실"],["13319",3,"IoT 응용시스템 실험실"],["13320",3,"집적회로 연구실"],["13322",3,"벤처 동아리 2"],["13324",3,"강의실"],["13325",3,"강의실"],["13326",3,"캡스톤디자인실"],["13401",4,"신호처리 실험실"],["13402",4,"지능형 무선통신 연구실"],["13403",4,"유비쿼터스 시스템즈 실험실"],["13405",4,"인공지능융합전공 강상기 교수님 연구실"],["13406",4,"인공지능융합전공 이영석 교수님 연구실"],["13407",4,"인공지능융합학과 고종현 교수님 연구실"],["13408",4,"IT융합통신공학과 문상미 교수님 연구실"],["13409",4,"캡스톤디자인 회의실"],["13410",4,"IT융합통신공학과 지석근 교수님 연구실"],["13411",4,"인공지능융합전공 최연성 교수님 연구실"],["13412",4,"IT융합통신공학과 김영완 교수님 연구실"],["13413",4,"전자회로 실험실"],["13414",4,"기계시각 실험실"],["13415",4,"Computer Vision Lab (CVLAB)"],["13417",4,"정보통신기술연구소"],["13419",4,"강의실"],["13420",4,"강의실"],["13421",4,"무선기술 실험실"],["13422",4,"보안 및 이동컴퓨팅 실험실"],["13501",5,"벤처 동아리 1"],["13502",5,"전자파 및 안테나 실험실 · 무선통신 실험실"],["13504",5,"캡스톤 디자인 실습실"],["13505",5,"차세대통신 연구실"],["13506",5,"AI융합 실험실"],["13508",5,"인공지능융합전공 양현호 교수님 연구실"],["13509",5,"인공지능융합전공 조한규 교수님 연구실"],["13510",5,"IT융합통신공학과 강규창 교수님 연구실"],["13511",5,"인공지능융합전공 배한별 교수님 연구실"],["13512",5,"인공지능융합전공 강영흥 교수님 연구실"],["13513",5,"인공지능융합전공 나인호 교수님 연구실"],["13514",5,"IT융합통신공학과 조주필 교수님 연구실"],["13515",5,"IT융합통신공학과 신호섭 교수님 연구실"],["13516",5,"마이크로파 · 캡스톤디자인 · 기초전자회로 실험실"],["13517",5,"멀티미디어 통신 실험실"],["13518",5,"AI-based Anomaly Detection (AIAD) Lab"],["13520",5,"사물지능 연구실"],["13522",5,"강의실"],["13523",5,"강의실"],["13524",5,"PC실"]]
+  .map(function(r){ var m = /([가-힣]{2,4}) 교수님/.exec(r[2]); return {code:r[0], floor:r[1], name:r[2], prof:m ? m[1] : '', ns:r[2].replace(/\s+/g, '').toLowerCase()}; });
+var BY = {}; ROOMS.forEach(function(r){ BY[r.code] = r; });
+var APP = '../../';   // 실제 앱 — 길 공유 주소 ?to=호실 로 열면 바로 길안내(문 고르기부터)
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+/* ════════ 구슬(오브) — 점으로 된 공. 상태마다 움직임이 다르다 ════════ */
+function Orb(canvas, n, opt){
+  opt = opt || {}; var DOT = opt.dot || 1, RAD = opt.rad || 0.34;   // 점 크기 · 공 반지름(캔버스 폭 대비)
+  var ctx = canvas.getContext('2d'), W = canvas.width, H = canvas.height, pts = [], GA = Math.PI*(3 - Math.sqrt(5));
+  for(var i = 0; i < n; i++){ var y = 1 - (i + 0.5)/n*2, r = Math.sqrt(1 - y*y), th = i*GA; pts.push({x:Math.cos(th)*r, y:y, z:Math.sin(th)*r, lat:Math.asin(y)}); }
+  var P = {amp:0.03, speed:0.35, scan:0, hue:0, glow:0.15, size:1}, T = {amp:0.03, speed:0.35, scan:0, hue:0, glow:0.15, size:1};
+  var COL = {idle:[0,229,255], listen:[0,229,255], think:[160,240,255], done:[57,255,136], none:[255,154,92]};
+  var col = [0,229,255], mode = 'idle', level = 0, lvT = 0, t0 = performance.now();
+  function set(m){
+    mode = m;
+    if(m === 'idle')   T = {amp:0.035, speed:0.32, scan:0, glow:0.12, size:1};
+    if(m === 'listen') T = {amp:0.07,  speed:0.55, scan:0, glow:0.35, size:1.04};
+    if(m === 'think')  T = {amp:0.015, speed:1.4,  scan:1, glow:0.5,  size:0.98};
+    if(m === 'done')   T = {amp:0.02,  speed:0.25, scan:0, glow:0.4,  size:0.9};
+    if(m === 'none')   T = {amp:0.02,  speed:0.2,  scan:0, glow:0.2,  size:0.92};
+  }
+  function bump(v){ lvT = Math.max(lvT, v); }
+  function draw(now){
+    var t = (now - t0)/1000;
+    for(var k in T) P[k] += (T[k] - P[k])*0.08;
+    var c = COL[mode] || COL.idle; for(var ci = 0; ci < 3; ci++) col[ci] += (c[ci] - col[ci])*0.08;
+    level = Math.max(level*0.9, lvT); lvT *= 0.86;
+    ctx.clearRect(0, 0, W, H);
+    var cx = W/2, cy = H/2, R = W*RAD*P.size, a = t*P.speed, ca = Math.cos(a), sa = Math.sin(a), tl = 0.42, ct = Math.cos(tl), st = Math.sin(tl);
+    var scanY = Math.sin(t*2.3)*0.95, amp = P.amp + (mode === 'listen' ? level*0.2 : 0);
+    var breathe = (mode === 'idle' || mode === 'done') ? Math.sin(t*1.7)*0.03 : 0;
+    for(var i = 0; i < pts.length; i++){
+      var p = pts[i];
+      var x1 = p.x*ca - p.z*sa, z1 = p.x*sa + p.z*ca, y1 = p.y;
+      var y2 = y1*ct - z1*st, z2 = y1*st + z1*ct;
+      var wave = amp*Math.sin(p.lat*7 - t*(mode === 'listen' ? 7 : 3));                       // 위도를 따라 굴러가는 파도
+      var g = P.scan > 0.05 ? Math.exp(-Math.pow(y2 - scanY, 2)/0.012)*P.scan : 0;             // 찾는 중 : 훑고 지나가는 선
+      var k = 1 + wave + breathe;
+      var persp = 1/(1.55 - z2*0.45);
+      var px = cx + x1*k*R*persp*1.05, py = cy + y2*k*R*persp*1.05;
+      var depth = (z2 + 1)/2;
+      var sz = (W/150)*DOT*(0.45 + 0.75*depth)*(1 + g*1.6 + (mode === 'listen' ? level*0.5 : 0));
+      var al = Math.min(1, 0.16 + 0.84*depth*depth + g*0.8);
+      var mix = (y2 + 1)/2;                                                                        // 위는 하늘색 · 아래는 보라 쪽으로
+      var r = col[0] + (124 - col[0])*mix*0.55*(mode === 'done' || mode === 'none' ? 0 : 1),
+          gg = col[1] + (92 - col[1])*mix*0.55*(mode === 'done' || mode === 'none' ? 0 : 1),
+          b = col[2] + (255 - col[2])*mix*0.55*(mode === 'done' || mode === 'none' ? 0 : 1);
+      ctx.fillStyle = 'rgba(' + (r|0) + ',' + (gg|0) + ',' + (b|0) + ',' + al.toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(px, py, sz, 0, 6.2832); ctx.fill();
+    }
+    /* 은은한 빛무리 */
+    var gl = ctx.createRadialGradient(cx, cy, R*0.2, cx, cy, R*1.35);
+    gl.addColorStop(0, 'rgba(' + (col[0]|0) + ',' + (col[1]|0) + ',' + (col[2]|0) + ',' + (0.10*P.glow + level*0.08).toFixed(3) + ')');
+    gl.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
+  }
+  return {set:set, bump:bump, draw:draw, mode:function(){ return mode; }};
+}
+var small = Orb($('orbSmall'), 150, {dot:2.3, rad:0.4}), big = Orb($('orbBig'), 420, {dot:1.15, rad:0.37}), open = false;   // 작은 구슬은 점을 크게 — 버튼으로 잘 보이게
+(function loop(now){ small.draw(now); if(open) big.draw(now); requestAnimationFrame(loop); })(performance.now());
+
+/* ════════ 말 → 목적지 ════════ */
+var KD = {'영':0,'공':0,'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'륙':6,'칠':7,'팔':8,'구':9};
+function koNumber(run){
+  if(!/[십백천만]/.test(run)){ var s = ''; for(var i = 0; i < run.length; i++) s += KD[run.charAt(i)]; return s; }   // 「일삼오이사」 하나씩
+  var total = 0, sec = 0, cur = 0;                                                                                       // 「만삼천오백이십사」
+  for(var j = 0; j < run.length; j++){
+    var ch = run.charAt(j);
+    if(KD[ch] !== undefined) cur = KD[ch];
+    else if(ch === '십'){ sec += (cur || 1)*10; cur = 0; }
+    else if(ch === '백'){ sec += (cur || 1)*100; cur = 0; }
+    else if(ch === '천'){ sec += (cur || 1)*1000; cur = 0; }
+    else if(ch === '만'){ total += ((sec + cur) || 1)*10000; sec = 0; cur = 0; }
+  }
+  return String(total + sec + cur);
+}
+function norm(s){
+  s = String(s || '').replace(/[.,!?~·"'“”‘’]/g, ' ').replace(/(\d)\s*,\s*(\d)/g, '$1$2');
+  s = s.replace(/(\d+)\s*만\s*(\d+)/g, function(m, a, b){ return String(+a*10000 + (+b)); });
+  s = s.replace(/(일|이|삼|사|오)\s*층/g, function(m, a){ return KD[a] + '층'; });                     // 「삼층」 → 3층
+  s = s.replace(/(\d)\s*층\s*([영공일이삼사오육륙칠팔구십]+)\s*호/g, function(m, f, r){ return f + '층 ' + koNumber(r) + '호'; });   // 「3층 십호」 → 3층 10호
+  s = s.replace(/피씨|피시/g, 'PC').replace(/에이아이/g, 'AI').replace(/아이오티/g, 'IoT').replace(/알에프/g, 'RF').replace(/에스오씨/g, 'SoC');   // 소리 나는 대로 받아쓴 영어
+  /* 한글 숫자 : 두 글자 이상 이어지고 뒤에 호 · 번 · 끝이 오면 (「사무실」의 「사」 같은 한 글자는 건드리지 않는다) */
+  s = s.replace(/[영공일이삼사오육륙칠팔구십백천만]{2,}(?=\s*(호|번|$))/g, function(m){ return koNumber(m); });
+  return s.replace(/\s+/g, ' ').trim();
+}
+var STOP = ['어디에 있어요','어디에 있어','어디 있어요','어디 있어','어디예요','어디에요','어디야','어디','있나요','있어요','있어','가는 길','가는길','알려 줘','알려줘','알려주세요','찾아 줘','찾아줘','찾아주세요','가고 싶어','가고싶어','가 줘','가줘','가자','주세요','해 줘','해줘','좀','으로 가','로 가'];
+function tokensOf(s){
+  STOP.forEach(function(w){ s = s.split(w).join(' '); });
+  return s.split(/\s+/).map(function(t){ return t.length > 2 ? t.replace(/(으로|에서|에게|에는|은요|는요|이요|님이|님은|님)$/, '').replace(/(로|에|은|는|이|가|을|를|의|요)$/, '') : t; })
+          .filter(function(t){ return t && t.length >= 2; });
+}
+function match(text){
+  var s = norm(text), q = s.replace(/\s+/g, '').toLowerCase();
+  /* ① 「5층 24호」 */
+  var fl = /([1-5])\s*층\s*(\d{1,2})\s*호/.exec(s);
+  if(fl){ var c0 = '13' + fl[1] + ('0' + fl[2]).slice(-2); if(BY[c0]) return {kind:'room', items:[BY[c0]], said:s}; }
+  /* ② 번호 : 5자리는 그대로, 3~4자리는 끝자리로 */
+  var nums = s.match(/\d{3,5}/g) || [];
+  for(var i = 0; i < nums.length; i++){
+    var d = nums[i];
+    if(d.length === 5 && BY[d]) return {kind:'room', items:[BY[d]], said:s};
+    if(d.length === 5) return {kind:'nonum', num:d, said:s};
+    var hits = ROOMS.filter(function(r){ return r.code.slice(-d.length) === d; });
+    if(hits.length) return {kind:'room', items:hits.slice(0, 4), said:s};
+  }
+  /* ③ 시설 */
+  if(/화장실/.test(q)) return {kind:'info', said:s, html:'<b>화장실</b>은 1~5층 모두 같은 자리(중앙계단 옆 통로 안)에 있어요.<br>실제 앱에 넣을 때는 「화장실」이라고 말하면 지금 층 화장실로 바로 길안내해요.'};
+  if(/엘리베이터|승강기/.test(q)) return {kind:'info', said:s, html:'<b>엘리베이터</b>는 건물 한가운데, 1층 로비에서 바로 보여요.'};
+  if(/정문|후문|동문|서문/.test(q)) return {kind:'info', said:s, html:'출입문은 <b>정문 · 후문 · 동문 · 서문</b> 네 곳이에요. 문에 붙은 QR 을 찍으면 그 문에서 바로 출발해요.'};
+  /* ④ 이름 · 교수님 · 실 이름 */
+  var toks = tokensOf(s), scored = [];
+  ROOMS.forEach(function(r){
+    var sc = 0;
+    if(r.prof && q.indexOf(r.prof) >= 0) sc += 100;                                             // 교수님 성함(세 글자)
+    else if(r.prof && /교수/.test(q) && q.indexOf(r.prof.slice(1)) >= 0) sc += 35;               // 이름만(성 빼고) 들렸을 때
+    toks.forEach(function(t){ var tl = t.toLowerCase(); if(tl === '교수님' || tl === '교수' || tl === '연구실' && r.prof) return; if(r.ns.indexOf(tl) >= 0) sc += tl.length*6; });
+    if(q.length >= 3 && r.ns === q) sc += 40;
+    var fq = /([1-5])\s*층/.exec(s); if(fq && sc > 0) sc += (+fq[1] === r.floor) ? 25 : -20;     // 「5층 PC실」 — 층이 맞으면 위로
+    if(sc > 0) scored.push({r:r, sc:sc});
+  });
+  scored.sort(function(a, b){ return b.sc - a.sc || a.r.floor - b.r.floor; });
+  if(!scored.length || scored[0].sc < 12) return {kind:'none', said:s};
+  var top = scored[0].sc, keep = scored.filter(function(x){ return x.sc >= top*0.7; });
+  return {kind:'room', items:keep.slice(0, 5).map(function(x){ return x.r; }), more:keep.length > 5 ? keep.length : 0, said:s};
+}
+
+/* ════════ 화면 ════════ */
+var REC = null, gotFinal = null, alts = [], timer = 0, lastLen = 0, errShown = false;
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var inApp = /KAKAOTALK|Instagram|NAVER\(inapp|FBAN|FBAV|Line\//i.test(navigator.userAgent);
+var EX = ['13524호 어디야', '김현섭 교수님 연구실', '5층 PC실', '학과사무실', '3층 10호', '화장실'];
+$('chips').innerHTML = EX.map(function(e){ return '<button type="button">' + esc(e) + '</button>'; }).join('');
+[].forEach.call($('chips').children, function(b){ b.onclick = function(){ stopRec(); showSaid(b.textContent, ''); think([b.textContent]); }; });
+
+function status(t, cls){ var el = $('st'); el.textContent = t; el.className = 'st' + (cls ? ' ' + cls : ''); }
+function showSaid(fin, inter){ $('said').innerHTML = esc(fin || '') + (inter ? '<span class="interim">' + esc(inter) + '</span>' : ''); }
+function openSheet(){ open = true; $('sheet').classList.add('on'); $('dim').classList.add('on'); }
+function closeSheet(){ stopRec(); open = false; $('sheet').classList.remove('on'); $('dim').classList.remove('on'); small.set('idle'); }
+function stopRec(){ clearTimeout(timer); if(REC){ try{ REC.onend = null; REC.abort(); }catch(e){} REC = null; } }
+function setMode(m){ big.set(m); small.set(m === 'listen' || m === 'think' ? m : 'idle'); }
+
+function listen(){
+  openSheet(); $('sheet').classList.remove('has'); $('res').innerHTML = ''; showSaid('', ''); errShown = false; gotFinal = null; alts = []; lastLen = 0;
+  if(!SR){
+    setMode('none');
+    status(inApp ? '이 앱 안 브라우저는 음성 인식이 안 돼요' : '이 브라우저는 음성 인식이 안 돼요', 'warn');
+    $('hint').textContent = inApp ? '오른쪽 위 ⋮ → 「다른 브라우저로 열기」(크롬 · 사파리) — 아래 예시나 글자로 시험할 수 있어요' : '크롬 · 삼성 인터넷 · 아이폰 사파리에서 열어 주세요 — 아래 예시나 글자로 시험할 수 있어요';
+    $('kb').classList.add('on'); return;
+  }
+  stopRec();
+  var r = new SR(); REC = r;
+  r.lang = 'ko-KR'; r.interimResults = true; r.continuous = false; r.maxAlternatives = 3;
+  setMode('listen'); status('듣고 있어요…'); $('hint').textContent = '말이 끝나면 저절로 멈춰요';
+  r.onspeechstart = function(){ big.bump(0.7); small.bump(0.7); };
+  r.onsoundstart = function(){ big.bump(0.35); };
+  r.onresult = function(e){
+    var fin = '', inter = '';
+    for(var i = e.resultIndex; i < e.results.length; i++){
+      var res = e.results[i];
+      if(res.isFinal){ fin += res[0].transcript; alts = []; for(var k = 0; k < res.length; k++) alts.push(res[k].transcript); }
+      else inter += res[0].transcript;
+    }
+    var len = (fin + inter).length; if(len > lastLen){ big.bump(Math.min(1, 0.45 + (len - lastLen)*0.08)); small.bump(0.6); } lastLen = len;
+    showSaid(fin, inter);
+    if(fin) gotFinal = fin;
+  };
+  r.onerror = function(e){
+    errShown = true; setMode('none');
+    var m = {'not-allowed':'마이크를 쓸 수 없어요 — 주소창 왼쪽 자물쇠 → 마이크 → 허용', 'service-not-allowed':'마이크를 쓸 수 없어요 — 주소창 왼쪽 자물쇠 → 마이크 → 허용',
+             'no-speech':'잘 안 들렸어요 — 구슬을 다시 누르고 말해 주세요', 'audio-capture':'마이크를 찾지 못했어요', 'network':'음성 인식은 인터넷이 필요해요', 'aborted':''}[e.error];
+    if(m === '') return;
+    status(m || ('음성 인식이 멈췄어요 (' + e.error + ')'), 'warn'); $('hint').textContent = '아래 예시를 누르거나 「⌨ 글자로」로도 시험할 수 있어요';
+  };
+  r.onend = function(){
+    clearTimeout(timer); REC = null;
+    if(gotFinal){ think(alts.length ? alts : [gotFinal]); return; }
+    if(!errShown){ setMode('none'); status('잘 안 들렸어요 — 다시 말해 주세요', 'warn'); }
+  };
+  try{ r.start(); }catch(e){ setMode('none'); status('음성 인식을 시작하지 못했어요', 'warn'); }
+  timer = setTimeout(function(){ try{ r.stop(); }catch(e){} }, 10000);   // 10초 안에 안 끝나면 멈춘다
+}
+function think(list){
+  setMode('think'); status('찾고 있어요…'); $('hint').textContent = ''; $('res').innerHTML = '';
+  setTimeout(function(){
+    /* 들린 말 후보(최대 3개) 중 가장 잘 맞는 것으로 */
+    var best = null;
+    list.forEach(function(t){
+      var m = match(t), w = m.kind === 'room' ? (m.items.length === 1 ? 3 : 2) : (m.kind === 'info' ? 2 : (m.kind === 'nonum' ? 1 : 0));
+      if(!best || w > best.w) best = {m:m, w:w, t:t};
+    });
+    render(best.m, best.t);
+  }, 650);
+}
+function render(m, t){
+  var res = $('res');
+  $('sheet').classList.add('has');
+  if(m.kind === 'room'){
+    setMode('done');
+    status(m.items.length === 1 ? '찾았어요!' : (m.more ? '여러 곳이에요 — 층이나 번호도 말해 주세요' : ('비슷한 곳 ' + m.items.length + '곳')), 'ok');
+    res.innerHTML = m.items.map(function(r, i){
+      return '<div class="card' + (i === 0 ? ' top1' : '') + '"><div class="no"><b>' + r.code + '</b><small>' + r.floor + '층</small></div>' +
+             '<div class="nm">' + esc(r.name) + '</div><a href="' + APP + '?to=' + r.code + '">길안내 시작 →</a></div>';
+    }).join('');
+    $('hint').textContent = '「' + m.said + '」(으)로 들었어요';
+  } else if(m.kind === 'info'){
+    setMode('done'); status('알려 드릴게요', 'ok'); res.innerHTML = '<div class="info">' + m.html + '</div>';
+  } else if(m.kind === 'nonum'){
+    setMode('none'); status(m.num + '호는 3호관에 없어요', 'warn');
+    res.innerHTML = '<div class="info">번호를 다시 말해 주세요 — 3호관 호실은 <b>13101 ~ 13524</b>처럼 13으로 시작해요.</div>';
+  } else {
+    setMode('none'); status('못 찾았어요 — 다르게 말해 볼까요?', 'warn');
+    res.innerHTML = '<div class="info">「' + esc(m.said || t) + '」(으)로 들었어요.<br>호실 번호(예 : <b>13524</b>)나 교수님 성함(예 : <b>김현섭 교수님</b>)으로 말해 주세요.</div>';
+  }
+}
+$('fab').onclick = listen; $('fakeSearch').onclick = listen; $('btnAgain').onclick = listen; $('btnClose').onclick = closeSheet; $('dim').onclick = closeSheet;
+$('btnKb').onclick = function(){ $('kb').classList.toggle('on'); if($('kb').classList.contains('on')) setTimeout(function(){ $('kbIn').focus(); }, 50); };
+function kbGo(){ var v = $('kbIn').value.trim(); if(!v) return; stopRec(); showSaid(v, ''); think([v]); }
+$('kbGo').onclick = kbGo; $('kbIn').addEventListener('keydown', function(e){ if(e.key === 'Enter') kbGo(); });
+window.__voiceSample = {match:match, norm:norm, think:think, listen:listen, closeSheet:closeSheet,   // 검사용
+  demo:function(m, said, inter){ openSheet(); $('sheet').classList.remove('has'); $('res').innerHTML = ''; setMode(m); if(m === 'listen'){ status('듣고 있어요…'); $('hint').textContent = '말이 끝나면 저절로 멈춰요'; big.bump(0.9); } showSaid(said || '', inter || ''); }};
+})();
+</script>
+</body>
+</html>

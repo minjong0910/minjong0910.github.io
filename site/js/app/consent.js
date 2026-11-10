@@ -78,7 +78,26 @@ var CONSENT = (function(){
   function agreed(){ if(again()) return false; var a = ls(K.agree); return !!(a && (a.v || 1) >= AGREE_V); }
   function pvOK(){ return !!ls(K.pv); }
   function camOK(){ return ls(K.cam) === 'yes'; }
-  function micOK(){ return ls(K.mic) === 'yes'; }
+  /* 마이크 — 11/11 사용자 「동의란에서 동의했는데 오브를 누르니 또 동의하라고 뜬다」 :
+     동의 화면에서 휴대폰 마이크 창을 그냥 닫거나 놓치면(getUserMedia 실패) 체크가 꺼진 채 'no' 로 저장돼, 오브를 누를 때마다 앱 창이 떴다.
+     → 마이크는 「동의 화면의 체크 = 앱 동의」(휴대폰 창의 결과와 따로) · 휴대폰이 이미 허락했으면(permissions 'granted') 앱 창 없이 바로.
+     그 사이(첫 마이크 판)에 'no' 로 저장된 폰은 한 번 'yes' 로 고친다(b3nav_mic_fix — 그 뒤에 일부러 끈 것은 그대로) */
+  var MIC_PERM = '';
+  try{
+    if(navigator.permissions && navigator.permissions.query){
+      navigator.permissions.query({name: 'microphone'}).then(function(p){
+        MIC_PERM = p.state; p.onchange = function(){ MIC_PERM = p.state; };
+      }, function(){});
+    }
+  }catch(e){}
+  try{
+    if(!ls('b3nav_mic_fix')){
+      var _a0 = ls(K.agree);
+      if(ls(K.mic) === 'no' && _a0 && (_a0.v || 1) >= 5) ls(K.mic, 'yes');
+      ls('b3nav_mic_fix', 1);
+    }
+  }catch(e){}
+  function micOK(){ return ls(K.mic) === 'yes' || MIC_PERM === 'granted'; }
   function notiSupported(){ return typeof Notification !== 'undefined'; }
   function notiOK(){ return ls(K.noti) === 'yes' && notiSupported() && Notification.permission === 'granted'; }
   function cameFromShare(){ try{ return !!(typeof PWA !== 'undefined' && PWA.peekShare && PWA.peekShare()); }catch(e){ return false; } }
@@ -102,7 +121,7 @@ var CONSENT = (function(){
   function permAsk(k){ return k === 'cam' ? camAsk : (k === 'mic' ? micAsk : notiAsk); }
   function permFailMsg(k, why){
     if(k === 'cam') return why === 'none' ? T('이 기기에서 카메라를 찾지 못했어요 — QR 을 찍을 때 다시 물어볼게요', 'No camera found — we will ask again when you scan a QR') : T('괜찮아요 — QR · 건의함 사진을 찍을 때 다시 물어볼게요', 'OK — we will ask again when you use the camera');
-    if(k === 'mic') return why === 'none' ? T('이 기기에서 마이크를 찾지 못했어요 — 오브를 누를 때 다시 물어볼게요', 'No microphone found — we will ask again when you tap the orb') : T('괜찮아요 — 오브를 눌러 말로 찾을 때 다시 물어볼게요', 'OK — we will ask again when you tap the orb');
+    if(k === 'mic') return why === 'none' ? T('이 기기에서 마이크를 찾지 못했어요', 'No microphone found on this device') : T('휴대폰이 마이크를 아직 허락하지 않았어요 — 오브를 누를 때 휴대폰이 물으면 「허용」을 눌러 주세요', 'Your phone has not allowed the microphone yet — tap “Allow” when it asks after you tap the orb');
     return notiFailMsg(why);
   }
   function notiAsk(cb){
@@ -258,7 +277,8 @@ var CONSENT = (function(){
       var k = keys[i];
       st[k] = true; paint();
       permAsk(k)(function(ok, why){
-        st[k] = ok; paint();
+        if(k !== 'mic') st[k] = ok;                                   // 마이크는 체크 = 앱 동의(휴대폰 창 결과와 따로 — 위 micOK)
+        paint();
         if(!ok) U.toast(permFailMsg(k, why), true);
         ask(keys, i + 1);
       });
@@ -291,7 +311,7 @@ var CONSENT = (function(){
         if(i >= need.length){ start(); return; }
         var k = need[i];
         permAsk(k)(function(ok, why){
-          st[k] = ok;
+          if(k !== 'mic') st[k] = ok;                                 // 마이크는 체크한 그대로 동의 — 오브에서 앱 창이 다시 뜨지 않게
           if(!ok) U.toast(permFailMsg(k, why), true);
           next(i + 1);
         });

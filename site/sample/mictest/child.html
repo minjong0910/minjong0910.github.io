@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>견본처럼</title>
+<!-- 마이크 시험 ② — 견본 3(폰에서 잘 됐던 방식)처럼, 틀(iframe) 안의 단추가 바깥 쪽의 음성 인식을 부른다 -->
+<style>
+  html, body{ margin:0; background:#0E1A2B; font-family:Pretendard,'Malgun Gothic',sans-serif; }
+  button{ display:block; width:calc(100% - 16px); margin:8px; padding:16px; font-size:18px; font-weight:700; border-radius:14px; border:0; color:#0A0E14; background:#9C8CFF; }
+</style>
+</head>
+<body>
+<button id="b2">② 견본처럼(틀 안에서) 말해 보기</button>
+<script>
+document.getElementById('b2').onclick = function(){
+  try{ if(parent && parent.runRec) parent.runRec('two', '②'); }catch(e){ try{ parent.MT.log('② 실패 : ' + e); }catch(x){} }
+};
+</script>
+</body>
+</html>

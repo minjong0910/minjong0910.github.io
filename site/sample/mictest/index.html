@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>마이크 시험</title>
+<!-- 2026-11-11 사용자 「오브를 누르면 『말씀해주세요』만 떠 있고 말해도 글자가 안 나온다(크롬)」 — 어디서 멈추는지 폰에서 한 번에 보는 시험 쪽.
+     앱은 건드리지 않는다. ① 앱처럼(이 쪽에서 바로 음성 인식) ② 견본 3처럼(틀 안 단추가 바깥 쪽 음성 인식을 씀 — 폰에서 잘 됐던 방식) ③ 마이크만 켜 보기.
+     맨 위 「결과」 줄만 알려 주면 원인을 안다. sample/ 은 폰 저장 목록(오프라인)에서 빠져 있다. -->
+<style>
+  :root{ color-scheme: dark; }
+  body{ margin:0; background:#0A0E14; color:#EAF4FF; font-family:Pretendard,'Malgun Gothic',sans-serif; }
+  .w{ max-width:520px; margin:0 auto; padding:18px 16px 40px; }
+  h1{ font-size:22px; margin:6px 0 4px; }
+  p.s{ margin:0 0 14px; color:#A9C1D9; font-size:14px; line-height:1.5; }
+  #sum{ background:#12253A; border:2px solid #4FC3F7; border-radius:14px; padding:12px 14px; font-size:17px; line-height:1.55; margin-bottom:14px; }
+  #sum b{ color:#FFD54F; }
+  button{ display:block; width:100%; margin:10px 0; padding:16px; font-size:18px; font-weight:700; border-radius:14px; border:0; color:#0A0E14; background:#4FC3F7; }
+  button.b2{ background:#9C8CFF; } button.b3{ background:#3FE08A; }
+  iframe{ width:100%; height:86px; border:1px dashed #2A4D73; border-radius:14px; background:#0E1A2B; }
+  #log{ white-space:pre-wrap; font-size:12.5px; line-height:1.5; background:#05080C; border:1px solid #1E3048; border-radius:10px; padding:10px; min-height:120px; color:#9FB2C8; }
+  small{ color:#6F8AA6; }
+</style>
+</head>
+<body>
+<div class="w">
+  <h1>🎤 마이크 시험</h1>
+  <p class="s">단추를 차례로 누르고, 「말씀하세요」가 나오면 <b>「삼층 화장실」</b>이라고 말해 주세요.<br>끝나면 아래 노란 「결과」 줄을 알려 주세요.</p>
+  <div id="sum">결과 : 아직 시험 전</div>
+  <button class="b1" id="b1">① 앱처럼 말해 보기</button>
+  <iframe id="kid" src="child.html" title="견본처럼 말해 보기"></iframe>
+  <button class="b3" id="b3">③ 마이크만 켜 보기</button>
+  <div id="log"></div>
+  <p class="s"><small>앱은 건드리지 않는 시험 쪽이에요.</small></p>
+</div>
+<script>
+(function(){
+  'use strict';
+  var T0 = Date.now(), logEl = document.getElementById('log'), sumEl = document.getElementById('sum');
+  var R = { perm:'확인 중', one:'아직', two:'아직', three:'아직' };
+  var PERM_KO = { granted:'허용됨', denied:'막힘', prompt:'물어봄' };
+  function log(s){ logEl.textContent += ((Date.now() - T0) / 1000).toFixed(1) + '초  ' + s + '\n'; }
+  function paint(){
+    sumEl.innerHTML = '결과 : 마이크 <b>' + R.perm + '</b> · ① <b>' + R.one + '</b> · ② <b>' + R.two + '</b> · ③ <b>' + R.three + '</b>';
+  }
+  window.MT = { log:log, set:function(k, v){ R[k] = v; paint(); } };
+  window.__MT_HOST = true;
+  var ua = navigator.userAgent, m = /Chrome\/(\d+)/.exec(ua), and = /Android\s*([\d.]+)/.exec(ua);
+  log('브라우저 : ' + (/SamsungBrowser/.test(ua) ? '삼성 인터넷' : /CriOS|Chrome/.test(ua) ? '크롬 ' + (m ? m[1] : '') : ua.slice(0, 60)) + (and ? ' · 안드로이드 ' + and[1] : ''));
+  log('음성 인식 기능 : ' + ((window.SpeechRecognition || window.webkitSpeechRecognition) ? '있음' : '없음'));
+  try{
+    navigator.permissions.query({name:'microphone'}).then(function(p){
+      R.perm = PERM_KO[p.state] || p.state; paint(); log('마이크 허락 상태 : ' + R.perm);
+      p.onchange = function(){ R.perm = PERM_KO[p.state] || p.state; paint(); log('마이크 허락 상태 바뀜 : ' + R.perm); };
+    }, function(e){ R.perm = '모름'; paint(); log('허락 상태를 못 읽음 : ' + e); });
+  }catch(e){ R.perm = '모름'; paint(); }
+  paint();
+
+  /* 음성 인식 한 번 — key : 'one'(이 쪽) · 'two'(틀 안에서 부름) */
+  window.runRec = function(key, label){
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){ R[key] = '기능 없음'; paint(); return; }
+    var r = new SR(), got = '', seen = {}, ended = false, err = '';
+    r.lang = 'ko-KR'; r.interimResults = true; r.continuous = false; r.maxAlternatives = 3;
+    function st(s){ R[key] = s; paint(); }
+    ['start','audiostart','soundstart','speechstart','speechend','soundend','audioend','nomatch'].forEach(function(ev){
+      r['on' + ev] = function(){ seen[ev] = 1; log(label + ' ' + ev); if(ev === 'start') st('말씀하세요…'); if(ev === 'audiostart') st('마이크 열림 — 말씀하세요'); if(ev === 'speechstart') st('말소리 들어옴'); };
+    });
+    r.onresult = function(e){ var t = ''; for(var i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript; got = t; log(label + ' 글자 : ' + t); st('글자 받음 「' + t + '」'); };
+    r.onerror = function(e){ err = e.error || '?'; log(label + ' 오류 : ' + err + (e.message ? ' (' + e.message + ')' : '')); };
+    r.onend = function(){
+      ended = true; log(label + ' end');
+      if(got) st('성공 「' + got + '」');
+      else if(err) st('오류 ' + err);
+      else if(seen.speechstart) st('말소리는 들어왔는데 글자 없음');
+      else if(seen.audiostart) st('마이크는 열렸는데 소리 못 받음');
+      else if(seen.start) st('시작은 했는데 마이크가 안 열림');
+      else st('시작조차 안 됨');
+    };
+    try{ r.start(); log(label + ' 시작 요청'); st('시작 요청함'); }catch(e){ log(label + ' 시작 실패 : ' + e); st('시작 실패 ' + (e.name || '')); return; }
+    setTimeout(function(){ if(!ended){ log(label + ' 10초 — 멈춤 요청'); try{ r.stop(); }catch(e){} } }, 10000);
+    setTimeout(function(){
+      if(!ended){
+        log(label + ' 13초가 지나도 끝나지 않음');
+        st(seen.audiostart ? '마이크는 열렸는데 끝나지 않음' : seen.start ? '시작은 했는데 마이크가 안 열린 채 멈춤' : '시작 요청 뒤 아무 반응 없음(멈춤)');
+        try{ r.abort(); }catch(e){}
+      }
+    }, 13000);
+  };
+  document.getElementById('b1').onclick = function(){ window.runRec('one', '①'); };
+  document.getElementById('b3').onclick = function(){
+    if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){ R.three = '기능 없음'; paint(); return; }
+    R.three = '켜는 중'; paint(); log('③ 마이크 켜기 요청');
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+      var tr = s.getAudioTracks()[0]; log('③ 마이크 켜짐 : ' + (tr ? tr.label || '이름 없음' : '트랙 없음'));
+      R.three = '켜짐'; paint(); setTimeout(function(){ s.getTracks().forEach(function(t){ t.stop(); }); log('③ 마이크 끔'); }, 800);
+    }, function(e){ log('③ 실패 : ' + e.name + ' ' + (e.message || '')); R.three = '실패 ' + e.name; paint(); });
+  };
+})();
+</script>
+</body>
+</html>

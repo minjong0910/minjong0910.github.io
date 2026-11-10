@@ -8,6 +8,7 @@
             (2026-11-03 내 시간표 · 길 공유하기가 들어가 g11 설정 · g12 ☰ 을 다시 찍고, g13 길 공유하기 · g14 내 시간표 · g15 수업 알림을 더함
              — 사용자 : 「설명은 최대한 간단하고 명확하게」)
             (2026-11-10 첫 화면 아래 말로 찾기 오브가 들어가 g01 을 다시 찍고 6번 「말로 찾기」를 더함 — voice.js)
+            (2026-11-10 음성 안내(tts.js) — g08 길안내를 다시 찍고 6번 「음성 안내」, g11 설정을 다시 찍고 「음성 안내」 · 「고객 센터」를 더함)
             그림의 번호 = 아래 설명의 번호.
    · ui.js 의 GUIDE_PAGES · guideRender 를 이 파일이 갈아 끼운다 (ui.js 는 건드리지 않는다).
    · 그림을 누르면 zoom.js 의 openZoom 으로 크게 본다. */
@@ -113,6 +114,9 @@ var HOWTO = [
        'Lost?', 'Tap if you can’t find the place in the photo. Pick the photo you see, or your floor (elevator photos), and the steps start again from there.'],
       ['안내판', '공항 안내판처럼 노란 칸의 그림이 갈 방향(화살표 · 엘리베이터)을, 큰 글씨가 지금 할 일을 알려 줘요. 아래 작은 글씨는 영어예요.',
        'Sign', 'Like an airport sign: the yellow box shows the way (arrow or elevator) and the big text tells you what to do.'],
+      /* 2026-11-10 음성 안내(tts.js) — 그림도 그 단추가 보이게 다시 찍음(번호 6) */
+      ['음성 안내', '단계가 바뀔 때마다 안내판 문장을 소리로 읽어 줘요. 걸으면서 화면을 안 봐도 돼요. 이 단추로 켜고 끄고(설정에서도), 켜져 있을 때 안내판을 누르면 다시 들려줘요.',
+       'Voice guidance', 'Reads each step aloud so you can walk without watching the screen. Turn it on or off here (or in Settings); tap the sign to hear it again.'],
       ['다음', '사진 속 자리에 오면 눌러요. 마지막 단계에서는 「도착했어요」로 바뀌어요. 왼쪽 버튼은 앞 단계로 돌아가요. 사진을 좌우로 밀어도 넘어가요.',
        'Next', 'Tap when you reach the spot in the photo. On the last step it says "Arrived". The left button goes back. You can also swipe the photo.']
     ] },
@@ -167,9 +171,11 @@ var HOWTO = [
         items:[
           ['언어', '「한글」 / 「English」를 누르면 앱 전체 말이 바로 바뀌어요.', 'Language', 'Tap 한글 / English to switch the whole app.'],
           ['쉬운 사용모드', '여기서도 켜고 끌 수 있어요.', 'Easy mode', 'Turn it on or off here too.'],
+          ['음성 안내', '길안내 단계를 소리로 읽어 줄지 정해요. 길안내 화면 안내판의 🔊 단추와 같아요.', 'Voice guidance', 'Whether steps are read aloud — same as the 🔊 button on the sign.'],
           ['이용안내', '지금 보고 있는 이 안내예요.', 'User guide', 'This guide.'],
           ['건의함', '앱 사진이 실제 모습과 다르면 지금 모습을 찍어서 보내 주세요. 확인한 뒤 고쳐서 다음에 오는 사람에게도 도움이 돼요.',
            'Suggestion box', 'If a photo looks different from reality, send a new photo. It helps the next visitors.'],
+          ['고객 센터', '앱이 고장 나면 관리자에게 이메일을 보내거나 상담원과 전화할 수 있어요.', 'Customer center', 'If the app breaks, email the admin or call an agent.'],
           ['길 공유하기', '호실만 넣으면 카톡 · 문자로 길을 보내요.', 'Share a route', 'Send directions by chat with just a room number.'],
           ['내 시간표', '내 수업을 넣어 두면 수업 시간에 바로 길안내가 떠요.', 'My timetable', 'Directions to your next class right away.'],
           ['앱 다운로드', '폰 홈 화면에 앱처럼 깔 수 있어요. 삼성(안드로이드)은 버튼 한 번, 아이폰은 그림으로 방법을 알려 줘요.',

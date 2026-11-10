@@ -90,6 +90,11 @@
       <b data-ko="쉬운 사용모드" data-en="Easy mode">쉬운 사용모드</b>
       <button class="ghost ezToggle ezRowBtn" style="padding:6px 14px;border-radius:8px;" onclick="EASY.toggle()"><span class="ezState">꺼짐</span></button>
     </div>
+    <!-- 음성 안내 (2026-11-10 사용자 · js/app/tts.js) — 길안내 단계마다 소리로 읽어 준다. 길안내 화면의 노란 안내판 🔊 단추와 같은 값 -->
+    <div class="row">
+      <b data-ko="음성 안내" data-en="Voice guidance">음성 안내</b>
+      <button class="ghost ttsRowBtn" style="padding:6px 14px;border-radius:8px;" onclick="TTS.toggle()"><span class="ttsState">켜짐</span></button>
+    </div>
     <div class="row">
       <b data-ko="이용안내" data-en="User Guide">이용안내</b>
       <button class="ghost" style="padding:6px 14px;border-radius:8px;" onclick="go('sguide');guideRender(0);" data-ko="보기 →" data-en="View →">보기 →</button>
@@ -793,5 +798,7 @@
 <script src="js/app/via.js"></script>
 <!-- 말로 찾기 — 첫 화면 아래 점 구슬(오브) + 「눌러서 목적지를 말해주세요.」 → 말한 대로 「여기가 맞나요?」 + 사진 → 길안내 첫 화면으로 바로 (2026-11-10 사용자, 견본 /sample/voice3/) — shell.js go · appBackStep 을 감싼다 -->
 <script src="js/app/voice.js"></script>
+<!-- 음성 안내 — 길안내 단계마다 문장을 소리로 읽고 짧게 진동 · 도착하면 「○○, 도착했습니다」 · 노란 안내판 🔊 · 설정 「음성 안내」 (2026-11-10 사용자) — guide.js render6 · startGuide, shell.js go 를 감싼다 -->
+<script src="js/app/tts.js"></script>
 </body>
 </html>

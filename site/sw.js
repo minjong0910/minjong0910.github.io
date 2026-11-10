@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '3e2b33c263c2';   // 파일 272개 · 18.1MB
+var VERSION = '042f47d1bf3a';   // 파일 273개 · 18.1MB
 var FILES = [
   ['3d/realistic.html','97d7383db21e',81305],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','4f922be51db6',180549],
+  ['css/app.css','4b2a538289b2',181425],
   ['css/boot.css','0b23cf08e0b6',2841],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
@@ -217,10 +217,10 @@ var FILES = [
   ['guide/g05_search.jpg','aa54cc2d0655',30962],
   ['guide/g06_3d.jpg','6b51ff0988da',94498],
   ['guide/g07_floor.jpg','71e7e512e012',68313],
-  ['guide/g08_step.jpg','d68fb2f2df34',130650],
+  ['guide/g08_step.jpg','0021489152ff',113586],
   ['guide/g09_arrive.jpg','22079be4a34b',88226],
   ['guide/g10_fav.jpg','24b3a50caa92',25747],
-  ['guide/g11_settings.jpg','199aab72b946',80862],
+  ['guide/g11_settings.jpg','2d5c81238719',95571],
   ['guide/g12_menu.jpg','b79f8d521356',76290],
   ['guide/g13_share.jpg','a4f01744c900',127047],
   ['guide/g14_tt.jpg','e1b7a9f36308',74555],
@@ -239,7 +239,7 @@ var FILES = [
   ['img/splash.mp4','d2f01cf420ad',277674],
   ['img/splash_end.jpg','040a235d9bd8',43535],
   ['img/splash_first.jpg','c68ac1b0d37e',29924],
-  ['index.html','bb8ccddcc9b5',64685],
+  ['index.html','47c7542be21f',65445],
   ['js/app/aid.js','6997dafbe012',33801],
   ['js/app/boot.js','9a7f3034fbe7',9242],
   ['js/app/building.js','6ae383d48918',23814],
@@ -247,7 +247,7 @@ var FILES = [
   ['js/app/easy.js','c4d503eeaa8b',26453],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','60e54dd09ede',51753],
-  ['js/app/howto.js','02e254ed47ea',25868],
+  ['js/app/howto.js','9efd61f8ae79',27023],
   ['js/app/icons.js','fcb873916bfb',22326],
   ['js/app/live.js','641f671b6fff',2510],
   ['js/app/overview3d.js','5568efd586df',115350],
@@ -275,6 +275,7 @@ var FILES = [
   ['js/app/support.js','2a86345f7909',12935],
   ['js/app/timetable.js','0d5a67e63151',37352],
   ['js/app/topmenu.js','0351042966f1',4319],
+  ['js/app/tts.js','01957cca4f99',9117],
   ['js/app/ui.js','fd0ccd5bd70a',29957],
   ['js/app/via.js','5ebda6cac5b1',11297],
   ['js/app/view3d.js','8cdb4d2f2f63',52017],

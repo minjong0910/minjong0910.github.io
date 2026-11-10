@@ -2149,3 +2149,12 @@ html.lt .vsName small{color:#44546A;}
 html.lt .vsAlt button{border-color:#9CC8DA;background:rgba(8,145,178,.06);color:#0B5568;}
 html.lt .vsAlt button.pick{border-color:#0891B2;background:rgba(8,145,178,.16);color:#0F1B2D;}
 html.lt .vsAgain{border-color:#0891B2;color:#0891B2;}
+
+/* ── 음성 안내 (2026-11-10 사용자 · js/app/tts.js) : 노란 안내판 오른쪽 🔊 단추 — 켜짐 노랑 · 꺼짐 회색 · 읽는 동안 깜빡 ── */
+.stSign .ttsBtn{flex:none;align-self:center;width:2.75rem;height:2.75rem;margin:0 0.6rem 0 0.1rem;padding:0;border-radius:50%;border:2px solid #FFC400;
+  background:rgba(255,196,0,.08);color:#FFC400;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.stSign .ttsBtn svg{width:1.4rem;height:1.4rem;}
+.stSign .ttsBtn.off{border-color:#5A5A5A;background:transparent;color:#8A8A8A;}
+.stSign .ttsBtn.talk{animation:ttsPulse 1.1s ease-in-out infinite;}
+@keyframes ttsPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,196,0,.55)}50%{box-shadow:0 0 0 7px rgba(255,196,0,0)}}
+@media (prefers-reduced-motion: reduce){ .stSign .ttsBtn.talk{animation:none;} }

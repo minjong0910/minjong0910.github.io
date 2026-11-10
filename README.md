@@ -56,7 +56,7 @@ pwsh -File 검사.ps1 -Full   + 1인칭 로드뷰 9가지를 끝까지 재생 (�
 | `site/` | **앱 — 이 폴더가 그대로 배포된다** |
 | `site/index.html` | 화면 틀(HTML)만. 코드·모양·자료는 아래 파일을 순서대로 부른다 |
 | `site/css/` | 모양 (`app.css`, 부팅 화면 `boot.css`) — 크기는 **모두 `rem`**, 아래 「화면 크기」 |
-| `site/js/app/` | 앱 코드 38개 파일 (아래 「구조」) |
+| `site/js/app/` | 앱 코드 39개 파일 (아래 「구조」) |
 | `site/js/vendor/` | three.js r128 · JSZip 3.10.1 · jsQR 1.4.0 |
 | `site/lib/` | TensorFlow.js · MobileNet · Tesseract.js — AI·글자 읽기를 쓸 때만 받는다 |
 | `site/data/photos.js` + `photos/` | 장소 사진 152곳 + 건물·출입문 사진, 그 목록 |
@@ -65,7 +65,7 @@ pwsh -File 검사.ps1 -Full   + 1인칭 로드뷰 9가지를 끝까지 재생 (�
 | `site/3d/` | 「여기가 맞나요?」 화면의 실사 3D (별도 페이지 + 그림 21장) |
 | `site/legal/` | 개인정보 처리방침 · 오픈소스 라이선스 화면 |
 | `site/manifest.webmanifest` · `site/img/icon-*` | 앱 이름("3호관 길안내")·아이콘 — 홈 화면에 설치할 때 쓴다 |
-| `site/sw.js` | 인터넷 없이 열기 — 앱 파일 270개(18MB)를 폰에 저장 (목록은 `도구/오프라인목록.ps1` 이 쓴다) |
+| `site/sw.js` | 인터넷 없이 열기 — 앱 파일 271개(18MB)를 폰에 저장 (목록은 `도구/오프라인목록.ps1` 이 쓴다) |
 | `site/eval_all.html` | 정확도 측정 페이지 (아래 「정확도」) — 저장소 맨 위의 `eval_ablation.html` · `eval_audit.html` · `eval.html` · `eval2.html` 도 측정용 |
 | `QR인쇄/` | 출입문 QR 인쇄용 그림 4장(`정문_MAIN.png` …) + A4 인쇄본 PDF (`도구/QR_만들기.ps1` 이 만든다) |
 | `tests/` | 자동 검사 (아래 「검사」) · `tests/rules/` 서버 규칙 시험 · `tests/ai_reject.html` 건물 밖 사진 측정 |
@@ -98,7 +98,7 @@ pwsh -File 검사.ps1 -Full   + 1인칭 로드뷰 9가지를 끝까지 재생 (�
 | `photos.js` | 장소 사진 목록·표시·관리자 사진 넣기 · 사진 자료 묶음(zip) |
 | `roomfix.js` | 관리자 「구성 및 변경」 — 층 지도에서 방을 눌러 번호·이름·메모를 고친다(서버 `rooms`), 보이는 번호 `dispNo()` |
 | `suggest.js` · `sugai.js` · `sugdb.js` · `aid.js` | 건의함 · AI 판별 · 서버 · AI 자료집 |
-| `consent.js` · `share.js` · `timetable.js` | 처음 동의 화면 · 길 공유하기 · 내 시간표 |
+| `consent.js` · `share.js` · `timetable.js` · `support.js` | 처음 동의 화면 · 길 공유하기 · 내 시간표 · 고객 센터(관리자 이메일 · 상담원 전화 — 시연용이라 실제로 보내거나 걸지 않는다) |
 | `easy.js` · `howto.js` · `icons.js` · `zoom.js` | 쉬운 사용모드 · 사진 이용안내 · 아이콘 · 사진 확대 |
 | `qrnav.js` · `boot.js` · `start.js` · `live.js` | QR · 부팅 화면 · 시작 · 발표장 「지금 켜 둔 사람」 |
 | `pwa.js` | 앱 다운로드(설치 안내) · `sw.js` 등록 · 출입문 QR 주소(`?gate=`) 받기 · 문제 기록(`DIAG`) — `head` 에서 일찍 읽는다 |
@@ -110,7 +110,7 @@ pwsh -File 검사.ps1 -Full   + 1인칭 로드뷰 9가지를 끝까지 재생 (�
 - **설정 → 앱 다운로드** (`PWA.install()`) — 기기마다 다른 안내 :
   안드로이드 크롬·삼성 인터넷은 버튼 한 번에 브라우저 설치 창 · 아이폰·아이패드는 그림 3단계(공유 → 홈 화면에 추가 → 추가, 아이콘·이름과 함께) ·
   카카오톡·인스타그램 같은 앱 안 브라우저는 "크롬/사파리로 열기" · 설치 신호가 아직 없는 안드로이드·PC 는 브라우저 메뉴 안내.
-- **인터넷 없이 열기** (`site/sw.js`) — 처음 열 때 `site/` 의 파일 270개(18MB)를 저장하고, 다음부터는 저장한 것으로 엽니다.
+- **인터넷 없이 열기** (`site/sw.js`) — 처음 열 때 `site/` 의 파일 271개(18MB)를 저장하고, 다음부터는 저장한 것으로 엽니다.
   AI 사진 판별 자료(`data/aivec.js`·`ailib.js`)와 AI 라이브러리(`lib/`)는 **저장하지 않습니다** — 끊겨 있으면 건의함이
   "인터넷이 없어 AI 사진 판별은 쉬어요 — 제보는 그대로 되고, 사람이 확인해요"라고 말하고, 다시 연결되면 다시 받습니다.
   파일마다 지문(SHA-256)을 적어 두어, 받은 파일이 목록과 다르면 다시 받고, 새 판이 나오면 바뀐 파일만 받습니다.
@@ -254,7 +254,7 @@ pwsh -File 검사.ps1 -Full   + 1인칭 로드뷰 9가지를 끝까지 재생 (�
 `-Ci` (GitHub 자동 검사) 는 다른 컴퓨터라 글꼴·그래픽이 달라 안전망에서 글자 폭·3D 그림 비교를 뺍니다. 나머지는 같습니다.
 
 안전망은 시계를 멈추고 글꼴을 기다려 그리므로, 같은 앱이면 3D 그림까지 점 하나 다르지 않습니다.
-**일부러 바꾼 화면이면** 확인한 뒤 새 기준을 기록합니다 : `pwsh -File tests\run_golden.ps1 -Mode capture -Tag v172` (지금 기준은 v171)
+**일부러 바꾼 화면이면** 확인한 뒤 새 기준을 기록합니다 : `pwsh -File tests\run_golden.ps1 -Mode capture -Tag v173` (지금 기준은 v172)
 (그다음 `검사.ps1` · `tests/run_golden.ps1` 의 기본 `-Tag` 를 올린다). 검사마다 일부러 망가뜨린 사본으로 실패를 잡는지 확인했습니다.
 
 ## AI 자료 다시 만들기 (사진을 더하거나 옮겼을 때)

@@ -2018,3 +2018,61 @@ html.lt .vcRow button.on{background:#0B6FB8;color:#FFFFFF;}
   border:1.5px dashed #FF6B6B;background:#1A0F14;color:#FF9A9A;font-size:12px;font-weight:700;line-height:1.5;cursor:default;}
 html.lt .sugAnyway{color:#B42318;border-color:#B42318;}
 html.lt .sugBadPhoto{background:#FFF1F1;color:#B42318;border-color:#B42318;}
+/* ── 고객 센터 (2026-11-10 사용자 · js/app/support.js) : 관리자의 이메일로 전송 · 상담원과 전화하기 — 실제로 보내거나 걸지 않는다 ── */
+.csRow:active{background:rgba(0,229,255,.06);}
+.csNote{margin-top:0.7rem;text-align:center;font-size:0.76rem;color:#8FA3B8;}
+.csNote b{color:#CFEFFF;font-weight:800;}
+.csTo{display:flex;align-items:center;gap:0.6rem;margin-top:0.7rem;padding:0.55rem 0.75rem;border:1.5px solid #2A6F86;border-radius:0.6rem;background:rgba(0,229,255,.06);font-size:0.84rem;}
+.csTo span{color:#8FA3B8;font-weight:700;flex:none;}
+.csTo b{color:#E7F6FF;font-weight:800;word-break:break-all;}
+.csKinds{display:flex;flex-wrap:wrap;gap:0.4rem;}
+.csKinds button{border:1.5px solid #33404F;background:#0B1118;color:#CFE3F5;border-radius:999px;padding:0.4rem 0.75rem;font:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;min-height:2.2rem;}
+.csKinds button.pick{border-color:#00E5FF;background:rgba(0,229,255,.14);color:#FFFFFF;}
+.csOpt{font-weight:600;color:#7C8AA0;}
+.csTx{font-size:16px;font-weight:600;}
+.csDiag{display:flex;align-items:center;gap:0.5rem;margin-top:0.65rem;font-size:0.8rem;color:#CFE3F5;font-weight:700;cursor:pointer;}
+.csDiag input{width:1.1rem;height:1.1rem;accent-color:#00E5FF;flex:none;}
+.csDiag span{flex:1;}
+.csPeek{flex:none;border:1.5px solid #33404F;background:transparent;color:#9FB2C8;border-radius:0.45rem;padding:0.2rem 0.55rem;font:inherit;font-size:0.74rem;font-weight:700;cursor:pointer;}
+.csDiagTx{margin:0.45rem 0 0;max-height:8.5rem;overflow:auto;padding:0.55rem 0.65rem;border-radius:0.5rem;background:#0B1118;border:1px solid #33404F;color:#9FB2C8;
+  font-size:0.68rem;line-height:1.45;white-space:pre-wrap;word-break:break-all;}
+.csSpin{width:1rem;height:1rem;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#FFFFFF;animation:csSpin .8s linear infinite;flex:none;}
+@keyframes csSpin{to{transform:rotate(360deg)}}
+.csDone{width:4rem;height:4rem;margin:0.4rem auto 0.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(57,255,136,.14);border:2px solid #39FF88;color:#39FF88;}
+.csDone .syI{width:2rem;height:2rem;}
+.sySheet h4.csMid{justify-content:center;}
+.sySheet .sub.csMid{text-align:center;}
+.csTicket{margin:0.2rem auto 0;width:max-content;max-width:100%;padding:0.4rem 0.9rem;border-radius:999px;border:1.5px dashed #2A6F86;font-size:0.82rem;color:#9FB2C8;}
+.csTicket b{color:#FFFFFF;letter-spacing:0.04em;margin-left:0.3rem;}
+/* 통화 화면 — 휴대폰 전화 앱처럼 화면 전체. 밝은 화면에서도 어둡게 둔다(전화 화면은 어두운 것이 익숙하다) */
+.csCall{position:absolute;inset:0;z-index:980;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  padding:calc(3.5rem + env(safe-area-inset-top)) 1.5rem calc(2.5rem + env(safe-area-inset-bottom));
+  background:radial-gradient(120% 70% at 50% 18%, #17405A 0%, #0B1622 55%, #05090F 100%);color:#FFFFFF;animation:syFade .25s;text-align:center;}
+.csCall.ending{opacity:0;transition:opacity .8s;}
+.csWho{word-break:keep-all;display:flex;flex-direction:column;align-items:center;gap:0.55rem;}
+.csWho b{font-size:1.25rem;font-weight:900;letter-spacing:-0.02em;margin-top:0.6rem;}
+.csSt{font-size:1rem;color:#9FD9EE;font-weight:700;font-variant-numeric:tabular-nums;}
+.csAv{position:relative;width:6.5rem;height:6.5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#0E2A3B;border:2px solid #1FA9C9;color:#9FEFFF;}
+.csAv .syI{width:3rem;height:3rem;}
+.csAv i{position:absolute;inset:-2px;border-radius:50%;border:2px solid rgba(0,229,255,.5);animation:csRing 1.8s ease-out infinite;}
+.csAv i + i{animation-delay:.9s;}
+@keyframes csRing{from{transform:scale(1);opacity:.9}to{transform:scale(1.7);opacity:0}}
+.csCall.on .csAv{border-color:#39FF88;color:#B9FFD6;background:#0E3324;}
+.csCall.on .csAv i{display:none;}
+.csCall.on .csSt{color:#B9FFD6;}
+.csCap{word-break:keep-all;max-width:18rem;padding:0.7rem 0.9rem;border-radius:1rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);font-size:0.86rem;line-height:1.55;color:#E7F6FF;}
+.csCap.in{animation:syUp .35s ease-out;}
+.csCtl{display:flex;gap:2.2rem;}
+.csCtl button{display:flex;flex-direction:column;align-items:center;gap:0.4rem;background:none;border:0;color:#CFE3F5;font:inherit;font-size:0.76rem;font-weight:700;cursor:pointer;}
+.csCtl button .syI{width:3.6rem;height:3.6rem;padding:1rem;border-radius:50%;background:rgba(255,255,255,.12);box-sizing:border-box;}
+.csCtl button.on .syI{background:#FFFFFF;color:#0B1622;}
+.csEnd{width:4.4rem;height:4.4rem;border-radius:50%;border:0;background:#FF3B30;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  box-shadow:0 0.5rem 1.5rem rgba(255,59,48,.45);}
+.csEnd .syI{width:1.9rem;height:1.9rem;}
+html.lt .csNote{color:#44546A;} html.lt .csNote b{color:#0B6FB8;}
+html.lt .csTo{background:#EEF6FC;border-color:#9CC3E2;} html.lt .csTo span{color:#44546A;} html.lt .csTo b{color:#0F1B2D;}
+html.lt .csKinds button{background:#F3F7FB;border-color:#B9C6D6;color:#24364D;}
+html.lt .csKinds button.pick{background:#0B6FB8;border-color:#0B6FB8;color:#FFFFFF;}
+html.lt .csDiag{color:#24364D;} html.lt .csPeek{border-color:#B9C6D6;color:#3A4A5C;}
+html.lt .csDiagTx{background:#F3F7FB;border-color:#B9C6D6;color:#3A4A5C;}
+html.lt .csTicket{border-color:#9CC3E2;color:#44546A;} html.lt .csTicket b{color:#0F1B2D;}

@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '19ea7545356c';   // 파일 270개 · 18MB
+var VERSION = '95f1afd39ae0';   // 파일 271개 · 18MB
 var FILES = [
   ['3d/realistic.html','97d7383db21e',81305],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','1b3698b388e2',166582],
+  ['css/app.css','a5758db767c1',172075],
   ['css/boot.css','0b23cf08e0b6',2841],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
@@ -239,11 +239,11 @@ var FILES = [
   ['img/splash.mp4','d2f01cf420ad',277674],
   ['img/splash_end.jpg','040a235d9bd8',43535],
   ['img/splash_first.jpg','c68ac1b0d37e',29924],
-  ['index.html','534da14575de',63227],
+  ['index.html','5e81ab103c4b',64349],
   ['js/app/aid.js','6997dafbe012',33801],
   ['js/app/boot.js','9a7f3034fbe7',9242],
   ['js/app/building.js','6ae383d48918',23814],
-  ['js/app/consent.js','8cb7ed9918d2',49236],
+  ['js/app/consent.js','6b69b18383cd',49236],
   ['js/app/easy.js','c4d503eeaa8b',26453],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','60e54dd09ede',51753],
@@ -272,6 +272,7 @@ var FILES = [
   ['js/app/sugai.js','6eaf97557df9',134696],
   ['js/app/sugdb.js','5a9152473f39',34863],
   ['js/app/suggest.js','24427b362db2',54196],
+  ['js/app/support.js','19663fbea8dc',11886],
   ['js/app/timetable.js','0d5a67e63151',37352],
   ['js/app/topmenu.js','0351042966f1',4319],
   ['js/app/ui.js','fd0ccd5bd70a',29957],

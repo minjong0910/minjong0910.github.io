@@ -98,6 +98,12 @@
       <b data-ko="건의함" data-en="Suggestion Box">건의함</b>
       <button class="ghost" style="padding:6px 14px;border-radius:8px;" onclick="go('ssug')" data-ko="열기 →" data-en="Open →">열기 →</button>
     </div>
+    <!-- 고객 센터 (2026-11-10 사용자 — 사진이 고장 나면 건의함, 앱이 고장 나면 사람을 부른다) : 관리자의 이메일로 전송 · 상담원과 전화하기.
+         둘 다 실제로 보내거나 걸지 않는다(사용자 지시) — js/app/support.js. 줄 어디를 눌러도 열린다. -->
+    <div class="row csRow" onclick="SUPPORT.open()" style="cursor:pointer;">
+      <span><b data-ko="고객 센터" data-en="Customer Center">고객 센터</b><small class="sySetSub" data-ko="앱이 고장 나면 — 관리자에게 이메일 · 상담원과 전화" data-en="If the app breaks — email the admin or call an agent">앱이 고장 나면 — 관리자에게 이메일 · 상담원과 전화</small></span>
+      <button class="ghost" type="button" style="padding:6px 14px;border-radius:8px;flex:none;" data-ko="열기 →" data-en="Open →">열기 →</button>
+    </div>
     <!-- 길 공유하기 · 내 시간표 (2026-11-03 사용자 — 첫 화면은 단추가 많아 설정에, js/app/share.js · timetable.js) -->
     <div class="row">
       <span><b data-ko="길 공유하기" data-en="Share a route">길 공유하기</b><small class="sySetSub" data-ko="호실만 넣으면 카톡 · 문자로 길을 보내요" data-en="Send directions by chat with just a room number">호실만 넣으면 카톡 · 문자로 길을 보내요</small></span>
@@ -781,6 +787,8 @@
 <script src="js/app/consent.js"></script>
 <script src="js/app/share.js"></script>
 <script src="js/app/timetable.js"></script>
+<!-- 고객 센터 — 설정 → 관리자의 이메일로 전송 · 상담원과 전화하기 (2026-11-10 사용자, 실제로 보내거나 걸지 않는다) -->
+<script src="js/app/support.js"></script>
 <!-- 강의실 찾기 → 「○층까지 어떻게 갈까요?」 엘리베이터 · 중앙계단 사진 카드 → 3D (2026-11-07 사용자 — QR · 기본 주소 모두) — ui.js openTarget · shell.js go 를 감싼다 -->
 <script src="js/app/via.js"></script>
 </body>

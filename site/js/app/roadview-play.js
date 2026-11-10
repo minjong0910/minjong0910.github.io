@@ -448,6 +448,25 @@ function fpTick(dt){
   }
   if(k>=1){ fpI++; fpT=0; fpEnterStep(); }
 }
+/* 공용 천장판(fpCeil, 건물 전체를 덮는 짙은 남색 판)의 기준 높이.
+   2026-11-10 사용자 「2층에서 3층으로 올라갈 때…」 직접 걸어보며 확인 : 예전에는 「발 높이 + 3.3m」라 계단을 오르는 동안
+   판이 발을 따라 올라가 위층 복도를 허리 · 머리 높이에서 가로로 잘랐다 — 계단 꼭대기에서 위층을 보면 벽이 2.5m 에서
+   끊기고 그 위가 남색으로 막혀 보였다(도착해서 층이 바뀌어야 제자리). 계단 · 엘리베이터로 층 사이를 지나는 동안에도
+   지금 「서 있는 층」(발밑에서 가장 가까운 아래 바닥) 기준에 붙여 둔다. 1~5층 사이에서만 —
+   지하(나가는 계단처럼 바닥보다 높이 오르는 곳) · 옥상(데크 높이가 따로)은 예전처럼 발 높이 기준. */
+function fpCeilBaseY(){
+  var y=fpPos.y;
+  try{
+    if(typeof LEVELS==='undefined' || y < fpSlabY(1)-0.25 || y >= fpSlabY('R')-0.25) return y;
+    var best=null;
+    for(var i=0;i<LEVELS.length;i++){
+      var lv=LEVELS[i]; if(typeof lv!=='number') continue;
+      var s=fpSlabY(lv);
+      if(s <= y+0.25 && (best===null || s>best)) best=s;
+    }
+    return best===null ? y : best;
+  }catch(e){ return y; }
+}
 /* 시선 회전·눈높이·천장·엘리베이터 캡을 실제로 반영한다.
    자동재생(fpTick)과 자유 탐색(fpFreeTick)이 똑같이 쓴다. */
 function fpCommit(wantYaw, dt, bob){
@@ -463,7 +482,7 @@ function fpCommit(wantYaw, dt, bob){
   var ex = fpPos.x + Math.cos(yaw)*sway, ey = fpPos.y + FP_EYE + fpEyeOffset + (bob||0) + fpRoofEyeLift, ez = fpPos.z - Math.sin(yaw)*sway;
   fpLastEye = {x:ex, y:ey, z:ez};
   fpLastAim = {x: ex + Math.sin(yaw)*6*ch, y: ey + Math.sin(pit)*6, z: ez + Math.cos(yaw)*6*ch};
-  if(fpCeil) fpCeil.position.set(0, fpPos.y + FP_CEIL_H,
+  if(fpCeil) fpCeil.position.set(0, fpCeilBaseY() + FP_CEIL_H,
       ((GLOBAL_TOP_Z+GLOBAL_BOT_Z)/2)*BUILDING_Z_STRETCH);
   /* 옥상 철문은 이제 fpRegisterAutoDoor(자동문)가 매 프레임
      스스로 회전을 갱신하므로, 여기서 fpRoofDoorK로 강제로 덮어쓰지 않는다

@@ -1,0 +1,13 @@
+﻿걷기 점검 도구 — 직접 걸어보기 3D 를 원격으로 둘러보며 사진을 찍는다 (2026-11-10, 2→3층 계단 벽 어긋남을 찾을 때 만듦)
+
+  준비 : 미리보기_실행.bat (http://localhost:8080)
+  1. pwsh -File 도구\걷기점검\open.ps1
+       화면 오른쪽에 크롬 창(임시 프로필, 원격 조종 포트 9350)을 연다. 폰 폭이라 앱이 폰 화면으로 뜬다.
+       처음 한 번은 크롬 창에서 동의 화면을 넘기거나, do.ps1 로 localStorage 의 b3nav_agree 를 넣는다.
+  2. pwsh -File 도구\걷기점검\do.ps1 -Js (Get-Content 도구\걷기점검\enter.js -Raw)
+       13524호 검색 → 중앙계단 → 직접 걸어보기 → 3D 크게. (window.__at(x,y,z,yaw,pitch) 로 아무 데나 서기)
+  3. pwsh -File 도구\걷기점검\floor.ps1 -Lv 3        한 층 둘러보기(복도 양 끝 · 계단 · 엘리베이터 · 비상계단 · 열린 공간 · 화장실) → 한 장으로
+  4. 계단 오르며 찍기 예 :
+       pwsh -File 도구\걷기점검\do.ps1 -Js "(async function(){ fpSetFloor(2); fpPos.x=0.65; fpPos.z=stZOf(2)*BUILDING_Z_STRETCH; fpYaw=Math.PI/2; await new Promise(function(r){setTimeout(r,1500);}); fpStairGo(1); return 'up'; })()" -Shot up23 -Frames 16 -IntervalMs 750 -Sheet up23_sheet
+  사진은 생성물\걷기점검\ (저장소에 안 올라간다). -Sheet 를 주면 여러 장을 번호 붙여 한 장으로 묶는다.
+  ※ 오류는 로드뷰 검사(검사.ps1 -Full)가 잡지만, 벽이 떨어져 있다 · 하늘이 비어 있다 같은 「모양」은 이렇게 눈으로 봐야 한다.

@@ -163,8 +163,11 @@ function fpMakeCorr(lv){
      구멍 가장자리가 아니라 통짜 벽 한복판에 얹혀, 계단실 안에서 보면 벽에
      회색 막대 하나가 붙어 있는 것처럼 보였다 — owAuto와 같은 규칙으로 맞춘다. */
   var _stIdx = lvIndex(lv);
+  /* 2026-11-10 : 계단실 폭을 「맞닿는 두 층」 기준으로 위 · 아래 따로 정하게 바꿨다(fpMakeStairwell owPair).
+     복도 높이(바닥 위)의 계단실은 위쪽 폭이므로, 개구부도 위층과 맞닿는 폭으로 — 2층은 이제 기본 폭(위층 3층 기준).
+     (1층 · 지하 1층은 위가 1층/2층 구간이라 그대로 1.4배) */
   var stOWreal = FP_ST_OW *
-    ((lv===1 || LEVELS[_stIdx+1]===1 || LEVELS[_stIdx-1]===1) ? 1.4 : 1);
+    ((lv===1 || LEVELS[_stIdx+1]===1) ? 1.4 : 1);
   /* 원복 + 재수정: 한 번은 중앙계단 개구부를 복도 천장(H)까지
      뚫어 인방(개구부 위 통짜 벽)을 없애 봤는데, 계단실 위로 한 층 층고가
      통째로 드러나 오히려 어색했고 1층은 위가 뻥 뚫려 보였다 — 개구부
@@ -255,7 +258,10 @@ function fpMakeCorr(lv){
      계단실은 4.4m"라 계단실 벽·바닥이 구멍보다 좁아 그 틈으로 바깥(빈 공간)이
      그대로 보였다("2층 계단 프레임이 뒤틀려 보인다"의 정체). 또 같은 이유로
      2층의 내려가는 단이 1층의 올라가는 단과 폭·중심이 어긋나 있었다.
-     1층만 명시적으로 1.4배를 주고, 나머지 층은 owAuto가 판단하게 둔다. */
+     1층만 명시적으로 1.4배를 주고, 나머지 층은 owAuto가 판단하게 둔다.
+     2026-11-10 : 그렇게 2층 전체를 1.4배로 넓혔더니 이번엔 2↔3층 계단참에서 2층 · 3층 옆벽이 0.88m 떨어졌다
+     (사용자 「2층에서 3층으로 올라갈 때 벽면 두 개가 서로 떨어져 있다」). 이제 2층 계단실은 바닥 아래만 1.4배,
+     바닥 위는 3층과 같은 폭이고, 위 복도 벽 구멍(stOWreal)도 바닥 위 폭에 맞췄다. */
   g.add(fpMakeStairwell(lv, stZ0, ko, false, undefined, (lv===1?1.4:undefined)));
   /* 최종: "1층에 서 있어도 지하 계단이 보이게" 하려고 B1의 계단
      매스를 1층 씬에 함께 끼워 넣었었는데, 1층 바닥을 다시 통짜로 막은
@@ -392,15 +398,18 @@ function fpMakeCorr(lv){
       var gate=fpMakeGate({w:sgW, sign:nm, accent:'#8FE3E0'});   // 정문과 동일(높이도 기본값)
       if(dir<0) gate.rotation.y=Math.PI;
       gate.position.set(0,0,zc+dir*0.05); g.add(gate);
+      gate.traverse(function(o){ o.userData.noCull=true; });   // 복도 끝 문 — 멀리서도 늘 그린다(위 끝벽 noCull 과 같은 이유)
       // 문 바깥쪽(건물 밖) 어둡게 막고 문턱 라인
       var bk=fpMkPlane(CORR_HALF*2,H,0x0A1018,1);
-      bk.position.set(0,H/2,zc-dir*0.06); g.add(bk);
+      bk.position.set(0,H/2,zc-dir*0.06); bk.userData.noCull=true; g.add(bk);
       var ed=fpMkPlane(CORR_HALF*2,0.16,0xB0B6BC,1);        // 문턱 금속 라인(복도와 통일 —)
       ed.rotation.x=-Math.PI/2; ed.position.set(0,0.07,zc+dir*0.30); g.add(ed);
     });
   }else{
-    var cA=fpMkPlane(CORR_HALF*2,H,0xE8DFC8,1); cA.position.set(0,H/2,z0); g.add(cA);
-    var cB=fpMkPlane(CORR_HALF*2,H,0xE8DFC8,1); cB.position.set(0,H/2,z1); g.add(cB);
+    /* noCull (2026-11-10 직접 걸어보며 확인) : 복도는 92m 인데 끝벽은 40m 넘으면 「멀어서 안 그리기」(fpBuildCorr fpCullList)에
+       걸려, 복도 한쪽 끝에서 반대쪽을 보면 끝에 시커먼 네모 구멍이 보였다. 끝벽은 두 장뿐이라 늘 그린다. */
+    var cA=fpMkPlane(CORR_HALF*2,H,0xE8DFC8,1); cA.position.set(0,H/2,z0); cA.userData.noCull=true; g.add(cA);
+    var cB=fpMkPlane(CORR_HALF*2,H,0xE8DFC8,1); cB.position.set(0,H/2,z1); cB.userData.noCull=true; g.add(cB);
     [[z0,1],[z1,-1]].forEach(function(a){
       var ln=fpMkPlane(CORR_HALF*2,0.05,0x5B4F3D,1);        // 크라운 몰딩(복도와 통일 —)
       ln.position.set(0,H-0.03,a[0]+a[1]*0.01); g.add(ln);
@@ -752,6 +761,7 @@ function fpBuildCorr(levels){
     var _c = new THREE.Vector3();
     fpCorrG.traverse(function(o){
       if(!o.isMesh || !o.visible || !o.geometry) return;
+      if(o.userData && o.userData.noCull) return;      // 복도 끝벽 · 끝 문 — 멀어도 늘 그린다 (2026-11-10)
       var p = o.parent, hid = false;
       while(p && p !== fpCorrG){ if(!p.visible){ hid = true; break; } p = p.parent; }
       if(hid) return;

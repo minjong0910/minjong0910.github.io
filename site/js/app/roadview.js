@@ -364,11 +364,10 @@ function fpMakeCeil(){
   });
   /* 폰에서는 이 큰 천장판도 바닥과 같은 길로 만든다 — 갤럭시 S20+ 에서 이 판이
      #111B03(파랑 42→3)으로 나왔다. 위 fpMkPlane 주석 참고. (2026-09-28) */
-  var m=new THREE.Mesh(new THREE.ShapeGeometry(shp), window.FP_PHONE
-    ? new THREE.MeshStandardMaterial({color:0x141D2A, roughness:0.9, metalness:0.02,
-        side:THREE.DoubleSide, transparent:true})
-    : new THREE.MeshPhongMaterial({color:0x141D2A, emissive:0x0C2534, emissiveIntensity:0.6,
-        side:THREE.DoubleSide, transparent:true}));
+  /* 2026-11-10 사용자 「직접 걸어보기로 층 전체를 둘러보라」 — 둘러보니 복도 천장(fpMakeCorrCeiling, 밝은 회색)이 없는 곳
+     (엘리베이터 앞 열린 공간 · 화장실 통로 · 계단실 앞)은 이 판이 그대로 보여 천장이 시커먼 남색이었다.
+     이 판은 「천장이 없는 곳을 막는 마지막 천장」이므로 복도 천장과 같은 재질 · 색으로 만든다(폰 갈래도 fpMkPlane 과 같다). */
+  var m=new THREE.Mesh(new THREE.ShapeGeometry(shp), fpMkPlane(1, 1, 0xF2F0EA, 1).material);
   m.rotation.x=Math.PI/2; m.userData.baseOp=1; m.renderOrder=-2; g.add(m);
   /* v121: 이 큰 천장판 한가운데를 따라 길게 깔던 옅은 하늘색 띠(0.34m × 건물 전체
      길이, 조명선 흉내)를 없앤다 — 복도 천장은 fpMakeCorr가 형광등까지 따로 그리므로, 이 띠는

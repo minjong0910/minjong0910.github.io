@@ -1380,15 +1380,18 @@ function fpMakeRoof(ko){
   });
   var gnd=new THREE.Mesh(new THREE.ShapeGeometry(gndShape), gndMat);
   gnd.renderOrder=-2;
-  gnd.rotation.x=-Math.PI/2; gnd.position.set(0, -3.2, 0); g.add(gnd);
+  gnd.rotation.x=-Math.PI/2; gnd.position.set(0, -3.2, 0); gnd.userData.noCull=true; g.add(gnd);
+  /* noCull (2026-11-10 사용자 「직접 걸어보기로 옥상까지 둘러보라」) : 건물 양 끝(±Z) 하늘판은 옥상 반대쪽 끝에서
+     110~130m 떨어져, 「멀어서 안 그리기」(fpBuildCorr fpCullList — 한계 40m + 판 반지름)에 걸려 사라졌다.
+     그 자리에 배경(검정)이 그대로 보여 「하늘에 시커먼 네모가 떠 있는」 모습이었다. 하늘 · 땅 배경은 늘 그린다. */
   [[0, z1+SKY, Math.PI, (HX+SKY)*2],
    [0, z0-SKY, 0,       (HX+SKY)*2]].forEach(function(a){
     var m=fpMkTex(a[3], SH, sky, 1);
-    m.rotation.y=a[2]; m.position.set(a[0], SKYC, a[1]); g.add(m);
+    m.rotation.y=a[2]; m.position.set(a[0], SKYC, a[1]); m.userData.noCull=true; g.add(m);
   });
   [[HX+SKY, -Math.PI/2],[-HX-SKY, Math.PI/2]].forEach(function(a){
     var m=fpMkTex((zl+SKY*2), SH, sky, 1);
-    m.rotation.y=a[1]; m.position.set(a[0], SKYC, zc); g.add(m);
+    m.rotation.y=a[1]; m.position.set(a[0], SKYC, zc); m.userData.noCull=true; g.add(m);
   });
   /* 버그 수정: 옆면 하늘판 4장은 fpMkTex(빛을 받지 않는 MeshBasicMaterial)
      인데 윗하늘만 fpMkPlane(빛을 받는 MeshStandardMaterial)로 만들어져 있었다 —
@@ -1398,7 +1401,7 @@ function fpMakeRoof(ko){
   var topMat=new THREE.MeshBasicMaterial({color:0x6FA9E0, side:THREE.DoubleSide});
   var top=new THREE.Mesh(new THREE.PlaneGeometry((HX+SKY)*2, zl+SKY*2), topMat);
   top.renderOrder=-2;
-  top.rotation.x=Math.PI/2; top.position.set(0, SKYC+SH/2-0.5, zc); g.add(top);
+  top.rotation.x=Math.PI/2; top.position.set(0, SKYC+SH/2-0.5, zc); top.userData.noCull=true; g.add(top);
   /* 녹색 방수 바닥 — 옥탑방들이 서는 자리는 구멍을 뚫어 뺀다(위 설명 참고).
      Shape+holes를 쓰지 않고 통짜 Plane 하나만 쓰던 것을 여기서 구멍 낸 버전으로 바꾼다. */
   /* 주의: 아래 fl 메쉬는 rotation.x=-Math.PI/2 로 눕히므로 Shape 로컬 Y가

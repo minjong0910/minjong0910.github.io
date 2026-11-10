@@ -42,6 +42,20 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
      생긴다 — 1층과 맞닿는 쪽은 어느 층이 그리든 항상 같은 폭을 쓰게 한다. */
   var owAuto = (!em && (lv===1 || upLv===1 || dnLv===1)) ? 1.4 : 1;
   var OW = (em ? FP_EM_OW : FP_ST_OW) * (owMul!==undefined ? owMul : owAuto);   // 비상계단은 중앙계단보다 좁다(사진 반영).
+  /* 2026-11-10 사용자 「2층에서 3층으로 올라갈 때 벽면 두 개가 서로 떨어져 있다」 :
+     계단실은 층마다 「아래 계단참 ~ 위 계단참」을 그 층 그룹이 짓는데, 위 owAuto 는 층 하나에 폭 하나만 줬다.
+     2층은 1층과 맞닿아 1.4배(옆벽 hw 3.11)로 지어지는데 3층은 기본 폭(hw 2.23)이라, 2↔3층 계단참에서
+     2층 옆벽(위로 0.45m)과 3층 옆벽(아래로 0.45m)이 0.88m 떨어진 채 겹쳐 서 있었다 — 계단 폭 · 계단참도 어긋났다.
+     → 폭을 「맞닿는 두 층」 기준으로 위 · 아래 따로 정한다 : 위쪽 절반(바닥 위 · 오르는 단 · 위 계단참) = 위층과 같은 폭,
+       아래쪽 절반(바닥 아래 · 내려가는 단) = 아래층과 같은 폭. 2층만 위(1.0) · 아래(1.4)가 달라지고,
+       그 경계(2층 바닥 높이)의 턱은 천장 띠(ledge)로 막는다. 나머지 층은 OWdn === OW 라 예전과 한 점도 다르지 않다. */
+  function owPair(a, b){ return (!em && (a===1 || b===1)) ? 1.4 : 1; }
+  var OWdn = OW;
+  if(owMul===undefined && !em){
+    if(upLv!==undefined) OW = FP_ST_OW * owPair(lv, upLv);
+    if(dnLv!==undefined && dnLv!==null) OWdn = FP_ST_OW * owPair(lv, dnLv);
+    else OWdn = OW;
+  }
   var HALF=SP/2;                             // 반 층(중간 계단참까지) 높이
   /* 비상계단은 지하만 제외하고 잇는다(옥상까지도 수직으로 뚫려 있다 — 지하는 여전히 중앙계단 전용) */
   if(em){ if(lv===1) dnLv=null; }
@@ -71,6 +85,8 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
   var yB=dnLv ? (-HALF-0.45) : -0.05,
       yT=upLv ? ((straightUp?SP:HALF)+0.45) : (lv==='R' ? (roofH||2.9) : 0.05), WH=yT-yB;
   var hw=OW/2+0.03;
+  var hwDn=OWdn/2+0.03;                      // 바닥 아래(내려가는 쪽) 옆벽 — 2층만 hw 와 다르다
+  var splitW = (hwDn - hw > 0.01);           // 2026-11-10 : 위 · 아래 폭이 다른 계단실(2층)
   var LAND=FP_ST_LAND;
   /* 실제 사진 기준 마감 : 중앙계단 = 베이지 석재 타일 벽, 비상계단 = 크림색 페인트 벽.
      단 옥상(lv==='R')은 예외 — 중앙계단 옥탑방은 roofOpen 분기에서 별도의
@@ -92,7 +108,7 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
      경계 등 이 길이에 기대어 계산되는 다른 모든 좌표가 그대로 맞는다. */
   var N = straightUp ? FP_ST_N_UP : ((lv==='R' && !em) ? FP_ST_N_R : FP_ST_N);   // v109: 옥상 도막만 10단
   var run = straightUp ? FP_B1F_RUN_LEN/FP_ST_N_UP : FP_ST_RUN;
-  var rise=(straightUp?SP:HALF)/N, fw=OW/2-0.10;
+  var rise=(straightUp?SP:HALF)/N, fw=OW/2-0.10, fwDn=OWdn/2-0.10;
   /* 구조 정정: 사용자가 실제 건물 기준을 다시 확인해 주었다 —
      2~5층에서 계단실을 바라보면 "오른쪽(+Z)이 위층으로 올라가는 계단,
      왼쪽(-Z)이 아래층으로 내려가는 계단"이고, 옥상에서도 철문을 바라볼 때
@@ -107,7 +123,7 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
      ※ 걷기 경로(fpStairGo의 zSide/zBack)와 옥상 개구부·스킵플로어 좌표도
        같은 기준으로 함께 되돌렸다. */
   var _colFlip = 1;
-  var xs=x0+LAND+((lv==='R' && !em)?FP_R_XSHIFT:0), zUp=zc+_colFlip*(OW/4+0.02), zDn=zc-_colFlip*(OW/4+0.02);   // v109: 옥상 도막은 첫 단을 안쪽으로 밀어 꼭대기(xs+N*run)가 5층 계단참과 그대로 만나게
+  var xs=x0+LAND+((lv==='R' && !em)?FP_R_XSHIFT:0), zUp=zc+_colFlip*(OW/4+0.02), zDn=zc-_colFlip*(OWdn/4+0.02);   // v109: 옥상 도막은 첫 단을 안쪽으로 밀어 꼭대기(xs+N*run)가 5층 계단참과 그대로 만나게
   var flTex=fpTerrazzoTex().clone(); flTex.needsUpdate=true;
   flTex.wrapS=flTex.wrapT=THREE.RepeatWrapping;
   /* 버그 수정: 이 계단실 문턱 바닥은 지금까지 공용 텍스처
@@ -160,6 +176,7 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
   if(roofOpen){
     var _wg=(zDn-fw/2)-(zc-hw-ROOF_WALL_IN)-0.005;   // v105: 벽에 완전히 붙인다(2cm→0.5cm)
     if(_wg>0){ zDn-=_wg/2; fw+=_wg; }
+    fwDn=fw;   // 2026-11-10 : 옥상은 내려가는 단만 있으므로 넓힌 폭을 내려가는 단(fwDn)에도 그대로
   }
   [-1,1].forEach(function(sn){
     if(roofOpen){
@@ -234,22 +251,36 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
       }
       return;
     }
-    var sw=fpMkPlane(WD,WH,cWall,1,eWall);
-    sw.rotation.y=(sn<0)?0:Math.PI; sw.position.set(x0+WD/2,(yT+yB)/2,zc+sn*hw); g.add(sw);
+    if(splitW && yB < 0 && yT > 0){
+      /* 2026-11-10 : 위 · 아래 폭이 다른 계단실(2층) — 옆벽을 바닥 높이(y=0)에서 둘로 나눈다.
+         아래(yB~0)는 1층 계단실과 같은 자리(hwDn), 위(0~yT)는 3층 계단실과 같은 자리(hw).
+         그 사이 턱(hw~hwDn)은 바닥 높이의 천장 띠로 막는다 — 아래에서 올려다보면 슬래브 밑면, 위에서는 벽 바깥이라 안 보인다. */
+      var swLo=fpMkPlane(WD,-yB,cWall,1,eWall);
+      swLo.rotation.y=(sn<0)?0:Math.PI; swLo.position.set(x0+WD/2,yB/2,zc+sn*hwDn); g.add(swLo);
+      var swHi=fpMkPlane(WD,yT,cWall,1,eWall);
+      swHi.rotation.y=(sn<0)?0:Math.PI; swHi.position.set(x0+WD/2,yT/2,zc+sn*hw); g.add(swHi);
+      var lgW=hwDn-hw+0.04;
+      var lg=fpMkPlane(WD+0.6,lgW,0xE9E5D9,1,0x000000); lg.rotation.x=Math.PI/2;
+      lg.position.set(x0+WD/2,-0.004,zc+sn*(hw+lgW/2-0.02)); g.add(lg);
+    }else{
+      var sw=fpMkPlane(WD,WH,cWall,1,eWall);
+      sw.rotation.y=(sn<0)?0:Math.PI; sw.position.set(x0+WD/2,(yT+yB)/2,zc+sn*hw); g.add(sw);
+    }
     if(!em && !(lobby1F && sn<0)){   // 중앙계단 벽의 큰 석재 타일 줄눈
       // (1층 좌측(-Z) 벽은 fpMake1FStairHall의 대형 사각 타일 패널이 덮으므로,
       //  베이지 줄눈이 그 위에 떠 보이지 않게 그 벽에서만 생략한다)
       for(var jj=1; jj<5; jj++){
+        var jy=yB+WH*jj/5, jhw=(splitW && jy<0) ? hwDn : hw;   // 나뉜 벽(2층)이면 그 높이의 벽에 붙인다
         var jl=fpMkPlane(WD-0.1,0.016,0xA79E8C,0.8);
         jl.rotation.y=(sn<0)?0:Math.PI;
-        jl.position.set(x0+WD/2, yB+WH*jj/5, zc+sn*(hw-0.012)); g.add(jl);
+        jl.position.set(x0+WD/2, jy, zc+sn*(jhw-0.012)); g.add(jl);
       }
     }
     // 벽 밑둥의 빨간 안전선(사진 반영) — 중앙·비상계단 모두
     {
       var rkb=fpMkPlane(WD-0.06,0.05,0xC0342B,1);
       rkb.rotation.y=(sn<0)?0:Math.PI;
-      rkb.position.set(x0+WD/2, yB+0.028, zc+sn*(hw-0.01)); g.add(rkb);
+      rkb.position.set(x0+WD/2, yB+0.028, zc+sn*((splitW && yB<0 ? hwDn : hw)-0.01)); g.add(rkb);
     }
   });
   /* 1층 중앙계단 홀 : 실사진 반영 장식 일체(타일벽·포스터·소화전함·천장걸이
@@ -321,7 +352,7 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
        상태에서 계단실 안을 내려다보면 내려가는 단 옆·아래로 바닥이 전혀
        없어 배경(짙은 남색)이 그대로 보였다(전 층 공통). 아래층이 함께
        지어졌을 때만 fpBuildCorr가 이 판을 감춘다. */
-    var flC=fpMkPlane(WD+0.6,hw*2+0.6,0x9B978C,1,0x2E2B24); flC.rotation.x=-Math.PI/2;
+    var flC=fpMkPlane(WD+0.6,hwDn*2+0.6,0x9B978C,1,0x2E2B24); flC.rotation.x=-Math.PI/2;   // 바닥 아래쪽 → 아래 폭(hwDn)
     flC.position.set(x0+WD/2,yB,zc);
     if(dnLv) flC.userData.stCapDn=true;
     g.add(flC);
@@ -339,9 +370,9 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
       fwUp.position.set(x0-0.015, (FP_CEIL_H+fTop1)/2, zc); g.add(fwUp);
     }
     if(yB < -0.02){
-      var fwDn=fpMkPlane(hw*2+3.0, -yB, cWall, 1, eWall);
-      fwDn.rotation.y=Math.PI/2;
-      fwDn.position.set(x0-0.045, yB/2, zc); g.add(fwDn);
+      var fwBelow=fpMkPlane(hwDn*2+3.0, -yB, cWall, 1, eWall);   // 바닥 아래 → 아래 폭(hwDn) (이름 fwDn 은 내려가는 단 폭이 쓴다)
+      fwBelow.rotation.y=Math.PI/2;
+      fwBelow.position.set(x0-0.045, yB/2, zc); g.add(fwBelow);
     }
   }else{
     /* 개구부 뒤쪽 막음벽도 옆벽과 같은 밝은 크림색으로 — 속이 새까만 pit이
@@ -505,7 +536,7 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
       var hwUp=FP_ST_OW*owAutoUp/2+0.03;
       stLandingDeco(HALF, Math.min(hw, hwUp));
     }
-    if(dnLv===1) stLandingDeco(-HALF, hw);                      // 1↔2층 계단참(1층 그룹 대신 2층 그룹이 담당)
+    if(dnLv===1) stLandingDeco(-HALF, hwDn);                    // 1↔2층 계단참(1층 그룹 대신 2층 그룹이 담당) — 아래쪽 옆벽(hwDn)에 문
   }
   /* v101: 5층↔옥상 계단참에도 다른 층처럼 -Z 옆벽 철문. 옥상 그룹(lv='R')이
      내려가는 쪽 계단참(y=-HALF)에 짓는다 — 옥상에 서 있을 때는 5층 그룹이 없어도
@@ -587,16 +618,16 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
       nu.rotation.x=-Math.PI/2;
       nu.position.set(xs+run*i+0.045,(i+1)*rise+0.009,zUp); g.add(nu);
     }
-    if(showDown){
-      var sd=fpMkBox(run,(N-i)*rise,fw,0x7E7A70,1,0x28251F);
+    if(showDown){   // 내려가는 단은 아래 폭(fwDn) — 아래층 계단실과 같은 폭 (2026-11-10, 2층만 fw 와 다르다)
+      var sd=fpMkBox(run,(N-i)*rise,fwDn,0x7E7A70,1,0x28251F);
       sd.position.set(xs+run*(i+0.5),-(i+N)*rise/2,zDn); g.add(sd);
-      var td=fpMkFloorPlane(run*0.99,fw,0xC2BEB2,1);
+      var td=fpMkFloorPlane(run*0.99,fwDn,0xC2BEB2,1);
       td.rotation.x=-Math.PI/2;
       td.position.set(xs+run*(i+0.5),-i*rise+0.004,zDn); g.add(td);
-      var rd2=fpMkPlane(fw,rise*0.96,0x716C60,1);   // 챌판 대비 강화(위와 동일)
+      var rd2=fpMkPlane(fwDn,rise*0.96,0x716C60,1);   // 챌판 대비 강화(위와 동일)
       rd2.rotation.y=-Math.PI/2;
       rd2.position.set(xs+run*i+0.004,-i*rise-rise*0.5,zDn); g.add(rd2);
-      var nd=fpMkPlane(0.08,fw,noseC,1);   // 단코 미끄럼방지 빨간 안전선(중앙·비상계단 모두, 사진 반영)
+      var nd=fpMkPlane(0.08,fwDn,noseC,1);   // 단코 미끄럼방지 빨간 안전선(중앙·비상계단 모두, 사진 반영)
       nd.rotation.x=-Math.PI/2;
       nd.position.set(xs+run*i+0.045,-i*rise+0.009,zDn); g.add(nd);
     }
@@ -673,7 +704,7 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
     elbowU.position.set(xs+N*run, N*rise+RAIL_H, zUp-fw/2); g.add(elbowU);
   }
   if(showDown && !straightUp && !roofOpen){   // v110: 옥상은 flight()의 파이프 난간만 — 흰 기둥이 겹쳐 서던 것 제거
-    stairRail(zDn+fw/2, 0, -N*rise, xs, xs+N*run);
+    stairRail(zDn+fwDn/2, 0, -N*rise, xs, xs+N*run);
   }
   /* 1층→지하 후문 + U턴 착지참 : 직접 렌더링해 확인해 보니 계단실 벽 구멍이
      후문 통로와 좌표가 안 맞아 허공에 뜬 벽 조각으로 겹쳐 보였고, U턴 착지참도
@@ -730,9 +761,10 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
      보였다(원목 손잡이 하나만 스테인리스 파이프였고 나머지는 전부 박스였다) —
      레퍼런스 사진처럼 상단 손잡이 1단 + 중단 파이프 1단, 원형 파이프로 다시 짓는다. */
   var Lr=Math.sqrt(Math.pow(N*run,2)+Math.pow(N*rise,2)), ang=Math.atan2(N*rise,N*run);
-  function flight(sgn, zSide, dirUp){
-    var zi = zSide - sgn*(fw/2-0.07);
-    var zo = zSide + sgn*(fw/2-0.05);
+  function flight(sgn, zSide, dirUp, fwF){
+    if(fwF===undefined) fwF=fw;               // 2026-11-10 : 내려가는 단은 fwDn 을 넘긴다
+    var zi = zSide - sgn*(fwF/2-0.07);
+    var zo = zSide + sgn*(fwF/2-0.05);
     var a  = dirUp ? ang : -ang;
     if(roofOpen || lv==='R' || straightUp){
       /* 옥상 개구부 속 계단 : 옆벽 자체가 없으므로(roofOpen에서 벽 생략)
@@ -793,7 +825,7 @@ function fpMakeStairwell(lv, zc, ko, em, roofH, owMul){
     }
   }
   if(upLv) flight(-1, zUp, true);
-  if(showDown) flight( 1, zDn, false);
+  if(showDown) flight( 1, zDn, false, fwDn);
   /* 하행 계단을 지운 좌측(zDn) 공간의 바닥은 1층 전용 landFl(위쪽,
      fpMake1FStairHall에서 이미 x0+LAND~x0+WD 전체 폭을 덮어 놓았다)이
      그대로 걸어다닐 수 있는 바닥 역할을 한다 — 별도 바닥을 또 깔면

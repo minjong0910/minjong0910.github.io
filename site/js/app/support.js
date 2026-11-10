@@ -48,6 +48,8 @@ var SUPPORT = (function(){
     var s = U.sheet('<h4>' + I.mail + T('관리자에게 이메일 보내기', 'Email the admin') + '</h4>' +
       '<div class="csTo"><span>' + T('받는 사람', 'To') + '</span><b>' + T('관리자', 'Admin') + ' &lt;' + esc(ADMIN_MAIL) + '&gt;</b></div>' +
       '<div class="lab">' + T('어떤 문제인가요?', 'What is the problem?') + '</div><div class="csKinds">' + k + '</div>' +
+      /* 「기타」를 고르면 바로 아래에 직접 쓰는 칸이 열린다 (2026-11-10 사용자) — 다른 것을 고르면 다시 접힌다(쓴 글은 남겨 둔다) */
+      '<input class="syInp csEtc" type="text" maxlength="60" autocomplete="off" style="display:none;margin-top:0.5rem;animation:syUp .26s cubic-bezier(.2,.9,.3,1.05);">' +   /* hidden 속성은 .syInp{display:block} 에 져서 style 로 접는다 */
       '<div class="lab">' + T('자세히 적어 주세요', 'Tell us more') + ' <small class="csOpt">' + T('(적지 않아도 돼요)', '(optional)') + '</small></div>' +
       '<textarea class="syInp csTx" rows="4" maxlength="1000"></textarea>' +
       '<label class="csDiag"><input type="checkbox" checked><span>' + T('문제 기록(앱 판 · 기기 · 오류)을 함께 보내기', 'Attach the problem log (version · device · errors)') + '</span>' +
@@ -55,14 +57,20 @@ var SUPPORT = (function(){
       '<pre class="csDiagTx" hidden></pre>' +
       '<button class="big" type="button" data-a="send" disabled>' + IC.send + T('보내기', 'Send') + '</button>' +
       '<button class="big ghost" type="button" data-a="back">' + I.back + T('고객 센터로', 'Back') + '</button>');
-    var tx = $('.csTx', s), send = $('[data-a=send]', s), kind = -1;
+    var tx = $('.csTx', s), send = $('[data-a=send]', s), etc = $('.csEtc', s), kind = -1, ETC = KINDS.length - 1;
     tx.placeholder = T('예) 3층에서 13310호를 찾았는데 화살표가 반대로 나와요', 'e.g. I searched Room 13310 on 3F and the arrow points the wrong way');
-    function ready(){ send.disabled = !(kind >= 0 || tx.value.trim()); }
+    etc.placeholder = T('어떤 문제인지 직접 적어 주세요', 'Describe the problem in your own words');
+    etc.setAttribute('aria-label', T('기타 — 직접 적기', 'Other — describe'));
+    /* 「기타」인데 직접 쓰는 칸이 비어 있으면 아래 「자세히」라도 있어야 보낼 수 있다 */
+    function ready(){ send.disabled = !((kind >= 0 && (kind !== ETC || etc.value.trim())) || tx.value.trim()); }
     $$('.csKinds button', s).forEach(function(b){ b.onclick = function(){
       kind = +b.getAttribute('data-k');
       $$('.csKinds button', s).forEach(function(o){ o.classList.toggle('pick', o === b); });
+      etc.style.display = kind === ETC ? 'block' : 'none';
+      if(kind === ETC) setTimeout(function(){ try{ etc.focus(); }catch(e){} }, 60);
       ready();
     }; });
+    etc.addEventListener('input', ready);
     tx.addEventListener('input', ready);
     var pre = $('.csDiagTx', s);
     $('.csPeek', s).onclick = function(e){
@@ -73,7 +81,7 @@ var SUPPORT = (function(){
     $('[data-a=back]', s).onclick = open;
     send.onclick = function(){
       /* 보내는 것처럼 — 실제로는 아무 데도 보내지 않는다(사용자 지시). 잠깐 「보내는 중」을 보여 준 뒤 「전송했어요」. */
-      send.disabled = true; tx.disabled = true;
+      send.disabled = true; tx.disabled = true; etc.disabled = true;
       send.innerHTML = '<span class="csSpin"></span>' + esc(T('보내는 중…', 'Sending…'));
       setTimeout(function(){ if(document.body.contains(s)) sent(); }, 1400);
     };

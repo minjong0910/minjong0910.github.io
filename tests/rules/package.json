@@ -4,7 +4,7 @@
   "description": "서버/firestore.rules 를 Firestore 에뮬레이터로 시험한다 — GitHub 자동 검사 전용(앱에는 Node 가 필요 없다)",
   "type": "module",
   "devDependencies": {
-    "@firebase/rules-unit-testing": "^3.0.4",
+    "@firebase/rules-unit-testing": "^6.0.0",
     "firebase": "^10.14.1"
   }
 }

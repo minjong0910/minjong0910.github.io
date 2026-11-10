@@ -8,7 +8,7 @@
      출입문 QR 로 들어왔든(?gate=) 기본 주소로 들어왔든 같은 조건이다(둘 다 출발 층 1).
    · 고른 것은 길안내 계단 길(guide.js GUIDE_VIA · b3nav_via)을 그대로 쓴다 — 길안내 화면 위 [엘리베이터 | 계단] 단추와 같은 값.
    · 3D 전체 건물도에도 「가는 방법 [엘리베이터 | 중앙계단]」 한 줄 — 거기서도 바꿀 수 있다.
-   · 남은 것 : 3D 「▶ 경로 미리보기」 움직임은 아직 엘리베이터 길 그대로다(길안내 사진 · 문장은 고른 길). */
+   · 2026-11-10 : 3D 빨간 동선 · 「▶ 경로 미리보기」도 고른 길로 — 중앙계단이면 계단을 걸어 오른다(overview3d.js · roadview-play.js). */
 var VIACHOOSE = (function(){
   if(typeof openTarget !== 'function' || typeof buildSteps !== 'function' || typeof setGuideVia !== 'function') return { isOpen:function(){ return false; }, close:function(){} };
   function $(s, r){ return (r || document).querySelector(s); }
@@ -107,7 +107,7 @@ var VIACHOOSE = (function(){
     row.addEventListener('click', function(e){
       var b = e.target.closest('button[data-v]'); if(!b) return;
       var v = b.getAttribute('data-v'); if(v === GUIDE_VIA) return;
-      setGuideVia(v); paintRow();
+      setGuideVia(v); paintRow(); redrawRoute(true);
       toast(v === 'stairs' ? T('🚶 중앙계단으로 바꿨어요', '🚶 Switched to the main stairs') : T('🛗 엘리베이터로 바꿨어요', '🛗 Switched to the elevator'));
     });
   }
@@ -120,12 +120,21 @@ var VIACHOOSE = (function(){
       '<button type="button" data-v="ev" class="' + (st ? '' : 'on') + '" aria-pressed="' + !st + '">' + LIFT + T('엘리베이터', 'Elevator') + '</button>' +
       '<button type="button" data-v="stairs" class="' + (st ? 'on' : '') + '" aria-pressed="' + st + '">' + STAIRS + T('중앙계단', 'Stairs') + '</button></div>';
   }
-  /* 화면이 바뀌면(뒤로가기 포함) 고르는 창은 닫고, 3D 화면에 오면 「가는 방법」 줄을 다시 그린다 */
+  /* 3D 빨간 동선 · 사람 · 1인칭 미리보기를 고른 길(엘리베이터 / 중앙계단)에 맞춘다 (2026-11-10 — overview3d.js buildRouteA · roadview-play.js fpStairsVia).
+     force : 「가는 방법」을 방금 바꿨다 · 아니면 그려 둔 동선과 지금 고른 길이 다를 때만(길안내 화면 위 단추로 바꾸고 돌아온 경우) */
+  function redrawRoute(force){
+    if(typeof buildRouteA !== 'function' || typeof target === 'undefined' || !target) return;
+    var want = (typeof fpStairsVia === 'function' && fpStairsVia()) ? 'stairs' : 'ev';
+    if(!force && (typeof routeAVia === 'undefined' || routeAVia === null || routeAVia === want)) return;
+    buildRouteA();
+    if(typeof startPersonTrip === 'function') startPersonTrip();   // 미리보기 중이었으면 멈추고 사람을 출발 자리로
+  }
+  /* 화면이 바뀌면(뒤로가기 포함) 고르는 창은 닫고, 3D 화면에 오면 「가는 방법」 줄 · 동선을 다시 맞춘다 */
   var _go = window.go;
   window.go = function(id){
     close();
     var r = _go.apply(this, arguments);
-    if(id === 4 || id === 's4') setTimeout(paintRow, 0);
+    if(id === 4 || id === 's4') setTimeout(function(){ paintRow(); redrawRoute(false); }, 0);
     return r;
   };
   /* 3D 화면 「현재 위치」 층을 바꾸면 계단 길이 되는지 다시 본다 */

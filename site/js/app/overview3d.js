@@ -701,6 +701,7 @@ function cycleView3D(){
 
 /* 빨간 경로 막대 (건물 전체 뷰) */
 var routeA=null, routeCurve=null;
+var routeAVia=null;   // 지금 그려 둔 동선이 엘리베이터('ev') · 중앙계단('stairs') 어느 쪽인지 — via.js 가 3D 화면에 돌아올 때 비교한다
 function buildRouteA(){
   if(typeof fpRouteFloor==='function') fpRouteFloor(false);   // 로드뷰용 바닥 유도선도 같이 정리
   if(routeA){ buildingRoot.remove(routeA); routeA=null; }
@@ -730,12 +731,42 @@ function buildRouteA(){
      동문 바로 옆 비상계단인데 화살표가 엘리베이터까지 갔다가 되돌아왔다.
      층이 바뀔 때만 엘리베이터 구간을 넣는다(경로 미리보기 v146과 같은 규칙). */
   var needLift = Math.abs(floorY(startFloor) - floorY(f)) > 0.01;
+  /* 2026-11-10 : 「중앙계단」을 골랐으면(guide.js GUIDE_VIA · via.js) 엘리베이터 대신 바로 옆 중앙계단 자리(coreX, stZ)에서
+     층마다 지그재그(반 층씩)로 올라간다 — 1인칭 미리보기(roadview-play.js fpStairsVia)와 같은 조건.
+     사람 걷기 시간 나누기(routeSplit)는 엘리베이터와 같은 태그(evStart · evDest)를 그대로 쓴다. */
+  var viaSt = needLift && typeof fpStairsVia==='function' && fpStairsVia();
+  routeAVia = viaSt ? 'stairs' : 'ev';
   var raw=[];
   raw.push({v:new THREE.Vector3(sp0.x, yS, sp0.z), tag:'door'});          // 출발 지점(출입문, 없으면 엘리베이터)
-  // ① 옆벽 문(정문·후문)만 : 문 앞에서 복도 중앙(x=0)까지 곧장
-  if(atGate && Math.abs(sp0.x) > CORR_HALF)
+  // ① 옆벽 문(정문·후문)만 : 문 앞에서 복도 중앙(x=0)까지 곧장 — 후문은 중앙계단실로 들어오므로 계단으로 갈 때는 복도를 거치지 않는다
+  if(atGate && Math.abs(sp0.x) > CORR_HALF && !(viaSt && currentGateKey()==='BACK'))
     raw.push({v:new THREE.Vector3(0, yS, sp0.z), tag:'corrEnter'});
-  if(needLift){
+  if(viaSt){
+    /* 1인칭 미리보기(roadview-play.js fpStairUpSteps)가 실제로 걷는 자리와 같은 좌표 —
+       계단실 입구(xIn) → +Z 쪽 단 발치(xFoot)에서 반 층 올라 계단참(xTop) → 계단참을 가로질러 -Z 쪽 단 → 나머지 반 층 → 위층 계단 발치.
+       (1인칭 바닥 유도선 fpRouteFloor 도 이 선을 그대로 쓰므로 계단 위를 따라간다) */
+    var ZS = BUILDING_Z_STRETCH, stZs = stZOf(startFloor);
+    var xIn = FP_WALL_X + 0.50, xFoot = FP_WALL_X + FP_ST_LAND + 0.12, xTop = FP_WALL_X + FP_ST_LAND + FP_ST_N*FP_ST_RUN + 0.58;
+    var dzOf = function(a, b){ return (((a===1 || b===1) ? FP_ST_OW*1.4 : FP_ST_OW)/4 - 0.06) / ZS; };   // 단 한 줄의 가운데(복도 축 z 로)
+    if(currentGateKey()==='BACK'){
+      // 후문은 들어서면 1층 중앙계단실(후문 로비) — 복도로 나가지 않고 계단 쪽 계단참으로
+      raw.push({v:new THREE.Vector3(FP_WALL_X + FP_ST_LAND*0.5, yS, stZs), tag:'stHall'});
+    }else{
+      // ② 복도를 따라 중앙계단 앞까지 → ③ 꺾어서 계단실 입구로
+      if(atGate) raw.push({v:new THREE.Vector3(0, yS, stZs), tag:'corrWalk'});
+      raw.push({v:new THREE.Vector3(xIn, yS, stZs), tag:'stIn'});
+    }
+    for(var lvS = lvIndex(startFloor); lvS < lvIndex(f); lvS++){
+      var la = LEVELS[lvS], lb = LEVELS[lvS+1], zc = stZOf(la), dz = dzOf(la, lb);
+      var ya = floorY(la), yb = floorY(lb), ym = (ya+yb)/2;
+      if(la!==startFloor) raw.push({v:new THREE.Vector3(xIn, ya, zc), tag:'stLand'});   // 층 계단참에서 칸막이를 돌아 다음 단으로
+      raw.push({v:new THREE.Vector3(xFoot, ya, zc + dz), tag: (la===startFloor) ? 'evStart' : 'stFloor'});   // 올라가는 단 발치
+      raw.push({v:new THREE.Vector3(xTop,  ym, zc + dz), tag:'stMid'});      // 계단참
+      raw.push({v:new THREE.Vector3(xTop,  ym, zc - dz), tag:'stMid2'});     // 계단참 가로지르기
+      raw.push({v:new THREE.Vector3(xFoot, yb, zc - dz), tag: (lb===f) ? 'evDest' : 'stTop'});        // 위층 계단 발치
+    }
+    raw.push({v:new THREE.Vector3(0, floorY(f), stZOf(f)), tag:'corrIn'});   // 계단실에서 복도로
+  }else if(needLift){
     // ② 복도를 따라 엘리베이터 앞 지점까지 일직선으로
     if(atGate) raw.push({v:new THREE.Vector3(0, yS, ev.z), tag:'corrWalk'});
     raw.push({v:new THREE.Vector3(ev.x, yS,        ev.z), tag:'evStart'}); // ③ 꺾어서 엘리베이터 앞
@@ -743,7 +774,7 @@ function buildRouteA(){
   }
   /* 엘리베이터에서 복도로 나오는 꺾임. 문에서 곧장 걸어가는 같은 층 경로에서는
      이미 복도 중앙에 서 있으므로 이 점이 필요 없다(넣으면 되돌아가는 선이 된다). */
-  if(needLift || !atGate)
+  if(!viaSt && (needLift || !atGate))
     raw.push({v:new THREE.Vector3(0,   floorY(f), ev.z), tag:'corrIn'});
   raw.push({v:new THREE.Vector3(0,     floorY(f), p.z),  tag:'corrAt'});  // 복도를 따라 목적지 앞까지
   raw.push({v:new THREE.Vector3(p.x,   floorY(f), p.z),  tag:'room'});    // 복도에서 방 안으로

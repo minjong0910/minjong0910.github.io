@@ -376,7 +376,7 @@
       <button class="b p" data-id="f_consent"><span class="n">consent.js</span><span class="d">466줄 · 처음 켤 때 동의 · 기능별 허용 · 처리방침 · 라이선스</span></button>
       <button class="b p" data-id="f_share"><span class="n">share.js</span><span class="d">236줄 · 길 공유하기 (링크)</span></button>
       <button class="b p" data-id="f_timetable"><span class="n">timetable.js</span><span class="d">407줄 · 내 시간표 · 수업 알림</span></button>
-      <button class="b p" data-id="f_via"><span class="n">via.js</span><span class="d">
+      <button class="b p" data-id="f_via"><span class="n">via.js</span><span class="d">145줄 · 엘리베이터 · 중앙계단 고르기</span></button>
     </div>
   </div>
 
@@ -384,9 +384,9 @@
     <div class="gt">③ 건물과 3D</div><div class="gs">가장 큰 덩어리 — 전체의 절반 · 12개</div>
     <div class="grid">
       <button class="b p" data-id="bdata"><span class="n">building.js</span><span class="d">435줄 · 호실 배치 자료</span></button>
-      <button class="b p" data-id="show"><span class="n">overview3d.js</span><span class="d">1,662줄 · 건물 전체 3D</span></button>
+      <button class="b p" data-id="show"><span class="n">overview3d.js</span><span class="d">1,693줄 · 건물 전체 3D</span></button>
       <button class="b p" data-id="show"><span class="n">view3d · floor-detail</span><span class="d">1,044줄 · 층 상세</span></button>
-      <button class="b p" data-id="roadview"><span class="n">roadview*.js</span><span class="d">10,805줄 · 8개 파일 · 1인칭 걷기</span></button>
+      <button class="b p" data-id="roadview"><span class="n">roadview*.js</span><span class="d">10,869줄 · 8개 파일 · 1인칭 걷기</span></button>
     </div>
   </div>
 
@@ -736,7 +736,7 @@ f_via:{t:'via.js — 엘리베이터 · 중앙계단 고르기',z:'p',zl:'폰 �
  kid:'강의실을 고르면 3D 로 가기 전에 「3층까지 어떻게 갈까요?」 하고 엘리베이터 사진 · 중앙계단 사진 두 장을 보여 줘요. 고른 길로 길안내를 해요.',
  why:'엘리베이터 안에서는 휴대폰 신호가 끊기고, 엘리베이터를 기다리기 싫은 사람도 있습니다. 처음 온 사람이 어떤 길로 갈지 먼저 고르게 했습니다.',
  where:['강의실 찾기에서 결과를 누를 때 — <b>1층에서 2~5층 강의실</b>로 올라갈 때만(1층 강의실은 바로 3D)','출입문 QR 로 들어오든 기본 주소로 들어오든 같게','3D 화면 「가는 방법」 줄 · 길안내 화면 위 [엘리베이터 | 계단] 단추에서도 바꿀 수 있음'],
- how:'두 길의 단계 수는 실제 길안내(buildSteps)로 잠깐 만들어 보고 보여 줍니다. 고른 것은 이 폰에만 기억합니다(b3nav_via — guide.js 의 계단 길과 같은 값). 3D 「경로 미리보기」 움직임은 아직 엘리베이터 길 그대로입니다.',
+ how:'두 길의 단계 수는 실제 길안내(buildSteps)로 잠깐 만들어 보고 보여 줍니다. 고른 것은 이 폰에만 기억합니다(b3nav_via — guide.js 의 계단 길과 같은 값). 중앙계단을 고르면 3D 빨간 동선(overview3d.js)과 「▶ 경로 미리보기」(roadview-play.js)도 계단을 걸어 오릅니다 — 직접 걸어보기의 계단 오르기와 같은 자리 · 같은 동작.',
  tech:['localStorage','길안내 다시 만들기(buildSteps)'],
  src:[['site/js/app/via.js','고르는 창 · 3D 가는 방법 줄'],['site/js/app/guide.js','계단 길 단계(GUIDE_VIA)']]},
 f_live:{t:'live.js — 발표장 「지금 켜 둔 사람」',z:'p',zl:'폰 안에서 돈다 · 발표장 QR 로 들어온 폰만',

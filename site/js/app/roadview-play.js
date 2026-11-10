@@ -12,6 +12,41 @@ function fpClearCorr(){
   fpCorrG=null; fpCorrMats=[]; fpTgtGlow=[]; fpHiddenSt=[]; fpAutoDoors=[];
 }
 
+/* ── 중앙계단으로 올라가는 길 (2026-11-10 사용자 「3D 경로 미리보기도 계단으로 올라가게」) ──
+   강의실 찾기에서 「중앙계단」을 골랐으면(guide.js GUIDE_VIA · via.js) 엘리베이터를 타지 않고 계단을 걸어 오른다.
+   길안내 계단 길과 같은 조건 — 1층(출입문)에서 2~5층으로 올라갈 때만(guideStairsOK).
+   걷는 자리 · 동작은 직접 걸어보기의 계단 오르기(roadview-free.js fpStairGo)와 똑같다 :
+   계단실로 들어가 → +Z 쪽 단으로 반 층 → 계단참에서 돌아 → -Z 쪽 단으로 나머지 반 층. 층마다 이어 붙인다. */
+function fpStairsVia(){
+  var f = (target && target.floor!==undefined) ? target.floor : startFloor;
+  return !!(typeof GUIDE_VIA!=='undefined' && GUIDE_VIA==='stairs' &&
+            typeof guideStairsOK==='function' && guideStairsOK() &&
+            startFloor===1 && typeof f==='number' && f>=2 && f<=5);
+}
+/* lvFrom → lvFrom+1 한 층 오르기. 시작 : 그 층 계단실 바닥(xIn) 근처 · 끝 : 위층 계단 발치(xFoot, -Z 쪽 단) */
+function fpStairUpSteps(lvFrom, ko){
+  var lv2 = LEVELS[lvIndex(lvFrom)+1];
+  var stZ = stZOf(lvFrom)*BUILDING_Z_STRETCH;
+  var yZ = fpSlabY(lv2), yMid = (fpSlabY(lvFrom)+yZ)/2;
+  var ow = (lvFrom===1 || lv2===1) ? FP_ST_OW*1.4 : FP_ST_OW;     // 1층과 맞닿는 계단은 1.4배 넓게 지어져 있다(fpStairGo 와 같은 값)
+  var zSide = stZ + (ow/4-0.06), zBack = stZ - (ow/4-0.06);
+  var xFoot = FP_WALL_X + FP_ST_LAND + 0.12;
+  var xTop  = FP_WALL_X + FP_ST_LAND + FP_ST_N*FP_ST_RUN + 0.58;
+  var N = FP_ST_N, per = 0.26;
+  return [
+    {to:{x:xFoot, z:zSide}, label: ko ? '올라가는 계단 앞' : 'At the up flight'},
+    {dur:0.3, yaw:Math.PI/2, label:''},
+    {to:{x:xTop, z:zSide}, y:yMid, ease:'lin', stairs:N, slook:1, dur:N*per,
+     label: ko ? (lvName(lvFrom)+' → '+lvName(lv2)+' 계단을 오릅니다') : ('Up the stairs · '+lvName(lvFrom)+' → '+lvName(lv2))},
+    {dur:0.5, yaw:Math.PI, label: ko ? '계단참에서 돌아섭니다' : 'Turning at the landing'},
+    {to:{x:xTop, z:zBack}, label: ko ? '계단참을 가로지릅니다' : 'Crossing the landing'},
+    {dur:0.4, yaw:-Math.PI/2, label:''},
+    {to:{x:xFoot, z:zBack}, y:yZ, ease:'lin', stairs:N, slook:1, dur:N*per,
+     label: ko ? (lvName(lv2)+'으로 올라갑니다') : ('Up to '+lvName(lv2))},
+    {dur:0.35, yaw:-Math.PI/2, label: ko ? (lvName(lv2)+' 도착') : ('Arrived at '+lvName(lv2))}
+  ];
+}
+
 /* ── 재생 대본 만들기 ───────────────────────────────────────────
    각 단계는 {dur, to, yaw, y, door, label} 형태. to가 있으면 그 지점까지 걷고
    (걷는 시간은 거리 ÷ 속도로 자동 계산), yaw가 있으면 그 방향을 바라보고,
@@ -37,6 +72,7 @@ function fpBuildScript(){
   /* 1층 화장실은 통로가 로비 밖으로 옮겨져 있으므로 목적지 z도 그 자리로 맞춘다 */
   if(target && target.kind==='toilet') rz = fpToiletZ(f);
   var ride = Math.abs(yT-yS) > 0.01;
+  var viaSt = ride && fpStairsVia();               // 엘리베이터 대신 중앙계단으로 (위 fpStairsVia)
   var ko = (LANG==='ko');
   var S = [];
 
@@ -71,7 +107,7 @@ function fpBuildScript(){
        갔다가 되돌아오는 이상한 길이 됐다. 엘리베이터를 실제로 탈 때(ride)만 그리로
        가고, 아니면 문 안쪽에서 곧바로 목적지 쪽으로 향한다. */
     corrZ = gs.z + gdir*2.6;
-    if(ride){
+    if(ride && !viaSt){
       S.push({to:{x:0, z: evzW},
               label: ko ? '복도를 따라 이동' : 'Along the corridor'});
       corrZ = evzW;
@@ -88,10 +124,11 @@ function fpBuildScript(){
             label: ko ? '공대 3호관 후문 앞' : 'At the back gate'});
     S.push({to:{x: FP_WALL_X + FP_ST_LAND*0.5, z: stZW},
             label: ko ? '후문으로 들어와 계단홀을 지납니다' : 'In through the back gate, across the stair hall'});
-    S.push({to:{x: 0, z: stZW},
+    /* 중앙계단으로 갈 때는 복도로 나가지 않는다 — 후문 로비가 곧 1층 중앙계단실이다(아래 viaSt) */
+    if(!viaSt) S.push({to:{x: 0, z: stZW},
             label: ko ? '복도 한가운데로' : 'To the middle of the corridor'});
     corrZ = stZW;                                   // v146: 엘리베이터로 가는 건 ride일 때만
-    if(ride){
+    if(ride && !viaSt){
       S.push({to:{x: 0, z: evzW},
               label: ko ? '복도를 따라 이동' : 'Along the corridor'});
       corrZ = evzW;
@@ -111,7 +148,33 @@ function fpBuildScript(){
     corrZ = 0;
   }
 
-  if(ride){
+  if(viaSt){
+    /* 중앙계단으로 걸어 오른다 — 층마다 fpStairUpSteps 를 이어 붙인다 */
+    var ST = BUILDING_Z_STRETCH, stZ1 = stZOf(1)*ST, xIn = FP_WALL_X + 0.50;
+    if(gateKey==='BACK'){
+      /* 후문은 들어서면 바로 1층 중앙계단실(후문 로비)이다 — 그 자리에서 계단 쪽으로 돌아선다 */
+      S.push({dur:0.6, yaw:Math.PI/2, label: ko ? '중앙계단 쪽으로 돌아섭니다' : 'Turning to the main stairs'});
+    }else{
+      var lp = null;
+      for(var q=S.length-1; q>=0; q--){ if(S[q].to){ lp = S[q].to; break; } }
+      if(!lp) lp = fpPos;
+      if(Math.abs(lp.x) > 0.05) S.push({to:{x:0, z:lp.z}, label: ko ? '복도로 나갑니다' : 'Into the corridor'});   // 정문 현관 → 복도
+      if(Math.abs(lp.z - stZ1) > 0.05) S.push({to:{x:0, z:stZ1}, label: ko ? '복도를 따라 중앙계단으로' : 'Along the corridor to the main stairs'});
+      S.push({to:{x:xIn, z:stZ1}, label: ko ? '중앙계단실로 들어갑니다' : 'Into the main stairwell'});
+    }
+    for(var lv=1; lv<f; lv++){
+      if(lv>1){
+        /* 위층 계단참에 올라섰다 — 같은 계단실에서 한 바퀴 돌아 다음 층 계단으로 */
+        S.push({to:{x:xIn, z:stZOf(lv)*ST}, label: ko ? (lvName(lv)+' — 한 층 더 올라갑니다') : (lvName(lv)+' — one more floor')});
+        S.push({dur:0.6, yaw:Math.PI/2, label:''});
+      }
+      Array.prototype.push.apply(S, fpStairUpSteps(lv, ko));
+    }
+    var stZt = stZOf(f-1)*ST;                       // 직접 걸어보기(fpStairGo)처럼 오른 계단의 자리에서 복도로 나온다
+    S.push({to:{x:0, z:stZt}, yaw:-Math.PI/2,
+            label: ko ? (lvName(f)+' 복도로 나갑니다') : ('Into the '+lvName(f)+' corridor')});
+    corrZ = stZt;
+  }else if(ride){
     if(fromGate){
       S.push({to:{x:lobbyX, z:evzW}, label: ko ? '엘리베이터 앞으로' : 'To the elevator'});
     }else{
@@ -144,7 +207,7 @@ function fpBuildScript(){
   var corrYaw = (dir > 0) ? 0 : Math.PI;            // +Z / -Z 중 목적지가 있는 쪽
   /* 같은 층(1층) 목적지라도 현관에서 곧장 방 쪽으로 걸으면 현관 옆벽을 뚫고 지나간다
      → 어떤 경우든 복도 한가운데(x=0)로 먼저 나온 뒤에 이동한다. */
-  S.push({to:{x:0, z:corrZ}, label: ko ? '복도로 나갑니다' : 'Into the corridor'});
+  if(!viaSt) S.push({to:{x:0, z:corrZ}, label: ko ? '복도로 나갑니다' : 'Into the corridor'});   // 계단으로 왔으면 이미 복도 한가운데
   S.push({dur:0.95, yaw:corrYaw, label: ko ? '목적지 방향으로' : 'Turning to the corridor'});
 
   /* 도착 : 복도 벽에 달린 '그 방 문' 바로 앞에 서서 문을 정면으로 마주 본다.
@@ -212,15 +275,18 @@ function fpStart(){
   if(!fpSteps || !fpSteps.length) return;
   if(!fpCab){ fpCab = fpMakeCab(); scene.add(fpCab); }
   if(!fpCeil){ fpCeil = fpMakeCeil(); scene.add(fpCeil); }
-  fpBuildCorr();            // 복도 벽·문·명찰을 이번 경로에 맞게 새로 세운다
-  /* 빨간 동선은 '엘리베이터를 타고 올라가는 길'을 그린 것이라,
+  /* 복도 벽·문·명찰을 이번 경로에 맞게 새로 세운다 — 중앙계단으로 오를 때는 지나가는 층(계단실)도 모두 */
+  var byStairs = fpStairsVia();
+  if(byStairs){ var lvs = []; for(var l=1; l<=target.floor; l++) lvs.push(l); fpBuildCorr(lvs); }
+  else fpBuildCorr();
+  /* 빨간 동선은 '엘리베이터(또는 중앙계단)로 올라가는 길'을 그린 것이라,
      출발층과 목적층이 같은 때는 엘리베이터에서 뿗어나온 선이 오히려 헷갈린다. */
   var sameFl = !!(target && target.floor===startFloor);
   fpRouteFloor(!sameFl);
   if(sameFl && typeof routeA!=='undefined' && routeA) routeA.visible=false;
   if(typeof fpSetCabButtons==='function')
-    fpSetCabButtons(sameFl ? null : lvLabel(target.floor));
-  fpEvDir = sameFl ? 0 : ((lvIndex(target.floor) > lvIndex(startFloor)) ? 1 : -1);
+    fpSetCabButtons((sameFl || byStairs) ? null : lvLabel(target.floor));
+  fpEvDir = (sameFl || byStairs) ? 0 : ((lvIndex(target.floor) > lvIndex(startFloor)) ? 1 : -1);
   fpCab.visible = (startFloor!=='R');
   fpSetXray(false);
   var lg=document.getElementById('legend3d'); if(lg) lg.style.display='none';  // 밖에서 볼 때용 범례는 접어 둔다

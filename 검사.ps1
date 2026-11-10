@@ -25,7 +25,7 @@
 #     안전망(tests/golden)        길안내 1,110가지·사진 174장·화면·CSS·3D 그림 15장이 기록과 같은가
 #   서버 규칙 시험(tests/rules)은 여기서 돌지 않는다 — Node · Java 가 필요해서 GitHub 자동 검사(rules job)에서만 돈다.
 #   pwsh -File 검사.ps1 -Ci      GitHub 자동 검사용 — 다른 컴퓨터라 글꼴·그래픽이 달라, 안전망에서 글자 폭·3D 그림 비교를 뺀다
-param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v174', [int]$Port = 8080)
+param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v175', [int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ROOT = $PSScriptRoot

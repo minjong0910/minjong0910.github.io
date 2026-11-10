@@ -6,7 +6,7 @@
      그 단계 문장(guide.js 의 steps[si].tko / 영어면 .ten)을 소리로 읽고 짧게 진동한다.
    · 도착 화면에 오면 「13524호, 도착했습니다. 문 옆 명패를 확인하세요.」
    · 노란 안내판 오른쪽 🔊 단추로 켜고 끈다(이 폰에 기억 — b3nav_tts, 처음엔 켜짐). 켜져 있을 때 안내판을 누르면 다시 읽는다.
-     설정 → 「음성 안내」 줄로도 켜고 끈다. 읽는 동안 단추가 깜빡인다.
+     읽는 동안 단추가 깜빡인다. (설정의 「음성 안내」 줄은 넣었다가 뺐다 — 사용자 11/10 「설정에 넣지 말 것」, 줄이 늘어 「문제 기록」이 밀려났다)
    · 길안내 · 도착 화면을 떠나거나, 화면이 꺼지거나 다른 앱으로 가면 읽던 것을 멈춘다. 같은 단계를 다시 그릴 때는 되풀이하지 않는다.
    · 폰에 들어 있는 목소리(speechSynthesis) — 서버 · 비용 없음, 인터넷 없이도 대개 된다(안드로이드 · 아이폰 기본 한국어 목소리).
      아이폰은 「누른 그 순간」에만 처음 소리를 낼 수 있어서, 단계를 그리는 그 자리에서 바로 읽는다(기다렸다 읽지 않는다).
@@ -103,7 +103,6 @@ var TTS = (function(){
       btn.setAttribute('aria-label', on ? T('음성 안내 끄기', 'Turn off voice guidance') : T('음성 안내 켜기', 'Turn on voice guidance'));
       btn.title = btn.getAttribute('aria-label');
     }
-    [].forEach.call(document.querySelectorAll('.ttsState'), function(e){ e.textContent = on ? T('켜짐', 'On') : T('꺼짐', 'Off'); });
   }
   function set(v){ on = !!v; lsSet(on ? '1' : '0'); if(!on) stop(); paint(); }
   var sign = s6 && s6.querySelector('.stSign');
@@ -150,7 +149,7 @@ var TTS = (function(){
   return {
     isOn: function(){ return on; },
     supported: function(){ return ok; },
-    /* 설정 → 「음성 안내」 줄. 켤 때 한마디(아이폰은 이 누름으로 소리가 열린다) */
+    /* 켜고 끄기(누른 자리에서 부를 것 — 켤 때 한마디로 아이폰 소리가 열린다) */
     toggle: function(){ set(!on); if(on) say(T('음성 안내를 켰어요. 길안내 단계마다 읽어 드릴게요.', 'Voice guidance is on.')); },
     set: set, say: say, stop: stop,
     /* 검사용 */

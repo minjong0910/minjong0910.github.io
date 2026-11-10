@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '4ca1ceb0fc29';   // 파일 273개 · 18.1MB
+var VERSION = '6877740bd341';   // 파일 273개 · 18.1MB
 var FILES = [
   ['3d/realistic.html','97d7383db21e',81305],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -243,7 +243,7 @@ var FILES = [
   ['js/app/aid.js','6997dafbe012',33801],
   ['js/app/boot.js','9a7f3034fbe7',9242],
   ['js/app/building.js','6ae383d48918',23814],
-  ['js/app/consent.js','6b69b18383cd',49236],
+  ['js/app/consent.js','6ab8337c0460',53602],
   ['js/app/easy.js','c4d503eeaa8b',26453],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','60e54dd09ede',51753],
@@ -279,13 +279,13 @@ var FILES = [
   ['js/app/ui.js','fd0ccd5bd70a',29957],
   ['js/app/via.js','5ebda6cac5b1',11297],
   ['js/app/view3d.js','8cdb4d2f2f63',52017],
-  ['js/app/voice.js','5f8eea6ffba2',29976],
+  ['js/app/voice.js','f022016b1ee4',30470],
   ['js/app/zoom.js','bc7bdb1b586f',10093],
   ['js/vendor/jsqr.min.js','a07c909282f1',130501],
   ['js/vendor/jszip.min.js','57fff0459a39',97676],
   ['js/vendor/three.min.js','ab353cb93cfa',603491],
   ['legal/licenses.html','e32b2a852eb6',27999],
-  ['legal/privacy.html','e14d6e7279d4',10829],
+  ['legal/privacy.html','f30b9c708fe9',11635],
   ['manifest.webmanifest','4419a01b0382',680]
 ];
 // ↑↑↑ 도구\오프라인목록.ps1 이 채운다

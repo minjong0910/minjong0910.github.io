@@ -7,6 +7,7 @@
             (2026-10-20 오른쪽 위 [인터넷][☰] · 하늘색 테두리로 다시 찍음 — g12 는 ☰ 메뉴를 펼친 모습)
             (2026-11-03 내 시간표 · 길 공유하기가 들어가 g11 설정 · g12 ☰ 을 다시 찍고, g13 길 공유하기 · g14 내 시간표 · g15 수업 알림을 더함
              — 사용자 : 「설명은 최대한 간단하고 명확하게」)
+            (2026-11-10 첫 화면 아래 말로 찾기 오브가 들어가 g01 을 다시 찍고 6번 「말로 찾기」를 더함 — voice.js)
             그림의 번호 = 아래 설명의 번호.
    · ui.js 의 GUIDE_PAGES · guideRender 를 이 파일이 갈아 끼운다 (ui.js 는 건드리지 않는다).
    · 그림을 누르면 zoom.js 의 openZoom 으로 크게 본다. */
@@ -23,7 +24,9 @@ var HOWTO = [
       ['인터넷 표시', '초록 와이파이 그림이면 인터넷이 연결된 거예요. 끊기면 그림이 바뀌어요. 누르면 인터넷 없이 쓰는 방법을 알려 줘요.',
        'Internet', 'A green Wi-Fi icon means you are online. It changes when you go offline. Tap it to see how to use the app offline.'],
       ['☰ 메뉴', '누르면 밝은 화면 · 처음으로 · 내 시간표 · 즐겨찾기 · 설정이 아래로 펼쳐져요. 다음 쪽에서 자세히 알려 줘요.',
-       '☰ Menu', 'Tap to open Light mode · Home · My timetable · Favorites · Settings. See the next page.']
+       '☰ Menu', 'Tap to open Light mode · Home · My timetable · Favorites · Settings. See the next page.'],
+      ['말로 찾기', '아래 동그란 구슬을 누르고 가고 싶은 곳을 말해요. 「13524호」 · 「김현섭 교수님」 · 「3층 화장실」처럼요. 사진을 보고 맞으면 「길안내 시작」을 눌러요. 처음 한 번은 마이크를 허용해 주세요.',
+       'Voice search', 'Tap the round orb at the bottom and say where you want to go, like "13524" or "3rd floor restroom". If the photo is right, tap "Start directions". Allow the microphone the first time.']
     ] },
   { t:['☰ 메뉴', '☰ Menu'], img:'g12_menu',
     lead:['어느 화면에서든 오른쪽 위 ☰을 누르면 펼쳐져요.', 'Tap ☰ at the top right on any screen.'],

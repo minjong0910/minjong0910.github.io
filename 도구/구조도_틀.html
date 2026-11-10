@@ -355,18 +355,18 @@
       <button class="b p" data-id="f_pwa"><span class="n">pwa.js</span><span class="d">714줄 · 설치 안내 · 문제 기록 · 저장 지키기</span></button>
       <button class="b p" data-id="f_boot"><span class="n">boot.js</span><span class="d">123줄 · 켜는 화면(동영상)</span></button>
       <button class="b p" data-id="f_start"><span class="n">start.js</span><span class="d">32줄 · 글꼴 기다렸다 시작</span></button>
-      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">499줄 · 오프라인 저장소</span></button>
+      <button class="b p" data-id="offline"><span class="n">sw.js</span><span class="d">500줄 · 오프라인 저장소</span></button>
     </div>
   </div>
 
   <div class="gbox">
-    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 13개</div>
+    <div class="gt">② 화면과 상태</div><div class="gs">무엇을 보여줄지 정한다 · 16개</div>
     <div class="grid">
       <button class="b p" data-id="f_shell"><span class="n">shell.js</span><span class="d">530줄 · 화면 전환 go() · 휴대폰 뒤로가기 · 종료</span></button>
       <button class="b p" data-id="f_ui"><span class="n">ui.js</span><span class="d"> · 한/영 · 검색</span></button>
-      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">796줄 · 화면 24개</span></button>
+      <button class="b p" data-id="f_index"><span class="n">index.html</span><span class="d">798줄 · 화면 24개</span></button>
       <button class="b p" data-id="f_easy"><span class="n">easy.js</span><span class="d">339줄 · 쉬운 사용모드</span></button>
-      <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">233줄 · 사진 이용안내</span></button>
+      <button class="b p" data-id="f_howto"><span class="n">howto.js</span><span class="d">236줄 · 사진 이용안내</span></button>
       <button class="b p" data-id="f_zoom"><span class="n">zoom.js</span><span class="d">219줄 · 사진 확대</span></button>
       <button class="b p" data-id="f_topmenu"><span class="n">topmenu.js</span><span class="d">64줄 · ☰ 메뉴 · 밝은 화면</span></button>
       <button class="b p" data-id="f_resume"><span class="n">resume.js</span><span class="d">147줄 · 길안내 이어 하기</span></button>
@@ -377,6 +377,7 @@
       <button class="b p" data-id="f_share"><span class="n">share.js</span><span class="d">236줄 · 길 공유하기 (링크)</span></button>
       <button class="b p" data-id="f_timetable"><span class="n">timetable.js</span><span class="d">407줄 · 내 시간표 · 수업 알림</span></button>
       <button class="b p" data-id="f_via"><span class="n">via.js</span><span class="d">145줄 · 엘리베이터 · 중앙계단 고르기</span></button>
+      <button class="b p" data-id="f_voice"><span class="n">voice.js</span><span class="d">399줄 · 말로 찾기 (첫 화면 오브)</span></button>
     </div>
   </div>
 
@@ -739,6 +740,13 @@ f_via:{t:'via.js — 엘리베이터 · 중앙계단 고르기',z:'p',zl:'폰 �
  how:'두 길의 단계 수는 실제 길안내(buildSteps)로 잠깐 만들어 보고 보여 줍니다. 고른 것은 이 폰에만 기억합니다(b3nav_via — guide.js 의 계단 길과 같은 값). 중앙계단을 고르면 3D 빨간 동선(overview3d.js)과 「▶ 경로 미리보기」(roadview-play.js)도 계단을 걸어 오릅니다 — 직접 걸어보기의 계단 오르기와 같은 자리 · 같은 동작.',
  tech:['localStorage','길안내 다시 만들기(buildSteps)'],
  src:[['site/js/app/via.js','고르는 창 · 3D 가는 방법 줄'],['site/js/app/guide.js','계단 길 단계(GUIDE_VIA)']]},
+f_voice:{t:'voice.js — 말로 찾기',z:'p',zl:'폰 안에서 돈다 · 말을 글자로 바꾸는 것만 브라우저(구글 · 애플)',
+ kid:'첫 화면 아래 반짝이는 점 구슬을 누르고 「13524호」나 「김현섭 교수님」처럼 말하면, 그곳 사진을 보여 주며 「여기가 맞나요?」 하고 물어요. 맞으면 바로 길안내가 시작돼요.',
+ why:'번호를 하나하나 누르기 어려운 사람(짐을 든 사람 · 처음 온 사람 · 글자 입력이 서툰 사람)도 말 한마디로 찾게 하려고 넣었습니다(2026-11-10 사용자 — Siri 같은 점 구슬 영상을 참고).',
+ where:['첫 화면 아래 — 구슬 + 늘 붙은 말풍선 「눌러서 목적지를 말해주세요.」(폰 크기마다 다른 글씨를 가리지 않는 자리를 재서 고름)','누르면 「가시고 싶은 목적지를 말씀해주세요」 → 말하는 대로 말풍선에 → 「찾으시는 목적지가 여기가 맞나요?」 + 사진','[길안내 시작] → 3D 건물도를 거치지 않고 길안내 1단계로 바로 · 뒤로 가면 첫 화면'],
+ how:'브라우저의 음성 인식(Web Speech API)이 말을 글자로 바꾸면, 앱이 그 글자를 방 목록에 맞춰 봅니다 — 숫자 읽기(일삼오이사 · 만삼천오백이십사 · 3층 10호), 끝자리(524호), 교수님 성함, 실 이름, 화장실(층). 들은 말은 화면에만 보이고 우리 서버로 보내거나 남기지 않습니다. 구슬은 점 140개를 2D 캔버스에 돌려 그리고, 첫 화면이 아닐 때는 그리기를 멈춥니다.',
+ tech:['Web Speech API','2D 캔버스 애니메이션'],
+ src:[['site/js/app/voice.js','구슬 · 말풍선 자리 · 말 → 목적지 · 확인 창'],['site/js/app/ui.js','길안내로 넘기기(openSearchHit · openTarget)'],['site/js/app/guide.js','길안내 첫 화면(startGuide)']]},
 f_live:{t:'live.js — 발표장 「지금 켜 둔 사람」',z:'p',zl:'폰 안에서 돈다 · 발표장 QR 로 들어온 폰만',
  kid:'발표장 QR 로 앱을 연 사람이 앱을 켜 두는 동안, 발표 화면에 「지금 N명이 켜 두고 있어요」가 보이게 해요. 앱을 끄면 숫자가 줄어요.',
  why:'졸업작품 발표회(20쪽 Q&A)에서 「휴대폰 하나로 끝내시죠」를 말로만이 아니라 그 자리에서 보여 주려고 만들었습니다(2026-10-27 · 28 사용자).',

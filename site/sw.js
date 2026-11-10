@@ -12,7 +12,7 @@
 'use strict';
 
 // ↓↓↓ 도구\오프라인목록.ps1 이 채운다 — 손으로 고치지 않는다
-var VERSION = '52370cfe78ec';   // 파일 271개 · 18MB
+var VERSION = '3e2b33c263c2';   // 파일 272개 · 18.1MB
 var FILES = [
   ['3d/realistic.html','97d7383db21e',81305],
   ['3d/tex/01.png','c66e23f057fc',50906],
@@ -36,7 +36,7 @@ var FILES = [
   ['3d/tex/19.png','dfbf4fb3776e',3056],
   ['3d/tex/20.png','3d65f66b2f70',3051],
   ['3d/tex/21.png','5185337f5f27',7799],
-  ['css/app.css','a5758db767c1',172075],
+  ['css/app.css','4f922be51db6',180549],
   ['css/boot.css','0b23cf08e0b6',2841],
   ['data/photos.js','c1c98972f145',16161],
   ['data/photos/13101/01.jpg','f20c39f84790',65321],
@@ -210,7 +210,7 @@ var FILES = [
   ['data/photos/WIN5R/01.jpg','f1dc31f7a5f9',125944],
   ['data/places.js','02bc4d37cb3f',1500],
   ['easy-trial.html','cd649f429bcd',831],
-  ['guide/g01_first.jpg','695aeb9bf0ec',61794],
+  ['guide/g01_first.jpg','0329fb0f42f6',75472],
   ['guide/g02_easy.jpg','17d5cd445ac7',84267],
   ['guide/g03_qrok.jpg','ff85a77bf415',79986],
   ['guide/g04_cat.jpg','43c8cd155b34',64953],
@@ -239,7 +239,7 @@ var FILES = [
   ['img/splash.mp4','d2f01cf420ad',277674],
   ['img/splash_end.jpg','040a235d9bd8',43535],
   ['img/splash_first.jpg','c68ac1b0d37e',29924],
-  ['index.html','5e81ab103c4b',64349],
+  ['index.html','bb8ccddcc9b5',64685],
   ['js/app/aid.js','6997dafbe012',33801],
   ['js/app/boot.js','9a7f3034fbe7',9242],
   ['js/app/building.js','6ae383d48918',23814],
@@ -247,7 +247,7 @@ var FILES = [
   ['js/app/easy.js','c4d503eeaa8b',26453],
   ['js/app/floor-detail.js','fbeed74dba3e',19490],
   ['js/app/guide.js','60e54dd09ede',51753],
-  ['js/app/howto.js','4763f7f4705a',25220],
+  ['js/app/howto.js','02e254ed47ea',25868],
   ['js/app/icons.js','fcb873916bfb',22326],
   ['js/app/live.js','641f671b6fff',2510],
   ['js/app/overview3d.js','5568efd586df',115350],
@@ -278,6 +278,7 @@ var FILES = [
   ['js/app/ui.js','fd0ccd5bd70a',29957],
   ['js/app/via.js','5ebda6cac5b1',11297],
   ['js/app/view3d.js','8cdb4d2f2f63',52017],
+  ['js/app/voice.js','5f8eea6ffba2',29976],
   ['js/app/zoom.js','bc7bdb1b586f',10093],
   ['js/vendor/jsqr.min.js','a07c909282f1',130501],
   ['js/vendor/jszip.min.js','57fff0459a39',97676],

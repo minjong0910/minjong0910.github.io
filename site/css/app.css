@@ -2076,3 +2076,76 @@ html.lt .csKinds button.pick{background:#0B6FB8;border-color:#0B6FB8;color:#FFFF
 html.lt .csDiag{color:#24364D;} html.lt .csPeek{border-color:#B9C6D6;color:#3A4A5C;}
 html.lt .csDiagTx{background:#F3F7FB;border-color:#B9C6D6;color:#3A4A5C;}
 html.lt .csTicket{border-color:#9CC3E2;color:#44546A;} html.lt .csTicket b{color:#0F1B2D;}
+/* ── 말로 찾기 (2026-11-10 사용자 · js/app/voice.js) : 첫 화면 아래 점 구슬(오브) + 늘 붙은 말풍선 「눌러서 목적지를 말해주세요.」
+      → 누르면 「가시고 싶은 목적지를 말씀해주세요」 · 말하는 대로 말풍선에 → 「찾으시는 목적지가 여기가 맞나요?」 + 사진 → [길안내 시작] / [다시 말하기]
+      견본 /sample/voice3/ 를 사용자가 폰으로 확인하고 옮겼다. 말풍선 자리(left/top · .top/.side · 오브 .lo/.sm · --vsx)는 voice.js place() 가 폰마다 재서 정한다 ── */
+.vsOrb{position:absolute;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(calc(-50% + var(--vsx,0px)));z-index:40;width:66px;height:66px;padding:0;border:0;border-radius:50%;cursor:pointer;
+  background:radial-gradient(circle at 50% 45%,#12324A 0%,#0A1622 62%,#060B12 100%);box-shadow:0 0 0 2px rgba(0,229,255,.45),0 0 26px rgba(0,229,255,.35);transition:transform .25s,box-shadow .25s;}
+.vsOrb canvas{width:66px;height:66px;display:block;border-radius:50%;}
+.vsOrb.lo{bottom:calc(10px + env(safe-area-inset-bottom));}                       /* 위 말풍선 자리가 조금 모자라면 10px 내려서 */
+.vsOrb.sm{bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(calc(-50% + var(--vsx,0px))) scale(.8);}   /* 아주 작은 폰 */
+.vsOrb.on{z-index:96;transform:translateX(-50%) scale(1.22);box-shadow:0 0 0 2px rgba(0,229,255,.8),0 0 40px rgba(0,229,255,.55);}   /* 듣는 동안 — 가운데로 돌아와 커진다 */
+.vsOrb.hide{display:none;}
+.vsDim{position:absolute;inset:0;z-index:90;background:rgba(2,4,8,.58);opacity:0;pointer-events:none;transition:opacity .25s;}
+.vsDim.on{opacity:1;pointer-events:auto;}
+/* 듣는 동안 오브 위 말풍선 — 말하는 그대로 써진다 */
+.vsBub{position:absolute;left:18px;right:18px;bottom:calc(122px + env(safe-area-inset-bottom));z-index:97;padding:16px 18px;border-radius:20px;
+  background:#101A26;border:2px solid #1FA9C9;color:#E7F6FF;text-align:center;font-size:19px;font-weight:800;line-height:1.4;word-break:keep-all;
+  box-shadow:0 10px 30px rgba(0,0,0,.45);opacity:0;transform:translateY(14px) scale(.96);transition:opacity .22s,transform .25s cubic-bezier(.2,.9,.3,1.2);pointer-events:none;}
+.vsBub.on{opacity:1;transform:none;}
+.vsBub:after{content:"";position:absolute;left:50%;bottom:-11px;width:18px;height:18px;margin-left:-9px;background:#101A26;border-right:2px solid #1FA9C9;border-bottom:2px solid #1FA9C9;transform:rotate(45deg);}
+.vsBub .ask{color:#9FEFFF;}
+.vsBub .ask i{display:inline-block;width:6px;height:6px;margin-left:4px;border-radius:50%;background:#00E5FF;animation:vsDot 1.2s infinite;}
+.vsBub .ask i:nth-child(2){animation-delay:.2s;} .vsBub .ask i:nth-child(3){animation-delay:.4s;}
+@keyframes vsDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
+.vsBub .int{color:#7F93A8;}
+.vsBub small{display:block;margin-top:6px;font-size:13px;font-weight:700;color:#7F93A8;}
+.vsBub.warn{border-color:#FF9A5C;} .vsBub.warn:after{border-color:#FF9A5C;}
+/* 「찾으시는 목적지가 여기가 맞나요?」 — 아래에서 올라오는 창 */
+.vsCard{position:absolute;left:0;right:0;bottom:0;z-index:98;background:#101722;border-top:3px solid #1FA9C9;border-radius:24px 24px 0 0;color:#E7F6FF;
+  padding:12px 18px calc(18px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.9,.3,1.05);max-height:94%;overflow:auto;text-align:center;
+  word-break:keep-all;overflow-wrap:anywhere;}   /* 「연구실」이 「연 / 구실」로 끊기지 않게 낱말 단위로 */
+.vsCard.on{transform:none;}
+.vsCard .grab{width:44px;height:5px;border-radius:9px;background:#33404F;margin:0 auto 10px;}
+.vsCard .x{position:absolute;right:12px;top:10px;width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.06);color:#9FB2C8;font-size:20px;cursor:pointer;}
+.vsCard h4{margin:4px 0 12px;font-size:20px;font-weight:900;letter-spacing:-.02em;}
+.vsCard .said{margin:-6px 0 12px;color:#7F93A8;font-size:13px;font-weight:700;}
+.vsPh{position:relative;width:100%;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:#0B1118;border:1px solid #1F2A38;}
+.vsPh .bg{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(18px) brightness(.55);}
+.vsPh img{position:relative;width:100%;height:100%;object-fit:contain;display:block;}   /* 사진은 통째로(자르지 않는다 — 11/05 사용자) */
+.vsPh .none{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#9FB2C8;font-weight:800;}
+.vsPh .none b{font-size:34px;color:#E7F6FF;}
+.vsName{margin-top:12px;font-size:22px;font-weight:900;}
+.vsName small{display:block;margin-top:2px;font-size:14px;font-weight:700;color:#9FB2C8;}
+.vsAlt{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px;}
+.vsAlt span{font-size:12px;font-weight:800;color:#7F93A8;align-self:center;}
+.vsAlt button{border:1.5px solid #2A6F86;background:rgba(0,229,255,.07);color:#CFEFFF;border-radius:99px;padding:6px 11px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;}
+.vsAlt button.pick{border-color:#00E5FF;background:rgba(0,229,255,.2);color:#fff;}
+.vsGo{display:block;width:100%;margin-top:14px;padding:16px;border:0;border-radius:14px;font:inherit;font-size:18px;font-weight:900;color:#0B0F16;cursor:pointer;background:linear-gradient(90deg,#00E5FF,#7C5CFF);}
+.vsAgain{display:block;width:100%;margin-top:10px;padding:14px;border:2px solid #00E5FF;border-radius:14px;font:inherit;font-size:16px;font-weight:800;color:#00E5FF;background:transparent;cursor:pointer;}
+.vsText{display:block;width:100%;margin-top:8px;padding:10px;border:0;background:none;color:#7F93A8;font:inherit;font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer;}
+/* 늘 떠 있는 말풍선 — 오브 위(.top, 꼬리 아래) 또는 오브 오른쪽(.side, 꼬리 왼쪽) */
+.vsHint{position:absolute;left:0;top:0;z-index:41;margin:0;padding:8px 13px;border-radius:14px;background:#101A26;border:1.5px solid #1FA9C9;color:#DFF8FF;
+  font:inherit;font-size:14px;font-weight:800;line-height:1.35;letter-spacing:-.01em;text-align:center;white-space:nowrap;word-break:keep-all;cursor:pointer;
+  box-shadow:0 6px 18px rgba(0,0,0,.4),0 0 14px rgba(0,229,255,.18);opacity:0;visibility:hidden;animation:vsFloat 2.8s ease-in-out infinite;}
+.vsHint.on{opacity:1;visibility:visible;transition:opacity .3s,visibility .3s;}   /* 나타날 때만 천천히 — 숨을 때는 바로(다른 화면 위에 남지 않게 · 안전망이 반쯤 사라진 것을 담지 않게) */
+.vsHint.side{text-align:left;}
+.vsHint.wrap{white-space:normal;}
+.vsHint:after{content:"";position:absolute;width:10px;height:10px;background:#101A26;border:1.5px solid #1FA9C9;transform:rotate(45deg);}
+.vsHint.top:after{left:50%;bottom:-6.5px;margin-left:-5px;border-top:0;border-left:0;}
+.vsHint.side:after{left:-6.5px;top:50%;margin-top:-5px;border-top:0;border-right:0;}
+@keyframes vsFloat{0%,100%{translate:0 0}50%{translate:0 -3px}}
+@media (prefers-reduced-motion: reduce){ .vsHint{animation:none;} }
+/* 밝은 화면 — 오브는 그대로(어두운 구슬), 말풍선 · 확인 창은 흰 바탕 */
+html.lt .vsHint{background:#FFFFFF;color:#0B5568;box-shadow:0 6px 18px rgba(15,27,45,.18);} html.lt .vsHint:after{background:#FFFFFF;}
+html.lt .vsDim{background:rgba(15,27,45,.45);}
+html.lt .vsBub{background:#FFFFFF;color:#0F1B2D;box-shadow:0 10px 30px rgba(15,27,45,.25);} html.lt .vsBub:after{background:#FFFFFF;}
+html.lt .vsBub .ask{color:#0B6E85;} html.lt .vsBub .int,html.lt .vsBub small{color:#5B6B80;}
+html.lt .vsCard{background:#FFFFFF;color:#0F1B2D;border-top-color:#2B88C8;box-shadow:0 -10px 40px rgba(15,27,45,.2);}
+html.lt .vsCard .grab{background:#D5DEE8;} html.lt .vsCard .x{background:rgba(15,27,45,.06);color:#44546A;}
+html.lt .vsCard .said,html.lt .vsAlt span,html.lt .vsText{color:#5B6B80;}
+html.lt .vsPh{background:#EEF3F8;border-color:#D5DEE8;} html.lt .vsPh .none{color:#44546A;} html.lt .vsPh .none b{color:#0F1B2D;}
+html.lt .vsName small{color:#44546A;}
+html.lt .vsAlt button{border-color:#9CC8DA;background:rgba(8,145,178,.06);color:#0B5568;}
+html.lt .vsAlt button.pick{border-color:#0891B2;background:rgba(8,145,178,.16);color:#0F1B2D;}
+html.lt .vsAgain{border-color:#0891B2;color:#0891B2;}

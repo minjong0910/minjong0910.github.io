@@ -1,6 +1,13 @@
 rules_version = '2';
 
-// 공대 3호관 길안내 — Firestore 보안 규칙 (2026-09-22 v84 · 2026-10-18 방 정보·하루 3번 · 2026-10-27 발표장 접속 수 · 10-28 지금 켜 둔 사람 추가)
+// 공대 3호관 길안내 — Firestore 보안 규칙 (2026-09-22 v84 · 2026-10-18 방 정보·하루 3번 · 2026-10-27 발표장 접속 수 · 10-28 지금 켜 둔 사람 추가
+//                                          · 2026-11-10 외부 점검 반영 : 제보 사진 · QR · AI 칸 모양 검사, 승인 사진 모양 검사, 관리자 작업 기록 adminlog)
+//
+// 마지막으로 콘솔에 게시한 날 : (아직 — 게시하면 여기에 날짜를 적는다)   ← 저장소 파일과 실제 규칙이 다른지 알아보는 표시
+//
+// 2026-11-10 고친 이유 : 제보는 익명으로 누구나 쓰고, 관리자 화면은 그 값을 HTML 로 그린다.
+//   예전 규칙은 사진 값을 「data:image/…;base64, 뒤에 아무 글자나」, QR 을 「20자 아무 글자나」, AI 결과를 「map 이면 아무거나」 받아서,
+//   꾸민 제보 하나로 관리자 브라우저에서 스크립트가 돌 수 있었다. 앱(sugdb.js cleanSug · suggest.js)도 같은 기준으로 막는다 — 규칙은 두 번째 방어선.
 //
 // 원칙
 //   · 관리자는 "로그인한 사람"이 아니라 "admins 명단에 UID 가 있는 사람"이다.
@@ -33,17 +40,36 @@ service cloud.firestore {
       return /databases/$(database)/documents/quota/$(uid + '_' + day);
     }
 
+    // 사진 값 : jpeg · png · webp 의 base64 만 (앱은 제보를 jpeg 로, 사진 지우기 요청의 1×1 그림을 png 로 보낸다).
+    //   base64 글자만 허용하므로 따옴표 · 꺾쇠가 섞일 수 없다.
+    function validImage(u) {
+      return u.matches('data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}');
+    }
+
+    // 승인 사진 한 장의 모양 — 앱(sugdb.js publishPhoto · hidePhoto)이 보내는 칸만. 관리자만 쓰지만 모든 사람 화면에 나가므로 모양을 지킨다.
+    function validPhoto(d) {
+      return d.keys().hasOnly(['code', 'sub', 'n', 'u', 'cap', 'ts', 'sid', 'hide'])
+        && d.code is string && d.code.matches('^[A-Za-z0-9_-]{1,40}$')
+        && (!('n' in d)   || (d.n is string && d.n.size() <= 200))
+        && (!('ts' in d)  || d.ts is number)
+        && (!('cap' in d) || (d.cap is string && d.cap.size() <= 600))
+        && (!('sub' in d) || (d.sub is string && d.sub.size() <= 40))
+        && (!('sid' in d) || (d.sid is string && d.sid.size() <= 160))
+        && ((('hide' in d) && d.hide == true && !('u' in d))
+            || (!('hide' in d) && d.u is string && d.u.size() < 950000 && validImage(d.u)));
+    }
+
     // 제보 한 건의 모양 — 앱(pushOne)이 보내는 칸만 받는다
     function validSuggestion(d) {
       return d.keys().hasOnly(['u', 'note', 'ts', 'status', 'ai', 'qr', 'ua', 'cid', 'uid', 'day'])
         && d.keys().hasAll(['u', 'status'])
         && d.status == 'pending'
         && d.u is string && d.u.size() < 950000
-        && d.u.matches('data:image/[a-zA-Z0-9.+-]+;base64,.*')
+        && validImage(d.u)
         && (!('note' in d) || (d.note is string && d.note.size() <= 500))
         && (!('ts' in d)   || d.ts is number)
-        && (!('ai' in d)   || d.ai == null || d.ai is map)
-        && (!('qr' in d)   || d.qr == null || (d.qr is string && d.qr.size() <= 20))
+        && (!('ai' in d)   || d.ai == null || (d.ai is map && d.ai.size() <= 60))
+        && (!('qr' in d)   || d.qr == null || (d.qr is string && d.qr.matches('^(MAIN|BACK|EAST|WEST)$')))
         && (!('ua' in d)   || (d.ua is string && d.ua.size() <= 120))
         && (!('cid' in d)  || (d.cid is string && d.cid.size() <= 60))
         && (!('uid' in d)  || (d.uid is string && d.uid.size() <= 128))
@@ -106,7 +132,22 @@ service cloud.firestore {
     // 승인된 사진 : 누구나 읽고, 관리자만 올리기·고치기·지우기
     match /photos/{id} {
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow create, update: if isAdmin() && validPhoto(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // 관리자 작업 기록 (2026-11-10) : 제보 승인 · 거절 · 삭제, 승인 사진 올리기 · 지우기 · 숨기기 · 다시 넣기를 한 줄씩.
+    //   관리자만 읽고 남긴다. 남긴 사람(by)은 자기 UID 여야 하고, 고치거나 지울 수 없다. (앱 sugdb.js adminLog)
+    match /adminlog/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['act', 'target', 'code', 'by', 'ts'])
+        && request.resource.data.act is string && request.resource.data.act.matches('^[a-z_]{1,20}$')
+        && request.resource.data.target is string && request.resource.data.target.size() <= 160
+        && (!('code' in request.resource.data) || (request.resource.data.code is string && request.resource.data.code.size() <= 40))
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.ts is number;
+      allow update, delete: if false;
     }
 
     // 고친 방 정보(구성 및 변경) : 누구나 읽고, 관리자만 고치기·원래대로(지우기)
@@ -122,6 +163,8 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ⚠ 발표가 끝나면 아래 live 블록 전체를 지우고(또는 allow create, update 를 false 로) 다시 게시한다 —
+    //   로그인 없이 누구나 숫자를 올릴 수 있는 칸이라 발표 때만 열어 둔다. (외부 점검 B-7)
     // 발표장 실시간 접속 수 (2026-10-27) : 발표용 QR(site/live/go.html)로 앱을 연 폰이 1 씩만 올린다.
     //   누가 열었는지는 남기지 않는다(숫자 n 과 마지막 시각 t 뿐). 누구나 읽고(발표 화면), 줄이거나 지울 수 없다.
     match /live/{ev} {

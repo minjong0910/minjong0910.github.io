@@ -40,24 +40,53 @@ var SCEN = [
   ['크리에이티브 존 · 3층에서', {kind:'zone', floor:'B1'}, 3],
   ['13205 (2층) · 지하에서',  {kind:'room', floor:2, code:'13205'}, 'B1']
 ];
-var errors = [];
+/* 폰 경로 (2026-11-10 외부 점검 D-1) : 폰은 view3d.js 가 재질을 MeshPhongMaterial 로 바꿔치기한다.
+   2026-09-24 에는 그때 PBR 전용 환경맵을 넘겨 셰이더가 컴파일에 실패했고, 문 · 난간이 폰에서만 사라졌다(문서/디버깅_사례.txt 사례 1).
+   데스크톱 재생이 끝나면 같은 앱을 ?perf=phone 으로 다시 열어 아래 장면을 한 번 더 재생하고,
+   three.js 가 콘솔에 남기는 셰이더 오류(THREE.WebGLProgram …)를 오류로 센다. */
+var PHONE_SCEN = [SCEN[0], SCEN[6], SCEN[7]];
+var errors = [], runs = [];
 
 function ready(w){ return w && w.scene && w.renderer && typeof w.openTarget === 'function' && typeof w.fpStart === 'function' && w.FLOOR_LAYOUT && w.FLOOR_LAYOUT[1]; }
-F.addEventListener('load', function(){
-  var t0 = Date.now();
-  (function poll(){
-    var w = F.contentWindow;
-    if(ready(w)) return setTimeout(function(){ run(w); }, 1500);
-    if(Date.now() - t0 > 120000) return out({ok:false, error:'앱이 준비되지 않음'});
-    setTimeout(poll, 300);
-  })();
-}, {once:true});
+function openApp(url, then){
+  F.addEventListener('load', function(){
+    var t0 = Date.now();
+    (function poll(){
+      var w = F.contentWindow;
+      if(ready(w)) return setTimeout(function(){ then(w); }, 1500);
+      if(Date.now() - t0 > 120000) return out({ok:false, runs:runs, error:'앱이 준비되지 않음 (' + url + ')'});
+      setTimeout(poll, 300);
+    })();
+  }, {once:true});
+  F.src = url;
+}
 try{ localStorage.setItem('b3nav_easy_asked2', '1'); localStorage.setItem('b3nav_easy_noask', '1'); }catch(e){}   /* 쉬운 사용모드 「처음이세요?」 창이 검사 화면을 가리지 않게(11/03 부터는 켜는 화면이 끝날 때마다 물어서 noask 도) (2026-10-20 본 앱에 들어옴) */
-F.src = APP;
+openApp(APP, function(w){
+  run(w, SCEN, '', true);
+  if(Q.get('phone') === '0'){ finish(); return; }
+  openApp(APP + (APP.indexOf('?') >= 0 ? '&' : '?') + 'perf=phone', function(w2){
+    if(!(w2.THREE && w2.THREE.MeshStandardMaterial && w2.THREE.MeshStandardMaterial.__isMobileFallback)){ errors.push('[폰] ?perf=phone 인데 폰 재질 경로가 안 켜짐'); finish(); return; }
+    if(w2.renderer && w2.renderer.isNoGL){ log('… 폰 경로 : 이 컴퓨터에 WebGL 이 없어 셰이더를 시험하지 못함 (건너뜀)'); finish(); return; }
+    run(w2, PHONE_SCEN, '[폰] ', false);
+    finish();
+  });
+});
+function finish(){
+  errors.slice(0, 10).forEach(function(e){ log('    ' + e); });
+  var ok = !errors.length && runs.every(function(r){ return r.started !== false; });
+  out({ok:ok, runs:runs, errors:errors.slice(0, 30)});
+}
 
-function run(w){
-  w.addEventListener('error', function(e){ errors.push('[window] ' + (e.message || e.error)); });
-  w.addEventListener('unhandledrejection', function(e){ errors.push('[promise] ' + (e.reason && e.reason.message || e.reason)); });
+function run(w, scen, tag, walk){
+  w.addEventListener('error', function(e){ errors.push(tag + '[window] ' + (e.message || e.error)); });
+  w.addEventListener('unhandledrejection', function(e){ errors.push(tag + '[promise] ' + (e.reason && e.reason.message || e.reason)); });
+  /* three.js 는 셰이더 컴파일 실패를 예외가 아니라 console.error 로만 알린다 — 그 재질은 아무것도 안 그려진다 */
+  var ce = w.console.error;
+  w.console.error = function(){
+    var m = Array.prototype.map.call(arguments, function(a){ return String(a && a.message || a); }).join(' ');
+    if(/WebGLProgram|shader error|SHADER_NAME|ENVMAP_TYPE/i.test(m)) errors.push(tag + '[셰이더] ' + m.replace(/\s+/g, ' ').slice(0, 200));
+    try{ return ce.apply(w.console, arguments); }catch(e){}
+  };
   /* 시계를 우리가 넘긴다 */
   var T = 100000;
   w.performance.now = function(){ return T; };
@@ -69,9 +98,8 @@ function run(w){
     try { w.animateRunning = true; w.animate(); } catch(e){ errors.push('[animate] ' + e.message); }
     w.animateRunning = false;
   }
-  var runs = [];
-  SCEN.forEach(function(s){
-    var before = errors.length, frames = 0, yMin = 1e9, yMax = -1e9, rec = {name:s[0]};
+  scen.forEach(function(s){
+    var before = errors.length, frames = 0, yMin = 1e9, yMax = -1e9, rec = {name:tag + s[0]};
     try {
       w.openTarget(JSON.parse(JSON.stringify(s[1])), s[1].floor);
       if(s[2] !== w.startFloor){
@@ -93,8 +121,9 @@ function run(w){
     } catch(e){ errors.push(s[0] + ' : ' + e.message); }
     rec.errors = errors.length - before;
     runs.push(rec);
-    log((rec.errors ? '✗ ' : '✓ ') + s[0] + ' — 장면 ' + rec.frames + ' · 오르내린 높이 ' + rec.climb + 'm' + (rec.finished ? ' · 끝까지 재생' : ' · 2분 안에 안 끝남') + (rec.errors ? ' · 오류 ' + rec.errors : ''));
+    log((rec.errors ? '✗ ' : '✓ ') + tag + s[0] + ' — 장면 ' + rec.frames + ' · 오르내린 높이 ' + rec.climb + 'm' + (rec.finished ? ' · 끝까지 재생' : ' · 2분 안에 안 끝남') + (rec.errors ? ' · 오류 ' + rec.errors : ''));
   });
+  if(!walk) return;
   /* 직접 걸어보기 */
   var fr = {name:'직접 걸어보기 (13310)'}, b2 = errors.length;
   try {
@@ -108,9 +137,6 @@ function run(w){
   } catch(e){ errors.push('직접 걸어보기 : ' + e.message); }
   fr.errors = errors.length - b2; runs.push(fr);
   log((fr.errors ? '✗ ' : '✓ ') + fr.name + (fr.started ? ' — 시작됨' : ' — 시작 안 됨') + (fr.ended ? ' · 끝냄' : '') + (fr.errors ? ' · 오류 ' + fr.errors : ''));
-  errors.slice(0, 10).forEach(function(e){ log('    ' + e); });
-  var ok = !errors.length && runs.every(function(r){ return r.started !== false; });
-  out({ok:ok, runs:runs, errors:errors.slice(0, 30)});
 }
 })();
 </script>

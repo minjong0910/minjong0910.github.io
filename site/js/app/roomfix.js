@@ -292,10 +292,11 @@ var RFIX = (function(){
     var out = [];
     var b = before || {}, a = after || {};
     var on = origName(key) || '이름 없음';
-    if((b.no || '') !== (a.no || '')) out.push('번호 ' + (b.no || key) + ' → ' + (a.no || key));
-    if((b.name || on) !== (a.name || on)) out.push((b.name || on) + ' → ' + (a.name || on));
-    if((b.en || '') !== (a.en || '')) out.push('영어 ' + (a.en || '(없음)'));
-    if((b.memo || '') !== (a.memo || '')) out.push(a.memo ? '메모 「' + a.memo + '」' : '메모 지움');
+    /* 2026-11-10 (외부 점검 B-2) : 아래 줄들은 HTML 로 들어간다 — 서버에서 온 값은 글자로 바꿔 넣는다 */
+    if((b.no || '') !== (a.no || '')) out.push('번호 ' + esc(b.no || key) + ' → ' + esc(a.no || key));
+    if((b.name || on) !== (a.name || on)) out.push(esc(b.name || on) + ' → ' + esc(a.name || on));
+    if((b.en || '') !== (a.en || '')) out.push('영어 ' + esc(a.en || '(없음)'));
+    if((b.memo || '') !== (a.memo || '')) out.push(a.memo ? '메모 「' + esc(a.memo) + '」' : '메모 지움');
     return out.length ? out.join('<br>') : '바뀐 것 없음';
   }
   function write(key, data){

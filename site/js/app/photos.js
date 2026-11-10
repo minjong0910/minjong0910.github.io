@@ -903,6 +903,7 @@ function phSortCommit(){
     if(typeof SUGAI !== 'undefined') SUGAI.learn(x.code, x.u, x.n);
     ok++;
   });
+  PH_UNSAVED += ok;
   PH_STAGE = left;
   phNormalize();
   if(typeof phRebuildRoomNames === 'function') phRebuildRoomNames();
@@ -966,8 +967,16 @@ function phRender(){
 
 function phClear(){
   if(!confirm('등록한 사진을 모두 지울까요?')) return;
-  ROOM_PHOTOS = {}; PH_SKIP = []; phRender();
+  ROOM_PHOTOS = {}; PH_SKIP = []; PH_UNSAVED = 0; phRender();
 }
+
+/* 2026-11-10 외부 점검 F-5 : 「사진 등록」에서 넣은 사진은 이 기기에만 있어 새로고침하면 사라진다 —
+   묶음(zip)으로 내려받기 전에 새로고침 · 창 닫기를 하면 브라우저가 한 번 묻게 한다.
+   관리자가 「사진 등록」으로 넣은 사진만 센다(일반 사용자에게는 뜨지 않는다). */
+var PH_UNSAVED = 0;
+window.addEventListener('beforeunload', function(e){
+  if(PH_UNSAVED > 0){ e.preventDefault(); e.returnValue = ''; return ''; }
+});
 
 /* 파일 하나를 내려받게 한다 */
 function saveBlob(blob, name){
@@ -1015,6 +1024,7 @@ function phExport(){
     'window.PHOTO_INDEX = ' + JSON.stringify(idx) + ';\n');
   zip.generateAsync({type:'blob'}).then(function(b){
     saveBlob(b, '사진자료_' + stamp + '.zip');
+    PH_UNSAVED = 0;
     alert('사진 ' + nAll + '장(새 사진 ' + nNew + '장)의 목록을 내려받았습니다.\n\n' +
           '압축을 site 폴더에 그대로 풀고(덮어쓰기) GitHub 에 올리면 모든 사용자에게 적용됩니다.');
   })['catch'](function(e){ alert('묶음을 만들지 못했습니다. (' + (e && e.message || e) + ')'); });

@@ -21,6 +21,74 @@ var SUGDB = (function(){
   function online(){ return location.protocol === 'http:' || location.protocol === 'https:'; }
   function $(id){ return document.getElementById(id); }
 
+  /* ── 서버에서 받은 것 검사 (2026-11-10 외부 점검 B-2) ─────────────────────────────
+     제보(suggestions)는 아무나(익명) 쓸 수 있고, 관리자 화면은 그 값을 HTML 로 그린다.
+     예전에는 사진 값(u) · QR(qr) · AI 결과(ai)가 그대로 <img src="…"> · 글자 · onclick 안에 들어가,
+     꾸며 낸 제보 하나로 관리자 브라우저에서 스크립트가 돌 수 있었다(관리자 권한으로 승인 사진 · 방 정보를 바꿀 수 있다).
+     → 받는 순간 모양을 확인하고 위험한 글자를 걷어 낸다. 서버 규칙(서버/firestore.rules)도 같은 모양만 받게 고쳤다.
+     승인 사진(photos)은 관리자만 쓰지만, 모든 사람 화면에 나가므로 같은 기준으로 한 번 더 거른다. */
+  /* 서버 오류를 설정 → 문제 기록에 남긴다 (pwa.js DIAG.fb, 2026-11-10 D-2) */
+  function fbErr(where, e){ try{ if(typeof DIAG !== 'undefined' && DIAG.fb) DIAG.fb(where, e); }catch(x){} }
+  var RX_IMG = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/]+={0,2}$/;
+  var RX_ID  = /^[A-Za-z0-9_\-]{1,160}$/;
+  function safeStr(s, n){ return String(s == null ? '' : s).replace(/[<>"'`\\&\u0000-\u001f]/g, '').slice(0, n || 300); }
+  function safeVal(v, depth){
+    if(v == null) return null;
+    if(typeof v === 'number') return isFinite(v) ? v : 0;
+    if(typeof v === 'boolean') return v;
+    if(typeof v === 'string') return safeStr(v, 300);
+    if(depth > 4) return null;
+    if(Array.isArray(v)) return v.slice(0, 30).map(function(x){ return safeVal(x, depth + 1); });
+    if(typeof v === 'object'){
+      var o = {}, n = 0;
+      Object.keys(v).forEach(function(k){ if(n < 60 && /^[A-Za-z0-9_]{1,40}$/.test(k)){ o[k] = safeVal(v[k], depth + 1); n++; } });
+      return o;
+    }
+    return null;
+  }
+  function cleanSug(x, id){
+    if(!x || typeof x !== 'object' || !RX_ID.test(String(id || ''))) return null;
+    var o = {id:String(id), fid:String(id)};
+    o.u = (typeof x.u === 'string' && RX_IMG.test(x.u)) ? x.u : '';      // 모양이 다르면 사진 없이(관리자는 거절만 할 수 있다)
+    o.bad = !o.u;
+    o.note = (typeof x.note === 'string') ? x.note.slice(0, 500) : '';     // 메모는 화면에서 글자로 바꿔 넣는다(sugEsc)
+    o.ts = (typeof x.ts === 'number' && isFinite(x.ts)) ? x.ts : 0;
+    o.status = safeStr(x.status, 20);
+    o.qr = /^(MAIN|BACK|EAST|WEST)$/.test(String(x.qr || '')) ? x.qr : null;
+    ['ua', 'cid', 'uid', 'day', 'code'].forEach(function(k){ if(x[k] != null) o[k] = safeStr(x[k], 160); });
+    if(typeof x.handledTs === 'number') o.handledTs = x.handledTs;
+    var ai = (x.ai && typeof x.ai === 'object' && !Array.isArray(x.ai)) ? safeVal(x.ai, 0) : null;
+    if(ai){
+      ['top', 'all'].forEach(function(k){
+        if(!Array.isArray(ai[k])) { delete ai[k]; return; }
+        ai[k] = ai[k].filter(function(c){ return c && typeof c === 'object' && typeof c.code === 'string' && /^[A-Za-z0-9_\-]{1,40}$/.test(c.code); })
+                     .map(function(c){ c.sim = (typeof c.sim === 'number') ? c.sim : 0; return c; });
+      });
+      if(ai.code != null && !/^[A-Za-z0-9_\-]{1,40}$/.test(String(ai.code))) ai.code = '';
+      if(ai.ocr != null && (typeof ai.ocr !== 'object' || Array.isArray(ai.ocr))) ai.ocr = null;
+      if(ai.side != null && (typeof ai.side !== 'object' || Array.isArray(ai.side))) ai.side = null;
+      if(ai.quality != null && (typeof ai.quality !== 'object' || Array.isArray(ai.quality))) ai.quality = null;
+    }
+    o.ai = ai;
+    return o;
+  }
+  function cleanPhoto(p){
+    if(!p || typeof p !== 'object') return null;
+    var o = {pid: RX_ID.test(String(p.pid || '')) ? String(p.pid) : ''};
+    if(!o.pid) return null;
+    o.code = /^[A-Za-z0-9_\-]{1,40}$/.test(String(p.code || '')) ? String(p.code) : '';
+    if(!o.code) return null;
+    o.n = safeStr(p.n, 200);
+    o.ts = (typeof p.ts === 'number' && isFinite(p.ts)) ? p.ts : 0;
+    if(p.hide === true){ o.hide = true; return o; }
+    if(typeof p.u !== 'string' || !RX_IMG.test(p.u)) return null;
+    o.u = p.u;
+    if(p.cap != null) o.cap = safeStr(p.cap, 300);
+    if(p.sub) o.sub = safeStr(p.sub, 40);
+    if(p.sid) o.sid = safeStr(p.sid, 160);
+    return o;
+  }
+
   function script(src){
     return new Promise(function(res, rej){
       var sc = document.createElement('script');
@@ -118,6 +186,7 @@ var SUGDB = (function(){
       syncMsg('');
       return true;
     })['catch'](function(e){
+      fbErr('제보 올리기', e);                                         // 문제 기록에 서버 오류 코드 (2026-11-10 D-2)
       rec.synced = false;
       if(typeof sugSaveQueue === 'function') sugSaveQueue();
       /* 서버가 「오늘 3번 다 올렸다」고 하면 (이 폰 기록이 지워졌을 때 등) 폰의 횟수도 맞춘다.
@@ -210,8 +279,8 @@ var SUGDB = (function(){
         .onSnapshot(function(snap){
           var arr = [];
           snap.forEach(function(d){
-            var x = d.data(); x.id = d.id; x.fid = d.id;
-            arr.push(x);
+            var x = cleanSug(d.data(), d.id);                          // 받는 순간 모양 검사 (위 cleanSug)
+            if(x) arr.push(x);
           });
           arr.sort(function(a,b){ return (a.ts||0) - (b.ts||0); });   // 화면은 reverse()로 최신이 위
           SUG_REMOTE = arr;
@@ -219,15 +288,28 @@ var SUGDB = (function(){
           if(typeof sugAdminRender === 'function') sugAdminRender();
           if(typeof sugBadgeSync === 'function') sugBadgeSync();
         }, function(err){
-          dbState('off', '서버 읽기 실패 : ' + (err && err.code || err));
+          dbState('off', '서버 읽기 실패 : ' + (err && err.code || err)); fbErr('관리자 목록', err);
         });
     })['catch'](function(){ dbState('off', '서버에 연결할 수 없음'); });
   }
   function unwatchAdmin(){ if(unsub){ try{ unsub(); }catch(e){} unsub = null; } }
 
+  /* ── 관리자 작업 기록 (2026-11-10 외부 점검 B-5) ──
+     예전에는 서버에 남는 기록이 방 정보(roomlog)뿐이라, 누가 언제 어떤 제보를 승인 · 거절 · 삭제했는지,
+     어떤 승인 사진을 올리고 · 지우고 · 숨겼는지 알 수 없었다. → adminlog 에 한 줄씩 남긴다(관리자만 읽고, 고치거나 지울 수 없다).
+     기록이 실패해도(규칙을 아직 콘솔에 안 올렸을 때 등) 하던 일은 그대로 한다. */
+  function adminLog(act, target, code){
+    if(!curUser || !db) return;
+    try{
+      var d = {act:String(act).slice(0, 20), target:String(target || '').slice(0, 160), by:curUser.uid, ts:Date.now()};
+      if(code) d.code = String(code).slice(0, 40);
+      db.collection('adminlog').add(d)['catch'](function(e){ console.warn('관리자 작업 기록 실패', e && e.code); fbErr('관리자 작업 기록', e); });
+    }catch(e){}
+  }
   function setStatus(fid, patch){
     return ensure().then(function(){ return db.collection(COL_SUG).doc(fid).update(patch); })
-      ['catch'](function(e){ console.warn('setStatus 실패', e); });
+      .then(function(){ adminLog(patch && patch.status === 'approved' ? 'approve' : (patch && patch.status === 'rejected' ? 'reject' : 'status'), fid, patch && patch.code); })
+      ['catch'](function(e){ console.warn('setStatus 실패', e); fbErr('setStatus', e); });
   }
 
   /* ── 건의함 사진 지우기 (2026-11-03 개인정보 안내와 같게 — consent.js PV_TABLE) ──
@@ -235,7 +317,8 @@ var SUGDB = (function(){
      관리자가 관리자 화면을 열 때 한 번 정리한다(앞으로 거절은 바로 지우므로, 예전에 「거절」로만 남겨 둔 것도 함께). */
   function removeSug(fid){
     return ensure().then(function(){ return db.collection(COL_SUG).doc(fid)['delete'](); })
-      ['catch'](function(e){ console.warn('removeSug 실패', e); });
+      .then(function(){ adminLog('delete_sug', fid); })
+      ['catch'](function(e){ console.warn('removeSug 실패', e); fbErr('removeSug', e); });
   }
   var cleaned = false;
   function cleanup(){
@@ -244,12 +327,26 @@ var SUGDB = (function(){
     var cut = Date.now() - 30 * 24 * 3600 * 1000;
     ensure().then(function(){
       if(!curUser) { cleaned = false; return; }
+      /* 지울 때마다 관리자 작업 기록(adminlog)에 남긴다 — 「누가 지웠나」가 비지 않게 (2026-11-10 B-5) */
+      function drop(d, why){ d.ref['delete']().then(function(){ adminLog(why, d.id); })['catch'](function(){}); }
       db.collection(COL_SUG).where('status', '==', 'rejected').get().then(function(snap){
-        snap.forEach(function(d){ d.ref['delete']()['catch'](function(){}); });
-      })['catch'](function(e){ console.warn('거절 사진 정리 실패', e); });
+        snap.forEach(function(d){ drop(d, 'auto_rejected'); });
+      })['catch'](function(e){ console.warn('거절 사진 정리 실패', e); fbErr('거절 사진 정리', e); });
       db.collection(COL_SUG).where('status', '==', 'pending').get().then(function(snap){
-        snap.forEach(function(d){ var x = d.data(); if(typeof x.ts === 'number' && x.ts < cut) d.ref['delete']()['catch'](function(){}); });
-      })['catch'](function(e){ console.warn('30일 지난 제보 정리 실패', e); });
+        snap.forEach(function(d){ var x = d.data(); if(typeof x.ts === 'number' && x.ts < cut) drop(d, 'auto_old_pending'); });
+      })['catch'](function(e){ console.warn('30일 지난 제보 정리 실패', e); fbErr('30일 지난 제보 정리', e); });
+      /* 2026-11-10 외부 점검 B-8 : 승인한 제보의 원본(사진 · 기기 정보)이 서버에 끝없이 남아 있었다.
+         안내 사진은 photos 에 따로 복사돼 있으므로, 승인하고 30일이 지난 원본은 지운다 —
+         단 photos 에 그 제보에서 온 사진(sid)이 정말 있을 때만(서버에 못 올렸으면 원본이 유일한 사본이라 남긴다). */
+      db.collection(COL_SUG).where('status', '==', 'approved').get().then(function(snap){
+        snap.forEach(function(d){
+          var x = d.data(), t = typeof x.handledTs === 'number' ? x.handledTs : x.ts;
+          if(typeof t !== 'number' || t >= cut) return;
+          db.collection(COL_PH).where('sid', '==', d.id).limit(1).get().then(function(ps){
+            if(!ps.empty) drop(d, 'auto_approved');
+          })['catch'](function(){});
+        });
+      })['catch'](function(e){ console.warn('승인한 제보 원본 정리 실패', e); fbErr('승인한 제보 원본 정리', e); });
     })['catch'](function(){ cleaned = false; });
   }
 
@@ -259,10 +356,10 @@ var SUGDB = (function(){
     lastPubErr = '';
     return ensure().then(function(){ return fit(entry.u); })
       .then(function(u){ entry.u = u; return db.collection(COL_PH).add(entry); })
-      .then(function(ref){ entry.pid = ref.id; return entry; })      /* v64 : 올린 문서 번호를 돌려준다 */
+      .then(function(ref){ entry.pid = ref.id; adminLog('publish', ref.id, entry.code); return entry; })      /* v64 : 올린 문서 번호를 돌려준다 */
       ['catch'](function(e){
         lastPubErr = (e && (e.code || e.message)) ? String(e.code || e.message) : '알 수 없는 오류';
-        console.warn('publishPhoto 실패', e);
+        console.warn('publishPhoto 실패', e); fbErr('publishPhoto', e);
         return null;
       });
   }
@@ -272,15 +369,15 @@ var SUGDB = (function(){
   function unpublishPhoto(pid){
     if(!pid) return Promise.resolve(false);
     return ensure().then(function(){ return db.collection(COL_PH).doc(pid)['delete'](); })
-      .then(function(){ return true; })['catch'](function(e){ console.warn('unpublishPhoto 실패', e); return false; });
+      .then(function(){ adminLog('unpublish', pid); return true; })['catch'](function(e){ console.warn('unpublishPhoto 실패', e); fbErr('unpublishPhoto', e); return false; });
   }
   function hidePhoto(code, n){
     return ensure().then(function(){ return db.collection(COL_PH).doc(hid(code, n)).set({hide:true, code:code, n:n, ts:Date.now()}); })
-      .then(function(){ return true; })['catch'](function(e){ console.warn('hidePhoto 실패', e); return false; });
+      .then(function(){ adminLog('hide', code + '|' + n, code); return true; })['catch'](function(e){ console.warn('hidePhoto 실패', e); fbErr('hidePhoto', e); return false; });
   }
   function unhidePhoto(code, n){
     return ensure().then(function(){ return db.collection(COL_PH).doc(hid(code, n))['delete'](); })
-      .then(function(){ return true; })['catch'](function(){ return false; });
+      .then(function(){ adminLog('unhide', code + '|' + n, code); return true; })['catch'](function(){ return false; });
   }
 
   /* v51 : Firestore REST 응답의 값 표기({stringValue:..} 등)를 보통 값으로 */
@@ -299,17 +396,45 @@ var SUGDB = (function(){
   function fromFields(f){ var o = {}; for(var k in f) o[k] = fromValue(f[k]); return o; }
   /* v51 : 승인 사진 목록은 공개 읽기라 SDK 없이 REST 한 번으로 받는다
      (Firebase SDK 500KB를 길안내만 쓰는 사람 폰에 내려받지 않게). 실패하면 예전 SDK 경로로. */
+  /* 2026-11-10 (외부 점검 B-3) : 예전에는 앱을 열 때마다 승인 사진 문서를 사진째로 통째로 받았다 — 5장에 1.4MB, 사진이 늘수록 커진다.
+     → ① 목록은 사진(u) 칸을 뺀 작은 정보만 받고(mask) ② 사진은 이 폰에 없거나 바뀐(updateTime) 것만 받아 폰에 저장해 둔다(Cache Storage).
+     저장 이름은 b3srv- 로 시작한다 — sw.js 는 「b3nav-」로 시작하는 옛 저장본을 지우므로 섞이지 않게. 저장을 못 쓰는 브라우저는 예전처럼 매번 받는다. */
+  var PH_STORE = 'b3srv-photos';
   function restPhotos(){
     if(typeof fetch !== 'function') return Promise.reject('nofetch');
-    var url = 'https://firestore.googleapis.com/v1/projects/' + CFG.projectId + '/databases/(default)/documents/' + COL_PH +
-              '?pageSize=300&key=' + encodeURIComponent(CFG.apiKey);
-    return fetch(url).then(function(r){ if(!r.ok) throw 'http'+r.status; return r.json(); }).then(function(j){
-      var items = [];
-      (j.documents || []).forEach(function(d){
-        var x = fromFields(d.fields || {}); x.pid = String(d.name || '').split('/').pop(); items.push(x);
+    var base = 'https://firestore.googleapis.com/v1/projects/' + CFG.projectId + '/databases/(default)/documents/' + COL_PH;
+    var key = 'key=' + encodeURIComponent(CFG.apiKey);
+    var mask = ['code', 'n', 'ts', 'hide', 'sub', 'cap', 'sid'].map(function(f){ return 'mask.fieldPaths=' + f; }).join('&');
+    return fetch(base + '?pageSize=300&' + mask + '&' + key, {cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw 'http'+r.status; return r.json(); }).then(function(j){
+        var docs = j.documents || [];
+        var open = (typeof caches !== 'undefined' && caches.open) ? caches.open(PH_STORE)['catch'](function(){ return null; }) : Promise.resolve(null);
+        return open.then(function(store){
+          var keep = {};
+          return Promise.all(docs.map(function(d){
+            var pid = String(d.name || '').split('/').pop(), meta = fromFields(d.fields || {});
+            meta.pid = pid;
+            if(meta.hide === true) return meta;                          // 숨김 기록은 사진이 없다
+            var ck = base + '/' + encodeURIComponent(pid) + '?v=' + encodeURIComponent(d.updateTime || '');
+            keep[ck] = 1;
+            var hit = store ? store.match(ck)['catch'](function(){ return null; }) : Promise.resolve(null);
+            return hit.then(function(h){
+              if(h) return h.json();
+              return fetch(base + '/' + encodeURIComponent(pid) + '?mask.fieldPaths=u&' + key, {cache:'no-store'})
+                .then(function(r){ if(!r.ok) throw 'http'+r.status; return r.json(); })
+                .then(function(full){
+                  var o = {u: fromFields(full.fields || {}).u};
+                  if(store && typeof o.u === 'string') store.put(ck, new Response(JSON.stringify(o), {headers:{'Content-Type':'application/json'}}))['catch'](function(){});
+                  return o;
+                });
+            }).then(function(o){ meta.u = o && o.u; return meta; });
+          })).then(function(items){
+            /* 지워졌거나 바뀐 사진의 옛 저장본은 치운다 */
+            if(store) store.keys().then(function(ks){ ks.forEach(function(k){ if(!keep[k.url]) store['delete'](k); }); })['catch'](function(){});
+            return items;
+          });
+        });
       });
-      return items;
-    });
   }
   function sdkPhotos(){
     return ensure().then(function(){ return db.collection(COL_PH).get(); }).then(function(snap){
@@ -323,6 +448,7 @@ var SUGDB = (function(){
   function loadPhotos(){
     if(!online()) return Promise.resolve(0);
     return restPhotos()['catch'](function(){ return sdkPhotos(); }).then(function(items){
+      items = (items || []).map(cleanPhoto).filter(Boolean);           // 모양이 맞는 것만 (위 cleanPhoto)
       var n = 0;
       items.sort(function(a,b){ return (a.ts||0) - (b.ts||0); });    // 오래된 것부터 적용 → 최신이 맨 앞
       /* v64 : 관리자가 뺀 사진(숨김 기록) — 모든 기기에서 똑같이 뺀다 */
@@ -357,7 +483,7 @@ var SUGDB = (function(){
         if(typeof phRender === 'function') phRender();
       }
       return n;
-    })['catch'](function(){ return 0; });
+    })['catch'](function(e){ fbErr('승인 사진 받기', e); return 0; });
   }
 
   /* ── 로그인 ── */
@@ -443,6 +569,7 @@ var SUGDB = (function(){
   return { ensure:ensure, online:online, pushOne:pushOne, retryUnsynced:retryUnsynced, prepSubmit:prepSubmit,
            watchAdmin:watchAdmin, unwatchAdmin:unwatchAdmin, setStatus:setStatus, removeSug:removeSug, cleanup:cleanup,
            publishPhoto:publishPhoto, loadPhotos:loadPhotos,
+           cleanSug:cleanSug, cleanPhoto:cleanPhoto,                 /* 2026-11-10 B-2 — 검사(tests/check.html)가 직접 시험한다 */
            get lastPubErr(){ return lastPubErr; },                   /* v71 */
            unpublishPhoto:unpublishPhoto, hidePhoto:hidePhoto, unhidePhoto:unhidePhoto,
            login:login, logout:logout, user:user, authKnown:function(){ return authKnown; }, fit:fit, CFG:CFG,

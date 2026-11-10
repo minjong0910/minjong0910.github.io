@@ -166,6 +166,18 @@ var LUCIDE = (function(){
       }
     });
     p.replaceChild(frag, n);
+    var only = parts.filter(function(x){ return typeof x === 'object'; });
+    if(only.length === 1) nameIconButton(p, only[0].nm);
+  }
+  /* 2026-11-10 외부 점검 F-4 : 글자(←, ✕)를 그림으로 바꾸면 그 버튼에 글자가 하나도 안 남는다 — 그림은 aria-hidden 이라
+     화면 읽기 프로그램이 「버튼」이라고만 읽었다(첫 화면 기준 24개). 글자가 없는 버튼에만 이름을 붙인다. */
+  var NAME = { 'arrow-left':['뒤로', 'Back'], 'x':['닫기', 'Close'], 'chevron-left':['이전', 'Previous'], 'chevron-right':['다음', 'Next'],
+               'menu':['메뉴', 'Menu'], 'settings':['설정', 'Settings'], 'house':['처음 화면', 'Home'], 'star':['즐겨찾기', 'Favorite'],
+               'play':['재생', 'Play'], 'pause':['멈춤', 'Pause'], 'rotate-ccw':['다시', 'Again'], 'rotate-cw':['다시', 'Again'] };
+  function nameIconButton(p, nm){
+    var b = p.closest('button,[role="button"]'); if(!b || b.hasAttribute('aria-label') || b.hasAttribute('title')) return;
+    if((b.textContent || '').trim() || !NAME[nm]) return;
+    b.setAttribute('aria-label', NAME[nm][document.documentElement.lang === 'en' ? 1 : 0]);
   }
   function scan(root){
     if(!root) return;

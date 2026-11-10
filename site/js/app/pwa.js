@@ -139,9 +139,26 @@ var DIAG = (function(){
       var sh = localStorage.getItem('b3nav_diag_shot');
       if(sh) L.push('걷기 색 : ' + sh);
     }catch(err){}
+    /* 2026-11-10 (외부 점검 D-2) : 인터넷 · 서비스 워커 상태와 서버(Firestore) 오류 코드 — 「제보가 안 올라간다 · 옛 판이 뜬다」를 가리는 데 쓴다 */
+    try{
+      L.push('인터넷 : ' + (navigator.onLine === false ? '끊김' : '연결됨') +
+             ' · 서비스 워커 ' + ((navigator.serviceWorker && navigator.serviceWorker.controller) ? '맡고 있음' : '없음'));
+    }catch(err){}
+    L.push('서버 오류 ' + fbErrs.length + '개' + (fbErrs.length ? '' : ' (없음)'));
+    for(var j=0;j<fbErrs.length;j++) L.push('  · ' + fbErrs[j]);
     L.push('오류 ' + errs.length + '개');
     for(var i=0;i<errs.length;i++) L.push('  · ' + errs[i]);
     return L.join('\n');
+  }
+  /* 서버(Firestore) 오류 — 어디서(제보 올리기 · 관리자 승인 …) 무슨 코드(permission-denied · unavailable …)였는지.
+     앱 오류(errs)와 따로 둔다 : 규칙을 콘솔에 아직 안 올린 동안의 관리자 기록 실패처럼 사용자에게는 문제가 아닌 것도 있어서
+     화면의 「이상 있음」에는 넣지 않고, 복사한 글에만 남긴다. (sugdb.js 가 부른다) */
+  var fbErrs = [];
+  function fb(where, e){
+    var code = String((e && (e.code || e.message)) || e || '?').slice(0, 80);
+    var line = new Date().toTimeString().slice(0, 8) + ' ' + where + ' : ' + code;
+    if(fbErrs.length && fbErrs[fbErrs.length-1].slice(9) === line.slice(9)) return;
+    fbErrs.push(line); if(fbErrs.length > 6) fbErrs.shift();
   }
   /* 걷기 중에 화면에서 잰 색을 저장한다(한 번만). overview3d.js 의 animate() 가 부른다. */
   function shot(text){
@@ -166,7 +183,7 @@ var DIAG = (function(){
     return t;
   }
   document.addEventListener('DOMContentLoaded', paint);
-  return {add:add, mat:mat, shot:shot, full:full, copy:copy, paint:paint, errors:function(){ return errs.slice(); }};
+  return {add:add, fb:fb, mat:mat, shot:shot, full:full, copy:copy, paint:paint, errors:function(){ return errs.slice(); }};
 })();
 
 /* pwa.js — 앱 다운로드(홈 화면에 설치) · 인터넷 없이 열기(sw.js) · 출입문 QR 주소(?gate=) 받기

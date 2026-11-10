@@ -217,6 +217,46 @@ function run(w){
     if(html.indexOf('<circle') < 0 || html.indexOf('NaN') >= 0 || html.indexOf('undefined') >= 0) bad.miniMap.push(c);
   });
 
+  /* ── 아무나 쓴 제보가 관리자 화면에서 스크립트로 돌지 않는가 (2026-11-10 외부 점검 B-2) ──
+     제보(suggestions)는 익명으로 누구나 쓰고, 관리자 화면은 그 값을 HTML 로 그린다. 예전에는 사진 값 · QR · AI 결과가
+     그대로 들어가 꾸민 제보 하나로 관리자 브라우저에서 스크립트가 돌 수 있었다. 서버에서 받는 길(sugdb.js cleanSug)과
+     화면(suggest.js sugAdminRender)을 꾸민 제보로 실제로 그려 보고, 위험한 속성이 하나도 안 생기는지 본다. */
+  bad.userHtml = [];
+  try {
+    var D = w.SUGDB, J = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD';
+    if(!D || typeof D.cleanSug !== 'function' || typeof D.cleanPhoto !== 'function') bad.userHtml.push('(SUGDB.cleanSug · cleanPhoto 없음)');
+    else {
+      w.__xssHit = 0;
+      var evil = {u: J + '" onerror="window.__xssHit++" x="', note:'<img src=x onerror="window.__xssHit++">', qr:'<svg onload=__xssHit++>',
+                  ts:Date.now(), status:'pending',
+                  ai:{verdict:'uncertain', code:"LNG3' onclick='__xssHit++", sim:'<b>', margin:0.1,
+                      ocr:{floor:'<img src=x onerror=__xssHit++>', code:'"><svg onload=__xssHit++>'},
+                      top:[{code:"EV3');__xssHit++;('", sim:0.5}, {code:'LNG3', sim:0.4}, 'x'], all:{no:'array'},
+                      noteCode:'<i onmouseover=__xssHit++>'}};
+      var c1 = D.cleanSug(evil, 'uidA_2026-1-1_1'), c2 = D.cleanSug({u:J + 'AA==', note:'정상', ts:1, status:'pending', qr:'EAST',
+                  ai:{verdict:'uncertain', code:'LNG3', sim:0.6, margin:0.1, top:[{code:'LNG3', sim:0.6}]}}, 'uidB_2026-1-1_1');
+      if(!c1 || c1.u !== '' || c1.qr !== null) bad.userHtml.push('꾸민 사진 · QR 값이 걸러지지 않음');
+      if(!c2 || !c2.u || c2.qr !== 'EAST' || !c2.ai || c2.ai.top.length !== 1) bad.userHtml.push('정상 제보가 망가짐');
+      if(D.cleanSug(evil, 'bad"id') !== null) bad.userHtml.push('이상한 문서 번호를 받음');
+      if(D.cleanPhoto({pid:'p1', code:'LNG3', n:'a.jpg', u:J + '" onerror="x'}) !== null) bad.userHtml.push('꾸민 승인 사진을 받음');
+      var listEl = w.document.getElementById('sugAdminList');
+      if(!listEl || typeof w.sugAdminRender !== 'function') bad.userHtml.push('(관리자 목록 · sugAdminRender 없음)');
+      else {
+        var keepRemote = w.SUG_REMOTE;
+        w.SUG_REMOTE = [c1, c2];
+        try { w.sugAdminRender(); } catch(e){ bad.userHtml.push('관리자 화면 그리기 오류 : ' + e.message); }
+        var hits = Array.prototype.filter.call(listEl.querySelectorAll('*'), function(e){
+          return Array.prototype.some.call(e.attributes, function(a){ return /^on(error|load|mouseover|focus)/i.test(a.name) || /javascript:/i.test(a.value); });
+        });
+        if(hits.length) bad.userHtml.push('관리자 화면에 위험한 속성 ' + hits.length + '개');
+        if(listEl.innerHTML.indexOf('사진 형식이 맞지 않는') < 0) bad.userHtml.push('형식이 틀린 제보 안내가 안 보임');
+        w.SUG_REMOTE = keepRemote;
+        try { w.sugAdminRender(); } catch(e){}
+      }
+      if(w.__xssHit) bad.userHtml.push('스크립트가 ' + w.__xssHit + '번 실행됨');
+    }
+  } catch(e){ bad.userHtml.push('검사 오류 : ' + e.message); }
+
   /* ── 앱 코드 파일마다 문법 (site/ 부터 여러 파일) ──
      한 파일이 문법 오류로 통째로 안 읽혀도, 그 파일의 기능(예 : 로드뷰)을 쓰기 전에는 드러나지 않는다.
      화면 틀이 부르는 우리 코드 파일을 모두 받아 new Function 으로 읽어 본다. */

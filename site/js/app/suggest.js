@@ -38,6 +38,8 @@ function sugEsc(s){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
 }
+/* 사진 값이 「jpeg · png · webp 의 base64」 모양인가 — 그래야 <img src="…"> 에 넣어도 따옴표로 빠져나갈 수 없다 (2026-11-10 B-2) */
+function sugSafeImg(u){ return typeof u === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/]+={0,2}$/.test(u); }
 
 function sugPreview(input){
   var file = input.files && input.files[0];
@@ -245,6 +247,21 @@ function sugSubmit(){
       if(ai.verdict === 'out_of_scope' && ai.why === 'note'){
         SUGAI.showCard(ai);
         if(stat){ stat.style.color = '#FF6B6B'; stat.textContent = SUGAI.rejectMsg(ai); stat.classList.add('on'); }
+        return;
+      }
+      /* 2026-11-10 (외부 점검 A-2) : 건물 사진이 아닌 것 같으면(1등 유사도가 문턱 SUGAI.TH.RELEVANT 미만 · 번호판도 안 읽힘)
+         장소를 짐작해 접수하지 않고 먼저 알린다. AI 가 틀릴 수도 있으니 「그래도 보내기」로 보낼 수 있다 —
+         그때는 AI 짐작 없이(장소 비움) 관리자에게 가고, 관리자 화면에 「AI : 건물 사진이 아닌 것 같음」으로 보인다. */
+      if(ai.verdict === 'irrelevant'){
+        SUGAI.showCard(ai);
+        if(stat){
+          stat.style.color = '#FF6B6B';
+          stat.innerHTML = sugEsc(SUGAI.rejectMsg(ai)) + ' <button type="button" class="sugAnyway">' +
+            sugEsc((LANG === 'ko') ? '그래도 보내기' : 'Send anyway') + '</button>';
+          stat.classList.add('on');
+          var any = stat.querySelector('.sugAnyway');
+          if(any) any.onclick = function(){ any.disabled = true; ai.code = ''; ai.sentAnyway = true; sugFinishSubmit(url, noteVal, ai, stat, noteEl); };
+        }
         return;
       }
       /* v57 : AI가 확신할 때만 바로 접수하고, 그 밖에는 사람이 사진 보고 고른다.
@@ -489,10 +506,13 @@ function sugAdminRender(){
       return (
         '<div class="sugCard">' +
           /* v54 : 눌러서 크게 보기 (사진 자체는 용량이 커서 onclick에 넣지 않고 id로 찾는다) */
-          '<div class="sugThumbWrap" onclick="zoomFromSug(\''+s.id+'\')" title="탭하면 크게 보기">' +
-            '<img src="'+s.u+'" class="sugThumb" alt="제보 사진">' +
-            '<span class="zoomBadge">🔍</span>' +
-          '</div>' +
+          /* 2026-11-10 (외부 점검 B-2) : 사진 값은 모양이 맞을 때만 <img> 에 넣는다 — 서버에서 받을 때 이미 거르지만(sugdb.js cleanSug), 화면에서도 한 번 더 */
+          (sugSafeImg(s.u)
+            ? '<div class="sugThumbWrap" onclick="zoomFromSug(\''+sugEsc(s.id)+'\')" title="탭하면 크게 보기">' +
+                '<img src="'+s.u+'" class="sugThumb" alt="제보 사진">' +
+                '<span class="zoomBadge">🔍</span>' +
+              '</div>'
+            : '<div class="sugThumbWrap sugBadPhoto">⚠ 사진 형식이 맞지 않는 제보<br>(승인할 수 없어요 — 거절해 주세요)</div>') +
           '<div class="sugMeta">' +
             '<div class="sugNote">'+noteHtml+'</div>' +
             '<div class="sugWhen">'+when+(s.fid ? '' : '<span class="sugLocal">이 폰에서만 · 서버 미전송</span>')+'</div>' +
@@ -512,7 +532,7 @@ function sugAdminRender(){
             '<div class="sugCodeLine"><label>직접 입력</label>' +
               '<input type="text" class="sugCodeInput" id="sugCode_'+s.id+'" list="sugCodeList" ' +
                 'oninput="sugSyncName(\''+s.id+'\')" value="'+
-                ((typeof SUGAI!=='undefined') ? SUGAI.autoCode(s) : '')+
+                sugEsc((typeof SUGAI!=='undefined') ? SUGAI.autoCode(s) : '')+
                 '" placeholder="코드를 아는 경우에만 (예: LNG3)"></div>' +
             /* v73 : 층마다 있는 라운지는 코드를 외우기 어려워 버튼으로 고른다 */
             '<div class="sugQuick">라운지 : ' +
@@ -540,6 +560,7 @@ function sugAdminRender(){
 function sugApprove(id){
   var s = sugFind(id);
   if(!s) return;
+  if(!sugSafeImg(s.u)){ alert('사진 형식이 맞지 않는 제보라 승인할 수 없어요 — 거절해 주세요.'); return; }   // 2026-11-10 B-2
   var subSel = document.getElementById('sugSub_'+id);
   var sub = subSel ? subSel.value : '';
   var input = document.getElementById('sugCode_'+id);

@@ -2011,3 +2011,10 @@ html.lt .vcRow .seg{border-color:#0B6FB8;}
 html.lt .vcRow button{background:#FFFFFF;color:#0B6FB8;}
 html.lt .vcRow button + button{border-left-color:#0B6FB8;}
 html.lt .vcRow button.on{background:#0B6FB8;color:#FFFFFF;}
+/* ── 2026-11-10 외부 점검 반영 : 건의함 「그래도 보내기」 · 관리자 화면의 형식이 틀린 제보 칸 ── */
+.sugAnyway{margin-left:6px;padding:4px 12px;border-radius:8px;border:1.5px solid #FF6B6B;background:transparent;color:#FFB4B4;font:inherit;font-weight:800;cursor:pointer;}
+.sugAnyway:disabled{opacity:.5;cursor:default;}
+.sugBadPhoto{display:flex;align-items:center;justify-content:center;text-align:center;min-height:90px;padding:8px;border-radius:8px;
+  border:1.5px dashed #FF6B6B;background:#1A0F14;color:#FF9A9A;font-size:12px;font-weight:700;line-height:1.5;cursor:default;}
+html.lt .sugAnyway{color:#B42318;border-color:#B42318;}
+html.lt .sugBadPhoto{background:#FFF1F1;color:#B42318;border-color:#B42318;}

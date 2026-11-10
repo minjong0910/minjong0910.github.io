@@ -556,7 +556,7 @@ function pickOpen(url, note, ai, after){
     else if(v === 'irrelevant' || v === 'out_of_scope')
       txt = (LANG==='ko') ? '<b>AI가 이 사진의 위치를 찾지 못했어요.</b><br>공대 3호관은 문과 복도가 층마다 비슷하게 생겨서, 문패가 안 보이면 AI도 헷갈립니다.' : '<b>The AI could not find where this photo was taken.</b><br>Doors and hallways look alike on every floor of Bldg.3, so without a room plate the AI gets confused.';
     else
-      txt = (LANG==='ko') ? '<b>AI가 확신하지 못했어요.</b><br>아래에서 <span class="hi">맞는 곳을 눌러 주세요.</span> 한 번만 골라 주시면 AI가 배웁니다.' : '<b>The AI is not sure.</b><br><span class="hi">Tap the right place below.</span> Pick it once and the AI learns.';
+      txt = (LANG==='ko') ? '<b>AI가 확신하지 못했어요.</b><br>아래에서 <span class="hi">맞는 곳을 눌러 주세요.</span> 관리자가 확인하면 AI가 배웁니다.' : '<b>The AI is not sure.</b><br><span class="hi">Tap the right place below.</span> Once the staff confirm it, the AI learns.';
     why.innerHTML = txt;
   }
   var sug = document.getElementById('pkSug'), lab = document.getElementById('pkSugLab');
@@ -591,8 +591,9 @@ function pickChoose(code){
   ai.pickedByUser = true;
   ai.verdict = 'match';
   ai.sim = ai.sim || 0;
-  /* 고른 답을 AI에게 가르친다 — 다음부터 같은 자리는 AI가 알아본다 */
-  try{ if(typeof SUGAI !== 'undefined' && SUGAI.learn) SUGAI.learn(code, PICK.url); }catch(e){}
+  /* 2026-11-10 (외부 점검 A-2) : 예전에는 여기서 고른 답을 이 폰의 AI 에게 곧바로 가르쳤다 — 확인 없이.
+     건물과 상관없는 사진에 장소를 골라 주면 그 뒤로 이 폰의 AI 는 비슷한 사진을 그 장소라고 답했다.
+     → 고른 장소는 제보와 함께 관리자에게만 간다. 관리자가 승인하면 그때 모든 폰의 AI 가 배운다(suggest.js sugApprove → 서버 승인 사진 → SUGAI.syncServer). */
   var after = PICK.after;
   PICK.after = null;
   if(after) after(code, ai);

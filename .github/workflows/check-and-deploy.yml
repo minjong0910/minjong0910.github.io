@@ -1,6 +1,15 @@
 # 검사 후 배포 — main 에 올리면 GitHub 가 검사.ps1 을 돌리고, 통과해야만 site/ 를 사이트로 내보낸다.
 # 검사가 실패하면 사이트는 바뀌지 않는다 (Actions 탭에서 어느 검사가 왜 실패했는지 볼 수 있다).
 # 저장소 설정 → Pages → Build and deployment → Source 를 "GitHub Actions" 로 두어야 한다.
+#
+# 언제 무엇이 일어나나
+#   · main 에 push          → 검사 · 서버 규칙 시험 → 통과하면 배포 → 배포 뒤 사이트 확인
+#   · Actions 탭 수동 실행   → 같은 순서 (main 에서 실행했을 때만 배포. 커밋 없이 다시 배포할 때 쓴다)
+#   · pull request          → 검사 · 서버 규칙 시험만 (배포하지 않는다)
+#   · 매주 월요일 새벽 3시   → 전체 검사(로드뷰 9가지까지)만 (배포하지 않는다) — 고치지 않아도 깨지는 것(브라우저 · 외부 주소)을 찾으려고
+#
+# 2026-11-10 외부 점검 반영 (I-1 · I-2 · B-6) : 수동 실행 배포 · PR 별도 줄 · 실패 시 서버 기록 보관 · 서버 규칙 자동 시험 ·
+#   배포 뒤 사이트 확인 · 주간 전체 검사. dependabot 은 .github/dependabot.yml.
 name: 검사 후 배포
 
 on:
@@ -8,6 +17,8 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: '0 18 * * 0'     # 일요일 18:00 UTC = 월요일 03:00 한국
 
 permissions:
   contents: read
@@ -16,15 +27,19 @@ permissions:
 #   그 뒤의 모든 실행이 기다리다 취소됐다("Canceling since a higher priority
 #   waiting request for pages exists"). 복도 버그 수정도 18시간 기다리다 취소됐다.
 #   묶음 이름을 바꿔 멈춘 줄에서 빠져나온다.
+# 2026-11-05 : 10/7 에 멈춰 있던 옛 실행의 배포가 한 달 뒤 새벽에 뒤늦게 돌아 사이트가 10/7 판으로 돌아갔다
+#   (문서/디버깅_사례.txt 사례 5). 배포 job 에 시간 제한이 있어야 하는 이유다.
+# 2026-11-09 : pull request 검사가 main 배포 줄에 끼어 배포를 밀어내지 않도록 PR 은 PR 번호별로 따로 줄을 선다.
+#   주간 검사도 따로. push · 수동 실행은 여전히 한 줄(pages-deploy)이라 오래 걸린 옛 커밋이 새 커밋의 사이트를 덮어쓰는 일은 없다.
 concurrency:
-  group: pages-deploy
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || (github.event_name == 'schedule' && 'weekly-check' || 'pages-deploy') }}
   cancel-in-progress: false
 
 jobs:
   test:
     name: 검사 (파일 · 앱 · 안전망)
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -48,15 +63,49 @@ jobs:
           }
           if(-not $up){ Write-Host '::error title=검사 실패::미리보기 서버가 30초 안에 켜지지 않음'; exit 1 }
           Write-Host '서버 켜짐'
-          ./검사.ps1 -Ci
+          if('${{ github.event_name }}' -eq 'schedule'){ ./검사.ps1 -Ci -Full } else { ./검사.ps1 -Ci }
           $code = $LASTEXITCODE
           if(Test-Path 서버기록.txt){ Write-Host '── 서버 기록 (마지막 20줄) ──'; Get-Content 서버기록.txt -Tail 20 }
           exit $code
 
+      # 검사가 실패했을 때만 서버 기록 전체를 7일간 내려받을 수 있게 남긴다
+      # (로그에는 마지막 20줄만 나오므로, 원인이 더 앞에 있을 때 쓴다)
+      - name: 서버 기록 남기기 (실패했을 때만)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-log
+          path: 서버기록.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # 서버/firestore.rules 를 진짜 Firestore 에뮬레이터에 올려 시험한다 (tests/rules — CI 전용, 앱에는 Node 가 필요 없다).
+  # 익명 제보 하루 3번 · 4번째 거부 · 사진 · QR · AI 칸 모양 · 관리자만 쓰기 · 기록은 못 고침 등.
+  rules:
+    name: 서버 규칙 시험 (Firestore 에뮬레이터)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: 규칙 시험
+        working-directory: tests/rules
+        run: |
+          cp "../../서버/firestore.rules" firestore.rules
+          npm install --no-audit --no-fund --loglevel=error
+          npx -y firebase-tools@13 emulators:exec --only firestore --project demo-b3nav "node rules.test.mjs"
+
   deploy:
     name: 사이트 바꾸기
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test]   # rules 가 GitHub 에서 처음 초록으로 도는 것을 확인한 뒤 [test, rules] 로 바꾼다
+    # push 로 올렸을 때, 또는 main 에서 수동 실행했을 때만 배포한다 (pull request · 주간 검사는 배포하지 않는다)
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     # 시간 제한이 없으면 한 번 멈췄을 때 뒤의 모든 배포를 영원히 막는다(위 주석 참고)
     timeout-minutes: 15
@@ -74,3 +123,30 @@ jobs:
           path: site
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # 배포 뒤 사이트 확인 (I-2) : 사이트가 정말 새 판(sw.js 의 VERSION)으로 바뀌었는지, 주요 주소가 응답하는지.
+  # 2026-11-05 사고(사이트가 옛 판으로 돌아감)를 이것으로 바로 알 수 있다.
+  smoke:
+    name: 배포 뒤 사이트 확인
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: 새 판으로 응답하는가 · 주요 주소
+        run: |
+          want=$(grep -oP "var VERSION = '\K[0-9a-f]+" site/sw.js)
+          base="https://minjong0910.github.io"
+          got=""
+          for i in $(seq 1 30); do
+            got=$(curl -fsS "$base/sw.js?nc=$i$RANDOM" | grep -oP "var VERSION = '\K[0-9a-f]+" || true)
+            [ "$got" = "$want" ] && break
+            sleep 10
+          done
+          if [ "$got" != "$want" ]; then echo "::error title=배포 확인 실패::사이트의 sw.js 판이 '$got' (이번 커밋은 '$want')"; exit 1; fi
+          for p in "/" "/index.html" "/?gate=MAIN" "/manifest.webmanifest" "/img/icon-192.png" "/js/app/sugdb.js" "/data/places.js"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$base$p")
+            echo "$code $p"
+            if [ "$code" != "200" ]; then echo "::error title=배포 확인 실패::$p 가 $code"; exit 1; fi
+          done
+          echo "::notice title=배포 확인::사이트가 판 $want 으로 바뀜 · 주요 주소 7곳 정상"

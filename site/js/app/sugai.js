@@ -5,8 +5,8 @@ var SUGAI = (function(){
   var V58_FROM = 1789570800000;
 
   /* ── 임계값 (전부 실측으로 정했다) ──────────────────────────────
-     무관한 사진의 최고 유사도 0.420 < TH_RELEVANT 0.60 < 실제 사진 최저 0.679
-     → 이 구간이 비어 있어서 오반려 없이 무관한 사진만 걸러진다.        */
+     (옛 기록) 무관한 사진의 최고 유사도 0.420 < TH_RELEVANT 0.60 < 실제 사진 최저 0.679
+     → 지금 값과 근거는 아래 RELEVANT 주석 (2026-11-10 재측정)         */
   var TH = {
     SHARP:     45,      // 라플라시안 분산 — 이보다 낮으면 흔들린 사진
     DARK:      40,      // 평균 밝기 하한
@@ -21,7 +21,13 @@ var SUGAI = (function(){
        확인했을 뿐이다. 새로 찍은 사진으로 다시 재니 자동 확정의 정답률은 0% 였다.
        → AI 단독 자동 확정을 없앤다. MATCH 를 닿을 수 없는 값으로 둔다.
          AI 는 후보를 5개까지 제시하고, 확정은 번호판 OCR 이나 사용자가 한다.     */
-    RELEVANT: 0.15,     // 미만 → 범위 밖 사진, 자동 반려 (정상 제보를 잘못 반려하지 않도록 낮게)
+    /* 2026-11-10 A-2 「건물과 무관한 사진에도 장소를 말한다」 — 0.15 는 사실상 아무것도 거르지 못했다.
+       도구\AI_건물밖사진_측정.ps1 (결과 문서\AI_건물밖사진_측정.txt) 로 다시 쟀다 :
+         3호관 사진 중 기준 자료에 없는 145장 · 무관한 사진 182장(그림·도표·QR · 앱 화면 캡처 · 풍경)
+         0.44 = 3호관 사진을 98% 이상 남기는 가장 높은 문턱 → 3호관 99.3% 남김 · 무관 81.9% 거름(품질 관문 포함) · AUROC 0.894
+       미만이면 「건물과 관련 없는 사진 같아요」 + 「그래도 보내기」. 번호판 글자가 읽히면 건물 사진으로 본다(applyOcr).
+       한계 : 다른 건물의 복도처럼 「비슷하지만 다른 곳」은 이 측정에 없다 — 그런 사진은 이 문턱으로 못 거른다. */
+    RELEVANT: 0.44,     // 미만 → 건물 사진이 아닌 것 같다 (위 측정)
     MATCH:    9.99,     // 자동 확정 안 함 (실측 정답률 0%)
     MARGIN:   0.20,     // MATCH 와 함께만 쓰인다 — 지금은 쓰이지 않는다. 확신도는 아래 CONF
     SAME:     0.97      // 이상 → 자료집에 이미 있는 사진과 사실상 동일
@@ -1325,6 +1331,11 @@ var SUGAI = (function(){
                :'The place in your note is not covered.<br>Accepted: '+SCOPE.label.en)
         : (ko()?'받는 범위 : '+SCOPE.label.ko+'<br>이 범위 안의 장소 사진을 올려주세요.'
                :'Accepted: '+SCOPE.label.en);
+    } else if(ai.verdict === 'irrelevant' && ai.sentAnyway){
+      /* 「그래도 보내기」를 눌렀다 (2026-11-10) */
+      t.icon='📮'; t.cls='aiInfo'; t.tag=ko()?'접수됨':'Accepted';
+      t.title=ko()?'제보가 접수됐습니다.':'Your report was submitted.';
+      t.body=ko()?'관리자가 사진을 보고 확인합니다.':'A staff member will review the photo.';
     } else if(ai.verdict === 'irrelevant'){
       t.icon='🚫'; t.cls='aiBad'; t.tag=ko()?'접수 안 됨':'Not accepted';
       t.title=ko()?'건물과 관련 없는 사진 같아요':'This does not look like the building';
@@ -1369,7 +1380,8 @@ var SUGAI = (function(){
     }
     /* '유사도 72%' 는 맞을 확률처럼 읽혀서 보여 주지 않는다 (유사도가 높아도 자리 정답은 60% 안팎).
        대신 측정으로 뒷받침되는 확신도만 말한다. 유사도 숫자는 관리자 화면에 그대로 있다. */
-    if(ai.sim !== undefined && ai.verdict !== 'unknown' && ai.verdict !== 'same'){
+    /* 2026-11-10 A-2 : 건물 사진이 아닌 것 같다고 할 때는 확신도 · 「다음 후보 ○○」도 말하지 않는다 — 장소 이름을 대는 셈이라 */
+    if(ai.sim !== undefined && ai.verdict !== 'unknown' && ai.verdict !== 'same' && ai.verdict !== 'irrelevant'){
       var tw = { plate: ko()?'확신도 : 번호판으로 확인':'Confidence: plate read',
                  place: ko()?'확신도 : 높음':'Confidence: high',
                  floor: ko()?'확신도 : 층만':'Confidence: floor only',
@@ -1523,6 +1535,7 @@ var SUGAI = (function(){
       else {                     cls='aiWarn'; txt='📷 사진 판별 (참고용 · 자주 틀림)'; }
     }
     else if(ai.verdict==='uncertain'){ cls='aiWarn'; txt='📷 사진 판별 (참고용 · 자주 틀림)'; }
+    else if(ai.verdict==='irrelevant'){ cls='aiBad'; txt='🚫 AI : 건물 사진이 아닌 것 같음 — 사용자가 「그래도 보내기」'; }   /* 2026-11-10 A-2 */
     else if(ai.verdict==='same'){ cls='aiInfo'; txt='기존과 거의 동일'; }
     else { cls='aiInfo'; txt='AI 판별 안 됨'; }
 
@@ -1531,7 +1544,7 @@ var SUGAI = (function(){
     if(ai.sim !== undefined) h += '<span class="num">유사도 '+(ai.sim*100).toFixed(0)+'% · 격차 '+(ai.margin*100).toFixed(0)+'%p</span>';
     if(ai.quality) h += '<span class="num">선명도 '+Math.round(ai.quality.sharp)+'</span>';
     if(ai.ms) h += '<span class="num">판별 '+(ai.ms/1000).toFixed(1)+'초</span>';   /* v69 : 폰 속도 확인용 */
-    if(s.qr) h += '<span class="num qr">⛶ '+s.qr+' QR 스캔 후 제보</span>';
+    if(s.qr) h += '<span class="num qr">⛶ '+String(s.qr).replace(/[^A-Z]/g, '')+' QR 스캔 후 제보</span>';   // 2026-11-10 B-2 : 문 이름(영문 대문자)만
     if(ai.ocr && ai.ocr.floor){
       h += '<span class="num hint">' + (ai.ocr.scene === 'lift' ? '🛗 엘리베이터 층 표시' : ai.ocr.scene === 'sign' ? '🗺 안내판 제목' : '🔢 번호판 '+(ai.ocr.code || ai.ocr.raw || '')) + ' → '+ai.ocr.floor
          + (ai.codeSource==='ocr' ? ' (이 방으로 확정)' : ' (층 확정)')
@@ -1544,7 +1557,9 @@ var SUGAI = (function(){
       h += '<span class="num hint">📝 메모 : '+ai.noteFloor+(ai.floorHintUsed ? ' (이 층 후보를 위로 올림)' : '')+'</span>';
     }
     h += '</div>';
-    h += whereText(ai);
+    /* 건물 사진이 아닌 것 같다고 본 사진에 「사진만 보면 ○○로 추정」을 붙이면 엉뚱한 장소를 그럴듯하게 말하는 셈이다 — 후보 버튼만 남긴다(AI 가 틀렸을 때 고를 수 있게) */
+    if(ai.verdict !== 'irrelevant') h += whereText(ai);
+    else h += '<div class="where low">AI 는 이 사진이 3호관 사진이 아닌 것 같다고 봤어요 (유사도 ' + Math.round((Number(ai.sim) || 0) * 100) + '%). 사진을 보고 판단해 주세요.</div>';
     /* v52 : 확실하지 않을 때는 후보를 더 많이(5개) 보여준다 — 관리자가 눌러서 바로 고르게 */
     /* v62 : 번호판으로 확정한 게 아니면 1등이 자주 틀리므로 후보를 넉넉히 준다 */
     var plateSure = (ai.codeSource==='ocr') || !!ai.pickedByUser || ai.verdict==='same';
@@ -2334,6 +2349,7 @@ var SUGAI = (function(){
            learn:learn, learnStats:learnStats, forgetAll:forgetAll,
            syncServer:syncServer, syncServerOne:syncServerOne, srvDrop:srvDrop, srvStats:srvStats,
            classify:classify, cluster:cluster, noteCode:noteCode, noteFloor:noteFloor, vecOf:vecOf,
+           quality:quality,                                           /* 2026-11-10 — 건물 밖 사진 측정(tests/ai_reject.html)이 앱과 같은 품질 관문을 쓰게 */
            embedUrlViews:embedUrlViews, powNorm:powNorm, Q_VIEWS:Q_VIEWS, REF_VIEWS:REF_VIEWS,
            libEnsure:libEnsure, libAdd:libAdd, libDel:libDel, libDelCode:libDelCode, libClear:libClear,
            libAll:libAll, libStats:libStats, libUsable:libUsable, rebuildRef:rebuildRef,

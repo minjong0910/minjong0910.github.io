@@ -52,7 +52,10 @@ function makeNoGLRenderer(cv){
 
 function init3D(){
   var cv=document.getElementById('c3d');
-  var isMobilePerf = ('ontouchstart' in window) || navigator.maxTouchPoints>0 || /Mobi|Android|iPhone|iPad/.test(navigator.userAgent);
+  /* ?perf=phone : 데스크톱에서도 폰 경로(재질 바꿔치기)를 켠다 — 검사(tests/roadview.html)가 폰에서만 나던 셰이더 사고
+     (문서/디버깅_사례.txt 사례 1)를 데스크톱에서 다시 잡으려고, 그리고 사람이 폰 문제를 PC 에서 볼 때 (2026-11-10 외부 점검 D-1) */
+  var isMobilePerf = ('ontouchstart' in window) || navigator.maxTouchPoints>0 || /Mobi|Android|iPhone|iPad/.test(navigator.userAgent)
+                     || /[?&]perf=phone(&|$)/.test(location.search);
   window.FP_PHONE = isMobilePerf;   // 1인칭 재질에서 '폰에서만 하는 처리'에 쓴다 (roadview.js 의 fpPhoneNoEmissive)
   /* ★ 2026-09-28 : 안드로이드 GPU(Adreno·Mali·PowerVR)에서는 1인칭 벽을 **조명 계산 없는
      단색 재질**로 그린다. 갤럭시 S20+(Adreno 650)에서 벽이 계속 #FFFF00 으로 나왔는데,

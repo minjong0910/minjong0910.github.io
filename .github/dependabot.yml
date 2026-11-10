@@ -1,0 +1,12 @@
+# 액션 · 시험 도구 버전이 낡으면 알려 준다 (2026-11-11 외부 점검 I-2).
+# Dependabot 이 pull request 를 열면 검사 · 서버 규칙 시험만 돈다(배포는 하지 않는다) — 통과하면 합치면 된다.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /tests/rules
+    schedule:
+      interval: monthly

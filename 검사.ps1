@@ -18,11 +18,14 @@
 #     앱 설치 정보                앱 이름·아이콘 크기·아이폰 아이콘, 첫 화면 앱 다운로드 문구, 설정의 앱 다운로드 버튼
 #     인터넷 없이 열기 목록        site\ 를 고치고 도구\오프라인목록.ps1 을 안 돌리면 폰이 옛 파일을 쓴다
 #     출입문 QR 주소              인쇄한 QR 이 이 저장소의 사이트를 여는가, QR인쇄\ 그림 4장이 있는가
+#     README 가 가리키는 파일      README 가 적은 경로가 실제로 있는가 · 콘솔에 붙여 넣을 규칙 사본이 firestore.rules 와 같은가 (2026-11-10)
 #     앱 검사(tests/check.html)   152곳 접수·이름·층·관리자 목록·3D·길찾기·실사 3D·후보 지도 (v65·v72·v75·v79)
-#     설치·오프라인(tests/pwa.html) QR 주소로 열기·기기별 설치 안내 13가지·12MB 저장·끊김 흉내·AI 는 인터넷 될 때만·QR 4장 다시 읽기
-#     안전망(tests/golden)        길안내 754가지·사진·화면·CSS·3D 그림 15장이 기록과 같은가
+#                                 · 아무나 쓴 제보가 관리자 화면에서 스크립트로 돌지 않는가 (2026-11-10 외부 점검 B-2)
+#     설치·오프라인(tests/pwa.html) QR 주소로 열기·기기별 설치 안내 13가지·18MB 저장·끊김 흉내·AI 는 인터넷 될 때만·QR 4장 다시 읽기
+#     안전망(tests/golden)        길안내 1,110가지·사진 174장·화면·CSS·3D 그림 15장이 기록과 같은가
+#   서버 규칙 시험(tests/rules)은 여기서 돌지 않는다 — Node · Java 가 필요해서 GitHub 자동 검사(rules job)에서만 돈다.
 #   pwsh -File 검사.ps1 -Ci      GitHub 자동 검사용 — 다른 컴퓨터라 글꼴·그래픽이 달라, 안전망에서 글자 폭·3D 그림 비교를 뺀다
-param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v170', [int]$Port = 8080)
+param([switch]$Full, [switch]$Quick, [switch]$Ci, [string]$Tag = 'v171', [int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ROOT = $PSScriptRoot
@@ -269,6 +272,46 @@ if(-not $qrUrl){ Bad 'qrnav.js 에서 QR 주소(SITE_URL)를 찾지 못했습니
 elseif($pages -and $qrUrl -ne $pages){ Bad "출입문 QR 주소($qrUrl)가 이 저장소의 사이트 주소($pages)와 다릅니다 — 인쇄한 QR 이 엉뚱한 곳을 연다" }
 elseif($qrMiss.Count){ Bad ('인쇄용 QR 그림이 없습니다 : QR인쇄\' + ($qrMiss -join ', ') + ' — pwsh -File 도구\QR_만들기.ps1') }
 else { Ok ("출입문 QR 주소 {0}?gate=… · 인쇄 그림 4장 있음" -f $qrUrl) }
+
+# ── README 가 가리키는 파일이 모두 있는지 · 콘솔에 붙여 넣을 규칙 사본이 원본과 같은지 ──
+# 2026-11-10 외부 점검 S-5 : README 가 정확도 측정 페이지를 `eval_all.html`(저장소 맨 위)이라 적었는데
+#   실제로는 site/eval_all.html 이었다. 파일을 옮기거나 이름을 바꿀 때 README 는 손으로 고쳐야 해서 어긋난다.
+#   · 폴더가 붙은 경로(site/… · 도구\… · 문서/… · 서버/… · tests/… · QR인쇄/…)는 그 자리에 있어야 한다.
+#   · 이름만 적은 파일(`app.css` · `building.js` …)은 저장소 맨 위나 자주 쓰는 폴더 중 한 곳에 있으면 된다.
+#   · * { } … < > 가 들어간 것(roadview*.js 같은 묶음 · 자리표시)은 건너뛴다.
+# 서버\규칙_붙여넣기용.txt 는 Firebase 콘솔에 붙여 넣는 사본이다 — firestore.rules 만 고치고 사본을 안 고치면
+#   옛 규칙을 게시하게 된다(2026-11-10 : 실제로 10/28 판에 머물러 있었다).
+$rdBad = @(); $rdN = 0
+$rdm = Join-Path $ROOT 'README.md'
+if(Test-Path $rdm){
+  $rt = [IO.File]::ReadAllText($rdm, [Text.Encoding]::UTF8)
+  $refs = New-Object 'System.Collections.Generic.HashSet[string]'
+  foreach($m in [regex]::Matches($rt, '\]\(([^)#\s]+)(?:#[^)]*)?\)')){ if($m.Groups[1].Value -notmatch '^(https?:|mailto:)'){ [void]$refs.Add($m.Groups[1].Value) } }
+  foreach($m in [regex]::Matches($rt, '(?<![\w/\\.])((?:site|도구|문서|서버|tests|QR인쇄|\.github)[\\/][^\s`)''"|,(]+)')){ [void]$refs.Add($m.Groups[1].Value.TrimEnd('.')) }
+  foreach($m in [regex]::Matches($rt, '`([^`\s/\\]+\.(?:ps1|bat|html|js|css|json|txt|md|rules|yml|pdf))`')){ [void]$refs.Add($m.Groups[1].Value) }
+  $look = @('.', 'site', 'site\js\app', 'site\css', 'site\data', 'site\js\vendor', 'site\legal', 'site\live', 'tests', '도구', '문서', '서버')
+  foreach($r in $refs){
+    if($r -match '[*{}…<>]'){ continue }
+    $rel = ($r -replace '/', '\').TrimEnd('\')
+    $rdN++
+    if($rel.Contains('\')){ if(-not (Test-Path -LiteralPath (Join-Path $ROOT $rel))){ $rdBad += $r } }
+    else {
+      $hit = $false
+      foreach($w in $look){ if(Test-Path -LiteralPath (Join-Path (Join-Path $ROOT $w) $rel)){ $hit = $true; break } }
+      if(-not $hit){ $rdBad += $r }
+    }
+  }
+}
+$rulesA = Join-Path $ROOT '서버\firestore.rules'; $rulesB = Join-Path $ROOT '서버\규칙_붙여넣기용.txt'
+$rulesSame = $true
+if((Test-Path $rulesA) -and (Test-Path $rulesB)){
+  $ra = ([IO.File]::ReadAllText($rulesA, [Text.Encoding]::UTF8) -replace "`r`n", "`n").Trim()
+  $rb = ([IO.File]::ReadAllText($rulesB, [Text.Encoding]::UTF8) -replace "`r`n", "`n").Trim()
+  $rulesSame = ($ra -eq $rb)
+}
+if($rdBad.Count){ Bad ('README 가 가리키는 파일이 없음 : ' + ($rdBad -join ' / ') + ' — 옮겼으면 README 를 고치세요') }
+elseif(-not $rulesSame){ Bad '서버\규칙_붙여넣기용.txt 가 서버\firestore.rules 와 다릅니다 — 콘솔에 옛 규칙을 붙여 넣게 된다 (Copy-Item 서버\firestore.rules 서버\규칙_붙여넣기용.txt)' }
+else { Ok ("README 가 가리키는 파일 {0}개 모두 있음 · 콘솔에 붙여 넣을 규칙 사본 = firestore.rules" -f $rdN) }
 
 # ═══ 2. 브라우저 검사 ═══════════════════════════════════════════
 if(-not $Quick){

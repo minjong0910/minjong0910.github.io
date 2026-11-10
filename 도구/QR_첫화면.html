@@ -28,6 +28,12 @@
   function mm(v){ return Math.round(v * DPI / 25.4); }
   var SW = mm(90), SH = mm(120);
   var URL0 = QRNAV.payload('MAIN').split('?')[0];          // 앱의 SITE_URL 그대로 — https://minjong0910.github.io/
+  /* ?v=consent : 시연용(2026-11-11 사용자) — 주소 뒤 ?consent 로 이미 동의한 폰에도 찍을 때마다 동의 화면부터(pwa.js · consent.js). 띠 색 · 큰 글씨를 달리해 첫 화면 QR 과 헷갈리지 않게 */
+  var DEMO = /[?&]v=consent/.test(location.search);
+  if(DEMO) URL0 = URL0 + '?consent';
+  var C1 = DEMO ? '#FF468C' : '#00C8E6', C2 = '#7C5CFF';
+  var BIG = DEMO ? '앱 시연용' : '앱 첫 화면', SUB = DEMO ? '찍을 때마다 동의 화면부터 시작해요' : '설치 · 가입 없이 바로 열려요';
+  var FOOT = DEMO ? '휴대폰 카메라로 찍으면 동의 화면부터 열려요' : '휴대폰 카메라로 찍으면 앱 첫 화면이 열려요';
   var out = {ok:false};
 
   function rr(ctx, x, y, w, h, r){
@@ -41,7 +47,7 @@
   function card(icon){
     var cv = document.createElement('canvas'); cv.width = SW; cv.height = SH;
     var c = cv.getContext('2d'), pad = mm(4);
-    var grad = c.createLinearGradient(pad, 0, SW - pad, 0); grad.addColorStop(0, '#00C8E6'); grad.addColorStop(1, '#7C5CFF');
+    var grad = c.createLinearGradient(pad, 0, SW - pad, 0); grad.addColorStop(0, C1); grad.addColorStop(1, C2);
     c.fillStyle = '#FFFFFF'; c.fillRect(0, 0, SW, SH);
     c.lineWidth = mm(1.2); c.strokeStyle = grad; rr(c, pad, pad, SW - 2 * pad, SH - 2 * pad, mm(4)); c.stroke();
     /* 위 띠 — 앱 단추 색(청록 → 보라) + 앱 아이콘 + 이름 */
@@ -57,9 +63,9 @@
     var cells = qr.size + 8, px = Math.floor(mm(56) / cells), full = cells * px;
     QRENC.draw(c, qr, Math.round((SW - full) / 2), pad + mm(17), px, 4);
     var y = pad + mm(17) + full;
-    center(c, '앱 첫 화면', y + mm(12.5), '800 ' + mm(11) + 'px Pretendard, "Malgun Gothic"', '#141820');
-    center(c, '설치 · 가입 없이 바로 열려요', y + mm(19), '600 ' + mm(4) + 'px Pretendard, "Malgun Gothic"', '#6B7585');
-    center(c, '휴대폰 카메라로 찍으면 앱 첫 화면이 열려요', SH - pad - mm(9), '600 ' + mm(3.5) + 'px Pretendard, "Malgun Gothic"', '#4B5566');
+    center(c, BIG, y + mm(12.5), '800 ' + mm(11) + 'px Pretendard, "Malgun Gothic"', '#141820');
+    center(c, SUB, y + mm(19), '600 ' + mm(4) + 'px Pretendard, "Malgun Gothic"', '#6B7585');
+    center(c, FOOT, SH - pad - mm(9), '600 ' + mm(3.5) + 'px Pretendard, "Malgun Gothic"', '#4B5566');
     center(c, URL0, SH - pad - mm(4), '400 ' + mm(2.6) + 'px Pretendard, "Malgun Gothic"', '#AAB2BE');
     return {canvas:cv, qr:qr};
   }
@@ -77,7 +83,7 @@
     document.title = out.ok ? 'QR 완료' : 'QR 실패';
   }
   var icon = new Image();
-  var TXT = '공대 3호관 길안내 앱 첫 화면 설치 · 가입 없이 바로 열려요 휴대폰 카메라로 찍으면 앱 첫 화면이 열려요 ' + URL0;
+  var TXT = '공대 3호관 길안내 ' + BIG + ' ' + SUB + ' ' + FOOT + ' ' + URL0;
   var fontReady = (document.fonts && document.fonts.load)
     ? Promise.all(['800', '700', '600', '400'].map(function(w){ return document.fonts.load(w + ' 40px Pretendard', TXT); }))
     : Promise.resolve();

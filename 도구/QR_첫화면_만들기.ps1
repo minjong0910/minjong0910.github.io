@@ -2,15 +2,17 @@
 #   QR 내용 = https://minjong0910.github.io/ (출입문 QR 처럼 ?gate= 가 없다 — 찍으면 앱 첫 화면, 출발 문은 정하지 않음)
 #   도구\QR_첫화면.html 을 Edge 헤드리스로 열어 그림을 받고, 앱의 QR 읽기(jsQR)로 원래 크기 · 1/4 크기 두 번 다시 읽어
 #   주소가 그대로이고 출입문 QR 로 읽히지 않을 때만 저장한다 → QR인쇄\앱첫화면_QR.png + 바탕화면 「앱 첫 화면 QR (발표 시험용).png」
-#   미리보기 서버(8080)가 켜져 있어야 한다.   사용법 : pwsh -File 도구\QR_첫화면_만들기.ps1
-param([int]$Port = 8080)
+#   -Consent : 시연용 — 주소 https://minjong0910.github.io/?consent (이미 동의한 폰에도 찍을 때마다 동의 화면부터) · 분홍 띠 「앱 시연용」
+#              → QR인쇄\앱시연용_QR_동의부터.png + 바탕화면 「앱 시연용 QR (동의 화면부터).png」
+#   미리보기 서버(8080)가 켜져 있어야 한다.   사용법 : pwsh -File 도구\QR_첫화면_만들기.ps1 [-Consent]
+param([int]$Port = 8080, [switch]$Consent)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ROOT = Split-Path $PSScriptRoot -Parent
-$OUT  = Join-Path $ROOT 'QR인쇄\앱첫화면_QR.png'
-$DESK = Join-Path ([Environment]::GetFolderPath('Desktop')) '앱 첫 화면 QR (발표 시험용).png'
+$OUT  = Join-Path $ROOT $(if($Consent){ 'QR인쇄\앱시연용_QR_동의부터.png' } else { 'QR인쇄\앱첫화면_QR.png' })
+$DESK = Join-Path ([Environment]::GetFolderPath('Desktop')) $(if($Consent){ '앱 시연용 QR (동의 화면부터).png' } else { '앱 첫 화면 QR (발표 시험용).png' })
 $EDGE = if($env:B3NAV_BROWSER){ $env:B3NAV_BROWSER } else { 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' }
-$page = "http://localhost:$Port/" + [uri]::EscapeDataString('도구') + '/' + [uri]::EscapeDataString('QR_첫화면.html')
+$page = "http://localhost:$Port/" + [uri]::EscapeDataString('도구') + '/' + [uri]::EscapeDataString('QR_첫화면.html') + $(if($Consent){ '?v=consent' } else { '' })
 $prof = Join-Path $env:TEMP ('b3nav_qrh_' + [guid]::NewGuid().ToString('N').Substring(0, 8))
 $dom = & $EDGE --headless=new --disable-gpu --no-first-run "--user-data-dir=$prof" --virtual-time-budget=20000 --dump-dom $page 2>$null | Out-String
 $raw = [regex]::Match($dom, '(?s)<pre id="R">(.*?)</pre>').Groups[1].Value.Replace('&lt;','<').Replace('&gt;','>').Replace('&quot;','"').Replace('&amp;','&')

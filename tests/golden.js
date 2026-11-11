@@ -338,6 +338,13 @@ function diffObj(a, b, path, out, lim){
     });
     return;
   }
+  /* 긴 글이 다르면 처음 다른 자리 앞뒤를 보여 준다 — 깃허브에서만 가끔 「dom.text 1곳」이 나는데 앞 140자는 같아서 무엇이 다른지 안 보였다(11/11) */
+  if(typeof a === 'string' && typeof b === 'string' && (a.length > 140 || b.length > 140)){
+    var p = 0; while(p < a.length && p < b.length && a.charCodeAt(p) === b.charCodeAt(p)) p++;
+    var s0 = Math.max(0, p - 40);
+    out.push(path + ' : ' + p + '번째 글자부터 다름 — 「' + a.slice(s0, p + 80) + '」 → 「' + b.slice(s0, p + 80) + '」');
+    return;
+  }
   out.push(path + ' : ' + short(a) + ' → ' + short(b));
 }
 function short(v){ var s = JSON.stringify(v); return s && s.length > 140 ? s.slice(0, 140) + '…' : s; }

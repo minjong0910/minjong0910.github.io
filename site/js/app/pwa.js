@@ -643,7 +643,9 @@ var PWA = (function(){
                첫 화면으로 오거나 화면이 안 보일 때(다른 앱으로 갔을 때) 조용히 갈아탄다. */
         var bootEl = document.querySelector('.fx-boot');
         var splash = !!(bootEl && bootEl.style.willChange !== 'clip-path');   // 걷히는 중이면 이미 끝난 것으로 본다
-        var asking = !!document.querySelector('.ezAsk');
+        /* 11/11 사용자 「처음 앱을 열면 동의란이 두 번 뜬다」 — 옛 판이 동의란을 띄운 순간 새 판으로 갈아타며 새로 고쳐, 새 판이 동의란을 또 띄웠다.
+           → 동의란(.syAgree)도 「묻는 중」으로 친다 : 동의가 끝나고 첫 화면에서 조용히 갈아탄다. */
+        var asking = !!document.querySelector('.ezAsk') || !!document.querySelector('.syAgree');
         var busy = (id === 's6' || id === 's7' || id === 'sqr' || id === 'sqrok' || asking);
         /* 11/11 : 휴대폰 허락 창(마이크 · 카메라 · 알림)이 떠 있는 동안은 새로 고치지 않는다 — 창이 닫히면 크롬은 「닫음」으로 쳐서 그 기능이 안 된다 */
         try{ if(typeof CONSENT !== 'undefined' && CONSENT.asking && CONSENT.asking()) return; }catch(err){}

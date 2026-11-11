@@ -370,14 +370,8 @@ var VOICE = (function(){
     card.querySelector('.x').onclick = closeAll;
   }
 
-  /* 11/11 사용자 「오브를 누를 때마다 동의받는 건 번거롭다」 — 처음 동의 화면의 「마이크」(미리 체크)에 동의했으면 바로 듣고,
-     끈 폰만 이 누름에서 「마이크를 켤까요?」를 한 번(CONSENT.need). 음성 인식이 없는 브라우저는 묻지 않고 바로 「안 돼요」 */
-  function start(){
-    if(!recCtor() || typeof CONSENT === 'undefined' || !CONSENT.need){ listen(); return; }
-    CONSENT.need('voice', listen);
-  }
-  btn.onclick = function(){ if(ACTIVE && REC){ try{ REC.stop(); }catch(e){} return; } start(); };   // 듣는 중에 한 번 더 누르면 바로 끝낸다
-  hint.onclick = function(){ start(); };
+  btn.onclick = function(){ if(ACTIVE && REC){ try{ REC.stop(); }catch(e){} return; } listen(); };   // 듣는 중에 한 번 더 누르면 바로 끝낸다
+  hint.onclick = function(){ listen(); };
   dim.onclick = closeAll;
   /* 휴대폰 뒤로가기 — 듣는 중이거나 확인 창이 떠 있으면 그것부터 닫는다 */
   if(typeof appBackStep === 'function'){
@@ -395,7 +389,7 @@ var VOICE = (function(){
     };
   }
 
-  return { open:start, close:closeAll, isOpen:function(){ return ACTIVE || card.classList.contains('on'); }, place:function(){ place(true); },
+  return { open:listen, close:closeAll, isOpen:function(){ return ACTIVE || card.classList.contains('on'); }, place:function(){ place(true); },
     /* 검사용 — 마이크 없이 화면만 */
     match:match, think:think, show:show,
     demo:function(said, inter){ card.classList.remove('on'); setActive(true); orb.set('listen'); orb.bump(.9);

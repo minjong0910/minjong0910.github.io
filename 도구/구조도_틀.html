@@ -373,11 +373,11 @@
       <button class="b p" data-id="f_story"><span class="n">story.js</span><span class="d">247줄 · 길안내 · 도착 화면 (인스타 + 공항)</span></button>
       <button class="b p" data-id="f_restart"><span class="n">restart.js</span><span class="d">140줄 · 여기가 어디인지 모르겠어요 (다시 출발)</span></button>
       <button class="b p" data-id="f_live"><span class="n">live.js</span><span class="d">34줄 · 발표장 「지금 켜 둔 사람」</span></button>
-      <button class="b p" data-id="f_consent"><span class="n">consent.js</span><span class="d">512줄 · 처음 켤 때 동의 · 기능별 허용 · 처리방침 · 라이선스</span></button>
+      <button class="b p" data-id="f_consent"><span class="n">consent.js</span><span class="d">474줄 · 처음 켤 때 동의 · 기능별 허용 · 처리방침 · 라이선스</span></button>
       <button class="b p" data-id="f_share"><span class="n">share.js</span><span class="d">236줄 · 길 공유하기 (링크)</span></button>
       <button class="b p" data-id="f_timetable"><span class="n">timetable.js</span><span class="d">407줄 · 내 시간표 · 수업 알림</span></button>
       <button class="b p" data-id="f_via"><span class="n">via.js</span><span class="d">145줄 · 엘리베이터 · 중앙계단 고르기</span></button>
-      <button class="b p" data-id="f_voice"><span class="n">voice.js</span><span class="d">405줄 · 말로 찾기 (첫 화면 오브)</span></button>
+      <button class="b p" data-id="f_voice"><span class="n">voice.js</span><span class="d">399줄 · 말로 찾기 (첫 화면 오브)</span></button>
       <button class="b p" data-id="f_tts"><span class="n">tts.js</span><span class="d">159줄 · 음성 안내 (단계마다 읽어 주기)</span></button>
     </div>
   </div>
@@ -777,9 +777,9 @@ f_restart:{t:'restart.js — 여기가 어디인지 모르겠어요 (사진 골�
  tech:['guide.js startGuide · buildSteps','shell.js appBackStep 감싸기','MutationObserver'],
  src:[['site/js/app/restart.js','단추 · 사진 고르기 · 층 고르기 · 다시 출발'],['site/css/app.css','「사진 골라 다시 출발」 묶음'],['site/js/app/guide.js','「3층에서 내려서 …」 문장']]},
 f_consent:{t:'consent.js — 처음 켤 때 동의 · 기능별 허용 · 건의함 사진 개인정보',z:'p',zl:'폰 안에서 돈다',
- kid:'앱을 처음 켜면 켜는 화면 다음에 「시작하기 전에 확인해 주세요」가 한 번 나와요. 여덟 줄(11/11 마이크 더함)이 모두 체크된 채로 열려서 「동의하고 시작하기」만 누르면 돼요(그때 휴대폰이 알림 · 카메라 허용을 한 번씩 물어요 — 마이크는 오브를 처음 누를 때 휴대폰이 한 번). 한 번 동의하면 앱은 다시 묻지 않아요 — 오브를 눌러 말로 찾을 때도요. 카메라 · 마이크 · 알림을 그때 허용하지 않았으면, 그 기능을 켤 때만 「허용할까요?」를 물어요.',
+ kid:'앱을 처음 켜면 켜는 화면 다음에 「시작하기 전에 확인해 주세요」가 한 번 나와요. 일곱 줄이 모두 체크된 채로 열려서 「동의하고 시작하기」만 누르면 돼요(그때 휴대폰이 알림 · 카메라 허용을 한 번씩 물어요). 한 번 동의하면 다시 묻지 않아요. 카메라 · 알림을 그때 허용하지 않았으면, 그 기능을 켤 때만 「허용할까요?」를 물어요. 마이크는 여기서 묻지 않고, 오브를 처음 누를 때 휴대폰이 한 번 물어요.',
  why:'2026-11-03 사용자가 눌러 보는 견본을 열 번 고쳐 정한 순서 — 「하나하나 켤 때마다 묻는 건 번거롭다, 처음에 한 번에」 · 「처음에 동의했으면 다시 묻지 말 것」 · 「QR 이면 QR 설명만, 건의함이면 건의함 설명만」 · 「설정에 동의 관리 줄은 두지 말고 이용안내 마지막 쪽에」.',
- where:['켜는 화면 → <b>동의 화면</b>(필수 : 이용 안내 · 이 폰에 저장 · 개인정보 처리방침 · 오픈소스 라이선스 고지 / 선택 : 개인정보 수집·이용(건의함 사진 — 11/04 두 줄을 합침) · 카메라 · 마이크 · 알림 — 처리방침 · 라이선스 두 줄은 설명 없이 체크만(사용자 11/03) — 11/05 사용자 「전부 체크돼 있으면 좋겠다」로 모든 줄을 처음부터 체크된 채로(선택 동의를 미리 체크하면 안내서상 명확한 동의로 보기 어렵다는 점은 알림), 11/11 사용자 「오브를 누를 때마다 묻는 건 번거롭다」로 마이크 줄(미리 체크)을 더해 여덟 줄, 설명은 「보기 ▾」. 「동의하고 시작하기」를 누르면 체크된 알림 · 카메라를 휴대폰이 차례로 한 번씩 묻는다(마이크는 체크 = 앱 동의만 — 동의 화면에서 마이크를 미리 켜고 끄면 오브가 듣지 못해서, 휴대폰 허락은 처음 판처럼 음성 인식이 오브에서 받는다 · 11/11). 동의 항목이 바뀌면(AGREE_V, 지금 5) 예전에 동의한 폰도 한 번 더, 새 폰과 똑같이 모두 체크된 채로. 다시 보기 주소 ?consent (또는 ?동의 · 문 주소와 같이 ?gate=EAST&consent)로 열면 이미 동의한 폰에도 한 번 더 — 발표 · 시험용, pwa.js 가 떼어 이 탭에만 적어 둔다) → 쉬운 사용모드 「처음이세요?」','처음에 허용 안 한 폰만 : 출입문 QR 스캔 · 건의함 📷 칸 · 말로 찾기 오브 · 수업 알림을 켜는 순간 앱이 묻는 창 [허용 안 함][허용]','건의함 : 사진 칸 아래 한 줄 · 맨 아래 「올린 사진 지워 달라고 하기」(글만) → 관리자 화면에 「사진 삭제 요청」 카드','☰ → 설정 → 이용안내 <b>15쪽 「동의 · 권한 안내」</b>'],
+ where:['켜는 화면 → <b>동의 화면</b>(필수 : 이용 안내 · 이 폰에 저장 · 개인정보 처리방침 · 오픈소스 라이선스 고지 / 선택 : 개인정보 수집·이용(건의함 사진 — 11/04 두 줄을 합침) · 카메라 · 알림 — 처리방침 · 라이선스 두 줄은 설명 없이 체크만(사용자 11/03) — 11/05 사용자 「전부 체크돼 있으면 좋겠다」로 모든 줄을 처음부터 체크된 채로(선택 동의를 미리 체크하면 안내서상 명확한 동의로 보기 어렵다는 점은 알림), 설명은 「보기 ▾」. 11/11 마이크 줄을 더했다가 같은 날 뺐다(동의 화면에서 마이크를 미리 묻자 시험 중 크롬이 그 사이트 마이크를 차단 — 마이크는 오브에서 휴대폰이 묻는다, 처음 판 그대로). 「동의하고 시작하기」를 누르면 체크된 알림 · 카메라를 휴대폰이 차례로 한 번씩 묻는다. 동의 항목이 바뀌면(AGREE_V, 지금 4 — 다음엔 6) 예전에 동의한 폰도 한 번 더, 새 폰과 똑같이 모두 체크된 채로. 다시 보기 주소 ?consent (또는 ?동의 · 문 주소와 같이 ?gate=EAST&consent)로 열면 이미 동의한 폰에도 한 번 더 — 발표 · 시험용, pwa.js 가 떼어 이 탭에만 적어 둔다) → 쉬운 사용모드 「처음이세요?」','처음에 허용 안 한 폰만 : 출입문 QR 스캔 · 건의함 📷 칸 · 수업 알림을 켜는 순간 앱이 묻는 창 [허용 안 함][허용]','건의함 : 사진 칸 아래 한 줄 · 맨 아래 「올린 사진 지워 달라고 하기」(글만) → 관리자 화면에 「사진 삭제 요청」 카드','☰ → 설정 → 이용안내 <b>15쪽 「동의 · 권한 안내」</b>'],
  how:'개인정보 처리방침 · 오픈소스 라이선스는 site/legal/privacy.html · licenses.html(주소로도 열림, 한 · 영) — 동의 화면 두 줄의 「보기 ›」와 이용안내 마지막 쪽 단추가 doc() 로 맨 위에 띄웁니다(라이선스 쪽은 도구 폴더의 법적고지_라이선스_만들기.ps1 로 만듦). easy.js 의 askFirst · busy 를 감싸 동의 화면을 「처음이세요?」 위(z 945)에 깝니다. 카메라는 getUserMedia 를 켜자마자 끄고, 알림은 Notification.requestPermission — 둘 다 누른 그 순간에 불러야 휴대폰 창이 뜹니다. 공유 링크(?to=)로 연 분에게는 묻지 않습니다(누르기만 하면 바로 길안내). 거절한 사진은 서버에서 바로 지우고, 확인하지 못한 사진은 관리자 화면을 열 때 30일 지난 것을 지웁니다(sugdb.js).',
  tech:['localStorage','getUserMedia','Notification.requestPermission','MutationObserver'],
  src:[['site/js/app/consent.js','동의 화면 · 허용 묻기 · 건의함 · 이용안내 마지막 쪽'],['site/js/app/sugdb.js','거절 즉시 삭제 · 30일 정리'],['site/css/app.css','「처음 켤 때 동의 · 길 공유하기 · 내 시간표」 묶음']]},

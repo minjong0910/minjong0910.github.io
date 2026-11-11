@@ -3,11 +3,12 @@
    견본 : 생성물\견본_링크공유_시간표_개인정보\견본 눌러보기 — 개인정보 동의 · 길 공유하기 · 내 시간표.html (사용자가 눌러 보며 열 번 고침)
 
    · 켜는 화면 → 「시작하기 전에 확인해 주세요」 → 쉬운 사용모드 「처음이세요?」 → 첫 화면.
-     필수 : 이용 안내 · 이 폰에 저장 · 개인정보 처리방침 · 오픈소스 라이선스 고지 / 선택 : 개인정보 수집·이용(건의함 사진 — 11/04 두 줄을 합침) · 카메라 · 알림.
+     필수 : 이용 안내 · 이 폰에 저장 · 개인정보 처리방침 · 오픈소스 라이선스 고지 / 선택 : 개인정보 수집·이용(건의함 사진 — 11/04 두 줄을 합침) · 카메라 · 마이크(11/11 판 6) · 알림 — 여덟 줄 모두 미리 체크.
      (처리방침 · 라이선스 · 수집·이용 세 줄은 11/03 사용자 — 설명 없이 체크만. 견본 : 생성물\견본_동의화면)
      한 번 동의하면 앱을 쓰는 동안 다시 묻지 않는다(b3nav_agree) — 항목이 바뀌어 AGREE_V 가 오르면 한 번 더.
      공유 링크(?to=)로 연 분은 묻지 않고 바로 길안내(share.js — 「누르기만 하면 바로」).
-   · 카메라 · 알림 체크 = 앱 동의 → 휴대폰(브라우저) 창만 한 번 (카메라 : getUserMedia 를 켜자마자 끈다 · 알림 : Notification.requestPermission).
+   · 카메라 · 마이크 · 알림 체크 = 앱 동의 → 「동의하고 시작하기」와 쉬운 사용모드 사이에 휴대폰(브라우저) 창으로 묻는다
+     (알림 : Notification.requestPermission → 카메라 · 마이크 : getUserMedia 한 번으로 같이 묻고 켜자마자 끈다). 오브(voice.js)는 앱 창 없이 바로 음성 인식.
    · 처음에 동의하지 않았으면, 그 기능이 켜지는 순간에만 앱이 묻는다(appAsk) — 그 기능 설명만 :
        QR 스캔 「QR 카메라를 켤까요?」 · 건의함 사진 칸 「카메라를 켤까요?」 · 수업 알림 「수업 알림을 켤까요?」. 「허용」이면 그대로 켠다.
      (건의함은 휴대폰 카메라 앱으로 찍어 휴대폰 창이 없고, QR 은 앱이 카메라를 켜서 처음 한 번 휴대폰 창이 뜬다 — 차단했던 폰은 qrnav.js 가 원래 하던 안내)
@@ -62,16 +63,18 @@ var B3UI = (function(){
 
 var CONSENT = (function(){
   var U = B3UI, $ = U.$, $$ = U.$$, mk = U.mk, esc = U.esc, ls = U.ls, T = U.T, IC = U.IC;
-  var K = {agree: 'b3nav_agree', pv: 'b3nav_pv', cam: 'b3nav_perm_cam', noti: 'b3nav_perm_noti'};   // cam · noti : 'yes' · 'no'
+  var K = {agree: 'b3nav_agree', pv: 'b3nav_pv', cam: 'b3nav_perm_cam', mic: 'b3nav_perm_mic', noti: 'b3nav_perm_noti'};   // cam · mic · noti : 'yes' · 'no'
 
   /* 동의 화면의 판 — 항목이 바뀌면 올린다. 예전 판에 동의한 폰은 동의 화면을 한 번 더 본다(전에 고른 것은 체크된 채로).
      2 = 2026-11-03 사용자 : 「개인정보 수집·이용 동의 · 개인정보 처리방침 · 오픈소스 라이선스 고지를 더해 동의만 구하게(설명 없이)」 */
   /* 3 = 2026-11-04 처리방침 · 라이선스를 처음부터 체크된 채로 — 사용자 「창이 안 뜬다」 : v2 에 이미 동의한 폰(사용자 폰)은 바뀐 화면을 못 봐서, 한 번 더 */
-  var AGREE_V = 4;   // 11/05 : 일곱 줄 모두 미리 체크 — 이미 동의한 폰(사용자 폰 포함)도 새 화면을 한 번 보게
-  /* 11/11 : 「마이크」 줄을 더했다가(판 5) 같은 날 뺐다 — 사용자 「동의란에서 마이크 허용 문구를 빼고, 오브를 누르면 마이크 허용이 뜨게 처음처럼」.
-     동의 화면에서 마이크를 미리 물었더니 시험하며 「허용 안 함」 · 닫힘이 쌓여 크롬이 그 사이트 마이크를 차단해 버렸다(사용자 폰 : 막힘 · not-allowed).
-     → 마이크는 동의 화면에 두지 않는다. 오브를 누르면 휴대폰(브라우저)이 스스로 한 번 묻는다(voice.js · 처음 판 e3bfd32 그대로).
-     판은 4 로 둔다(일곱 줄은 4 와 같다 — 판 5 에 동의한 폰도 4 이상이라 다시 묻지 않는다). 다음에 항목을 바꾸면 6 으로 올릴 것. */
+  /* 4 = 11/05 : 일곱 줄 모두 미리 체크 — 이미 동의한 폰(사용자 폰 포함)도 새 화면을 한 번 보게
+     5 = 11/11 오전 : 「마이크」 줄을 더했다가 같은 날 뺐다(시험하며 크롬이 사이트 마이크를 차단 — 사용자 폰 막힘 · not-allowed. 원인은 휴대폰 창이
+         여러 번 닫히거나 거절된 것 : 창이 떠 있을 때 새 판 새로 고침이 끼어든 것도 한몫 → 아래 ASKING 으로 막음)
+     6 = 11/11 사용자 「동의란 → 마이크 · 카메라 · 알림 체크된 채 『동의하고 시작하기』 → 그 사이에 권한을 전부 묻고 → 쉬운 사용모드 → 앱 시작」
+         → 마이크 줄(미리 체크)을 다시 두고, 「동의하고 시작하기」에서 알림 → 카메라 · 마이크(휴대폰 창 하나로 같이)를 묻는다. 그 뒤 오브 · QR 은 묻지 않는다.
+         이미 동의한 폰도 새 동의 화면을 한 번 더 본다. */
+  var AGREE_V = 6;
   /* 휴대폰 허락 창(카메라 · 알림)이 떠 있는 동안 — pwa.js 가 이때는 새 판으로 갈아타며 새로 고치지 않는다
      (창이 떠 있을 때 새로 고쳐지면 크롬은 「닫음」으로 치고, 여러 번이면 그 사이트의 그 기능을 한동안 막는다 — 11/11 마이크에서 겪은 것) */
   var ASKING = 0;
@@ -83,6 +86,7 @@ var CONSENT = (function(){
   function agreed(){ if(again()) return false; var a = ls(K.agree); return !!(a && (a.v || 1) >= AGREE_V); }
   function pvOK(){ return !!ls(K.pv); }
   function camOK(){ return ls(K.cam) === 'yes'; }
+  function micOK(){ return ls(K.mic) === 'yes'; }
   function notiSupported(){ return typeof Notification !== 'undefined'; }
   function notiOK(){ return ls(K.noti) === 'yes' && notiSupported() && Notification.permission === 'granted'; }
   function cameFromShare(){ try{ return !!(typeof PWA !== 'undefined' && PWA.peekShare && PWA.peekShare()); }catch(e){ return false; } }
@@ -94,6 +98,39 @@ var CONSENT = (function(){
     try{ p = navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'environment'}}, audio: false}); }catch(e){ cb(false, 'err'); return; }
     p.then(function(st){ try{ st.getTracks().forEach(function(t){ t.stop(); }); }catch(e){} cb(true); },
            function(err){ cb(false, err && err.name === 'NotAllowedError' ? 'denied' : 'none'); });
+  }
+  /* 마이크(말로 찾기) — 카메라처럼 켜자마자 끈다. 크롬은 이 허락을 음성 인식에도 그대로 써서 오브를 눌러도 다시 묻지 않는다 */
+  function micAsk(cb){
+    if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){ cb(false, 'none'); return; }
+    var p;
+    try{ p = navigator.mediaDevices.getUserMedia({audio: true, video: false}); }catch(e){ cb(false, 'err'); return; }
+    p.then(function(st){ try{ st.getTracks().forEach(function(t){ t.stop(); }); }catch(e){} cb(true); },
+           function(err){ cb(false, err && err.name === 'NotAllowedError' ? 'denied' : 'none'); });
+  }
+  /* 카메라 + 마이크를 휴대폰 창 하나로(「카메라 및 마이크 사용 허용?」) — 11/11 사용자 「동의하고 시작하기에서 권한을 한 번에」.
+     cb(camOk, micOk). 한 창이 실패하면(한쪽이 이미 막혀 있으면 둘 다 실패한다) 아직 정하지 않은(prompt) 쪽만 따로 한 번 더 묻는다 —
+     사용자가 그 창에서 「허용 안 함」을 눌렀으면 둘 다 정해진 것이라 다시 묻지 않는다. */
+  function permState(name, cb){
+    try{ if(navigator.permissions && navigator.permissions.query){ navigator.permissions.query({name: name}).then(function(p){ cb(p.state); }, function(){ cb(''); }); return; } }catch(e){}
+    cb('');
+  }
+  function camMicAsk(cb){
+    if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){ cb(false, false); return; }
+    var p;
+    try{ p = navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'environment'}}, audio: true}); }catch(e){ cb(false, false); return; }
+    p.then(function(st){ try{ st.getTracks().forEach(function(t){ t.stop(); }); }catch(e){} cb(true, true); },
+      function(){
+        permState('camera', function(cs){
+          permState('microphone', function(ms){
+            var camOk = cs === 'granted', micOk = ms === 'granted';
+            (function one(list){
+              if(!list.length){ cb(camOk, micOk); return; }
+              var k = list.shift();
+              asked(k === 'cam' ? camAsk : micAsk)(function(ok){ if(k === 'cam') camOk = ok; else micOk = ok; one(list); });
+            })([].concat(cs === 'prompt' ? ['cam'] : [], ms === 'prompt' ? ['mic'] : []));
+          });
+        });
+      });
   }
   function notiAsk(cb){
     if(!notiSupported() || !Notification.requestPermission){ cb(false, 'unsupported'); return; }
@@ -199,6 +236,12 @@ var CONSENT = (function(){
         '<li>' + T('체크된 채로 「동의하고 시작하기」를 누르면 휴대폰이 「카메라를 허용할까요?」를 한 번 물어요 — 여기서 허용하면 <b>앱을 쓰는 동안 다시 묻지 않아요.</b>', 'When you tap “Agree and start”, your phone asks once — allow it and <b>we never ask again.</b>') + '</li>' +
         '<li>' + T('체크를 꺼도 괜찮아요 — 건의함 사진 칸 · QR 스캔을 누를 때 허용할지 물어요.', 'You can untick this — we ask when you tap the photo box or QR scan.') + '</li>' +
         '<li>' + T('아이폰 사파리는 다시 물을 수 있어요 — 사파리 설정 → 카메라 → 「허용」으로 두면 안 물어요.', 'iPhone Safari may ask again — set Safari Settings → Camera → Allow.') + '</li></ul>'},
+    /* 11/11 판 6 — 사용자 「동의란에서 마이크 · 카메라 · 알림 체크 → 동의하고 시작하기 때 권한을 전부 묻기」 */
+    {k: 'mic', req: false, on: true, perm: 'mic', t: T('마이크', 'Microphone'), s: T('말로 찾기 — 첫 화면 오브를 눌러 가고 싶은 곳을 말할 때', 'Voice search — when you tap the orb and say where to go'),
+     d: '<ul><li>' + T('첫 화면 오브를 눌러 말로 찾을 때만 마이크를 켜요. 말이 끝나면 바로 꺼요.', 'The microphone is used only while you search by voice with the orb.') + '</li>' +
+        '<li>' + T('말은 휴대폰 인터넷 앱의 음성 인식(안드로이드 구글 · 아이폰 애플)이 글자로 바꿔요. <b>우리 서버로는 보내지 않고 저장하지도 않아요.</b>', 'Your voice is turned into text by your browser’s speech service. <b>We never send it to our server or store it.</b>') + '</li>' +
+        '<li>' + T('체크된 채로 「동의하고 시작하기」를 누르면 휴대폰이 「카메라 및 마이크」를 한 번에 물어요 — 「허용」하면 <b>오브를 눌러도 다시 묻지 않아요.</b>', 'When you tap “Agree and start”, your phone asks for camera and microphone together — allow it and <b>the orb never asks again.</b>') + '</li>' +
+        '<li>' + T('체크를 꺼도 괜찮아요 — 오브를 처음 누를 때 휴대폰이 물어요.', 'You can untick this — your phone asks the first time you tap the orb.') + '</li></ul>'},
     {k: 'noti', req: false, on: true, perm: 'noti', t: T('알림', 'Notifications'), s: T('내 시간표의 수업 시작 전 알림 (소리 · 진동)', 'Alerts before your classes (sound · vibration)'),
      d: '<ul><li>' + T('내 시간표에 넣은 수업이 시작하기 전에 알려 드려요. 몇 분 전 · 소리는 시간표에서 정해요. 광고 알림은 보내지 않아요.', 'We alert you before classes in My Timetable. No ads.') + '</li>' +
         '<li>' + T('체크된 채로 「동의하고 시작하기」를 누르면 휴대폰이 「알림을 허용할까요?」를 한 번 물어요 — 여기서 허용하면 <b>앱을 쓰는 동안 다시 묻지 않아요.</b>', 'When you tap “Agree and start”, your phone asks once — allow it and <b>we never ask again.</b>') + '</li>' +
@@ -216,7 +259,7 @@ var CONSENT = (function(){
       '<div class="sc"><div class="brand">🏫 ' + T('공대 3호관 길안내', 'Engineering Bldg 3 Navigator') + '</div>' +
       '<h2>' + T('시작하기 전에<br>확인해 주세요', 'Before you start') + '</h2><p class="sub">' +
         (prev && (prev.v || 1) < AGREE_V ? T('동의 항목이 바뀌어서 한 번만 더 여쭤봐요.', 'Our consent items changed, so we ask once more.') : T('한 번만 동의하면 다음부터는 묻지 않아요.', 'Agree once and we will not ask again.')) + '</p>' +
-      '<div class="syAgAll" role="checkbox"><span class="syBox">' + IC.check + '</span><div><b>' + T('모두 동의해요', 'Agree to all') + '</b><small>' + T('선택 항목 · 카메라 · 알림까지 한 번에', 'Including optional items, camera and notifications') + '</small></div></div>' +
+      '<div class="syAgAll" role="checkbox"><span class="syBox">' + IC.check + '</span><div><b>' + T('모두 동의해요', 'Agree to all') + '</b><small>' + T('선택 항목 · 카메라 · 마이크 · 알림까지 한 번에', 'Including optional items, camera, microphone and notifications') + '</small></div></div>' +
       list.map(function(x){
         /* 설명 없는 줄 — 처리방침 · 라이선스는 「보기 ›」로 본문 쪽을 연다(11/04 — 펼치는 설명이 아니라 문서 전체) */
         if(x.plain) return '<div class="syAgItem plain" data-k="' + x.k + '"><div class="hd" role="checkbox"><span class="syBox">' + IC.check + '</span><div class="t"><b>' + tagOf(x) + x.t + '</b></div>' +
@@ -224,7 +267,7 @@ var CONSENT = (function(){
         return '<div class="syAgItem" data-k="' + x.k + '"><div class="hd" role="checkbox"><span class="syBox">' + IC.check + '</span><div class="t"><b>' + tagOf(x) + x.t + '</b><small>' + x.s + '</small></div><button class="more" type="button">' + T('보기 ▾', 'More ▾') + '</button></div><div class="det">' + x.d + '</div></div>';
       }).join('') +
       '<div class="syPerm">📍 <b>' + T('GPS 위치는 쓰지 않아요', 'We never use GPS') + '</b> — ' + T('어디 계신지는 출입문 QR 로만 알아요.', 'your position comes only from the door QR.') + '<br>' +
-        T('여기서 동의하면 앱을 쓰는 동안 다시 묻지 않아요. 카메라 · 알림은 「동의하고 시작하기」를 누를 때 휴대폰이 한 번만 물어요.', 'Agree here and we never ask again. For camera and notifications your phone asks once when you tap “Agree and start”.') + '</div></div>' +
+        T('여기서 동의하면 앱을 쓰는 동안 다시 묻지 않아요. 「동의하고 시작하기」를 누르면 휴대폰이 알림 · 카메라 및 마이크 허용을 물어요 — 「허용」을 눌러 주세요.', 'Agree here and we never ask again. When you tap “Agree and start”, your phone asks for notifications and camera & microphone — tap “Allow”.') + '</div></div>' +
       '<div class="ft"><button class="big" type="button" disabled>' + T('필수 항목에 동의해 주세요', 'Please agree to the required items') + '</button><small>' + T('동의 · 권한 안내는 ☰ → 설정 → 이용안내 마지막 쪽에 있어요', 'See ☰ → Settings → User guide, last page') + '</small></div>');
     function paint(){
       list.forEach(function(x){ var hd = $('.syAgItem[data-k=' + x.k + '] .hd', a); hd.classList.toggle('on', st[x.k]); hd.setAttribute('aria-checked', st[x.k]); });
@@ -232,16 +275,19 @@ var CONSENT = (function(){
       var ok = list.every(function(x){ return !x.req || st[x.k]; }), b = $('.ft .big', a);
       b.disabled = !ok; b.textContent = ok ? T('동의하고 시작하기', 'Agree and start') : T('필수 항목에 동의해 주세요', 'Please agree to the required items');
     }
-    /* 카메라 · 알림 — 체크 = 앱 동의, 그 순간 휴대폰 창만 한 번 */
+    /* 카메라 · 마이크 · 알림 — 체크 = 앱 동의, 그 순간 휴대폰 창만 한 번 */
+    function failMsg(k, why){
+      if(k === 'cam') return why === 'none' ? T('이 기기에서 카메라를 찾지 못했어요 — QR 을 찍을 때 다시 물어볼게요', 'No camera found — we will ask again when you scan a QR') : T('괜찮아요 — QR · 건의함 사진을 찍을 때 다시 물어볼게요', 'OK — we will ask again when you use the camera');
+      if(k === 'mic') return T('괜찮아요 — 말로 찾기를 쓸 때 다시 물어볼게요', 'OK — we will ask again when you use voice search');
+      return notiFailMsg(why);
+    }
     function ask(keys, i){
       if(i >= keys.length){ paint(); return; }
       var k = keys[i];
       st[k] = true; paint();
-      asked(k === 'cam' ? camAsk : notiAsk)(function(ok, why){
+      asked(k === 'cam' ? camAsk : (k === 'mic' ? micAsk : notiAsk))(function(ok, why){
         st[k] = ok; paint();
-        if(!ok) U.toast(k === 'cam'
-          ? (why === 'none' ? T('이 기기에서 카메라를 찾지 못했어요 — QR 을 찍을 때 다시 물어볼게요', 'No camera found — we will ask again when you scan a QR') : T('괜찮아요 — QR · 건의함 사진을 찍을 때 다시 물어볼게요', 'OK — we will ask again when you use the camera'))
-          : notiFailMsg(why), true);
+        if(!ok) U.toast(failMsg(k, why), true);
         ask(keys, i + 1);
       });
     }
@@ -261,21 +307,30 @@ var CONSENT = (function(){
       if($('.more[data-doc]', it)){ $('.more', it).onclick = function(){ doc(this.getAttribute('data-doc')); }; return; }
       if($('.more', it)) $('.more', it).onclick = function(){ var o = !it.classList.contains('open'); it.classList.toggle('open', o); this.textContent = o ? T('접기 ▴', 'Less ▴') : T('보기 ▾', 'More ▾'); };
     });
-    /* 「동의하고 시작하기」 — 미리 체크된 카메라 · 알림은 이 누름에서 휴대폰 창을 한 번씩(알림 먼저 : 아이폰은 누른 그 순간에만 알림 창이 뜬다) */
+    /* 「동의하고 시작하기」 — 이 누름과 쉬운 사용모드 사이에서 체크된 권한을 전부 묻는다(11/11 사용자 · 판 6) :
+       ① 알림(먼저 : 아이폰은 누른 그 순간에만 알림 창이 뜬다) → ② 카메라 · 마이크는 휴대폰 창 하나로 같이(camMicAsk) — 하나만 체크했으면 그것만.
+       다 끝나면 start() 가 동의 화면을 걷고, 그 아래 「처음이세요?」(쉬운 사용모드)가 보인다. */
     $('.ft .big', a).onclick = function(){
       var btn = this; if(btn.disabled) return;
       var need = [];
       if(st.noti && !(notiSupported() && Notification.permission === 'granted')) need.push('noti');
-      if(st.cam && !camOK()) need.push('cam');
+      var wantCam = st.cam && !camOK(), wantMic = st.mic && !micOK();
+      if(wantCam && wantMic) need.push('cammic'); else if(wantCam) need.push('cam'); else if(wantMic) need.push('mic');
       btn.disabled = true;
       (function next(i){
         if(i >= need.length){ start(); return; }
         var k = need[i];
-        asked(k === 'cam' ? camAsk : notiAsk)(function(ok, why){
+        if(k === 'cammic'){
+          asked(camMicAsk)(function(c, m){
+            st.cam = c; st.mic = m;
+            if(!c || !m) U.toast(!c ? failMsg('cam') : failMsg('mic'), true);
+            next(i + 1);
+          });
+          return;
+        }
+        asked(k === 'cam' ? camAsk : (k === 'mic' ? micAsk : notiAsk))(function(ok, why){
           st[k] = ok;
-          if(!ok) U.toast(k === 'cam'
-            ? (why === 'none' ? T('이 기기에서 카메라를 찾지 못했어요 — QR 을 찍을 때 다시 물어볼게요', 'No camera found — we will ask again when you scan a QR') : T('괜찮아요 — QR · 건의함 사진을 찍을 때 다시 물어볼게요', 'OK — we will ask again when you use the camera'))
-            : notiFailMsg(why), true);
+          if(!ok) U.toast(failMsg(k, why), true);
           next(i + 1);
         });
       })(0);
@@ -283,7 +338,7 @@ var CONSENT = (function(){
     function start(){
       try{ sessionStorage.removeItem('b3nav_consent_again'); }catch(e){}   // 다시 보기 주소로 한 번 보여 줬으면 끝
       ls(K.agree, {d: U.today(), v: AGREE_V}); ls(K.pv, st.photo ? {d: U.today()} : null);
-      ls(K.cam, st.cam ? 'yes' : 'no'); ls(K.noti, st.noti ? 'yes' : 'no');
+      ls(K.cam, st.cam ? 'yes' : 'no'); ls(K.mic, st.mic ? 'yes' : 'no'); ls(K.noti, st.noti ? 'yes' : 'no');
       a.remove(); pvPaint();
       U.toast('✓ ' + T('동의했어요 — 다음부터는 묻지 않아요', 'Thank you — we will not ask again'));
       if(typeof TIMETABLE !== 'undefined' && TIMETABLE.refresh) TIMETABLE.refresh();
@@ -405,10 +460,11 @@ var CONSENT = (function(){
         li(2, T('필수 · 이 폰에 저장', 'Required · Saved on this phone'), T('즐겨찾기 · 내 시간표 같은 기록은 이 폰에만 남아요.', 'Favorites and your timetable stay on this phone only.')) +
         li(3, T('필수 · 개인정보 처리방침 · 오픈소스 라이선스 고지', 'Required · Privacy policy · Open-source licenses'), T('개인정보를 어떻게 다루는지와, 앱에 쓴 공개 프로그램(오픈소스)의 사용 허가에 관한 것이에요.', 'How we handle personal data, and the licenses of the open-source software in this app.')) +
         li(4, T('선택 · 개인정보 수집·이용 (건의함 사진)', 'Optional · Personal data (suggestion photos)'), T('동의하지 않아도 길안내는 모두 쓸 수 있어요.', 'Directions work without it.')) +
-        li(5, T('선택 · 카메라 · 알림', 'Optional · Camera · Alerts'), T('지금 허용하지 않아도 괜찮아요. 쓸 때 다시 물어요.', 'You can skip — we ask again when you use them.')) + '</ol>' +
-      '<h5 class="hwHead">📷 ' + T('카메라 · 알림은 쓸 때 물어요', 'Camera and alerts are asked when needed') + '</h5><ol class="hwList">' +
+        li(5, T('선택 · 카메라 · 마이크 · 알림', 'Optional · Camera · Microphone · Alerts'), T('「동의하고 시작하기」를 누를 때 휴대폰이 한 번 물어요. 지금 허용하지 않아도 괜찮아요 — 쓸 때 다시 물어요.', 'Your phone asks once when you tap “Agree and start”. You can skip — we ask again when you use them.')) + '</ol>' +
+      '<h5 class="hwHead">📷 ' + T('처음에 허용하지 않았으면 쓸 때 물어요', 'If you skipped, we ask when needed') + '</h5><ol class="hwList">' +
         li(1, T('카메라', 'Camera'), T('출입문 QR 을 찍을 때 · 건의함 사진을 찍을 때', 'Scanning a door QR · taking a suggestion photo')) +
-        li(2, T('알림', 'Alerts'), T('내 시간표에서 수업 알림을 켤 때', 'Turning on class alerts in My Timetable')) + '</ol>' +
+        li(2, T('마이크', 'Microphone'), T('첫 화면 오브를 눌러 말로 찾을 때 — 말은 저장하지 않아요', 'Tapping the orb to search by voice — your voice is not stored')) +
+        li(3, T('알림', 'Alerts'), T('내 시간표에서 수업 알림을 켤 때', 'Turning on class alerts in My Timetable')) + '</ol>' +
       '<div class="hwTip">💡 ' + T('「허용」을 눌러도 안 켜지면 휴대폰에서 켜 주세요<br>안드로이드 : 주소창 왼쪽 자물쇠 → 권한 → 허용<br>아이폰 : 주소창 왼쪽 「가가」 → 웹 사이트 설정 → 허용',
         'If “Allow” does not work, turn it on in your phone<br>Android: lock icon in the address bar → Permissions → Allow<br>iPhone: “AA” in the address bar → Website Settings → Allow') + '</div>' +
       '<h5 class="hwHead">🗂 ' + T('건의함 사진', 'Suggestion photos') + '</h5><ol class="hwList">' +
@@ -468,6 +524,6 @@ var CONSENT = (function(){
   /* 말을 바꾸면(ui.js applyLang) 건의함에 한 번 그려 둔 줄을 그 말로 다시 */
   function relang(){ var d = document.getElementById('delLink'); if(d) d.remove(); delLink(); pvPaint(); }
 
-  return {agreed: agreed, pvOK: pvOK, camOK: camOK, asking: function(){ return ASKING > 0; }, notiOK: notiOK, notiSupported: notiSupported, need: need, appAsk: appAsk, notiAsk: notiAsk,
+  return {agreed: agreed, pvOK: pvOK, camOK: camOK, micOK: micOK, asking: function(){ return ASKING > 0; }, notiOK: notiOK, notiSupported: notiSupported, need: need, appAsk: appAsk, notiAsk: notiAsk,
           notiFailMsg: notiFailMsg, guideHtml: guideHtml, openGuideLast: openGuideLast, agreeScreen: agreeScreen, relang: relang, doc: doc, K: K};
 })();

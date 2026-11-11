@@ -110,7 +110,7 @@
     2. pwsh -File 도구\구조도_줄수_맞추기.ps1   구조도의 줄 수 · 소스를 맞춘다
     3. 검사_실행.bat (큰 변경이면 pwsh -File 검사.ps1 -Full)
     4. 화면을 일부러 바꿨다면 안전망 새 기준 :
-         pwsh -File tests\run_golden.ps1 -Mode capture -Tag v179   (지금 기준 v178 의 다음 번호)
+         pwsh -File tests\run_golden.ps1 -Mode capture -Tag v180   (지금 기준 v179 의 다음 번호)
        그다음 검사.ps1 · tests\run_golden.ps1 의 기본 -Tag 를 같은 번호로. 의도하지 않은 변화면 기준을 바꾸지 말고 원인을 고친다.
     5. commit · push → Actions 초록 확인 → 사이트에서 직접 열어 확인
   서버/firestore.rules 를 고쳤으면 : 서버/규칙_붙여넣기용.txt 도 같게(검사가 확인) → 콘솔에 붙여 넣고 게시 →

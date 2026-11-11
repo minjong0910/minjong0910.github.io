@@ -9,6 +9,43 @@
 <meta name="theme-color" content="#0B0E13">
 <!-- 이 앱은 어두운 화면 · 밝은 화면을 스스로 칠한다 — 폰 브라우저(삼성 인터넷 · 크롬)의 「다크 모드」가 색을 억지로 바꾸지 않게 알린다 (2026-10-19) -->
 <meta name="color-scheme" content="dark light">
+<!-- 삼성 인터넷이면 크롬으로 (2026-11-11 사용자 「QR 찍으면 자동으로 크롬으로」 — 견본 /sample/to-chrome/ 을 폰으로 확인한 뒤)
+     삼성 폰 카메라로 QR · NFC 를 찍으면 삼성 인터넷이 열리는데, 그 폰의 삼성 인터넷이 마이크 · 카메라를 막아 두면 말로 찾기 · QR 카메라가 안 됐다.
+     → 앱이 켜지기 전에 같은 주소(?gate= · ?consent · ?to= 꼬리 그대로)를 크롬 앱으로 다시 연다(안드로이드 intent 주소).
+       크롬이 없으면 browser_fallback_url 로 삼성 인터넷에 그대로(&stay=1). 넘기기가 막히면 「크롬으로 열기」 큰 단추 · 「삼성 인터넷에서 그냥 쓰기」.
+     넘기지 않는 때 : 삼성 인터넷이 아님(아이폰 · 크롬 …) · 홈 화면에 설치한 앱으로 열림(넘기면 열 때마다 튀어 나간다) · 인터넷이 끊김 · &stay=1.
+     시험용 : &samsung=1(다른 브라우저에서도 켜 봄) · &nogo=1(실제로 넘기지 않음 — 헤드리스는 intent 로 넘어가다 멈춘다). -->
+<script>
+(function(){
+  try{
+    var ua = navigator.userAgent, q = location.search;
+    if(!(/SamsungBrowser/.test(ua) || /[?&]samsung=1/.test(q))) return;
+    if(/[?&]stay=1/.test(q)) return;
+    if(navigator.onLine === false) return;
+    if(window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || matchMedia('(display-mode: minimal-ui)').matches)) return;
+    var cq = q.replace(/([?&])(samsung|nogo)=1&?/g, '$1').replace(/([?&])(samsung|nogo)=1&?/g, '$1').replace(/[?&]$/, '');
+    var back = location.protocol + '//' + location.host + location.pathname + cq + (cq ? '&' : '?') + 'stay=1' + location.hash;
+    var intent = 'intent://' + location.host + location.pathname + cq + '#Intent;scheme=' + location.protocol.replace(':', '') + ';package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(back) + ';end';
+    window.__TOCHROME = {intent: intent, back: back};
+    if(!/[?&]nogo=1/.test(q)){ try{ location.href = intent; }catch(e){} }
+    document.addEventListener('DOMContentLoaded', function(){
+      var d = document.createElement('div'); d.id = 'toChrome';
+      d.style.cssText = 'position:fixed;inset:0;z-index:5000;background:#0B0E13;color:#EAF4FF;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:Pretendard,"Malgun Gothic",sans-serif;word-break:keep-all;';
+      d.innerHTML = '<div style="font-size:44px;margin-bottom:10px;">🌐</div>' +
+        '<div style="font-size:21px;font-weight:900;margin-bottom:8px;">크롬으로 여는 중이에요</div>' +
+        '<div style="font-size:14px;color:#A9C1D9;margin-bottom:4px;line-height:1.5;">말로 찾기 · QR 카메라가 크롬에서 잘 돼요</div>' +
+        '<div style="font-size:12px;color:#6F8AA6;margin-bottom:22px;">Opening in Chrome</div>';
+      /* 단추 주소는 요소에 바로 넣는다(글 속 href 는 검사가 파일 이름으로 읽는다) */
+      var go = document.createElement('a'); go.id = 'toChromeGo'; go.href = intent; go.textContent = '크롬으로 열기';
+      go.style.cssText = 'display:block;width:100%;max-width:340px;padding:17px;border-radius:6px;background:linear-gradient(90deg,#00E5FF,#7B5CFF);color:#05060A;font-weight:800;font-size:18px;text-decoration:none;';
+      var st = document.createElement('a'); st.id = 'toChromeStay'; st.href = back; st.textContent = '삼성 인터넷에서 그냥 쓰기';
+      st.style.cssText = 'display:block;margin-top:16px;color:#7C8AA0;font-size:14px;';
+      d.appendChild(go); d.appendChild(st);
+      document.body.appendChild(d);
+    });
+  }catch(e){}
+})();
+</script>
 <title>공대 3호관 길안내</title>
 <!-- 길 공유하기(js/app/share.js) — 카카오톡 · 문자에 링크를 붙이면 이 그림 · 글이 미리 보기로 뜬다 -->
 <meta property="og:type" content="website">

@@ -56,8 +56,9 @@
       '<h2>「동의하고 시작하기」 한 번에</h2>' +
       '<p class="sub">실제 앱이라면 여기서 쉬운 사용모드 「처음이세요?」로 넘어가요. 견본에서는 휴대폰이 실제로 무엇을 허락했는지 보여 드려요.</p>' +
       '<div class="box"><b class="k">브라우저</b>' + browser() + '</div>' +
-      '<div class="box"><b class="k">누른 그 순간 휴대폰에 요청한 것</b>' + (r.asked.length ? r.asked.join(' · ') : '없음 — 모두 이미 정해져 있었어요(허용됨이거나 막힘)') +
-        (r.media && r.media !== 'ok' ? '<div style="margin-top:0.35rem;color:#FFD54F;font-size:0.85rem;">카메라 · 마이크 요청 결과 : ' + r.media + '</div>' : '') + '</div>' +
+      '<div class="box"><b class="k">누른 그 순간 휴대폰에 요청한 것</b>' + (r.asked.length ? r.asked.join(' · ') : '없음 — 모두 이미 허용돼 있었어요') +
+        (r.media ? '<div style="margin-top:0.35rem;font-size:0.85rem;">카메라 · 마이크 요청 결과 : ' + (r.media === 'ok' ? '<span class="ok">허용</span>' : '<span class="no">' + r.media + '</span> (창 없이 바로 거절이면 정말 막힌 것)') + '</div>' : '') +
+        (r.noti ? '<div style="margin-top:0.2rem;font-size:0.85rem;">알림 요청 결과 : ' + (r.noti === 'granted' ? '<span class="ok">허용</span>' : '<span class="no">허용 안 됨</span>') + '</div>' : '') + '</div>' +
       '<div class="box"><b class="k">휴대폰의 실제 허락 (누르기 전 → 지금)</b><table>' + row('알림', 'noti') + row('카메라', 'cam') + row('마이크', 'mic') + '</table></div>' +
       '<button class="big" type="button" id="smTalk">🎤 말해 보기 — 마이크가 진짜 되나</button><div id="smSay"></div>' +
       '<button class="ghost2" type="button" id="smAgain">처음부터 다시</button>';

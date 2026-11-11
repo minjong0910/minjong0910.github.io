@@ -323,14 +323,16 @@ var CONSENT = (function(){
        예전 판은 알림 창의 답을 기다린 뒤에 카메라 · 마이크를 물어서, 「누른 순간」이 지나 삼성 인터넷이 창을 띄우지 않았다.
        → 이 누름 안에서 카메라+마이크(휴대폰 창 하나) · 알림을 곧바로 같이 요청한다(휴대폰이 창을 차례로 보여 준다).
        → 물을지 말지는 앱이 적어 둔 기록(b3nav_perm_*)이 아니라 휴대폰의 실제 허락 상태(PS · Notification.permission)로 정한다 :
-         이미 허용 = 묻지 않음 · 막힘 = 물을 수 없음(창이 안 뜸) · 아직 안 정함 / 알 수 없음 = 묻는다. */
+         이미 허용 = 묻지 않음 · 그 밖(아직 안 정함 · 막힘이라고 하는 것 · 알 수 없음) = 묻는다. */
     $('.ft .big', a).onclick = function(){
       var btn = this; if(btn.disabled) return;
       btn.disabled = true;
       var ns = notiSupported() ? Notification.permission : 'unsupported';
-      var wantNoti = st.noti && ns === 'default';
-      var wantCam = st.cam && PS.cam !== 'granted' && PS.cam !== 'denied';
-      var wantMic = st.mic && PS.mic !== 'granted' && PS.mic !== 'denied';
+      /* 이미 허용된 것만 건너뛰고 나머지는 모두 요청한다 — 삼성 인터넷 30 은 정하지 않은 것도 「막힘(denied)」으로 알려 주는데(사용자 폰 : 셋 다 막힘인데
+         그 기능에 들어가면 창이 떴다) 그 말을 믿고 건너뛰면 아무것도 안 묻게 된다. 정말 막혀 있으면 요청은 창 없이 바로 거절되니 손해가 없다. */
+      var wantNoti = st.noti && ns !== 'granted' && ns !== 'unsupported';
+      var wantCam = st.cam && PS.cam !== 'granted';
+      var wantMic = st.mic && PS.mic !== 'granted';
       var rep = {before: {cam: PS.cam || '?', mic: PS.mic || '?', noti: ns}, asked: [], media: '', noti: ''};
       var waits = 1;
       function fin(){

@@ -1,6 +1,8 @@
 "use strict";
 /* 견본 /sample/blocked-fallback/ — 권한이 막힌 폰에서도 「그냥 되게」 (2026-11-11 사용자 「샘플로 해줘」)
    실제 앱(index.html 그대로)을 띄우고 이 파일만 맨 끝에 더한다. 실제 앱 파일은 하나도 바꾸지 않는다.
+   판 3 (11/11 사용자 「삼성은 동의란도 안 뜬다」 — 이미 동의한 폰이라서) : 열 때마다 동의 화면부터(index.html 의 b3nav_consent_again) +
+   동의 화면은 견본 consent-perm 의 것(「동의하고 시작하기」 누른 순간 카메라+마이크 · 알림을 같이 요청, 저장 이름 b3nav_s_*) = 원하는 흐름 전체.
 
    · 마이크(말로 찾기 오브) : 휴대폰이 이 사이트 마이크를 막아 두었으면(permissions 'denied') 오브를 누르는 순간 음성 인식 대신
      「말하거나 적어 주세요」 글자 칸을 열고 키보드를 띄운다 — 키보드의 🎤(삼성 · 구글 · 아이폰 키보드)는 브라우저가 아니라 키보드 앱의
@@ -17,7 +19,7 @@
 
   /* ── 견본 표시 ── */
   var tag = D.createElement('div');
-  tag.textContent = '견본 · 판 2';
+  tag.textContent = '견본 · 판 3';
   tag.style.cssText = 'position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:3000;background:#FF4D8D;color:#fff;font:700 12px Pretendard,"Malgun Gothic",sans-serif;padding:3px 10px;border-radius:999px;pointer-events:none;';
   D.body.appendChild(tag);
 

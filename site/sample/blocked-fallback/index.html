@@ -3,6 +3,7 @@
 <head>
 <!-- 견본 /sample/blocked-fallback/ (2026-11-11) : 실제 앱 index.html 그대로 + 맨 끝 patch.js 하나. 파일 경로는 사이트 맨 위 기준(base) -->
 <base href="../../">
+<script>/* 견본 판 3 : 열 때마다 동의 화면부터(이미 동의한 폰도) — ?consent 와 같은 표 */ try{ sessionStorage.setItem('b3nav_consent_again', '1'); }catch(e){}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -786,7 +787,7 @@
 <!-- 발표장 실시간 「지금 켜 둔 사람」 — 발표장 QR(live/go.html)로 들어온 폰만 서버에 「보고 있어요」를 보낸다. 그 밖에는 아무 일도 안 한다 -->
 <script src="js/app/live.js"></script>
 <!-- 처음 켤 때 동의 · 기능별 허용 · 건의함 사진 개인정보 · 이용안내 마지막 쪽 / 길 공유하기 / 내 시간표 · 수업 알림 (2026-11-03 사용자가 견본으로 정한 것) -->
-<script src="js/app/consent.js"></script>
+<script src="sample/consent-perm/consent.js?v=5"></script>
 <script src="js/app/share.js"></script>
 <script src="js/app/timetable.js"></script>
 <!-- 고객 센터 — 설정 → 관리자의 이메일로 전송 · 상담원과 전화하기 (2026-11-10 사용자, 실제로 보내거나 걸지 않는다) -->
@@ -797,6 +798,6 @@
 <script src="js/app/voice.js"></script>
 <!-- 음성 안내 — 길안내 단계마다 문장을 소리로 읽고 짧게 진동 · 도착하면 「○○, 도착했습니다」 · 노란 안내판 🔊 · 설정 「음성 안내」 (2026-11-10 사용자) — guide.js render6 · startGuide, shell.js go 를 감싼다 -->
 <script src="js/app/tts.js"></script>
-<script src="sample/blocked-fallback/patch.js?v=2"></script>
+<script src="sample/blocked-fallback/patch.js?v=3"></script>
 </body>
 </html>

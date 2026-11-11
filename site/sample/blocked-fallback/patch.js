@@ -17,7 +17,7 @@
 
   /* ── 견본 표시 ── */
   var tag = D.createElement('div');
-  tag.textContent = '견본';
+  tag.textContent = '견본 · 판 2';
   tag.style.cssText = 'position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:3000;background:#FF4D8D;color:#fff;font:700 12px Pretendard,"Malgun Gothic",sans-serif;padding:3px 10px;border-radius:999px;pointer-events:none;';
   D.body.appendChild(tag);
 

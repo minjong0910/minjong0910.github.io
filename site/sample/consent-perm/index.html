@@ -32,8 +32,9 @@
 </head>
 <body>
 <div class="phone"></div>
-<div class="smTag">견본</div>
-<script src="sample/consent-perm/consent.js"></script>
+<div class="smTag">견본 · 판 4</div>
+<!-- 판 번호(?v=) — 삼성 인터넷이 옛 consent.js 를 그대로 쓰던 일(11/11) : 고칠 때마다 올리고 QR 주소에도 같은 번호 -->
+<script src="sample/consent-perm/consent.js?v=4"></script>
 <script>
 (function(){
   'use strict';
@@ -55,7 +56,7 @@
       '<div class="brand" style="color:#00E5FF;font-weight:900;font-size:0.9rem;">🏫 견본 결과</div>' +
       '<h2>「동의하고 시작하기」 한 번에</h2>' +
       '<p class="sub">실제 앱이라면 여기서 쉬운 사용모드 「처음이세요?」로 넘어가요. 견본에서는 휴대폰이 실제로 무엇을 허락했는지 보여 드려요.</p>' +
-      '<div class="box"><b class="k">브라우저</b>' + browser() + '</div>' +
+      '<div class="box"><b class="k">브라우저 · 견본 판</b>' + browser() + ' · 판 4</div>' +
       '<div class="box"><b class="k">누른 그 순간 휴대폰에 요청한 것</b>' + (r.asked.length ? r.asked.join(' · ') : '없음 — 모두 이미 허용돼 있었어요') +
         (r.media ? '<div style="margin-top:0.35rem;font-size:0.85rem;">카메라 · 마이크 요청 결과 : ' + (r.media === 'ok' ? '<span class="ok">허용</span>' : '<span class="no">' + r.media + '</span> (창 없이 바로 거절이면 정말 막힌 것)') + '</div>' : '') +
         (r.noti ? '<div style="margin-top:0.2rem;font-size:0.85rem;">알림 요청 결과 : ' + (r.noti === 'granted' ? '<span class="ok">허용</span>' : '<span class="no">허용 안 됨</span>') + '</div>' : '') + '</div>' +

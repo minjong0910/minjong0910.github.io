@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>동의 화면 견본 — 권한 한 번에</title>
+<!-- 2026-11-11 사용자 : 「『동의하고 시작하기』를 누른 그 순간에 알림 · 카메라 · 마이크를 한꺼번에 요청 · 앱 기록 대신 휴대폰이 실제로 허락했는지를 보고 묻기 —
+     삼성 인터넷 · 아이폰 둘 다. 내가 말한 것만 먼저 견본으로」
+     실제 앱의 동의 화면(consent.js)을 그대로 복사해 「동의하고 시작하기」 부분만 바꿨다(이 폴더의 consent.js). 실제 앱은 그대로.
+     저장 이름은 b3nav_s_* 로 따로 — 실제 앱 기록과 섞이지 않는다(휴대폰의 허락 자체는 같은 사이트라 앱과 같이 간다).
+     다 누르면 결과 : 누른 순간 무엇을 요청했나 · 휴대폰이 실제로 허락했나 + 「말해 보기」로 마이크가 진짜 되는지. -->
+<base href="../../">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<link rel="stylesheet" href="css/app.css">
+<style>
+  body{ margin:0; background:#05080C; }
+  .smTag{ position:fixed; top:calc(8px + env(safe-area-inset-top)); right:10px; z-index:3000; background:#FF4D8D; color:#fff; font:700 12px Pretendard,'Malgun Gothic',sans-serif; padding:4px 10px; border-radius:999px; }
+  .smRes{ position:absolute; inset:0; z-index:950; background:#0B0E13; color:#E7F6FF; overflow:auto; padding:calc(2.4rem + env(safe-area-inset-top)) 1.1rem 1.4rem; font-family:Pretendard,'Malgun Gothic',sans-serif; word-break:keep-all; }
+  .smRes h2{ font-size:1.35rem; margin:0.2rem 0 0.3rem; font-weight:900; }
+  .smRes .sub{ color:#9FB2C8; font-size:0.86rem; margin:0 0 0.9rem; line-height:1.5; }
+  .smRes .box{ background:#12253A; border:1px solid #2A4D73; border-radius:12px; padding:0.8rem 0.9rem; margin-bottom:0.8rem; }
+  .smRes .box b.k{ display:block; color:#4FC3F7; font-size:0.82rem; margin-bottom:0.35rem; }
+  .smRes table{ width:100%; border-collapse:collapse; font-size:0.92rem; }
+  .smRes td{ padding:0.42rem 0.2rem; border-top:1px solid #1E3048; }
+  .smRes tr:first-child td{ border-top:0; }
+  .smRes td.n{ color:#A9C1D9; width:4.2rem; }
+  .ok{ color:#3FE08A; font-weight:700; } .no{ color:#FF6B8B; font-weight:700; } .mid{ color:#FFD54F; font-weight:700; }
+  .smRes .big{ width:100%; margin-top:0.55rem; }
+  .smRes .ghost2{ display:block; width:100%; margin-top:0.55rem; padding:0.85rem; border-radius:6px; border:1px solid #2A4D73; background:transparent; color:#A9C1D9; font:600 0.95rem Pretendard,'Malgun Gothic',sans-serif; }
+  #smSay{ margin-top:0.6rem; font-size:0.95rem; color:#EAF4FF; min-height:1.4em; }
+</style>
+</head>
+<body>
+<div class="phone"></div>
+<div class="smTag">견본</div>
+<script src="sample/consent-perm/consent.js"></script>
+<script>
+(function(){
+  'use strict';
+  var KO = { granted:'<span class="ok">허용됨 ✓</span>', denied:'<span class="no">막힘 ✗</span>', prompt:'<span class="mid">아직 안 정함</span>',
+             'default':'<span class="mid">아직 안 정함</span>', unsupported:'<span class="mid">이 브라우저엔 없음</span>', '?':'<span class="mid">알 수 없음</span>' };
+  function ko(s){ return KO[s] || s; }
+  function browser(){
+    var ua = navigator.userAgent, m;
+    if((m = /SamsungBrowser\/([\d.]+)/.exec(ua))) return '삼성 인터넷 ' + m[1].split('.')[0];
+    if(/iPhone|iPad|iPod/.test(ua)){ m = /Version\/([\d.]+)/.exec(ua); return (/CriOS/.test(ua) ? '아이폰 크롬' : '아이폰 사파리') + (m ? ' ' + m[1] : ''); }
+    if((m = /Chrome\/(\d+)/.exec(ua))) return '크롬 ' + m[1];
+    return ua.slice(0, 40);
+  }
+  function result(){
+    var r = window.__PERM_REPORT || {before:{}, after:{}, asked:[]};
+    var d = document.createElement('div'); d.className = 'smRes';
+    var row = function(name, k){ return '<tr><td class="n">' + name + '</td><td>' + ko(r.before[k]) + '</td><td>→</td><td>' + ko(r.after[k]) + '</td></tr>'; };
+    d.innerHTML =
+      '<div class="brand" style="color:#00E5FF;font-weight:900;font-size:0.9rem;">🏫 견본 결과</div>' +
+      '<h2>「동의하고 시작하기」 한 번에</h2>' +
+      '<p class="sub">실제 앱이라면 여기서 쉬운 사용모드 「처음이세요?」로 넘어가요. 견본에서는 휴대폰이 실제로 무엇을 허락했는지 보여 드려요.</p>' +
+      '<div class="box"><b class="k">브라우저</b>' + browser() + '</div>' +
+      '<div class="box"><b class="k">누른 그 순간 휴대폰에 요청한 것</b>' + (r.asked.length ? r.asked.join(' · ') : '없음 — 모두 이미 정해져 있었어요(허용됨이거나 막힘)') +
+        (r.media && r.media !== 'ok' ? '<div style="margin-top:0.35rem;color:#FFD54F;font-size:0.85rem;">카메라 · 마이크 요청 결과 : ' + r.media + '</div>' : '') + '</div>' +
+      '<div class="box"><b class="k">휴대폰의 실제 허락 (누르기 전 → 지금)</b><table>' + row('알림', 'noti') + row('카메라', 'cam') + row('마이크', 'mic') + '</table></div>' +
+      '<button class="big" type="button" id="smTalk">🎤 말해 보기 — 마이크가 진짜 되나</button><div id="smSay"></div>' +
+      '<button class="ghost2" type="button" id="smAgain">처음부터 다시</button>';
+    document.querySelector('.phone').appendChild(d);
+    document.getElementById('smAgain').onclick = function(){ location.reload(); };
+    document.getElementById('smTalk').onclick = function(){
+      var out = document.getElementById('smSay'), SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SR){ out.innerHTML = '<span class="no">이 브라우저는 음성 인식이 없어요</span>'; return; }
+      var rec = new SR(), got = '', err = '';
+      rec.lang = 'ko-KR'; rec.interimResults = true; rec.continuous = false;
+      rec.onstart = function(){ out.innerHTML = '<span class="mid">말씀하세요… (예 : 삼층 화장실)</span>'; };
+      rec.onresult = function(e){ var t = ''; for(var i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript; got = t; out.textContent = '「' + t + '」'; };
+      rec.onerror = function(e){ err = e.error || '?'; };
+      rec.onend = function(){ out.innerHTML = got ? '<span class="ok">성공 ✓</span> 「' + got.replace(/</g, '&lt;') + '」' : '<span class="no">' + (err ? '오류 : ' + err : '아무 말도 못 들었어요') + '</span>'; };
+      try{ rec.start(); }catch(e){ out.innerHTML = '<span class="no">시작 실패 : ' + e.name + '</span>'; }
+      setTimeout(function(){ try{ rec.stop(); }catch(e){} }, 10000);
+    };
+  }
+  CONSENT.agreeScreen(result);
+})();
+</script>
+</body>
+</html>

@@ -298,7 +298,7 @@ var CONSENT = (function(){
       var k = keys[i];
       st[k] = true; paint();
       asked(k === 'cam' ? camAsk : (k === 'mic' ? micAsk : notiAsk))(function(ok, why){
-        st[k] = ok; paint();
+        st[k] = true; paint();                                       // 체크 = 앱 동의 — 휴대폰이 거절해도 그대로(실제 앱과 같게 11/11)
         if(!ok) U.toast(failMsg(k, why), true);
         ask(keys, i + 1);
       });

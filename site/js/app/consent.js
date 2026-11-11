@@ -286,7 +286,9 @@ var CONSENT = (function(){
       var k = keys[i];
       st[k] = true; paint();
       asked(k === 'cam' ? camAsk : (k === 'mic' ? micAsk : notiAsk))(function(ok, why){
-        st[k] = ok; paint();
+        /* 11/11 사용자 「동의란에 체크가 안 된 것들이 있다」 — 「모두 동의해요」 · 줄을 누를 때 휴대폰이 거절하면(막힌 폰) 체크가 풀렸다.
+           체크 = 앱 동의(사용자 뜻)라 그대로 두고, 휴대폰이 거절한 것은 알림 글로만. 실제 허락 여부는 「동의하고 시작하기」에서 다시 묻고 기록한다 */
+        st[k] = true; paint();
         if(!ok) U.toast(failMsg(k, why), true);
         ask(keys, i + 1);
       });
